@@ -1,5 +1,8 @@
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
+import java.time.Instant
+import java.time.LocalDate
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '2.2.1.RELEASE'
@@ -14,19 +17,42 @@ repositories {
 
 project.sourceCompatibility = '11'
 project.targetCompatibility = '11'
-group = 'uk.gov.justice.hmpps'
-version = '0.0.1-SNAPSHOT'
 
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+group = 'uk.gov.justice.hmpps'
+
+def today = Instant.now()
+def todaysDate = LocalDate.now().format('yyyy-MM-dd')
+version = System.getenv('CI') ? "${todaysDate}.${System.getenv('CIRCLE_BUILD_NUM')}" : todaysDate
+
+jar {
+    baseName = rootProject.name
+    manifest {
+        attributes 'Implementation-Title': rootProject.name, 'Implementation-Version': version
+    }
+}
+
+springBoot {
+    buildInfo {
+        properties {
+            artifact = rootProject.name
+            version = version
+            group = group
+            name = rootProject.name
+            time = today
+            additional = [
+                    by                   : System.properties['user.name'],
+                    operatingSystem      : "${System.properties['os.name']} (${System.properties['os.version']})",
+                    continuousIntegration: System.getenv('CI') ? true : false,
+                    machine              : InetAddress.localHost.hostName
+            ]
+        }
+    }
 }
 
 dependencyManagement {
-	imports {
-		mavenBom(SpringBootPlugin.BOM_COORDINATES)
-	}
+    imports {
+        mavenBom(SpringBootPlugin.BOM_COORDINATES)
+    }
 }
 
 dependencies {
@@ -47,8 +73,4 @@ dependencies {
 	testRuntime('org.junit.jupiter:junit-jupiter-engine:5.4.2')
 
 	testCompile("org.springframework.boot:spring-boot-starter-test:2.2.1.RELEASE")
-}
-
-test {
-	useJUnitPlatform()
 }
