@@ -62,7 +62,7 @@ jobs:
           command: |
             APP_VERSION=$(cat ./app_version.txt)
             docker build --rm=false . \
-               --tag "mojdigitalstudio/offender-case-notes:$APP_VERSION" \
+               --tag "mojdigitalstudio/dps-data-compliance:$APP_VERSION" \
                --label "maintainer=feedback@digital.justice.gov.uk" \
                --label "app.version=$APP_VERSION" \
                --label "build.version=$APP_VERSION" \
@@ -73,9 +73,9 @@ jobs:
             if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
               # publish to docker hub as the tag
              docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-             docker tag mojdigitalstudio/offender-case-notes:$APP_VERSION mojdigitalstudio/offender-case-notes:latest
-             docker push mojdigitalstudio/offender-case-notes:$APP_VERSION
-             docker push mojdigitalstudio/offender-case-notes:latest
+             docker tag mojdigitalstudio/dps-data-compliance:$APP_VERSION mojdigitalstudio/dps-data-compliance:latest
+             docker push mojdigitalstudio/dps-data-compliance:$APP_VERSION
+             docker push mojdigitalstudio/dps-data-compliance:latest
             fi
 
 workflows:
