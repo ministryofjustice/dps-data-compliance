@@ -60,7 +60,6 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok'
 
-    implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     implementation 'net.logstash.logback:logstash-logback-encoder:6.2'
@@ -78,6 +77,13 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.14.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.1.RELEASE'
 }
+
+task copyAgent(type: Copy) {
+    from configurations.agentDeps
+    into "$buildDir/libs"
+}
+
+assemble.dependsOn copyAgent
 
 test {
     useJUnitPlatform()
