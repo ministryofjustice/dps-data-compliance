@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: dps-data-compliance
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  use-forward-headers: true
+  tomcat:
+    remote-ip-header: x-forwarded-for
+    protocol_header: x-forwarded-proto
+
+graceful:
+  shutdown:
+    enabled: true
+
+azure:
+  application-insights:
+    web:
+      enable-W3C: true
