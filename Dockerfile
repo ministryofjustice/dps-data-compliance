@@ -20,4 +20,5 @@ COPY --chown=appuser:appgroup AI-Agent.xml /app
 
 USER 2000
 
-ENTRYPOINT ["/bin/sh", "/app/run.sh"]
+ENTRYPOINT ["java", "-javaagent:/app/agent.jar", "-jar", "/app/app.jar"]
+
