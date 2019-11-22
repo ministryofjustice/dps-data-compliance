@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.sns.SnsAsyncClient;
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
-import software.amazon.awssdk.utils.ImmutableMap;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionEvent;
+
+import java.util.Map;
 
 import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.propagateAnyError;
 
@@ -25,6 +26,9 @@ public class OffenderDeletionAwsEventPusher implements OffenderDeletionEventPush
     public OffenderDeletionAwsEventPusher(final SnsAsyncClient snsClient,
                                           @Value("${sns.topic.arn}") final String topicArn,
                                           final ObjectMapper objectMapper) {
+
+        log.info("Configured to push offender deletion events to SNS topic: {}", topicArn);
+
         this.objectMapper = objectMapper;
         this.snsClient = snsClient;
         this.topicArn = topicArn;
@@ -32,6 +36,8 @@ public class OffenderDeletionAwsEventPusher implements OffenderDeletionEventPush
 
     @Override
     public void sendEvent(final String offenderDisplayId) {
+
+        log.debug("Sending request for offender deletion: {}", offenderDisplayId);
 
         snsClient.publish(generateRequest(offenderDisplayId))
                 .whenComplete((response, throwable) -> {
@@ -46,7 +52,7 @@ public class OffenderDeletionAwsEventPusher implements OffenderDeletionEventPush
 
         return PublishRequest.builder()
                 .topicArn(topicArn)
-                .messageAttributes(ImmutableMap.of(
+                .messageAttributes(Map.of(
                         "eventType", stringAttribute("DATA_COMPLIANCE_DELETE-OFFENDER"),
                         "contentType", stringAttribute("text/plain;charset=UTF-8")))
                 .message(propagateAnyError(() -> objectMapper.writeValueAsString(event)))
