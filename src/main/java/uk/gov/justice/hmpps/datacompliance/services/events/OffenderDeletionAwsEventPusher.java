@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services;
+package uk.gov.justice.hmpps.datacompliance.services.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

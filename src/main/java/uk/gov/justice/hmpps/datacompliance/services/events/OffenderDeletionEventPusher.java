@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services;
+package uk.gov.justice.hmpps.datacompliance.services.events;
 
 public interface OffenderDeletionEventPusher {
     void sendEvent(final String offenderIdDisplay);
