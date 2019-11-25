@@ -7,7 +7,7 @@ commands:
       - aws-cli/install
       - kubernetes/install
       - helm/install-helm-client:
-          version: v3.0.0
+          version: v2.13.1
       - run:
           name: Setup kubectl
           command: |
