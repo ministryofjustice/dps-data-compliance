@@ -10,3 +10,19 @@ server:
   tomcat:
     remote-ip-header: x-forwarded-for
     protocol_header: x-forwarded-proto
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: 'info, health'
+  endpoint:
+    health:
+      cache:
+        time-to-live: 2000ms
+      show-components: always
+      show-details: always
+    info:
+      cache:
+        time-to-live: 2000ms
