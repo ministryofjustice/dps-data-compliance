@@ -15,7 +15,6 @@ WORKDIR /app
 
 COPY --chown=appuser:appgroup build/libs/dps-data-compliance*.jar /app/app.jar
 COPY --chown=appuser:appgroup build/libs/applicationinsights-agent*.jar /app/agent.jar
-COPY --chown=appuser:appgroup run.sh /app
 COPY --chown=appuser:appgroup AI-Agent.xml /app
 
 USER 2000
