@@ -1,5 +1,54 @@
 version: 2.1
+
 commands:
+  setup:
+    description: "Install tools and configure kubectl"
+    steps:
+      - aws-cli/install
+      - kubernetes/install
+      - helm/install-helm-client:
+          version: v3.0.0
+      - run:
+          name: Setup kubectl
+          command: |
+            echo -n "${KUBE_ENV_CACERT}" | base64 -d > /tmp/cluster_ca.crt
+            kubectl config set-cluster "${KUBE_ENV_NAME}" \
+              --certificate-authority="/tmp/cluster_ca.crt" \
+              --server="https://api.${KUBE_ENV_NAME}"
+            kubectl config set-credentials circleci \
+              --token="${KUBE_ENV_TOKEN}"
+            kubectl config set-context circleci \
+              --cluster="${KUBE_ENV_NAME}" \
+              --user="circleci" \
+              --namespace="${KUBE_ENV_NAMESPACE}"
+            # confirm setup is ok
+            kubectl config use-context circleci
+            kubectl -n "${KUBE_ENV_NAMESPACE}" get pods
+
+  deploy_to_env:
+    parameters:
+      env:
+        type: string
+    steps:
+      - setup
+      - checkout:
+          path: ~/git
+      - attach_workspace:
+          at: ~/app
+      - deploy:
+          name: Deploy to << parameters.env >>
+          command: |
+            APP_VERSION=$(cat ~/app/app_version.txt)
+            aws secretsmanager --region ${AWS_DEFAULT_REGION} get-secret-value --secret-id ${AWS_SECRET_NAMESPACE} | jq -r .SecretString | \
+            helm upgrade dps-data-compliance ~/git/helm_deploy/dps-data-compliance/. \
+              --install --wait --force --reset-values --timeout 360 \
+              --tiller-namespace=${KUBE_ENV_NAMESPACE} \
+              --namespace=${KUBE_ENV_NAMESPACE} \
+              --description="${APP_VERSION} - ${CIRCLE_BUILD_URL}" \
+              --values ~/git/helm_deploy/values-<< parameters.env >>.yaml \
+              --values - \
+              --set image.tag="${APP_VERSION}"
+
 executors:
   deployer:
     docker:
@@ -9,6 +58,11 @@ executors:
     docker:
       - image: circleci/openjdk:11-jdk-browsers
     working_directory: ~/app
+
+orbs:
+  aws-cli: circleci/aws-cli@0.1.18
+  kubernetes: circleci/kubernetes@0.10.1
+  helm: circleci/helm@0.2.2
 
 jobs:
   build:
@@ -78,6 +132,12 @@ jobs:
              docker push mojdigitalstudio/dps-data-compliance:latest
             fi
 
+  deploy_dev:
+    executor: deployer
+    steps:
+      - deploy_to_env:
+          env: "dev"
+
 workflows:
   version: 2
   build-test-and-deploy:
@@ -92,3 +152,6 @@ workflows:
           filters:
             branches:
               only: master
+      - deploy_dev:
+          requires:
+            - build_docker
