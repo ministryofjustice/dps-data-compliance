@@ -19,6 +19,9 @@ ingress:
       cert_secret: prison-data-compliance-cert
   path: /
 
+env:
+  JAVA_OPTS: "Xmx512m"
+
 whitelist:
   office: "217.33.148.210/32"
   health-kick: "35.177.252.195/32"
