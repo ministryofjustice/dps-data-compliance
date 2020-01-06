@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.2.1.RELEASE'
+    id 'org.springframework.boot' version '2.2.2.RELEASE' // remove pinning of tomcat version to 9.0.30 when next upgrading
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'com.github.ben-manes.versions' version '0.27.0'
     id 'org.owasp.dependencycheck' version '5.2.4'
@@ -24,6 +24,8 @@ configurations {
 project.sourceCompatibility = '11'
 project.targetCompatibility = '11'
 
+ext['tomcat.version'] = '9.0.30'
+
 group = 'uk.gov.justice.hmpps'
 
 def today = Instant.now()
@@ -34,8 +36,8 @@ springBoot {
     buildInfo {
         properties {
             artifact = rootProject.name
-            version = version
-            group = group
+            version
+            group
             name = rootProject.name
             time = today
             additional = [
@@ -63,13 +65,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    implementation 'net.logstash.logback:logstash-logback-encoder:6.2'
+    implementation 'net.logstash.logback:logstash-logback-encoder:6.3'
     implementation 'com.microsoft.azure:applicationinsights-spring-boot-starter:2.5.1'
     implementation 'com.microsoft.azure:applicationinsights-logging-logback:2.5.1'
     agentDeps 'com.microsoft.azure:applicationinsights-agent:2.5.1'
     implementation configurations.agentDeps
 
-    implementation 'software.amazon.awssdk:sns:2.10.22'
+    implementation 'software.amazon.awssdk:sns:2.10.42'
 
     implementation 'org.apache.commons:commons-lang3:3.9'
 
@@ -77,7 +79,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
     testImplementation 'org.assertj:assertj-core:3.14.0'
     testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.11.1'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.1.RELEASE'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 task copyAgent(type: Copy) {
