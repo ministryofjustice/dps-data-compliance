@@ -21,6 +21,15 @@ configurations {
     agentDeps.transitive = false
 }
 
+dependencyCheck {
+    failBuildOnCVSS = 5
+    suppressionFiles = ['dependency-check-suppress-spring.xml']
+    format = 'ALL'
+    analyzers {
+        assemblyEnabled = false
+    }
+}
+
 project.sourceCompatibility = '11'
 project.targetCompatibility = '11'
 
@@ -71,7 +80,7 @@ dependencies {
     agentDeps 'com.microsoft.azure:applicationinsights-agent:2.5.1'
     implementation configurations.agentDeps
 
-    implementation 'software.amazon.awssdk:sns:2.10.42'
+    implementation 'software.amazon.awssdk:sns:2.10.45'
 
     implementation 'org.apache.commons:commons-lang3:3.9'
 
