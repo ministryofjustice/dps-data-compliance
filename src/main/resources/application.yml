@@ -2,6 +2,19 @@ spring:
   application:
     name: dps-data-compliance
 
+  security:
+    oauth2:
+      client:
+        registration:
+          dps-data-compliance:
+            provider: nomis-oauth2-server
+            client-id: ${dps.data.compliance.client.id}
+            client-secret: ${dps.data.compliance.client.secret}
+            authorization-grant-type: client_credentials
+        provider:
+          nomis-oauth2-server:
+            token-uri: ${oauth.api.base.url}/oauth/token
+
 server:
   port: 8080
   servlet:
@@ -26,3 +39,7 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+
+graceful:
+  shutdown:
+    enabled: true

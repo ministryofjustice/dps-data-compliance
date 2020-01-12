@@ -6,6 +6,7 @@ import java.time.LocalDate
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.2.2.RELEASE' // remove pinning of tomcat version to 9.0.30 when next upgrading
+                                                          // also remove pinning of nimbus-jose-jwt to 8.4 when next upgrading
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'com.github.ben-manes.versions' version '0.27.0'
     id 'org.owasp.dependencycheck' version '5.2.4'
@@ -73,6 +74,12 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
+    implementation 'org.springframework:spring-webflux'
+
+    implementation 'com.nimbusds:nimbus-jose-jwt:8.4'
 
     implementation 'net.logstash.logback:logstash-logback-encoder:6.3'
     implementation 'com.microsoft.azure:applicationinsights-spring-boot-starter:2.5.1'
@@ -80,7 +87,7 @@ dependencies {
     agentDeps 'com.microsoft.azure:applicationinsights-agent:2.5.1'
     implementation configurations.agentDeps
 
-    implementation 'software.amazon.awssdk:sns:2.10.45'
+    implementation 'software.amazon.awssdk:sns:2.10.47'
 
     implementation 'org.apache.commons:commons-lang3:3.9'
 
@@ -89,6 +96,8 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.14.0'
     testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.11.1'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.squareup.okhttp3:okhttp:4.3.1'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.3.1'
 }
 
 task copyAgent(type: Copy) {
