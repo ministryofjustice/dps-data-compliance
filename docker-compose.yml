@@ -1,0 +1,74 @@
+version: '3.1'
+services:
+
+  dps-data-compliance:
+    image: mojdigitalstudio/dps-data-compliance:latest
+    container_name: dps-data-compliance
+    depends_on:
+      - localstack
+    networks:
+      - hmpps
+    ports:
+      - "8082:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    environment:
+      - SERVER_PORT=8080
+      - ELITE2_API_BASE_URL=http://elite2-api:8080
+      - OAUTH2_API_BASE_URL=http://oauth:8081
+
+  oauth:
+    image: mojdigitalstudio/nomis-oauth2-server:latest
+    networks:
+      - hmpps
+    container_name: oauth
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+
+  elite2-api:
+    image: mojdigitalstudio/elite2-api:latest
+    container_name: elite2-api
+    depends_on:
+      - localstack
+    networks:
+      - hmpps
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=nomis-hsqldb-localstack
+      - AWS_ACCESS_KEY_ID=arbitrary
+      - AWS_SECRET_ACCESS_KEY=arbitrary
+
+  localstack:
+    image: localstack/localstack
+    container_name: localstack
+    networks:
+      - hmpps
+    ports:
+      - "4567-4597:4567-4597"
+      - 8999:8080
+    environment:
+      - SERVICES=sns,sqs
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=${DATA_DIR- }
+      - PORT_WEB_UI=${PORT_WEB_UI- }
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_EXECUTION_ENV=True
+      - DEFAULT_REGION=eu-west-2
+      - HOSTNAME_EXTERNAL=localstack
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+networks:
+  hmpps:
