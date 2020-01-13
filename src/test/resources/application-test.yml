@@ -2,3 +2,6 @@ management:
   endpoint:
     health.cache.time-to-live: 0
     info.cache.time-to-live: 0
+
+elite2:
+  api.base.url: http://localhost:8999

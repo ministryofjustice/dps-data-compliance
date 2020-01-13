@@ -7,6 +7,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
+import static java.util.Objects.requireNonNull;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -22,14 +23,14 @@ public class HealthCheckIntegrationTest {
     @Test
     void healthPageReportsOk() {
         var response = restTemplate.getForEntity("/health", String.class);
-        assertThatJson(response.getBody()).node("status").isEqualTo("UP");
+        assertThatJson(requireNonNull(response.getBody())).node("status").isEqualTo("UP");
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
     }
 
     @Test
     void healthPingPageIsAvailable() {
         var response = restTemplate.getForEntity("/health/ping", String.class);
-        assertThatJson(response.getBody()).node("status").isEqualTo("UP");
+        assertThatJson(requireNonNull(response.getBody())).node("status").isEqualTo("UP");
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
     }
 }
