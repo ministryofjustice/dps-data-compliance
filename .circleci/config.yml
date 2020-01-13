@@ -7,7 +7,7 @@ commands:
       - aws-cli/install
       - kubernetes/install
       - helm/install-helm-client:
-          version: v2.13.1
+          version: v3.0.2
       - run:
           name: Setup kubectl
           command: |
@@ -39,10 +39,10 @@ commands:
           name: Deploy to << parameters.env >>
           command: |
             APP_VERSION=$(cat ~/app/app_version.txt)
+            sed -i "s/appVersion: \".*\"/appVersion: \"${APP_VERSION}\"/g" ~/git/helm_deploy/dps-data-compliance/Chart.yaml
             aws secretsmanager --region ${AWS_DEFAULT_REGION} get-secret-value --secret-id ${AWS_SECRET_NAME} | jq -r .SecretString | \
             helm upgrade dps-data-compliance ~/git/helm_deploy/dps-data-compliance/. \
-              --install --wait --force --reset-values --timeout 360 \
-              --tiller-namespace=${KUBE_ENV_NAMESPACE} \
+              --install --wait --reset-values --timeout 5m --history-max 10 \
               --namespace=${KUBE_ENV_NAMESPACE} \
               --description="${APP_VERSION} - ${CIRCLE_BUILD_URL}" \
               --values ~/git/helm_deploy/values-<< parameters.env >>.yaml \
@@ -62,7 +62,7 @@ executors:
 orbs:
   aws-cli: circleci/aws-cli@0.1.18
   kubernetes: circleci/kubernetes@0.10.1
-  helm: circleci/helm@0.2.2
+  helm: circleci/helm@0.2.3
   owasp: entur/owasp@0.0.6
 
 jobs:
@@ -159,7 +159,7 @@ workflows:
   scheduled:
     triggers:
       - schedule:
-          cron: "0 7 * * 1-5"
+          cron: "0 8 * * 1-5"
           filters:
             branches:
               only:
