@@ -44,7 +44,6 @@ commands:
             helm upgrade dps-data-compliance ~/git/helm_deploy/dps-data-compliance/. \
               --install --wait --reset-values --timeout 5m --history-max 10 \
               --namespace=${KUBE_ENV_NAMESPACE} \
-              --description="${APP_VERSION} - ${CIRCLE_BUILD_URL}" \
               --values ~/git/helm_deploy/values-<< parameters.env >>.yaml \
               --values - \
               --set image.tag="${APP_VERSION}"
