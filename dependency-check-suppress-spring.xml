@@ -21,4 +21,25 @@
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-core@.*$</packageUrl>
         <cve>CVE-2018-1258</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-security-oauth2-core-5.2.1.RELEASE.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-oauth2\-core@.*$</packageUrl>
+        <cve>CVE-2018-1258</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-security-oauth2-jose-5.2.1.RELEASE.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-oauth2\-jose@.*$</packageUrl>
+        <cve>CVE-2018-1258</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-security-oauth2-client-5.2.1.RELEASE.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-oauth2\-client@.*$</packageUrl>
+        <cve>CVE-2018-1258</cve>
+    </suppress>
 </suppressions>
