@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -16,13 +17,18 @@ import static java.util.stream.Collectors.toSet;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Service
-@AllArgsConstructor
 public class Elite2ApiClient {
 
     private static final String OFFENDER_IDS_PATH = "/api/offenders/ids";
 
-    private WebClient webClient;
-    private DataComplianceProperties dataComplianceProperties;
+    private final WebClient webClient;
+    private final DataComplianceProperties dataComplianceProperties;
+
+    public Elite2ApiClient(@Qualifier("authorizedWebClient") final WebClient webClient,
+                           final DataComplianceProperties dataComplianceProperties) {
+        this.webClient = webClient;
+        this.dataComplianceProperties = dataComplianceProperties;
+    }
 
     public Set<String> getOffenderNumbers(final long offset, final long limit) {
         return getOffenderNumbersFlux(offset, limit).toStream().collect(toSet());
