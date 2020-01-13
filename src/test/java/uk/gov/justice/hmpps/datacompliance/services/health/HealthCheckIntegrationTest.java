@@ -1,36 +1,60 @@
 package uk.gov.justice.hmpps.datacompliance.services.health;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import static java.util.Objects.requireNonNull;
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
 @ContextConfiguration
-public class HealthCheckIntegrationTest {
-
-    @Autowired
-    private TestRestTemplate restTemplate;
+public class HealthCheckIntegrationTest extends IntegrationTest {
 
     @Test
     void healthPageReportsOk() {
-        var response = restTemplate.getForEntity("/health", String.class);
-        assertThatJson(requireNonNull(response.getBody())).node("status").isEqualTo("UP");
-        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
+        mockExternalServiceResponseCode(200);
+
+        webTestClient.get().uri("/health")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("UP")
+                .jsonPath("$.components['healthCheck.Elite2ApiHealth'].status").isEqualTo("UP")
+                .jsonPath("$.components['healthCheck.OAuthApiHealth'].status").isEqualTo("UP");
     }
 
     @Test
     void healthPingPageIsAvailable() {
-        var response = restTemplate.getForEntity("/health/ping", String.class);
-        assertThatJson(requireNonNull(response.getBody())).node("status").isEqualTo("UP");
-        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
+        webTestClient.get().uri("/health/ping")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("UP");
     }
+
+    @Test
+    void healthPageReportsDown() {
+
+        mockExternalServiceResponseCode(404);
+
+        webTestClient.get().uri("/health")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(503)
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("DOWN")
+                .jsonPath("$.components['healthCheck.Elite2ApiHealth'].status").isEqualTo("DOWN")
+                .jsonPath("$.components['healthCheck.Elite2ApiHealth'].details.error").value(containsString("404 Not Found"))
+                .jsonPath("$.components['healthCheck.OAuthApiHealth'].status").isEqualTo("DOWN")
+                .jsonPath("$.components['healthCheck.OAuthApiHealth'].details.error").value(containsString("404 Not Found"));
+    }
+
 }
