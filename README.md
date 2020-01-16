@@ -71,6 +71,15 @@ Results in:
 }
 ```
 
+#### Publish to the queue
+(Warning, if configured, this will prompt Elite2 to delete the Offender provided)
+```bash
+aws --endpoint-url=http://localhost:4575 sns publish \
+    --topic-arn arn:aws:sns:eu-west-2:000000000000:offender_events \
+    --message '{"offenderIdDisplay":"SOME_OFFENDER_ID_DISPLAY"}' \ 
+    --message-attributes "eventType={StringValue=DATA_COMPLIANCE_DELETE-OFFENDER,DataType=String}"
+```
+
 ### Read off the queue
 ```bash
 aws --endpoint-url=http://localhost:4576 sqs receive-message --queue-url http://localhost:4576/queue/elite2_api_queue
