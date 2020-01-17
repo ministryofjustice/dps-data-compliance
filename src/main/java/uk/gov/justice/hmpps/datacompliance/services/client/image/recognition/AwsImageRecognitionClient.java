@@ -52,6 +52,8 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
         if (indexedFaces.size() != 1) {
             log.warn("Face count: '{}' for offender: '{}' and image: '{}'", indexedFaces.size(), offenderNumber, imageId);
 
+            // Need to delete all indexed faces in this image because we cannot tell which one
+            // belongs to the offender:
             indexedFaces.forEach(face -> removeFaceFromCollection(face.getFace().getFaceId()));
 
             return Optional.empty();
