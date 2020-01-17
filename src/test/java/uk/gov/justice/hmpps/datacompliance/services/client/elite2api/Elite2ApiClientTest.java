@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services.client;
+package uk.gov.justice.hmpps.datacompliance.services.client.elite2api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
+import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient;
 
 import java.util.List;
 

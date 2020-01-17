@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services.client;
+package uk.gov.justice.hmpps.datacompliance.services.client.elite2api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
