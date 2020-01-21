@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
-import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 import java.util.List;
 
@@ -45,16 +45,20 @@ class Elite2ApiClientTest {
     @Test
     void getOffenderNumbers() throws Exception {
 
-        List<Elite2ApiClient.OffenderNumber> offenderNumbers = List.of(
-                new Elite2ApiClient.OffenderNumber("offender1"),
-                new Elite2ApiClient.OffenderNumber("offender2"));
+        var offenderNumbers = List.of(
+                new OffenderNumber("offender1"),
+                new OffenderNumber("offender2"));
 
         elite2ApiMock.enqueue(new MockResponse()
                 .setBody(OBJECT_MAPPER.writeValueAsString(offenderNumbers))
-                .setHeader("Content-Type", "application/json"));
+                .setHeader("Content-Type", "application/json")
+                .setHeader("Total-Records", "123"));
 
-        assertThat(elite2ApiClient.getOffenderNumbers(0, 2))
+        var response = elite2ApiClient.getOffenderNumbers(0, 2);
+
+        assertThat(response.getOffenderNumbers()).extracting(OffenderNumber::getOffenderNumber)
                 .containsExactlyInAnyOrder("offender1", "offender2");
+        assertThat(response.getTotalCount()).isEqualTo(123);
 
         RecordedRequest recordedRequest = elite2ApiMock.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("GET");
@@ -73,14 +77,15 @@ class Elite2ApiClientTest {
     }
 
     @Test
-    void getOffenderNumbersThrowsIfResponseContainsNulls() throws Exception {
+    void getOffenderNumbersThrowsIfResponseContainsNulls() {
 
         elite2ApiMock.enqueue(new MockResponse()
-                .setBody(OBJECT_MAPPER.writeValueAsString(List.of(new Elite2ApiClient.OffenderNumber(null))))
-                .setHeader("Content-Type", "application/json"));
+                .setBody("[{\"offenderNumber\":null}]")
+                .setHeader("Content-Type", "application/json")
+                .setHeader("Total-Records", "123"));
 
         assertThatThrownBy(() -> elite2ApiClient.getOffenderNumbers(0, 2))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessageContaining("Response contained null offender numbers");
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Null offender number");
     }
 }
