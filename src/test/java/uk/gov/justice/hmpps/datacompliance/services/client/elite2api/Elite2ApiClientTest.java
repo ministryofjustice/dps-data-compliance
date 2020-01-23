@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import okio.Buffer;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 import java.util.List;
@@ -22,14 +24,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class Elite2ApiClientTest {
 
     private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static MockWebServer elite2ApiMock;
-    private Elite2ApiClient elite2ApiClient;
 
-    @BeforeAll
-    static void setUp() throws Exception {
-        elite2ApiMock = new MockWebServer();
-        elite2ApiMock.start();
-    }
+    private final MockWebServer elite2ApiMock = new MockWebServer();
+    private Elite2ApiClient elite2ApiClient;
 
     @BeforeEach
     void initialize() {
@@ -37,8 +34,8 @@ class Elite2ApiClientTest {
                 new DataComplianceProperties(format("http://localhost:%s", elite2ApiMock.getPort())));
     }
 
-    @AfterAll
-    static void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         elite2ApiMock.shutdown();
     }
 
@@ -87,5 +84,59 @@ class Elite2ApiClientTest {
         assertThatThrownBy(() -> elite2ApiClient.getOffenderNumbers(0, 2))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Null offender number");
+    }
+
+    @Test
+    void getOffenderFaceImages() throws Exception {
+
+        var offenderImages = List.of(new OffenderImageMetadata(123L, "FACE"), new OffenderImageMetadata(456L, "OTHER"));
+
+        elite2ApiMock.enqueue(new MockResponse()
+                .setBody(OBJECT_MAPPER.writeValueAsString(offenderImages))
+                .setHeader("Content-Type", "application/json"));
+
+        var result = elite2ApiClient.getOffenderFaceImagesFor(new OffenderNumber("offender1"));
+
+        assertThat(result).containsOnly(new OffenderImageMetadata(123L, "FACE"));
+
+        RecordedRequest recordedRequest = elite2ApiMock.takeRequest();
+        assertThat(recordedRequest.getMethod()).isEqualTo("GET");
+        assertThat(recordedRequest.getPath()).isEqualTo("/api/images/offenders/offender1");
+    }
+
+    @Test
+    void getOffenderFaceThrowsOnNonSuccessResponse() {
+
+        elite2ApiMock.enqueue(new MockResponse().setResponseCode(500));
+
+        assertThatThrownBy(() -> elite2ApiClient.getOffenderFaceImagesFor(new OffenderNumber("offender1")))
+                .isInstanceOf(WebClientResponseException.class);
+    }
+
+    @Test
+    void getImageData() throws Exception {
+
+        final var data = new byte[]{0x12};
+
+        elite2ApiMock.enqueue(new MockResponse()
+                .setBody(new Buffer().write(data))
+                .setHeader("Content-Type", "image/jpeg"));
+
+        var result = elite2ApiClient.getImageData(123L);
+
+        assertThat(result).isEqualTo(data);
+
+        RecordedRequest recordedRequest = elite2ApiMock.takeRequest();
+        assertThat(recordedRequest.getMethod()).isEqualTo("GET");
+        assertThat(recordedRequest.getPath()).isEqualTo("/api/images/123/data");
+    }
+
+    @Test
+    void getImageDataThrowsOnNonSuccessResponse() throws Exception {
+
+        elite2ApiMock.enqueue(new MockResponse().setResponseCode(500));
+
+        assertThatThrownBy(() -> elite2ApiClient.getImageData(123L))
+                .isInstanceOf(WebClientResponseException.class);
     }
 }
