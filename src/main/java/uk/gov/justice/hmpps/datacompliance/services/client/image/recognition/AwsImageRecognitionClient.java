@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -33,7 +34,7 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
 
     @Override
     public Optional<String> uploadImageToCollection(final byte[] imageData,
-                                                    final String offenderNumber,
+                                                    final OffenderNumber offenderNumber,
                                                     final long imageId) {
 
         log.debug("Uploading image data for offender: '{}', image: '{}'", offenderNumber, imageId);
@@ -45,12 +46,14 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
         return ensureOnlyOneFaceIndexed(offenderNumber, imageId, indexedFaces);
     }
 
-    private Optional<String> ensureOnlyOneFaceIndexed(final String offenderNumber,
+    private Optional<String> ensureOnlyOneFaceIndexed(final OffenderNumber offenderNumber,
                                                       final long imageId,
                                                       final List<FaceRecord> indexedFaces) {
 
         if (indexedFaces.size() != 1) {
-            log.warn("Face count: '{}' for offender: '{}' and image: '{}'", indexedFaces.size(), offenderNumber, imageId);
+
+            log.warn("Face count: '{}' for offender: '{}' and image: '{}'",
+                    indexedFaces.size(), offenderNumber.getOffenderNumber(), imageId);
 
             // Need to delete all indexed faces in this image because we cannot tell which one
             // belongs to the offender:
@@ -66,7 +69,7 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
     }
 
     private IndexFacesRequest generateIndexFaceRequest(final byte[] imageData,
-                                                       final String offenderNumber,
+                                                       final OffenderNumber offenderNumber,
                                                        final long imageId) {
         // Check for up to two faces in a single image so that we are warned
         // if multiple faces are detected.
@@ -91,7 +94,7 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
                 .withFaceIds(faceId);
     }
 
-    private String generateExternalImageId(final String offenderNumber, final long imageId) {
-        return format("%s-%s", offenderNumber, imageId);
+    private String generateExternalImageId(final OffenderNumber offenderNumber, final long imageId) {
+        return format("%s-%s", offenderNumber.getOffenderNumber(), imageId);
     }
 }
