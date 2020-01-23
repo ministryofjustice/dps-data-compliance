@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.when;
 class AwsImageRecognitionClientTest {
 
     private static final byte[] DATA = new byte[] { (byte) 0x01 };
-    private static final String OFFENDER_NUMBER = "A1234AA";
+    private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("offender1");
     private static final long OFFENDER_IMAGE_ID = 1L;
     private static final String EXPECTED_FACE_ID = "face1";
     private static final String COLLECTION_NAME = "collection_name";
@@ -47,7 +48,7 @@ class AwsImageRecognitionClientTest {
         assertThat(request.getValue().getMaxFaces()).isEqualTo(2);
         assertThat(request.getValue().getQualityFilter()).isEqualTo("HIGH");
         assertThat(request.getValue().getCollectionId()).isEqualTo(COLLECTION_NAME);
-        assertThat(request.getValue().getExternalImageId()).isEqualTo(OFFENDER_NUMBER + "-" + OFFENDER_IMAGE_ID);
+        assertThat(request.getValue().getExternalImageId()).isEqualTo(OFFENDER_NUMBER.getOffenderNumber() + "-" + OFFENDER_IMAGE_ID);
         assertThat(request.getValue().getImage().getBytes().array()).isEqualTo(DATA);
     }
 

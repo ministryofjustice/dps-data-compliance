@@ -1,14 +1,12 @@
 package uk.gov.justice.hmpps.datacompliance.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
-@EqualsAndHashCode
-@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OffenderDeletionEvent {
     private String offenderIdDisplay;
 }
