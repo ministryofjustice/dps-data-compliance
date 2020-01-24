@@ -66,7 +66,6 @@ dependencyManagement {
 dependencies {
 
     annotationProcessor 'org.projectlombok:lombok'
-
     compileOnly 'org.projectlombok:lombok'
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -84,13 +83,15 @@ dependencies {
     agentDeps 'com.microsoft.azure:applicationinsights-agent:2.5.1'
     implementation configurations.agentDeps
 
-    implementation 'com.amazonaws:aws-java-sdk-rekognition:1.11.711'
-    implementation 'software.amazon.awssdk:sns:2.10.53'
+    implementation 'com.amazonaws:aws-java-sdk-rekognition:1.11.713'
+    implementation 'software.amazon.awssdk:sns:2.10.55'
 
     implementation 'org.apache.commons:commons-lang3:3.9'
 
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
+    testAnnotationProcessor "org.projectlombok:lombok"
+    testCompileOnly 'org.projectlombok:lombok'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testImplementation 'org.assertj:assertj-core:3.14.0'
     testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.12.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

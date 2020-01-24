@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient.OffenderNumbersResponse;
@@ -33,7 +34,7 @@ class OffenderIteratorTest {
 
     @BeforeEach
     void setUp() {
-        offenderIterator = new OffenderIterator(client, REQUEST_LIMIT);
+        offenderIterator = new OffenderIterator(client, new DataComplianceProperties("some-url", REQUEST_LIMIT));
     }
 
     @Test

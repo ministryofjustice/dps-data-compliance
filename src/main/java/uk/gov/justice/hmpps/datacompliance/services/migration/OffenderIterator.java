@@ -1,8 +1,8 @@
 package uk.gov.justice.hmpps.datacompliance.services.migration;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient.OffenderNumbersResponse;
@@ -13,11 +13,16 @@ import java.util.stream.LongStream;
 import static java.lang.Math.ceil;
 
 @Slf4j
-@AllArgsConstructor
+@Service
 public class OffenderIterator {
 
     private final Elite2ApiClient elite2ApiClient;
     private final long requestLimit;
+
+    public OffenderIterator(final Elite2ApiClient elite2ApiClient, final DataComplianceProperties properties) {
+        this.elite2ApiClient = elite2ApiClient;
+        this.requestLimit = properties.getElite2ApiOffenderIdsLimit();
+    }
 
     public void applyForAll(final OffenderAction action) {
 

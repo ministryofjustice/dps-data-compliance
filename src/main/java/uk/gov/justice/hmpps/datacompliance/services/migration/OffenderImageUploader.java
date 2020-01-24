@@ -9,6 +9,7 @@ import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.Ima
 import uk.gov.justice.hmpps.datacompliance.services.migration.OffenderIterator.OffenderAction;
 
 @Slf4j
+@Service
 @AllArgsConstructor
 public class OffenderImageUploader implements OffenderAction {
     
