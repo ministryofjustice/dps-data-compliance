@@ -37,7 +37,7 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
                                                     final OffenderNumber offenderNumber,
                                                     final long imageId) {
 
-        log.debug("Uploading image data for offender: '{}', image: '{}'", offenderNumber, imageId);
+        log.debug("Uploading image data for offender: '{}', image: '{}'", offenderNumber.getOffenderNumber(), imageId);
 
         final var indexedFaces = client.indexFaces(
                 generateIndexFaceRequest(imageData, offenderNumber, imageId))
