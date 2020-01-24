@@ -26,10 +26,10 @@ public class OffenderIterator {
 
     public void applyForAll(final OffenderAction action) {
 
-        log.info("Applying offender action to first batch of {} offenders", requestLimit);
+        log.info("Applying offender action to first batch of up to {} offenders", requestLimit);
         final var firstBatchResponse = applyForBatch(action, 0);
 
-        log.info("Applying offender action to a total of {} offenders", firstBatchResponse.getTotalCount());
+        log.info("Total number of {} offenders", firstBatchResponse.getTotalCount());
         LongStream.rangeClosed(1, indexOfFinalBatch(firstBatchResponse))
                 .forEach(batchIndex -> applyForBatch(action, batchIndex));
 

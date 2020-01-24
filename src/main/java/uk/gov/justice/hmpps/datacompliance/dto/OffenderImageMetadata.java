@@ -17,7 +17,7 @@ public class OffenderImageMetadata {
     @JsonProperty("imageId")
     private Long imageId;
 
-    @JsonProperty("imageViewType")
+    @JsonProperty("imageView")
     private String imageView;
 
     public boolean isOffenderFaceImage() {
