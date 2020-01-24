@@ -16,7 +16,6 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.MediaType.IMAGE_JPEG;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Service
 public class Elite2ApiClient {
@@ -40,7 +39,6 @@ public class Elite2ApiClient {
                 .uri(dataComplianceProperties.getElite2ApiBaseUrl() + OFFENDER_IDS_PATH)
                 .header("Page-Offset", String.valueOf(offset))
                 .header("Page-Limit", String.valueOf(limit))
-                .attributes(clientRegistrationId("dps-data-compliance"))
                 .retrieve()
                 .toEntityList(OffenderNumber.class)
                 .block();
@@ -55,7 +53,6 @@ public class Elite2ApiClient {
 
         return webClient.get()
                 .uri(url)
-                .attributes(clientRegistrationId("dps-data-compliance"))
                 .retrieve()
                 .bodyToFlux(OffenderImageMetadata.class)
                 .filter(OffenderImageMetadata::isOffenderFaceImage)
@@ -66,7 +63,6 @@ public class Elite2ApiClient {
 
         return webClient.get()
                 .uri(dataComplianceProperties.getElite2ApiBaseUrl() + format(IMAGE_DATA_PATH, imageId))
-                .attributes(clientRegistrationId("dps-data-compliance"))
                 .accept(IMAGE_JPEG)
                 .retrieve()
                 .bodyToMono(byte[].class)
