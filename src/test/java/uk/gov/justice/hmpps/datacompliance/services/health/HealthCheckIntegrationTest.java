@@ -1,17 +1,11 @@
 package uk.gov.justice.hmpps.datacompliance.services.health;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
+import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 
 import static org.hamcrest.core.StringContains.containsString;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("test")
-@ContextConfiguration
 public class HealthCheckIntegrationTest extends IntegrationTest {
 
     @Test

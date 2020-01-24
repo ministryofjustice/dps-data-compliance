@@ -23,7 +23,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ExtendWith(MockitoExtension.class)
 class Elite2ApiClientTest {
 
-    private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final long PAGE_LIMIT = 2;
 
     private final MockWebServer elite2ApiMock = new MockWebServer();
     private Elite2ApiClient elite2ApiClient;
@@ -31,7 +32,7 @@ class Elite2ApiClientTest {
     @BeforeEach
     void initialize() {
         elite2ApiClient = new Elite2ApiClient(WebClient.create(),
-                new DataComplianceProperties(format("http://localhost:%s", elite2ApiMock.getPort())));
+                new DataComplianceProperties(format("http://localhost:%s", elite2ApiMock.getPort()), PAGE_LIMIT));
     }
 
     @AfterEach
@@ -51,7 +52,7 @@ class Elite2ApiClientTest {
                 .setHeader("Content-Type", "application/json")
                 .setHeader("Total-Records", "123"));
 
-        var response = elite2ApiClient.getOffenderNumbers(0, 2);
+        var response = elite2ApiClient.getOffenderNumbers(0, PAGE_LIMIT);
 
         assertThat(response.getOffenderNumbers()).extracting(OffenderNumber::getOffenderNumber)
                 .containsExactlyInAnyOrder("offender1", "offender2");
@@ -69,7 +70,7 @@ class Elite2ApiClientTest {
 
         elite2ApiMock.enqueue(new MockResponse().setResponseCode(500));
 
-        assertThatThrownBy(() -> elite2ApiClient.getOffenderNumbers(0, 2))
+        assertThatThrownBy(() -> elite2ApiClient.getOffenderNumbers(0, PAGE_LIMIT))
                 .isInstanceOf(WebClientResponseException.class);
     }
 
@@ -81,7 +82,7 @@ class Elite2ApiClientTest {
                 .setHeader("Content-Type", "application/json")
                 .setHeader("Total-Records", "123"));
 
-        assertThatThrownBy(() -> elite2ApiClient.getOffenderNumbers(0, 2))
+        assertThatThrownBy(() -> elite2ApiClient.getOffenderNumbers(0, PAGE_LIMIT))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Null offender number");
     }
@@ -132,7 +133,7 @@ class Elite2ApiClientTest {
     }
 
     @Test
-    void getImageDataThrowsOnNonSuccessResponse() throws Exception {
+    void getImageDataThrowsOnNonSuccessResponse() {
 
         elite2ApiMock.enqueue(new MockResponse().setResponseCode(500));
 

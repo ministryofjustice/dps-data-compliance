@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services.health;
+package uk.gov.justice.hmpps.datacompliance;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -17,18 +17,18 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ContextConfiguration
 public class IntegrationTest {
 
-    static MockWebServer elite2ApiMock;
-    static MockWebServer oauthApiMock;
+    protected static MockWebServer elite2ApiMock;
+    protected static MockWebServer oauthApiMock;
 
     @BeforeAll
-    static void setUp() throws Exception {
+    protected static void setUp() throws Exception {
         elite2ApiMock = new MockWebServer();
         elite2ApiMock.start(8999);
         oauthApiMock = new MockWebServer();
         oauthApiMock.start(8998);
     }
 
-    void mockExternalServiceResponseCode(final int status) {
+    protected void mockExternalServiceResponseCode(final int status) {
         var response = new MockResponse()
                 .setResponseCode(status)
                 .setBody(status == 200 ? "pong" : "some error");
@@ -38,11 +38,11 @@ public class IntegrationTest {
     }
 
     @AfterAll
-    static void tearDown() throws Exception {
+    protected static void tearDown() throws Exception {
         elite2ApiMock.shutdown();
         oauthApiMock.shutdown();
     }
 
     @Autowired
-    WebTestClient webTestClient;
+    protected WebTestClient webTestClient;
 }
