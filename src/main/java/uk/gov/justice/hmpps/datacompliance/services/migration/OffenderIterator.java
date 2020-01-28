@@ -14,17 +14,17 @@ import static java.lang.Math.ceil;
 
 @Slf4j
 @Service
-public class OffenderIterator {
+class OffenderIterator {
 
     private final Elite2ApiClient elite2ApiClient;
     private final long requestLimit;
 
-    public OffenderIterator(final Elite2ApiClient elite2ApiClient, final DataComplianceProperties properties) {
+    OffenderIterator(final Elite2ApiClient elite2ApiClient, final DataComplianceProperties properties) {
         this.elite2ApiClient = elite2ApiClient;
         this.requestLimit = properties.getElite2ApiOffenderIdsLimit();
     }
 
-    public void applyForAll(final OffenderAction action) {
+    void applyForAll(final OffenderAction action) {
 
         log.info("Applying offender action to first batch of up to {} offenders", requestLimit);
         final var firstBatchResponse = applyForBatch(action, 0);
@@ -49,6 +49,6 @@ public class OffenderIterator {
         return (long) ceil((double) response.getTotalCount() / requestLimit) - 1;
     }
 
-    public interface OffenderAction extends Consumer<OffenderNumber> { }
+    interface OffenderAction extends Consumer<OffenderNumber> { }
 
 }

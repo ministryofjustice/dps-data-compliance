@@ -2,19 +2,18 @@ package uk.gov.justice.hmpps.datacompliance.services.migration;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.ImageRecognitionClient;
 import uk.gov.justice.hmpps.datacompliance.services.migration.OffenderIterator.OffenderAction;
 
 @Slf4j
-@Service
 @AllArgsConstructor
-public class OffenderImageUploader implements OffenderAction {
+class OffenderImageUploader implements OffenderAction {
     
     private final Elite2ApiClient elite2ApiClient;
     private final ImageRecognitionClient imageRecognitionClient;
+    private final OffenderImageUploadLogger uploadLogger;
 
     @Override
     public void accept(final OffenderNumber offenderNumber) {
@@ -34,7 +33,12 @@ public class OffenderImageUploader implements OffenderAction {
 
             final var imageData = elite2ApiClient.getImageData(image.getImageId());
 
-            imageRecognitionClient.uploadImageToCollection(imageData, offenderNumber, image.getImageId());
+            imageRecognitionClient.uploadImageToCollection(imageData, offenderNumber, image.getImageId())
+                    .ifPresent(faceId -> uploadLogger.log(offenderNumber, image, faceId));
         });
+    }
+
+    long getUploadCount() {
+        return uploadLogger.getUploadCount();
     }
 }
