@@ -19,6 +19,33 @@ env:
   - name: OAUTH_API_BASE_URL
     value: "{{ .Values.env.OAUTH_API_BASE_URL }}"
 
+  - name: SPRING_DATASOURCE_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: dps-rds-instance-output
+        key: database_username
+
+  - name: SPRING_DATASOURCE_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: dps-rds-instance-output
+        key: database_password
+
+  - name: DB_NAME
+    valueFrom:
+      secretKeyRef:
+        name: dps-rds-instance-output
+        key: database_name
+
+  - name: DB_ENDPOINT
+    valueFrom:
+      secretKeyRef:
+        name: dps-rds-instance-output
+        key: rds_instance_endpoint
+
+  - name: APP_DB_URL
+    value: "jdbc:postgresql://$(DB_ENDPOINT)/$(DB_NAME)?sslmode=verify-full"
+
   - name: APPINSIGHTS_INSTRUMENTATIONKEY
     valueFrom:
       secretKeyRef:
