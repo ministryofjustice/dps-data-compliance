@@ -8,3 +8,5 @@ elite2:
 
 oauth:
   api.base.url: http://localhost:8998
+
+app.db.url: jdbc:hsqldb:mem:data-compliance-db;sql.syntax_pgs=true;shutdown=false
