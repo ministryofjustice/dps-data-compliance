@@ -54,7 +54,7 @@ class OffenderImageMigration {
         batch.setUploadCount(imageUploader.getUploadCount());
         repository.save(batch);
 
-        log.info("Offender image migration complete");
+        log.info("Offender image migration complete, {} faces have been indexed", imageUploader.getUploadCount());
     }
 
     private ImageUploadBatch newUploadBatch() {
