@@ -21,7 +21,7 @@ public class OffenderImageUploader implements OffenderAction {
 
         log.debug("Uploading image data for offender: '{}'", offenderNumber.getOffenderNumber());
 
-        var faceImages = elite2ApiClient.getOffenderFaceImagesFor(offenderNumber);
+        final var faceImages = elite2ApiClient.getOffenderFaceImagesFor(offenderNumber);
 
         if (faceImages.isEmpty()) {
             log.debug("Offender: '{}' has no face images to upload", offenderNumber);
@@ -32,7 +32,7 @@ public class OffenderImageUploader implements OffenderAction {
 
             log.trace("Uploading image: '{}' for offender: '{}'", image.getImageId(), offenderNumber.getOffenderNumber());
 
-            byte[] imageData = elite2ApiClient.getImageData(image.getImageId());
+            final var imageData = elite2ApiClient.getImageData(image.getImageId());
 
             imageRecognitionClient.uploadImageToCollection(imageData, offenderNumber, image.getImageId());
         });

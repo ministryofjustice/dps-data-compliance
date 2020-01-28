@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.2.4.RELEASE' // remove pinning of nimbus-jose-jwt to 8.4 when next upgrading
+    id 'org.springframework.boot' version '2.2.4.RELEASE' // remove pinning of nimbus-jose-jwt to 8.5 when next upgrading
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'com.github.ben-manes.versions' version '0.27.0'
     id 'org.owasp.dependencycheck' version '5.3.0'
@@ -30,8 +30,8 @@ dependencyCheck {
     }
 }
 
-project.sourceCompatibility = '11'
-project.targetCompatibility = '11'
+project.sourceCompatibility = 11
+project.targetCompatibility = 11
 
 group = 'uk.gov.justice.hmpps'
 
@@ -65,29 +65,43 @@ dependencyManagement {
 
 dependencies {
 
+    // Lombok
     annotationProcessor 'org.projectlombok:lombok'
     compileOnly 'org.projectlombok:lombok'
 
+    // Spring
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
     implementation 'org.springframework:spring-webflux:5.2.3.RELEASE'
 
-    implementation 'com.nimbusds:nimbus-jose-jwt:8.4'
-
+    // Logging
     implementation 'net.logstash.logback:logstash-logback-encoder:6.3'
     implementation 'com.microsoft.azure:applicationinsights-spring-boot-starter:2.5.1'
     implementation 'com.microsoft.azure:applicationinsights-logging-logback:2.5.1'
     agentDeps 'com.microsoft.azure:applicationinsights-agent:2.5.1'
     implementation configurations.agentDeps
 
-    implementation 'com.amazonaws:aws-java-sdk-rekognition:1.11.713'
-    implementation 'software.amazon.awssdk:sns:2.10.55'
+    // AWS
+    implementation 'com.amazonaws:aws-java-sdk-rekognition:1.11.714'
+    implementation 'software.amazon.awssdk:sns:2.10.56'
 
+    // Utils
     implementation 'org.apache.commons:commons-lang3:3.9'
 
+    implementation 'com.nimbusds:nimbus-jose-jwt:8.5'
+
+    // Database
+    implementation 'org.hibernate:hibernate-core:5.4.10.Final'
+
+    runtime 'org.hsqldb:hsqldb:2.5.0'
+    runtime 'org.flywaydb:flyway-core:6.2.0'
+    runtime 'org.postgresql:postgresql:42.2.9'
+
+    // Test
     testAnnotationProcessor "org.projectlombok:lombok"
     testCompileOnly 'org.projectlombok:lombok'
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")

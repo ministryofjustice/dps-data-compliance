@@ -1,4 +1,5 @@
 spring:
+
   application:
     name: dps-data-compliance
 
@@ -14,6 +15,17 @@ spring:
         provider:
           nomis-oauth2-server:
             token-uri: ${oauth.api.base.url}/oauth/token
+
+  datasource:
+    url: ${app.db.url}
+    username: sa
+    password:
+    continueOnError: true
+
+    hikari:
+      pool-name: DPS-Data-Compliance-CP
+      connectionTimeout: 1000
+      validationTimeout:  500
 
 server:
   port: 8080
