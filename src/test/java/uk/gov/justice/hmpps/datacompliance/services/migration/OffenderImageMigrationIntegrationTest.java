@@ -14,16 +14,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.repository.ImageUploadBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.ImageRecognitionClient;
+import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 import static java.util.Objects.requireNonNull;
 import static java.util.regex.Pattern.compile;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
@@ -36,17 +39,27 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
     private OffenderIterator iterator;
 
     @Autowired
-    private OffenderImageUploader uploader;
+    private OffenderImageUploaderFactory uploaderFactory;
+
+    @Autowired
+    private ImageUploadBatchRepository repository;
+
+    @Autowired
+    private TimeSource timeSource;
 
     private OffenderImageMigration migration;
 
     @BeforeEach
     void set() {
-        migration = new OffenderImageMigration(iterator, uploader, "some cron");
+        migration = new OffenderImageMigration(iterator, uploaderFactory, repository, timeSource, "some cron");
     }
 
     @Test
     void runMigration() {
+
+        when(imageRecognitionClient.uploadImageToCollection(any(), any(), anyLong()))
+                .thenReturn(Optional.of("face1"))
+                .thenReturn(Optional.of("face2"));
 
         oauthApiMock.enqueue(new MockResponse()
                 .setResponseCode(200)
@@ -60,6 +73,8 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
         verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x02}, new OffenderNumber("offender2"), 2L);
         verifyNoMoreInteractions(imageRecognitionClient);
 
+        var persistedBatch = repository.findAll().iterator().next();
+        assertThat(persistedBatch.getUploadCount()).isEqualTo(2);
     }
 
     private Dispatcher mockElite2ApiResponses() {
