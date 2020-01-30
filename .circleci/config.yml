@@ -166,7 +166,7 @@ workflows:
           requires:
             - deploy_dev
       - deploy_preprod:
-          context: offender-case-notes-preprod
+          context: prison-data-compliance-preprod
           requires:
             - request-preprod-approval
   scheduled:
