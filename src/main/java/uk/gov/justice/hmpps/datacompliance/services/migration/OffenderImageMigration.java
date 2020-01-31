@@ -8,8 +8,6 @@ import uk.gov.justice.hmpps.datacompliance.model.ImageUploadBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.ImageUploadBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
-import static com.microsoft.applicationinsights.agent.shadow.com.google.common.collect.Iterables.size;
-
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -24,11 +22,6 @@ class OffenderImageMigration {
     void run() {
 
         log.info("Running offender image migration");
-
-        if (size(repository.findAll()) != 0) {
-            log.warn("For first proof of concept, we only need this to run once");
-            return;
-        }
 
         final var batch = repository.save(newUploadBatch());
         final var imageUploader = uploaderFactory.generateUploaderFor(batch);
