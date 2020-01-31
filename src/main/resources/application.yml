@@ -16,6 +16,8 @@ spring:
           nomis-oauth2-server:
             token-uri: ${oauth.api.base.url}/oauth/token
 
+  flyway.locations: classpath:db/migration,classpath:db/quartz
+
   datasource:
     url: ${app.db.url}
     username: sa
