@@ -51,7 +51,7 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
     @BeforeEach
     void set() {
-        migration = new OffenderImageMigration(iterator, uploaderFactory, repository, timeSource, "some cron");
+        migration = new OffenderImageMigration(iterator, uploaderFactory, repository, timeSource);
     }
 
     @Test
