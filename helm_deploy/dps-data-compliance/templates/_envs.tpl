@@ -19,13 +19,11 @@ env:
   - name: OAUTH_API_BASE_URL
     value: "{{ .Values.env.OAUTH_API_BASE_URL }}"
 
-  {{- if .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}
   - name: IMAGE_RECOGNITION_MIGRATION_CRON
     value: "{{ .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}"
 
   - name: IMAGE_RECOGNITION_PROVIDER
     value: "{{ .Values.env.IMAGE_RECOGNITION_PROVIDER }}"
-  {{- end }}
 
   - name: SPRING_DATASOURCE_USERNAME
     valueFrom:
