@@ -58,6 +58,30 @@ env:
         name: {{ template "app.name" . }}
         key: APPINSIGHTS_INSTRUMENTATIONKEY
 
+  - name: DPS_DATA_COMPLIANCE_CLIENT_ID
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: DPS_DATA_COMPLIANCE_CLIENT_ID
+
+  - name: DPS_DATA_COMPLIANCE_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: DPS_DATA_COMPLIANCE_CLIENT_SECRET
+
+  - name: IMAGE_RECOGNITION_AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: IMAGE_RECOGNITION_AWS_ACCESS_KEY_ID
+
+  - name: IMAGE_RECOGNITION_AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: IMAGE_RECOGNITION_AWS_ACCESS_KEY_ID
+
   - name: SNS_AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
