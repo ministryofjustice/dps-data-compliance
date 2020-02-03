@@ -19,6 +19,12 @@ env:
   - name: OAUTH_API_BASE_URL
     value: "{{ .Values.env.OAUTH_API_BASE_URL }}"
 
+  - name: IMAGE_RECOGNITION_MIGRATION_CRON
+    value: "{{ .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}"
+
+  - name: IMAGE_RECOGNITION_PROVIDER
+    value: "{{ .Values.env.IMAGE_RECOGNITION_PROVIDER }}"
+
   - name: SPRING_DATASOURCE_USERNAME
     valueFrom:
       secretKeyRef:
@@ -69,5 +75,6 @@ env:
       secretKeyRef:
         name: offender-events-topic
         key: topic_arn
+
 
 {{- end -}}
