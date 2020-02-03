@@ -37,6 +37,6 @@ The permissions are added to the user as follows:
 
 The collection can be described with the following command:
 ```
-aws rekognition describe-collection --collection-id jon-brighton-testing
+aws rekognition describe-collection --collection-id dps-offender-images
 ```
 
