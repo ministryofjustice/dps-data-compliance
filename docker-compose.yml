@@ -6,6 +6,7 @@ services:
     container_name: dps-data-compliance
     depends_on:
       - localstack
+      - dps-data-compliance-db
     networks:
       - hmpps
     ports:
@@ -16,6 +17,9 @@ services:
       - SERVER_PORT=8080
       - ELITE2_API_BASE_URL=http://elite2-api:8080
       - OAUTH2_API_BASE_URL=http://oauth:8081
+      - APP_DB_URL=jdbc:postgresql://dps-data-compliance-db:5431/dps-data-compliance-db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin_password
 
   oauth:
     image: mojdigitalstudio/nomis-oauth2-server:latest
@@ -69,6 +73,20 @@ services:
     volumes:
       - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - $PWD/localstack:/docker-entrypoint-initaws.d
+
+  dps-data-compliance-db:
+    image: postgres
+    networks:
+      - hmpps
+    container_name: dps-data-compliance-db
+    restart: always
+    ports:
+      - "5431:5432"
+    environment:
+      - POSTGRES_PASSWORD=admin_password
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=dps-data-compliance-db
 
 networks:
   hmpps:
