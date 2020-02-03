@@ -19,7 +19,7 @@ env:
   - name: OAUTH_API_BASE_URL
     value: "{{ .Values.env.OAUTH_API_BASE_URL }}"
 
-  {{- if hasKey .Values.env "IMAGE_RECOGNITION_MIGRATION_CRON" }}
+  {{- if .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}
   - name: IMAGE_RECOGNITION_MIGRATION_CRON
     value: "{{ .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}"
 
