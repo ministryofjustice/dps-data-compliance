@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
@@ -14,12 +15,16 @@ import uk.gov.justice.hmpps.datacompliance.services.migration.OffenderIterator.O
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.min;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +39,7 @@ class OffenderIteratorTest {
 
     @BeforeEach
     void setUp() {
-        offenderIterator = new OffenderIterator(client, new DataComplianceProperties("some-url", REQUEST_LIMIT));
+        offenderIterator = new OffenderIterator(client, new DataComplianceProperties("some-url", REQUEST_LIMIT, 0L, null));
     }
 
     @Test
@@ -79,6 +84,17 @@ class OffenderIteratorTest {
         assertThat(processedOffenderNumbers).isEmpty();
     }
 
+    @Test
+    void canLimitIterationOverAConfigurableSubset() {
+
+        offenderIterator = new OffenderIterator(client, new DataComplianceProperties("some-url", REQUEST_LIMIT, 1L, 1L));
+
+        mockOffenderNumbersResponseWithOffset(1, "offender1", "offender2", "offender3", "offender4");
+
+        assertThat(processedOffenderNumbers()).containsOnly("offender2", "offender3");
+
+    }
+
     private List<String> processedOffenderNumbers() {
         final var processedOffenderNumbers = new ArrayList<String>();
         offenderIterator.applyForAll(offenderNumber ->
@@ -87,19 +103,26 @@ class OffenderIteratorTest {
     }
 
     private void mockOffenderNumbersResponse(final String ... offenderNumbers) {
+        mockOffenderNumbersResponseWithOffset(0, offenderNumbers);
+    }
 
-        final var list = stream(offenderNumbers).map(OffenderNumber::new).collect(toList());
-        final var count = new AtomicInteger();
+    private void mockOffenderNumbersResponseWithOffset(final int offset, final String ... offenderNumbers) {
+
+        final var list = asList(offenderNumbers);
+        final var count = new AtomicInteger(offset);
 
         do {
-            when(client.getOffenderNumbers(count.get(), REQUEST_LIMIT))
-                    .thenReturn(OffenderNumbersResponse.builder()
-                            .totalCount(list.size())
-                            .offenderNumbers(new HashSet<>(
-                                    list.subList(count.get(), min(count.get() + REQUEST_LIMIT, list.size()))))
-                            .build());
+            lenient().when(client.getOffenderNumbers(count.get(), REQUEST_LIMIT)).thenReturn(
+                    response(list.size(), list.subList(count.get(), min(count.get() + REQUEST_LIMIT, list.size()))));
 
             count.addAndGet(REQUEST_LIMIT);
         } while (count.get() < list.size());
+    }
+
+    private OffenderNumbersResponse response(final long total, final Collection<String> offenderNumbers) {
+        return OffenderNumbersResponse.builder()
+                .totalCount(total)
+                .offenderNumbers(offenderNumbers.stream().map(OffenderNumber::new).collect(toSet()))
+                .build();
     }
 }

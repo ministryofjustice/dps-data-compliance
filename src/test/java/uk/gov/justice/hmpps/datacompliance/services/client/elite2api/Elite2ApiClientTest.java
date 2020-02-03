@@ -32,7 +32,7 @@ class Elite2ApiClientTest {
     @BeforeEach
     void initialize() {
         elite2ApiClient = new Elite2ApiClient(WebClient.create(),
-                new DataComplianceProperties(format("http://localhost:%s", elite2ApiMock.getPort()), PAGE_LIMIT));
+                new DataComplianceProperties(format("http://localhost:%s", elite2ApiMock.getPort()), PAGE_LIMIT, 0L, null));
     }
 
     @AfterEach
