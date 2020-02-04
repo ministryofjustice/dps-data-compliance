@@ -22,9 +22,6 @@ import static org.quartz.CronScheduleBuilder.cronSchedule;
 @Configuration
 public class AwsRekognitionConfig {
 
-    @Value("${image.recognition.migration.cron:#{null}}")
-    private String imageMigrationCron;
-
     @Bean
     @ConditionalOnProperty(name = "image.recognition.provider", havingValue = "aws")
     AmazonRekognition amazonRekognition(@Value("${image.recognition.aws.access.key.id}") final String accessKey,
@@ -41,7 +38,7 @@ public class AwsRekognitionConfig {
 
     @Bean
     @ConditionalOnProperty(name = "image.recognition.migration.cron")
-    public Trigger offenderImageMigrationTrigger() {
+    public Trigger offenderImageMigrationTrigger(@Value("${image.recognition.migration.cron}") final String imageMigrationCron) {
 
         log.info("Configured to run offender image recognition migration with schedule: '{}'", imageMigrationCron);
 
