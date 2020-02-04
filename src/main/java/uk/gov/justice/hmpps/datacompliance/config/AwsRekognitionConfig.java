@@ -22,7 +22,7 @@ import static org.quartz.CronScheduleBuilder.cronSchedule;
 @Configuration
 public class AwsRekognitionConfig {
 
-    @Value("${image.recognition.migration.cron:#{null}")
+    @Value("${image.recognition.migration.cron:#{null}}")
     private String imageMigrationCron;
 
     @Bean
