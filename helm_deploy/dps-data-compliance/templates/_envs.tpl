@@ -76,11 +76,11 @@ env:
         name: {{ template "app.name" . }}
         key: IMAGE_RECOGNITION_AWS_ACCESS_KEY_ID
 
-  - name: IMAGE_RECOGNITION_AWS_ACCESS_KEY_ID
+  - name: IMAGE_RECOGNITION_AWS_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: {{ template "app.name" . }}
-        key: IMAGE_RECOGNITION_AWS_ACCESS_KEY_ID
+        key: IMAGE_RECOGNITION_AWS_SECRET_ACCESS_KEY
 
   - name: SNS_AWS_ACCESS_KEY_ID
     valueFrom:
