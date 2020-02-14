@@ -1,20 +1,22 @@
 package uk.gov.justice.hmpps.datacompliance.services.client.image.recognition;
 
-import com.amazonaws.services.rekognition.AmazonRekognitionClient;
-import com.amazonaws.services.rekognition.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.rekognition.RekognitionClient;
+import software.amazon.awssdk.services.rekognition.model.*;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static software.amazon.awssdk.services.rekognition.model.QualityFilter.HIGH;
 
 @ExtendWith(MockitoExtension.class)
 class AwsImageRecognitionClientTest {
@@ -26,7 +28,7 @@ class AwsImageRecognitionClientTest {
     private static final String COLLECTION_NAME = "collection_name";
 
     @Mock
-    private AmazonRekognitionClient awsClient;
+    private RekognitionClient awsClient;
 
     private ImageRecognitionClient client;
 
@@ -45,47 +47,50 @@ class AwsImageRecognitionClientTest {
         assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID))
                 .contains(EXPECTED_FACE_ID);
 
-        assertThat(request.getValue().getMaxFaces()).isEqualTo(2);
-        assertThat(request.getValue().getQualityFilter()).isEqualTo("HIGH");
-        assertThat(request.getValue().getCollectionId()).isEqualTo(COLLECTION_NAME);
-        assertThat(request.getValue().getExternalImageId()).isEqualTo(OFFENDER_NUMBER.getOffenderNumber() + "-" + OFFENDER_IMAGE_ID);
-        assertThat(request.getValue().getImage().getBytes().array()).isEqualTo(DATA);
+        assertThat(request.getValue().maxFaces()).isEqualTo(2);
+        assertThat(request.getValue().qualityFilter()).isEqualTo(HIGH);
+        assertThat(request.getValue().collectionId()).isEqualTo(COLLECTION_NAME);
+        assertThat(request.getValue().externalImageId()).isEqualTo(OFFENDER_NUMBER.getOffenderNumber() + "-" + OFFENDER_IMAGE_ID);
+        assertThat(request.getValue().image().bytes().asByteArray()).isEqualTo(DATA);
     }
 
     @Test
     void uploadImageToCollectionEnsuresOnlyOneFaceIndexed() {
 
-        when(awsClient.indexFaces(any()))
+        when(awsClient.indexFaces(any(IndexFacesRequest.class)))
                 .thenReturn(indexedFaces(EXPECTED_FACE_ID, "another-face-in-the-image"));
 
         assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID))
                 .isEmpty();
 
-        verify(awsClient).deleteFaces(new DeleteFacesRequest()
-                .withCollectionId(COLLECTION_NAME)
-                .withFaceIds(EXPECTED_FACE_ID));
-        verify(awsClient).deleteFaces(new DeleteFacesRequest()
-                .withCollectionId(COLLECTION_NAME)
-                .withFaceIds("another-face-in-the-image"));
+        verify(awsClient).deleteFaces(DeleteFacesRequest.builder()
+                .collectionId(COLLECTION_NAME)
+                .faceIds(EXPECTED_FACE_ID)
+                .build());
+        verify(awsClient).deleteFaces(DeleteFacesRequest.builder()
+                .collectionId(COLLECTION_NAME)
+                .faceIds("another-face-in-the-image")
+                .build());
     }
 
     @Test
     void uploadImageToCollectionHandlesImageWithNoFace() {
 
-        when(awsClient.indexFaces(any()))
+        when(awsClient.indexFaces(any(IndexFacesRequest.class)))
                 .thenReturn(indexedFaces(/* NONE */));
 
         assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID))
                 .isEmpty();
     }
 
-    private IndexFacesResult indexedFaces(final String ... faceIds) {
-        final var result = new IndexFacesResult();
-
-        result.withFaceRecords(stream(faceIds)
-                .map(id -> new FaceRecord().withFace(new Face().withFaceId(id)))
-                .toArray(FaceRecord[]::new));
-
-        return result;
+    private IndexFacesResponse indexedFaces(final String ... faceIds) {
+        return IndexFacesResponse.builder()
+                .faceRecords(stream(faceIds)
+                        .map(id -> FaceRecord.builder()
+                                .face(Face.builder()
+                                        .faceId(id)
+                                        .build())
+                                .build())
+                        .collect(toList())).build();
     }
 }
