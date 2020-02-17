@@ -1,9 +1,5 @@
 package uk.gov.justice.hmpps.datacompliance.config;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.rekognition.AmazonRekognition;
-import com.amazonaws.services.rekognition.AmazonRekognitionClientBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -14,6 +10,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import uk.gov.justice.hmpps.datacompliance.services.migration.OffenderImageMigrationJob;
 
 import static org.quartz.CronScheduleBuilder.cronSchedule;
@@ -24,15 +24,15 @@ public class AwsRekognitionConfig {
 
     @Bean
     @ConditionalOnProperty(name = "image.recognition.provider", havingValue = "aws")
-    AmazonRekognition amazonRekognition(@Value("${image.recognition.aws.access.key.id}") final String accessKey,
+    RekognitionClient amazonRekognition(@Value("${image.recognition.aws.access.key.id}") final String accessKey,
                                         @Value("${image.recognition.aws.secret.access.key}") final String secretKey,
                                         @Value("${image.recognition.region}") final String region) {
 
-        final var credentials = new BasicAWSCredentials(accessKey, secretKey);
+        final var credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
-        return AmazonRekognitionClientBuilder.standard()
-                .withRegion(region)
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+        return RekognitionClient.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .build();
     }
 
