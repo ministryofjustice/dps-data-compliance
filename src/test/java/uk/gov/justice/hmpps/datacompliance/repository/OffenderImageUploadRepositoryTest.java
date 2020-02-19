@@ -18,6 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional
+@Sql(value = "image_upload_batch.sql")
+@Sql(value = "offender_image_upload.sql")
 class OffenderImageUploadRepositoryTest {
 
     private static final LocalDateTime DATE_TIME = LocalDateTime.now();
@@ -29,7 +31,6 @@ class OffenderImageUploadRepositoryTest {
     private OffenderImageUploadRepository uploadRepository;
 
     @Test
-    @Sql(value = "image_upload_batch.sql")
     void persistOffenderImageUploadAndRetrieveById() {
 
         final var offenderImageUpload = uploadRepository.save(buildOffenderImageUpload());
@@ -44,8 +45,6 @@ class OffenderImageUploadRepositoryTest {
     }
 
     @Test
-    @Sql(value = "image_upload_batch.sql")
-    @Sql(value = "offender_image_upload.sql")
     void findOffenderImageUploadsByOffenderNo() {
 
         assertThat(uploadRepository.findByOffenderNo("OFFENDER1"))
@@ -60,6 +59,18 @@ class OffenderImageUploadRepositoryTest {
     @Test
     void findOffenderImageUploadByOffenderNoReturnsEmpty() {
         assertThat(uploadRepository.findByOffenderNo("UNKNOWN")).isEmpty();
+    }
+
+    @Test
+    void findOffenderImageUploadByOffenderNoAndImageId() {
+        assertThat(uploadRepository.findByOffenderNoAndImageId("OFFENDER1", 1L))
+                .map(OffenderImageUpload::getUploadId)
+                .contains(1L);
+    }
+
+    @Test
+    void findOffenderImageUploadByOffenderNoAndImageIdReturnsEmpty() {
+        assertThat(uploadRepository.findByOffenderNoAndImageId("UNKNOWN", 999L)).isEmpty();
     }
 
     private OffenderImageUpload buildOffenderImageUpload() {
