@@ -23,6 +23,8 @@ env:
   JAVA_OPTS: "Xmx512m"
   ELITE2_API_BASE_URL: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api"
   OAUTH_API_BASE_URL: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth"
+  IMAGE_RECOGNITION_PROVIDER: "AWS"
+  IMAGE_RECOGNITION_MIGRATION_CRON: "0 30 15 19 2 ? 2020"
 
 whitelist:
   office: "217.33.148.210/32"
