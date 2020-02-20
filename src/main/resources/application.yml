@@ -41,6 +41,7 @@ spring:
       scheduler.instanceId: AUTO
       scheduler.instanceName: data-compliance-quartz
 
+elite2.api.offender.ids.iteration.threads: 10
 elite2.api.offender.ids.initial.offset: 0
 elite2.api.offender.ids.total.pages: 10
 

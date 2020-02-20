@@ -32,7 +32,7 @@ class Elite2ApiClientTest {
     @BeforeEach
     void initialize() {
         elite2ApiClient = new Elite2ApiClient(WebClient.create(),
-                new DataComplianceProperties(format("http://localhost:%s", elite2ApiMock.getPort()), PAGE_LIMIT, 0L, null));
+                new DataComplianceProperties(format("http://localhost:%s", elite2ApiMock.getPort()), 1, PAGE_LIMIT, 0L, null));
     }
 
     @AfterEach
@@ -125,11 +125,20 @@ class Elite2ApiClientTest {
 
         var result = elite2ApiClient.getImageData(123L);
 
-        assertThat(result).isEqualTo(data);
+        assertThat(result).contains(data);
 
         RecordedRequest recordedRequest = elite2ApiMock.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("GET");
         assertThat(recordedRequest.getPath()).isEqualTo("/api/images/123/data");
+    }
+
+    @Test
+    void getImageDataHandlesMissingImageData() {
+
+        elite2ApiMock.enqueue(new MockResponse()
+                .setResponseCode(404));
+
+        assertThat(elite2ApiClient.getImageData(123L)).isEmpty();
     }
 
     @Test

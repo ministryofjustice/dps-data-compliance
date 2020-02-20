@@ -2,6 +2,7 @@ package uk.gov.justice.hmpps.datacompliance.services.migration;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.ImageRecognitionClient;
@@ -27,18 +28,25 @@ class OffenderImageUploader implements OffenderAction {
             return;
         }
 
-        faceImages.forEach(image -> {
-
-            log.trace("Uploading image: '{}' for offender: '{}'", image.getImageId(), offenderNumber.getOffenderNumber());
-
-            final var imageData = elite2ApiClient.getImageData(image.getImageId());
-
-            imageRecognitionClient.uploadImageToCollection(imageData, offenderNumber, image.getImageId())
-                    .ifPresent(faceId -> uploadLogger.log(offenderNumber, image, faceId));
-        });
+        faceImages.forEach(image -> getAndUploadImageData(image, offenderNumber));
     }
 
     long getUploadCount() {
         return uploadLogger.getUploadCount();
+    }
+
+    private void getAndUploadImageData(final OffenderImageMetadata image, final OffenderNumber offenderNumber) {
+
+        log.trace("Uploading image: '{}' for offender: '{}'", image.getImageId(), offenderNumber.getOffenderNumber());
+
+        final var imageData = elite2ApiClient.getImageData(image.getImageId());
+
+        imageData.ifPresentOrElse(
+
+                data -> imageRecognitionClient.uploadImageToCollection(data, offenderNumber, image.getImageId())
+                        .ifPresent(faceId -> uploadLogger.log(offenderNumber, image, faceId)),
+
+                () -> log.warn("Image: '{}' for offender: '{}' has no image data",
+                        image.getImageId(), offenderNumber.getOffenderNumber()));
     }
 }

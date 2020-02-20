@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
@@ -15,17 +14,14 @@ import uk.gov.justice.hmpps.datacompliance.services.migration.OffenderIterator.O
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static java.lang.Math.min;
 import static java.util.Arrays.asList;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
+import static java.util.Collections.synchronizedList;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OffenderIteratorTest {
@@ -39,7 +35,7 @@ class OffenderIteratorTest {
 
     @BeforeEach
     void setUp() {
-        offenderIterator = new OffenderIterator(client, new DataComplianceProperties("some-url", REQUEST_LIMIT, 0L, null));
+        offenderIterator = new OffenderIterator(client, new DataComplianceProperties("some-url", 2, REQUEST_LIMIT, 0L, null));
     }
 
     @Test
@@ -67,9 +63,9 @@ class OffenderIteratorTest {
     }
 
     @Test
-    void exceptionPreventsFurtherProcessing() {
+    void exceptionPreventsFurtherBatchesProcessing() {
 
-        mockOffenderNumbersResponse("offender1", "offender2");
+        mockOffenderNumbersResponse("offender1", "offender2", "offender3");
 
         final var processedOffenderNumbers = new ArrayList<String>();
         final var processedFirst = new AtomicBoolean(false);
@@ -80,14 +76,15 @@ class OffenderIteratorTest {
             processedOffenderNumbers.add(offenderNumber.getOffenderNumber());
         };
 
-        assertThatThrownBy(() -> offenderIterator.applyForAll(firstActionFails));
-        assertThat(processedOffenderNumbers).isEmpty();
+        assertThatThrownBy(() -> offenderIterator.applyForAll(firstActionFails))
+                .hasMessageContaining("First action fails!");
+        assertThat(processedOffenderNumbers).doesNotContain("offender3");
     }
 
     @Test
     void canLimitIterationOverAConfigurableSubset() {
 
-        offenderIterator = new OffenderIterator(client, new DataComplianceProperties("some-url", REQUEST_LIMIT, 1L, 1L));
+        offenderIterator = new OffenderIterator(client, new DataComplianceProperties("some-url", 2, REQUEST_LIMIT, 1L, 1L));
 
         mockOffenderNumbersResponseWithOffset(1, "offender1", "offender2", "offender3", "offender4");
 
@@ -96,7 +93,7 @@ class OffenderIteratorTest {
     }
 
     private List<String> processedOffenderNumbers() {
-        final var processedOffenderNumbers = new ArrayList<String>();
+        final var processedOffenderNumbers = synchronizedList(new ArrayList<String>());
         offenderIterator.applyForAll(offenderNumber ->
                 processedOffenderNumbers.add(offenderNumber.getOffenderNumber()));
         return processedOffenderNumbers;

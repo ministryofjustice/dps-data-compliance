@@ -3,9 +3,11 @@ package uk.gov.justice.hmpps.datacompliance.services.client.elite2api;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
@@ -15,6 +17,7 @@ import java.util.*;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.IMAGE_JPEG;
 
 @Service
@@ -59,14 +62,18 @@ public class Elite2ApiClient {
                 .toStream().collect(toList());
     }
 
-    public byte[] getImageData(final long imageId) {
+    public Optional<byte[]> getImageData(final long imageId) {
 
         return webClient.get()
                 .uri(dataComplianceProperties.getElite2ApiBaseUrl() + format(IMAGE_DATA_PATH, imageId))
                 .accept(IMAGE_JPEG)
                 .retrieve()
+
+                // Handling edge case where image had no image data and a 404 response was returned
+                .onStatus(NOT_FOUND::equals, ignored -> Mono.empty())
+
                 .bodyToMono(byte[].class)
-                .block();
+                .blockOptional();
     }
 
     private OffenderNumbersResponse offenderNumbersResponse(final ResponseEntity<List<OffenderNumber>> response) {
