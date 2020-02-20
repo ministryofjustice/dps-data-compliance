@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.model;
 
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

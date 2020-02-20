@@ -11,7 +11,6 @@ import uk.gov.justice.hmpps.datacompliance.model.ImageUploadBatch;
 import uk.gov.justice.hmpps.datacompliance.model.ImageUploadBatch.ImageUploadBatchBuilder;
 
 import javax.transaction.Transactional;
-
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;

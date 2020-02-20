@@ -14,6 +14,7 @@ import java.util.stream.LongStream;
 import static java.lang.Long.MAX_VALUE;
 import static java.lang.Math.ceil;
 import static java.lang.Math.min;
+import static java.lang.Thread.currentThread;
 import static java.util.concurrent.Executors.callable;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.toList;
@@ -66,6 +67,9 @@ class OffenderIterator {
                     .forEach(future -> propagateAnyError(future::get));
 
         } catch (InterruptedException e) {
+
+            currentThread().interrupt();
+
             throw new IllegalStateException("Execution of batch interrupted", e);
         }
 
