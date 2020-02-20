@@ -11,14 +11,16 @@ import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiCl
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient.OffenderNumbersResponse;
 import uk.gov.justice.hmpps.datacompliance.services.migration.OffenderIterator.OffenderAction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.min;
 import static java.util.Arrays.asList;
-import static java.util.Collections.synchronizedList;
 import static java.util.stream.Collectors.toSet;
+import static java.util.Collections.synchronizedList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;

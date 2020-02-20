@@ -1,9 +1,10 @@
 package uk.gov.justice.hmpps.datacompliance.services.health;
 
-import java.util.Map;
-import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.info.BuildProperties;
+
+import java.util.Map;
+import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
