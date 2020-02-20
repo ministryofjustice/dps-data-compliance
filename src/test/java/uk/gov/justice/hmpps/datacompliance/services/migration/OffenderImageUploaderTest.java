@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.services.migration;
 
+import com.google.common.util.concurrent.RateLimiter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,11 +34,14 @@ class OffenderImageUploaderTest {
     @Mock
     private OffenderImageUploadLogger logger;
 
+    @Mock
+    private RateLimiter rateLimiter;
+
     private OffenderImageUploader imageUploader;
 
     @BeforeEach
     void setUp() {
-        imageUploader = new OffenderImageUploader(elite2ApiClient, imageRecognitionClient, logger);
+        imageUploader = new OffenderImageUploader(elite2ApiClient, imageRecognitionClient, logger, rateLimiter);
     }
 
     @Test
@@ -53,6 +57,7 @@ class OffenderImageUploaderTest {
 
         imageUploader.accept(OFFENDER_NUMBER);
 
+        verify(rateLimiter).acquire();
         verify(logger).log(OFFENDER_NUMBER, IMAGE_METADATA, "face1");
     }
 

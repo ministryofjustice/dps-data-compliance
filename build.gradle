@@ -92,6 +92,7 @@ dependencies {
     implementation 'software.amazon.awssdk:sns'
 
     // Utils
+    implementation 'com.google.guava:guava:28.2-jre'
     implementation 'org.apache.commons:commons-lang3:3.9'
     implementation ('org.quartz-scheduler:quartz:2.3.2') {
         exclude group: 'com.zaxxer'

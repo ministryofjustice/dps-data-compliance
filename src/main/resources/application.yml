@@ -41,10 +41,6 @@ spring:
       scheduler.instanceId: AUTO
       scheduler.instanceName: data-compliance-quartz
 
-elite2.api.offender.ids.iteration.threads: 4
-elite2.api.offender.ids.initial.offset: 0
-elite2.api.offender.ids.total.pages: 10
-
 image.recognition:
   region: eu-west-2
   aws.collection.id: dps-offender-images
