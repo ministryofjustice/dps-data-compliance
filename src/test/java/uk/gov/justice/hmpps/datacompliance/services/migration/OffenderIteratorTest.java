@@ -35,7 +35,12 @@ class OffenderIteratorTest {
 
     @BeforeEach
     void setUp() {
-        offenderIterator = new OffenderIterator(client, new DataComplianceProperties("some-url", 2, REQUEST_LIMIT, 0L, null));
+        offenderIterator = new OffenderIterator(client, DataComplianceProperties.builder()
+                .elite2ApiBaseUrl("some-url")
+                .elite2ApiOffenderIdsIterationThreads(2)
+                .elite2ApiOffenderIdsLimit(REQUEST_LIMIT)
+                .elite2ApiOffenderIdsInitialOffset(0L)
+                .build());
     }
 
     @Test

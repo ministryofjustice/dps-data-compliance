@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.config;
 
+import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 import java.util.Optional;
 
 @Getter
+@Builder
 @Validated
 @Configuration
 @EnableScheduling
