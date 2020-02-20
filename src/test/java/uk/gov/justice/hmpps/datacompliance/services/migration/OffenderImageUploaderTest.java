@@ -47,7 +47,7 @@ class OffenderImageUploaderTest {
         when(elite2ApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
                 .thenReturn(List.of(IMAGE_METADATA));
 
-        when(elite2ApiClient.getImageData(IMAGE_ID)).thenReturn(IMAGE_DATA);
+        when(elite2ApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.of(IMAGE_DATA));
 
         when(imageRecognitionClient.uploadImageToCollection(IMAGE_DATA, OFFENDER_NUMBER, IMAGE_ID))
                 .thenReturn(Optional.of("face1"));
@@ -70,12 +70,26 @@ class OffenderImageUploaderTest {
     }
 
     @Test
+    void uploadOffenderImagesHandlesMissingImageData() {
+
+        when(elite2ApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
+                .thenReturn(List.of(IMAGE_METADATA));
+
+        when(elite2ApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.empty());
+
+        imageUploader.accept(OFFENDER_NUMBER);
+
+        verifyNoInteractions(imageRecognitionClient);
+        verifyNoInteractions(logger);
+    }
+
+    @Test
     void uploadMayResultInNoIndexedFaces() {
 
         when(elite2ApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
                 .thenReturn(List.of(IMAGE_METADATA));
 
-        when(elite2ApiClient.getImageData(IMAGE_ID)).thenReturn(IMAGE_DATA);
+        when(elite2ApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.of(IMAGE_DATA));
 
         when(imageRecognitionClient.uploadImageToCollection(IMAGE_DATA, OFFENDER_NUMBER, IMAGE_ID))
                 .thenReturn(Optional.empty());

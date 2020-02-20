@@ -1,6 +1,5 @@
 package uk.gov.justice.hmpps.datacompliance.services.migration;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
@@ -8,20 +7,32 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient.OffenderNumbersResponse;
 
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.stream.LongStream;
 
 import static java.lang.Long.MAX_VALUE;
 import static java.lang.Math.ceil;
 import static java.lang.Math.min;
+import static java.util.concurrent.Executors.callable;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.propagateAnyError;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 class OffenderIterator {
 
     private final Elite2ApiClient elite2ApiClient;
     private final DataComplianceProperties properties;
+    private final ExecutorService executorService;
+
+    public OffenderIterator(final Elite2ApiClient elite2ApiClient,
+                            final DataComplianceProperties properties) {
+        this.executorService = newFixedThreadPool(properties.getElite2ApiOffenderIdsIterationThreads());
+        this.elite2ApiClient = elite2ApiClient;
+        this.properties = properties;
+    }
 
     void applyForAll(final OffenderAction action) {
 
@@ -45,8 +56,18 @@ class OffenderIterator {
 
         final var offset = properties.getElite2ApiOffenderIdsInitialOffset() + (batchIndex * pageLimit());
         final var response = elite2ApiClient.getOffenderNumbers(offset, pageLimit());
+        final var tasks = response.getOffenderNumbers().stream()
+                .map(offenderNumber -> callable(() -> action.accept(offenderNumber)))
+                .collect(toList());
 
-        response.getOffenderNumbers().forEach(action);
+        try {
+
+            executorService.invokeAll(tasks)
+                    .forEach(future -> propagateAnyError(future::get));
+
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("Execution of batch interrupted", e);
+        }
 
         return response;
     }
