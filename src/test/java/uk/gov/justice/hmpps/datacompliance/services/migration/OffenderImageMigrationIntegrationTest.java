@@ -17,6 +17,7 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.ImageUploadBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.ImageRecognitionClient;
+import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.IndexFacesError;
 import uk.gov.justice.hmpps.datacompliance.utils.Result;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
@@ -29,6 +30,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.regex.Pattern.compile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.IndexFacesError.FACE_NOT_FOUND;
+import static uk.gov.justice.hmpps.datacompliance.utils.Result.error;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.success;
 
 class OffenderImageMigrationIntegrationTest extends IntegrationTest {
@@ -62,7 +65,8 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
         when(imageRecognitionClient.uploadImageToCollection(any(), any(), anyLong()))
                 .thenReturn(success(new FaceId("face1")))
-                .thenReturn(success(new FaceId("face2")));
+                .thenReturn(success(new FaceId("face2")))
+                .thenReturn(error(FACE_NOT_FOUND));
 
         oauthApiMock.enqueue(new MockResponse()
                 .setResponseCode(200)
@@ -74,6 +78,7 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
         verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x01}, new OffenderNumber("offender1"), 1L);
         verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x02}, new OffenderNumber("offender2"), 2L);
+        verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x03}, new OffenderNumber("offender3"), 3L);
         verifyNoMoreInteractions(imageRecognitionClient);
 
         var persistedBatch = repository.findAll().iterator().next();
@@ -99,9 +104,10 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
                     return new MockResponse()
                             .setBody(OBJECT_MAPPER.writeValueAsString(List.of(
                                     new OffenderNumber("offender1"),
-                                    new OffenderNumber("offender2"))))
+                                    new OffenderNumber("offender2"),
+                                    new OffenderNumber("offender3"))))
                             .setHeader("Content-Type", "application/json")
-                            .setHeader("Total-Records", "2");
+                            .setHeader("Total-Records", "3");
 
                 } else if (imageMetaDataMatch.find()) {
 

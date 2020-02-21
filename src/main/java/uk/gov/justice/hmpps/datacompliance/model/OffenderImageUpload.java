@@ -30,9 +30,8 @@ public class OffenderImageUpload {
     @Column(name = "OFFENDER_IMAGE_ID", nullable = false)
     private Long imageId;
 
-    @NotNull
     @Length(max = 255)
-    @Column(name = "FACE_ID", nullable = false)
+    @Column(name = "FACE_ID")
     private String faceId;
 
     @NotNull
@@ -42,4 +41,8 @@ public class OffenderImageUpload {
     @ManyToOne
     @JoinColumn(name = "BATCH_ID")
     private ImageUploadBatch imageUploadBatch;
+
+    @Length(max = 255)
+    @Column(name = "UPLOAD_ERROR_REASON")
+    private String uploadErrorReason;
 }

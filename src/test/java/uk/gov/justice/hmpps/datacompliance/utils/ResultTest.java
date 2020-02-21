@@ -26,33 +26,11 @@ class ResultTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void ifSuccess() {
-
-        final var result = success(1);
-        final var consumer = mock(Consumer.class);
-
-        result.ifSuccess(consumer);
-
-        verify(consumer).accept(1);
-    }
-
-    @Test
     void getErrorThrowsIfResultIsSuccess() {
 
         final var result = success(1);
 
         assertThatThrownBy(result::getError)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("No error value present, success value is: '1'");
-    }
-
-    @Test
-    void handleErrorThrowsIfResultIsSuccess() {
-
-        final var result = success(1);
-
-        assertThatThrownBy(() -> result.handleError(error -> {}))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("No error value present, success value is: '1'");
     }
@@ -68,18 +46,6 @@ class ResultTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void handleError() {
-
-        final var result = error(1);
-        final var consumer = mock(Consumer.class);
-
-        result.handleError(consumer);
-
-        verify(consumer).accept(1);
-    }
-
-    @Test
     void getThrowsIfResultIsError() {
 
         final var result = error(1);
@@ -91,13 +57,29 @@ class ResultTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void ifSuccessDoesNotCallConsumerIfResultIsError() {
+    void handleSuccess() {
+
+        final var result = success(1);
+        final var successHandler = mock(Consumer.class);
+        final var errorHandler = mock(Consumer.class);
+
+        result.handle(successHandler, errorHandler);
+
+        verify(successHandler).accept(1);
+        verifyNoInteractions(errorHandler);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void handleError() {
 
         final var result = error(1);
-        final var consumer = mock(Consumer.class);
+        final var successHandler = mock(Consumer.class);
+        final var errorHandler = mock(Consumer.class);
 
-        result.ifSuccess(consumer);
+        result.handle(successHandler, errorHandler);
 
-        verifyNoInteractions(consumer);
+        verify(errorHandler).accept(1);
+        verifyNoInteractions(successHandler);
     }
 }

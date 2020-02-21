@@ -89,8 +89,8 @@ class OffenderImageUploaderTest {
 
         imageUploader.accept(OFFENDER_NUMBER);
 
+        verify(logger).logUploadError(OFFENDER_NUMBER, IMAGE_METADATA, "MISSING_IMAGE_DATA");
         verifyNoInteractions(imageRecognitionClient);
-        verifyNoInteractions(logger);
     }
 
     @Test
@@ -106,7 +106,7 @@ class OffenderImageUploaderTest {
 
         imageUploader.accept(OFFENDER_NUMBER);
 
-        verifyNoInteractions(logger);
+        verify(logger).logUploadError(OFFENDER_NUMBER, IMAGE_METADATA, "FACE_NOT_FOUND");
     }
 
 }

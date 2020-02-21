@@ -32,6 +32,17 @@ class OffenderImageUploadLogger {
                         save(offenderNumber, image, faceId));
     }
 
+    void logUploadError(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final String reason) {
+
+        log.debug("Upload for image: '{}' and offender: '{}' failed due to: '{}'",
+                image.getImageId(), offenderNumber.getOffenderNumber(), reason);
+
+        repository.findByOffenderNoAndImageId(offenderNumber.getOffenderNumber(), image.getImageId())
+                .ifPresentOrElse(
+                        logAlreadyExists(image, offenderNumber),
+                        saveUploadError(offenderNumber, image, reason));
+    }
+
     long getUploadCount() {
         return uploadCount.get();
     }
@@ -42,21 +53,29 @@ class OffenderImageUploadLogger {
                 image.getImageId(), offenderNumber.getOffenderNumber());
     }
 
+    private Runnable saveUploadError(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final String reason) {
+        return () -> repository.save(
+                offenderImageUploadBuilder(offenderNumber, image)
+                        .uploadErrorReason(reason)
+                        .build());
+    }
+
     private Runnable save(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final FaceId faceId) {
         return () -> {
-            repository.save(offenderImageUpload(offenderNumber, image, faceId));
+            repository.save(
+                    offenderImageUploadBuilder(offenderNumber, image)
+                            .faceId(faceId.getFaceId())
+                            .build());
             uploadCount.incrementAndGet();
         };
     }
 
-    private OffenderImageUpload offenderImageUpload(final OffenderNumber offenderNumber,
-                                                    final OffenderImageMetadata image, final FaceId faceId) {
+    private OffenderImageUpload.OffenderImageUploadBuilder offenderImageUploadBuilder(final OffenderNumber offenderNumber,
+                                                                                      final OffenderImageMetadata image) {
         return OffenderImageUpload.builder()
                 .imageUploadBatch(uploadBatch)
                 .uploadDateTime(timeSource.nowAsLocalDateTime())
                 .offenderNo(offenderNumber.getOffenderNumber())
-                .imageId(image.getImageId())
-                .faceId(faceId.getFaceId())
-                .build();
+                .imageId(image.getImageId());
     }
 }

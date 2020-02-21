@@ -12,7 +12,9 @@ import uk.gov.justice.hmpps.datacompliance.services.migration.OffenderIterator.O
 @Slf4j
 @AllArgsConstructor
 class OffenderImageUploader implements OffenderAction {
-    
+
+    private static final String MISSING_IMAGE_DATA = "MISSING_IMAGE_DATA";
+
     private final Elite2ApiClient elite2ApiClient;
     private final ImageRecognitionClient imageRecognitionClient;
     private final OffenderImageUploadLogger uploadLogger;
@@ -21,7 +23,7 @@ class OffenderImageUploader implements OffenderAction {
     @Override
     public void accept(final OffenderNumber offenderNumber) {
 
-        log.debug("Uploading image data for offender: '{}'", offenderNumber.getOffenderNumber());
+        log.trace("Uploading image data for offender: '{}'", offenderNumber.getOffenderNumber());
 
         final var faceImages = elite2ApiClient.getOffenderFaceImagesFor(offenderNumber);
 
@@ -47,8 +49,7 @@ class OffenderImageUploader implements OffenderAction {
 
                 data -> uploadAndLogImage(image, offenderNumber, data),
 
-                () -> log.warn("Image: '{}' for offender: '{}' has no image data",
-                        image.getImageId(), offenderNumber.getOffenderNumber()));
+                () -> logMissingImageData(image, offenderNumber));
     }
 
     private void uploadAndLogImage(final OffenderImageMetadata image,
@@ -57,8 +58,16 @@ class OffenderImageUploader implements OffenderAction {
 
         rateLimiter.acquire();
 
-        // TODO GDPR-87 Handle images without a single quality face
         imageRecognitionClient.uploadImageToCollection(imageData, offenderNumber, image.getImageId())
-                .ifSuccess(faceId -> uploadLogger.log(offenderNumber, image, faceId));
+                .handle(faceId -> uploadLogger.log(offenderNumber, image, faceId),
+                        error -> uploadLogger.logUploadError(offenderNumber, image, error.getReason()));
+    }
+
+    private void logMissingImageData(final OffenderImageMetadata image, final OffenderNumber offenderNumber) {
+
+        log.warn("Image: '{}' for offender: '{}' has no image data",
+                image.getImageId(), offenderNumber.getOffenderNumber());
+
+        uploadLogger.logUploadError(offenderNumber, image, MISSING_IMAGE_DATA);
     }
 }
