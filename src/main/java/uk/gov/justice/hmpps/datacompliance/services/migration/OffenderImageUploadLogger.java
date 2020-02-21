@@ -7,6 +7,7 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.model.ImageUploadBatch;
 import uk.gov.justice.hmpps.datacompliance.model.OffenderImageUpload;
 import uk.gov.justice.hmpps.datacompliance.repository.OffenderImageUploadRepository;
+import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -21,7 +22,7 @@ class OffenderImageUploadLogger {
     private final TimeSource timeSource;
     private final AtomicLong uploadCount = new AtomicLong();
 
-    void log(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final String faceId) {
+    void log(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final FaceId faceId) {
 
         log.trace("Uploaded image: '{}' for offender: '{}'", image.getImageId(), offenderNumber.getOffenderNumber());
 
@@ -41,7 +42,7 @@ class OffenderImageUploadLogger {
                 image.getImageId(), offenderNumber.getOffenderNumber());
     }
 
-    private Runnable save(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final String faceId) {
+    private Runnable save(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final FaceId faceId) {
         return () -> {
             repository.save(offenderImageUpload(offenderNumber, image, faceId));
             uploadCount.incrementAndGet();
@@ -49,13 +50,13 @@ class OffenderImageUploadLogger {
     }
 
     private OffenderImageUpload offenderImageUpload(final OffenderNumber offenderNumber,
-                                                    final OffenderImageMetadata image, final String faceId) {
+                                                    final OffenderImageMetadata image, final FaceId faceId) {
         return OffenderImageUpload.builder()
                 .imageUploadBatch(uploadBatch)
                 .uploadDateTime(timeSource.nowAsLocalDateTime())
                 .offenderNo(offenderNumber.getOffenderNumber())
                 .imageId(image.getImageId())
-                .faceId(faceId)
+                .faceId(faceId.getFaceId())
                 .build();
     }
 }

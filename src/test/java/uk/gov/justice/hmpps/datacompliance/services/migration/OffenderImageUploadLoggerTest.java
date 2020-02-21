@@ -11,6 +11,7 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.model.ImageUploadBatch;
 import uk.gov.justice.hmpps.datacompliance.model.OffenderImageUpload;
 import uk.gov.justice.hmpps.datacompliance.repository.OffenderImageUploadRepository;
+import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.time.LocalDateTime;
@@ -25,7 +26,7 @@ class OffenderImageUploadLoggerTest {
 
     private static final LocalDateTime DATE_TIME = LocalDateTime.now();
     private static final String OFFENDER_NUMBER = "offender1";
-    private static final String FACE_ID = "face1";
+    private static final FaceId FACE_ID = new FaceId("face1");
     private static final long IMAGE_ID = 123L;
 
     @Mock
@@ -54,7 +55,7 @@ class OffenderImageUploadLoggerTest {
 
         assertThat(offenderImageUpload.getValue().getOffenderNo()).isEqualTo(OFFENDER_NUMBER);
         assertThat(offenderImageUpload.getValue().getImageId()).isEqualTo(IMAGE_ID);
-        assertThat(offenderImageUpload.getValue().getFaceId()).isEqualTo(FACE_ID);
+        assertThat(offenderImageUpload.getValue().getFaceId()).isEqualTo(FACE_ID.getFaceId());
         assertThat(offenderImageUpload.getValue().getUploadDateTime()).isEqualTo(DATE_TIME);
         assertThat(offenderImageUpload.getValue().getImageUploadBatch()).isEqualTo(batch);
 

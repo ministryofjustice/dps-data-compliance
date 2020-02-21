@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static software.amazon.awssdk.services.rekognition.model.QualityFilter.HIGH;
+import static uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.IndexFacesError.*;
 
 @ExtendWith(MockitoExtension.class)
 class AwsImageRecognitionClientTest {
@@ -44,8 +45,8 @@ class AwsImageRecognitionClientTest {
 
         when(awsClient.indexFaces(request.capture())).thenReturn(indexedFaces(EXPECTED_FACE_ID));
 
-        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID))
-                .contains(EXPECTED_FACE_ID);
+        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID).get().getFaceId())
+                .isEqualTo(EXPECTED_FACE_ID);
 
         assertThat(request.getValue().maxFaces()).isEqualTo(2);
         assertThat(request.getValue().qualityFilter()).isEqualTo(HIGH);
@@ -60,8 +61,8 @@ class AwsImageRecognitionClientTest {
         when(awsClient.indexFaces(any(IndexFacesRequest.class)))
                 .thenReturn(indexedFaces(EXPECTED_FACE_ID, "another-face-in-the-image"));
 
-        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID))
-                .isEmpty();
+        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID).getError())
+                .isEqualTo(MULTIPLE_FACES_FOUND);
 
         verify(awsClient).deleteFaces(DeleteFacesRequest.builder()
                 .collectionId(COLLECTION_NAME)
@@ -79,11 +80,27 @@ class AwsImageRecognitionClientTest {
         when(awsClient.indexFaces(any(IndexFacesRequest.class)))
                 .thenReturn(indexedFaces(/* NONE */));
 
-        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID))
-                .isEmpty();
+        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID).getError())
+                .isEqualTo(FACE_NOT_FOUND);
+    }
+
+    @Test
+    void uploadImageToCollectionHandlesImageWithPoorQualityFace() {
+
+        when(awsClient.indexFaces(any(IndexFacesRequest.class)))
+                .thenReturn(indexedFacesBuilder(/* NONE */)
+                        .unindexedFaces(UnindexedFace.builder().build())
+                        .build());
+
+        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID).getError())
+                .isEqualTo(FACE_POOR_QUALITY);
     }
 
     private IndexFacesResponse indexedFaces(final String ... faceIds) {
+        return indexedFacesBuilder(faceIds).build();
+    }
+
+    private IndexFacesResponse.Builder indexedFacesBuilder(final String ... faceIds) {
         return IndexFacesResponse.builder()
                 .faceRecords(stream(faceIds)
                         .map(id -> FaceRecord.builder()
@@ -91,6 +108,6 @@ class AwsImageRecognitionClientTest {
                                         .faceId(id)
                                         .build())
                                 .build())
-                        .collect(toList())).build();
+                        .collect(toList()));
     }
 }

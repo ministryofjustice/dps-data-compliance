@@ -9,13 +9,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient;
+import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.ImageRecognitionClient;
+import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.IndexFacesError;
+import uk.gov.justice.hmpps.datacompliance.utils.Result;
 
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
+import static uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.IndexFacesError.FACE_NOT_FOUND;
+import static uk.gov.justice.hmpps.datacompliance.utils.Result.error;
+import static uk.gov.justice.hmpps.datacompliance.utils.Result.success;
 
 @ExtendWith(MockitoExtension.class)
 class OffenderImageUploaderTest {
@@ -53,12 +59,12 @@ class OffenderImageUploaderTest {
         when(elite2ApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.of(IMAGE_DATA));
 
         when(imageRecognitionClient.uploadImageToCollection(IMAGE_DATA, OFFENDER_NUMBER, IMAGE_ID))
-                .thenReturn(Optional.of("face1"));
+                .thenReturn(success(new FaceId("face1")));
 
         imageUploader.accept(OFFENDER_NUMBER);
 
         verify(rateLimiter).acquire();
-        verify(logger).log(OFFENDER_NUMBER, IMAGE_METADATA, "face1");
+        verify(logger).log(OFFENDER_NUMBER, IMAGE_METADATA, new FaceId("face1"));
     }
 
     @Test
@@ -96,7 +102,7 @@ class OffenderImageUploaderTest {
         when(elite2ApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.of(IMAGE_DATA));
 
         when(imageRecognitionClient.uploadImageToCollection(IMAGE_DATA, OFFENDER_NUMBER, IMAGE_ID))
-                .thenReturn(Optional.empty());
+                .thenReturn(error(FACE_NOT_FOUND));
 
         imageUploader.accept(OFFENDER_NUMBER);
 
