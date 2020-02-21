@@ -4,8 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.utils.Result;
 
 import java.util.Optional;
+
+import static uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.IndexFacesError.FACE_NOT_FOUND;
+import static uk.gov.justice.hmpps.datacompliance.utils.Result.error;
 
 @Slf4j
 @Component
@@ -17,10 +21,10 @@ public class NoOpImageRecognitionClient implements ImageRecognitionClient {
     }
 
     @Override
-    public Optional<String> uploadImageToCollection(final byte[] imageData,
-                                                    final OffenderNumber offenderNumber,
-                                                    final long imageId) {
+    public Result<FaceId, IndexFacesError> uploadImageToCollection(final byte[] imageData,
+                                                                   final OffenderNumber offenderNumber,
+                                                                   final long imageId) {
         log.warn("Pretending to upload image data for offender: {}, image: {}", offenderNumber, imageId);
-        return Optional.empty();
+        return error(FACE_NOT_FOUND);
     }
 }

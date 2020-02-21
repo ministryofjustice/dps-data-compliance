@@ -15,7 +15,9 @@ import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.ImageUploadBatchRepository;
+import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.ImageRecognitionClient;
+import uk.gov.justice.hmpps.datacompliance.utils.Result;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.List;
@@ -27,6 +29,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.regex.Pattern.compile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static uk.gov.justice.hmpps.datacompliance.utils.Result.success;
 
 class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
@@ -58,8 +61,8 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
     void runMigration() {
 
         when(imageRecognitionClient.uploadImageToCollection(any(), any(), anyLong()))
-                .thenReturn(Optional.of("face1"))
-                .thenReturn(Optional.of("face2"));
+                .thenReturn(success(new FaceId("face1")))
+                .thenReturn(success(new FaceId("face2")));
 
         oauthApiMock.enqueue(new MockResponse()
                 .setResponseCode(200)

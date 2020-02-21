@@ -57,7 +57,8 @@ class OffenderImageUploader implements OffenderAction {
 
         rateLimiter.acquire();
 
+        // TODO GDPR-87 Handle images without a single quality face
         imageRecognitionClient.uploadImageToCollection(imageData, offenderNumber, image.getImageId())
-                .ifPresent(faceId -> uploadLogger.log(offenderNumber, image, faceId));
+                .ifSuccess(faceId -> uploadLogger.log(offenderNumber, image, faceId));
     }
 }
