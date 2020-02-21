@@ -40,14 +40,13 @@ public class Result<SUCCESS, ERROR> {
         return error != null;
     }
 
-    public void ifSuccess(final Consumer<SUCCESS> onSuccess) {
-        if (isSuccess()) {
-            onSuccess.accept(success);
-        }
-    }
+    public void handle(final Consumer<SUCCESS> onSuccess, final Consumer<ERROR> onError) {
 
-    public void handleError(final Consumer<ERROR> errorHandler) {
-        checkState(isError(), "No error value present, success value is: '%s'", success);
-        errorHandler.accept(error);
+        if (isError()) {
+            onError.accept(error);
+            return;
+        }
+
+        onSuccess.accept(success);
     }
 }

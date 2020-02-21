@@ -59,6 +59,8 @@ class OffenderImageUploadLoggerTest {
         assertThat(offenderImageUpload.getValue().getUploadDateTime()).isEqualTo(DATE_TIME);
         assertThat(offenderImageUpload.getValue().getImageUploadBatch()).isEqualTo(batch);
 
+        assertThat(offenderImageUpload.getValue().getUploadErrorReason()).isNull();
+
         assertThat(logger.getUploadCount()).isEqualTo(1);
     }
 
@@ -75,4 +77,27 @@ class OffenderImageUploadLoggerTest {
         verify(repository, never()).save(any());
         assertThat(logger.getUploadCount()).isZero();
     }
+
+    @Test
+    void logUploadError() {
+
+        assertThat(logger.getUploadCount()).isZero();
+
+        when(repository.findByOffenderNoAndImageId(any(), any())).thenReturn(Optional.empty());
+        logger.logUploadError(new OffenderNumber(OFFENDER_NUMBER), new OffenderImageMetadata(IMAGE_ID, "FACE"), "some reason");
+
+        var offenderImageUpload = ArgumentCaptor.forClass(OffenderImageUpload.class);
+        verify(repository).save(offenderImageUpload.capture());
+
+        assertThat(offenderImageUpload.getValue().getOffenderNo()).isEqualTo(OFFENDER_NUMBER);
+        assertThat(offenderImageUpload.getValue().getImageId()).isEqualTo(IMAGE_ID);
+        assertThat(offenderImageUpload.getValue().getUploadDateTime()).isEqualTo(DATE_TIME);
+        assertThat(offenderImageUpload.getValue().getImageUploadBatch()).isEqualTo(batch);
+        assertThat(offenderImageUpload.getValue().getUploadErrorReason()).isEqualTo("some reason");
+
+        assertThat(offenderImageUpload.getValue().getFaceId()).isNull();
+
+        assertThat(logger.getUploadCount()).isZero();
+    }
+
 }
