@@ -1,13 +1,25 @@
 [< Back](../README.md)
 ---
-## Publishing Deletion Event to SNS Topic
+## Deletion Event Queues
 
-Once the DPS Data Compliance Service identifies an offender for deletion, it adds 
-an event onto the offender_events topic with an `eventType` of 
-`DATA_COMPLIANCE_DELETE-OFFENDER`.
+The DPS Data Compliance Service communicates with Elite2 API to retrieve referrals
+for offender deletion and to send commands to delete offender data.
 
-Other services such as Elite2 API pick up this event from an SNS queue and delete
-the offender data as a result.
+This is done using two SQS queues, one inbound and one outbound.
+
+The Data Compliance Service requests, via an async API, that Elite2 populates the
+offender pending deletion queue with a batch of referrals.  The Data Compliance service 
+consumes this queue and if it cannot find any reason why the offender data cannot be
+deleted, it will then publish a new event on the offender deletion granted queue which
+Elite2 will consume and process the deletion.
+
+For consistency with other DPS queues, messages have an `eventType` message attribute.
+The messages received from Elite2 API for deletion referral will have an `eventType`
+of either `DATA_COMPLIANCE_OFFENDER-PENDING-DELETION` or 
+`DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-COMPLETE`.  The `-COMPLETE` message is sent
+by Elite2 API once it has finished adding messages to the queue for that batch.  This
+allows the Data Compliance Service to check that the process associated with a given
+async API request has been completed.
 
 ### Setup
 
@@ -18,56 +30,13 @@ works, we can set up services and a Localstack instance using docker:
 TMPDIR=/private$TMPDIR docker-compose up
 ```
 
-### Topic and Queue
-The localstack section in docker-compose.yml ensures that the files
-`localstack/setup-sns.sh` and `localstack/set-queue-attributes.json`
+### Localstack Queues
+The localstack section in docker-compose.yml ensures that the 
+`localstack/setup-queues.sh` file and associated queue attributes files
 are copied into an auto-execution directory in the container.
 
-The `setup-sns.sh` script ensures the topic and queue are created by
-using the following AWS CLI commands:
+### Publishing to the queues
 
-#### Topic:
-```bash
-aws --endpoint-url=http://localhost:4575 sns create-topic --name offender_events
-```
-
-Results in:
-```json
-{
-    "TopicArn": "arn:aws:sns:eu-west-2:000000000000:offender_events"
-}
-
-```
-
-#### Queue
-```bash
-aws --endpoint-url=http://localhost:4576 sqs create-queue --queue-name elite2_api_queue
-```
-
-Results in:
-```json
-{
-   "QueueUrl": "http://localhost:4576/queue/event_queue"
-}
-```
-
-#### Subscription
-```bash
-aws --endpoint-url=http://localhost:4575 sns subscribe \
-    --topic-arn arn:aws:sns:eu-west-2:000000000000:offender_events \
-    --protocol sqs \
-    --notification-endpoint http://localhost:4576/queue/elite2_api_queue \
-    --attributes '{"FilterPolicy":"{\"eventType\":[\"DATA_COMPLIANCE_DELETE-OFFENDER\"]}"}'
-```
-
-Results in:
-```json
-{
-    "SubscriptionArn": "arn:aws:sns:eu-west-2:000000000000:offender_events:074545bd-393c-4a43-ad62-95b1809534f0"
-}
-```
-
-### Publishing to the queue
 (Warning, if configured, this will prompt Elite2 to delete the Offender provided)
 
 The following command can be run after the docker containers have started up
@@ -75,16 +44,26 @@ in order to simulate a deletion (replacing `SOME_OFFENDER_ID_DISPLAY` with a
 valid offender number:
 
 ```bash
-aws --endpoint-url=http://localhost:4575 sns publish \
-    --topic-arn arn:aws:sns:eu-west-2:000000000000:offender_events \
-    --message '{"offenderIdDisplay":"SOME_OFFENDER_ID_DISPLAY"}' \ 
-    --message-attributes "eventType={StringValue=DATA_COMPLIANCE_DELETE-OFFENDER,DataType=String}"
+aws --endpoint-url=http://localhost:4576 sqs send-message \
+    --queue-url http://localstack:4576/queue/outbound_deletion_queue \
+    --message-body '{"offenderIdDisplay":"A1234AA"}' \
+    --message-attributes "eventType={StringValue=DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED,DataType=String}"
 ```
 
-### Reading off the queue
+The following queue publishing will cause the Data Compliance Service to analyse
+the offender for deletion eligibility:
+
+```bash
+aws --endpoint-url=http://localhost:4576 sqs send-message \
+    --queue-url http://localstack:4576/queue/inbound_referral_queue \
+    --message-body '{"offenderIdDisplay":"A1234AA"}' \
+    --message-attributes "eventType={StringValue=DATA_COMPLIANCE_OFFENDER-PENDING-DELETION,DataType=String}"
+```
+
+### Reading off a queue
 In order to manually test reading off the queue, the following command
-can be run (would need to stop the Elite2 API container to prevent it picking up
+can be run (would need to stop the relevant container to prevent it picking up
 the event first).
 ```bash
-aws --endpoint-url=http://localhost:4576 sqs receive-message --queue-url http://localhost:4576/queue/elite2_api_queue
+aws --endpoint-url=http://localhost:4576 sqs receive-message --queue-url http://localhost:4576/queue/outbound_deletion_queue
 ```

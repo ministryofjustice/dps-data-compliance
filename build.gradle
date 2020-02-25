@@ -78,6 +78,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
     implementation 'org.springframework:spring-webflux:5.2.3.RELEASE'
+    implementation 'org.springframework:spring-jms:5.2.3.RELEASE'
 
     // Logging
     implementation 'net.logstash.logback:logstash-logback-encoder:6.3'
@@ -89,7 +90,9 @@ dependencies {
     // AWS
     implementation platform('software.amazon.awssdk:bom:2.10.68')
     implementation 'software.amazon.awssdk:rekognition'
-    implementation 'software.amazon.awssdk:sns'
+
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.722')
+    implementation 'com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8'
 
     // Utils
     implementation 'com.google.guava:guava:28.2-jre'

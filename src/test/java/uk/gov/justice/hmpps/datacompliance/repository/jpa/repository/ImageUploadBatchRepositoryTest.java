@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.repository;
+package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,8 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.justice.hmpps.datacompliance.model.ImageUploadBatch;
-import uk.gov.justice.hmpps.datacompliance.model.ImageUploadBatch.ImageUploadBatchBuilder;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch.ImageUploadBatchBuilder;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ImageUploadBatchRepository;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;

@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.model.ImageUploadBatch;
-import uk.gov.justice.hmpps.datacompliance.model.OffenderImageUpload;
-import uk.gov.justice.hmpps.datacompliance.repository.OffenderImageUploadRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.OffenderImageUpload;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.OffenderImageUploadRepository;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 

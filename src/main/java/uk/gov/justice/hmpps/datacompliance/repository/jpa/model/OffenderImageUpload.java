@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.model;
+package uk.gov.justice.hmpps.datacompliance.repository.jpa.model;
 
 import lombok.*;
 import org.hibernate.validator.constraints.Length;

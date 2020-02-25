@@ -1,11 +1,10 @@
 package uk.gov.justice.hmpps.datacompliance.services.migration;
 
 import com.google.common.util.concurrent.RateLimiter;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.justice.hmpps.datacompliance.model.ImageUploadBatch;
-import uk.gov.justice.hmpps.datacompliance.repository.OffenderImageUploadRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.OffenderImageUploadRepository;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.ImageRecognitionClient;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;

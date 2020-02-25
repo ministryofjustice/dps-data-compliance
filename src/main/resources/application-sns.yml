@@ -1,4 +1,0 @@
-sns.aws.access.key.id=
-sns.aws.secret.access.key=
-sns.topic.arn=
-sns.provider=aws

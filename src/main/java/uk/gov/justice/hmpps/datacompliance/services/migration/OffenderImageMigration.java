@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import uk.gov.justice.hmpps.datacompliance.model.ImageUploadBatch;
-import uk.gov.justice.hmpps.datacompliance.repository.ImageUploadBatchRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ImageUploadBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 @Slf4j

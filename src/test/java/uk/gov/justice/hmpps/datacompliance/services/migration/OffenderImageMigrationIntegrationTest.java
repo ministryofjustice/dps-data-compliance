@@ -14,15 +14,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.repository.ImageUploadBatchRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ImageUploadBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.ImageRecognitionClient;
-import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.IndexFacesError;
-import uk.gov.justice.hmpps.datacompliance.utils.Result;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.List;
-import java.util.Optional;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
