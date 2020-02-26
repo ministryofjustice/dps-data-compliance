@@ -20,9 +20,15 @@ ingress:
   path: /
 
 env:
+
   JAVA_OPTS: "Xmx512m"
+
   OAUTH_API_BASE_URL: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth"
   ELITE2_API_BASE_URL: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api"
+
+  OUTBOUND_DELETION_SQS_PROVIDER: aws
+  INBOUND_REFERRAL_SQS_PROVIDER: aws
+
   # Switching off offender image upload:
   #ELITE2_API_OFFENDER_IDS_ITERATION_THREADS: 10
   #ELITE2_API_OFFENDER_IDS_INITIAL_OFFSET: 300

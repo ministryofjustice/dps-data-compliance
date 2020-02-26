@@ -45,6 +45,9 @@ image.recognition:
   region: eu-west-2
   aws.collection.id: dps-offender-images
 
+outbound.deletion.sqs.region: eu-west-2
+inbound.referral.sqs.region: eu-west-2
+
 server:
   port: 8080
   servlet:

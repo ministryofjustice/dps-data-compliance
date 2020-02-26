@@ -86,23 +86,70 @@ env:
         name: {{ template "app.name" . }}
         key: IMAGE_RECOGNITION_AWS_SECRET_ACCESS_KEY
 
-  - name: SNS_AWS_ACCESS_KEY_ID
+  - name: INBOUND_REFERRAL_SQS_AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
-        name: offender-events-topic
+        name: offender-pending-deletion-sqs
         key: access_key_id
 
-  - name: SNS_AWS_SECRET_ACCESS_KEY
+  - name: INBOUND_REFERRAL_SQS_AWS_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
-        name: offender-events-topic
+        name: offender-pending-deletion-sqs
         key: secret_access_key
 
-  - name: SNS_TOPIC_ARN
+  - name: INBOUND_REFERRAL_SQS_DLQ_AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
-        name: offender-events-topic
-        key: topic_arn
+        name: offender-pending-deletion-sqs-dl
+        key: access_key_id
 
+  - name: INBOUND_REFERRAL_SQS_DLQ_AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: offender-pending-deletion-sqs-dl
+        key: secret_access_key
+
+  - name: INBOUND_REFERRAL_SQS_QUEUE_NAME
+    valueFrom:
+      secretKeyRef:
+        name: offender-pending-deletion-sqs
+        key: sqs_opd_name
+
+  - name: OUTBOUND_DELETION_SQS_AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: offender-deletion-granted-sqs
+        key: access_key_id
+
+  - name: OUTBOUND_DELETION_SQS_AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: offender-deletion-granted-sqs
+        key: secret_access_key
+
+  - name: OUTBOUND_DELETION_SQS_DLQ_AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: offender-deletion-granted-sqs-dl
+        key: access_key_id
+
+  - name: OUTBOUND_DELETION_SQS_DLQ_AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: offender-deletion-granted-sqs-dl
+        key: secret_access_key
+
+  - name: OUTBOUND_DELETION_SQS_QUEUE_NAME
+    valueFrom:
+      secretKeyRef:
+        name: offender-deletion-granted-sqs
+        key: sqs_odg_name
+
+  - name: OUTBOUND_DELETION_SQS_QUEUE_URL
+    valueFrom:
+      secretKeyRef:
+        name: offender-deletion-granted-sqs
+        key: sqs_odg_url
 
 {{- end -}}
