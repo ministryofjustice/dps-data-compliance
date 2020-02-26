@@ -8,6 +8,6 @@ A Spring Boot app to manage data compliance for the Digital Prison Services
 ## Contents
 
 1. [Overview](readme/overview.md)
-1. [Running](readme/running.md)
-2. [Pushing Deletion Events to SNS](readme/deletion_events.md)
+1. [Building and Running](readme/running.md)
+2. [Deletion Event Queues](readme/deletion_events.md)
 3. [Image Recognition](readme/image_recognition.md)

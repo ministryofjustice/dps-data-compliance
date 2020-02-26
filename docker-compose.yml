@@ -7,6 +7,8 @@ services:
     depends_on:
       - localstack
       - dps-data-compliance-db
+      - oauth
+      - elite2-api
     networks:
       - hmpps
     ports:
@@ -16,10 +18,13 @@ services:
     environment:
       - SERVER_PORT=8080
       - ELITE2_API_BASE_URL=http://elite2-api:8080
-      - OAUTH2_API_BASE_URL=http://oauth:8081
-      - APP_DB_URL=jdbc:postgresql://dps-data-compliance-db:5431/dps-data-compliance-db
+      - OAUTH_API_BASE_URL=http://oauth:8080/auth
+      - APP_DB_URL=jdbc:postgresql://dps-data-compliance-db:5432/dps-data-compliance-db
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin_password
+      - SPRING_PROFILES_ACTIVE=localstack
+      - AWS_ACCESS_KEY_ID=arbitrary
+      - AWS_SECRET_ACCESS_KEY=arbitrary
 
   oauth:
     image: mojdigitalstudio/nomis-oauth2-server:latest
@@ -47,7 +52,19 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
     environment:
       - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=nomis-hsqldb-localstack
+      - SPRING_PROFILES_ACTIVE=nomis-hsqldb
+      - DATA_COMPLIANCE_DB_ENABLE_PARALLEL_HINTS=false
+      - DATA_COMPLIANCE_OUTBOUND_REFERRAL_SQS_PROVIDER=localstack
+      - DATA_COMPLIANCE_OUTBOUND_REFERRAL_SQS_QUEUE_NAME=inbound_referral_queue
+      - DATA_COMPLIANCE_OUTBOUND_REFERRAL_SQS_QUEUE_URL=http://localstack:4576/queue/inbound_referral_queue
+      - DATA_COMPLIANCE_OUTBOUND_REFERRAL_SQS_DLQ_NAME=inbound_referral_dead_letter_queue
+      - DATA_COMPLIANCE_OUTBOUND_REFERRAL_SQS_ENDPOINT_URL=http://localstack:4576
+      - DATA_COMPLIANCE_OUTBOUND_REFERRAL_SQS_REGION=eu-west-2
+      - DATA_COMPLIANCE_INBOUND_DELETION_SQS_PROVIDER=localstack
+      - DATA_COMPLIANCE_INBOUND_DELETION_SQS_QUEUE_NAME=outbound_deletion_queue
+      - DATA_COMPLIANCE_INBOUND_DELETION_SQS_DLQ_NAME=outbound_deletion_dead_letter_queue
+      - DATA_COMPLIANCE_INBOUND_DELETION_SQS_ENDPOINT_URL=http://localstack:4576
+      - DATA_COMPLIANCE_INBOUND_DELETION_SQS_REGION=eu-west-2
       - AWS_ACCESS_KEY_ID=arbitrary
       - AWS_SECRET_ACCESS_KEY=arbitrary
 

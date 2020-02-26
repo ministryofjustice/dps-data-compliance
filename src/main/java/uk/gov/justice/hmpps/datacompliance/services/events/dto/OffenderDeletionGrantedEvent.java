@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.dto;
+package uk.gov.justice.hmpps.datacompliance.services.events.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OffenderDeletionEvent {
+public class OffenderDeletionGrantedEvent {
     private String offenderIdDisplay;
 }
 
