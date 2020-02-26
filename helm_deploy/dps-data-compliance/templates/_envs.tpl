@@ -29,6 +29,16 @@ env:
     value: "{{ .Values.env.IMAGE_RECOGNITION_PROVIDER }}"
   {{- end }}
 
+  {{- if .Values.env.OUTBOUND_DELETION_SQS_PROVIDER }}
+  - name: OUTBOUND_DELETION_SQS_PROVIDER
+    value: "{{ .Values.env.OUTBOUND_DELETION_SQS_PROVIDER }}"
+  {{- end }}
+
+  {{- if .Values.env.INBOUND_REFERRAL_SQS_PROVIDER }}
+  - name: INBOUND_REFERRAL_SQS_PROVIDER
+    value: "{{ .Values.env.INBOUND_REFERRAL_SQS_PROVIDER }}"
+  {{- end }}
+
   - name: SPRING_DATASOURCE_USERNAME
     valueFrom:
       secretKeyRef:
