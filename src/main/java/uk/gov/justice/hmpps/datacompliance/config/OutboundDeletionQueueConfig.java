@@ -21,7 +21,7 @@ public class OutboundDeletionQueueConfig {
 
     @Bean
     @ConditionalOnProperty(name = "outbound.deletion.sqs.provider", havingValue = "aws")
-    public AmazonSQS outboundReferralSqsClient(
+    public AmazonSQS outboundDeletionSqsClient(
             @Value("${outbound.deletion.sqs.aws.access.key.id}") final String accessKey,
             @Value("${outbound.deletion.sqs.aws.secret.access.key}") final String secretKey,
             @Value("${outbound.deletion.sqs.region}") final String region) {
@@ -38,7 +38,7 @@ public class OutboundDeletionQueueConfig {
 
     @Bean
     @ConditionalOnProperty(name = "outbound.deletion.sqs.provider", havingValue = "aws")
-    public AmazonSQS outboundReferralSqsDlqClient(
+    public AmazonSQS outboundDeletionSqsDlqClient(
             @Value("${outbound.deletion.sqs.dlq.aws.access.key.id}") final String accessKey,
             @Value("${outbound.deletion.sqs.dlq.aws.secret.access.key}") final String secretKey,
             @Value("${outbound.deletion.sqs.region}") final String region) {
