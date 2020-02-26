@@ -5,7 +5,6 @@ outbound.deletion:
     queue.url: http://localstack:4576/queue/outbound_deletion_queue
     dlq.name: outbound_deletion_dead_letter_queue
     endpoint.url: http://localstack:4576
-    region: eu-west-2
 
 inbound.referral:
   sqs:
@@ -13,4 +12,3 @@ inbound.referral:
     queue.name: inbound_referral_queue
     dlq.name: inbound_referral_dead_letter_queue
     endpoint.url: http://localstack:4576
-    region: eu-west-2

@@ -52,7 +52,7 @@ public class OffenderPendingDeletionListener {
 
     private String getEventType(final MessageHeaders messageHeaders) {
 
-        final var eventType = (String) messageHeaders.get("eventType");
+        final var eventType = messageHeaders.get("eventType", String.class);
 
         checkNotNull(eventType, "Message event type not found");
         checkState(EXPECTED_EVENT_TYPES.contains(eventType),
