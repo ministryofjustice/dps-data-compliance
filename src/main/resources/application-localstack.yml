@@ -12,3 +12,9 @@ inbound.referral:
     queue.name: inbound_referral_queue
     dlq.name: inbound_referral_dead_letter_queue
     endpoint.url: http://localstack:4576
+
+sns:
+  provider: localstack
+  topic.arn: arn:aws:sns:eu-west-2:000000000000:offender_events
+  endpoint.url: http://localstack:4575
+  region: eu-west-2
