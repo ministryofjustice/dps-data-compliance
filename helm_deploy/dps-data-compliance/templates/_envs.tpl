@@ -10,9 +10,6 @@ env:
   - name: JAVA_OPTS
     value: "{{ .Values.env.JAVA_OPTS }}"
 
-  - name: SPRING_PROFILES_ACTIVE
-    value: "sns"
-
   - name: ELITE2_API_BASE_URL
     value: "{{ .Values.env.ELITE2_API_BASE_URL }}"
 

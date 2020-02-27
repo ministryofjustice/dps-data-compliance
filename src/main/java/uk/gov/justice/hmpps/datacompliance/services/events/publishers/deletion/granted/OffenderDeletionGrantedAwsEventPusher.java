@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services.events.publishers;
+package uk.gov.justice.hmpps.datacompliance.services.events.publishers.deletion.granted;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.MessageAttributeValue;

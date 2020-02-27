@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services.events.publishers;
+package uk.gov.justice.hmpps.datacompliance.services.events.publishers.deletion.granted;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.services.events.publishers.deletion.granted.OffenderDeletionGrantedAwsEventPusher;
+import uk.gov.justice.hmpps.datacompliance.services.events.publishers.deletion.granted.OffenderDeletionGrantedEventPusher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
