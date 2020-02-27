@@ -26,6 +26,8 @@ env:
   ELITE2_API_BASE_URL: "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api"
   OAUTH_API_BASE_URL: "https://gateway.t3.nomis-api.hmpps.dsd.io/auth"
 
+  SNS_PROVIDER: aws
+
   OUTBOUND_DELETION_SQS_PROVIDER: aws
   INBOUND_REFERRAL_SQS_PROVIDER: aws
 

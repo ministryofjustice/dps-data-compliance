@@ -93,6 +93,24 @@ env:
         name: {{ template "app.name" . }}
         key: IMAGE_RECOGNITION_AWS_SECRET_ACCESS_KEY
 
+  - name: SNS_AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: offender-events-topic
+        key: access_key_id
+
+  - name: SNS_AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: offender-events-topic
+        key: secret_access_key
+
+  - name: SNS_TOPIC_ARN
+    valueFrom:
+      secretKeyRef:
+        name: offender-events-topic
+        key: topic_arn
+
   - name: INBOUND_REFERRAL_SQS_AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
