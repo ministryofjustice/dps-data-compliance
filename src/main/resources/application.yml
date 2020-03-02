@@ -45,6 +45,7 @@ image.recognition:
   region: eu-west-2
   aws.collection.id: dps-offender-images
 
+sns.region: eu-west-2
 outbound.deletion.sqs.region: eu-west-2
 inbound.referral.sqs.region: eu-west-2
 
