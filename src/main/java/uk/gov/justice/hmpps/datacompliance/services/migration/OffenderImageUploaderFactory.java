@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.datacompliance.services.migration;
 
 import com.google.common.util.concurrent.RateLimiter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch;
@@ -9,6 +10,7 @@ import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiCl
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.ImageRecognitionClient;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
+@Slf4j
 @Service
 class OffenderImageUploaderFactory {
 
@@ -22,6 +24,8 @@ class OffenderImageUploaderFactory {
                                  final ImageRecognitionClient imageRecognitionClient,
                                  final OffenderImageUploadRepository repository,
                                  final TimeSource timeSource) {
+
+        log.info("Image upload - rate limited to {} per second", uploadsPerSecond);
 
         this.elite2ApiClient = elite2ApiClient;
         this.imageRecognitionClient = imageRecognitionClient;

@@ -2,6 +2,7 @@ package uk.gov.justice.hmpps.datacompliance.config;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,7 @@ import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.Optional;
 
+@Slf4j
 @Getter
 @Builder
 @Validated
@@ -35,6 +37,12 @@ public class DataComplianceProperties {
                                     @Value("${elite2.api.offender.ids.page.limit:100}") final long elite2ApiOffenderIdsLimit,
                                     @Value("${elite2.api.offender.ids.initial.offset:0}") final long elite2ApiOffenderIdsInitialOffset,
                                     @Value("${elite2.api.offender.ids.total.pages:#{null}}") final Long elite2ApiOffenderIdsTotalPages) {
+
+        log.info("Image upload - number of threads: {}", elite2ApiOffenderIdsIterationThreads);
+        log.info("Image upload - page limit: {}", elite2ApiOffenderIdsLimit);
+        log.info("Image upload - initial offset: {}", elite2ApiOffenderIdsInitialOffset);
+        log.info("Image upload - total pages: {}", elite2ApiOffenderIdsTotalPages);
+
         this.elite2ApiBaseUrl = elite2ApiBaseUrl;
         this.elite2ApiOffenderIdsIterationThreads = elite2ApiOffenderIdsIterationThreads;
         this.elite2ApiOffenderIdsLimit = elite2ApiOffenderIdsLimit;
