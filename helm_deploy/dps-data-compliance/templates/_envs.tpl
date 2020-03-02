@@ -26,6 +26,31 @@ env:
     value: "{{ .Values.env.IMAGE_RECOGNITION_PROVIDER }}"
   {{- end }}
 
+  {{- if .Values.env.IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND }}
+  - name: IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND
+    value: "{{ .Values.env.IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND }}"
+  {{- end }}
+
+  {{- if .Values.env.ELITE2_API_OFFENDER_IDS_TOTAL_PAGES }}
+  - name: ELITE2_API_OFFENDER_IDS_TOTAL_PAGES
+    value: "{{ .Values.env.ELITE2_API_OFFENDER_IDS_TOTAL_PAGES }}"
+  {{- end }}
+
+  {{- if .Values.env.ELITE2_API_OFFENDER_IDS_INITIAL_OFFSET }}
+  - name: ELITE2_API_OFFENDER_IDS_INITIAL_OFFSET
+    value: "{{ .Values.env.ELITE2_API_OFFENDER_IDS_INITIAL_OFFSET }}"
+  {{- end }}
+
+  {{- if .Values.env.ELITE2_API_OFFENDER_IDS_ITERATION_THREADS }}
+  - name: ELITE2_API_OFFENDER_IDS_ITERATION_THREADS
+    value: "{{ .Values.env.ELITE2_API_OFFENDER_IDS_ITERATION_THREADS }}"
+  {{- end }}
+
+  {{- if .Values.env.SNS_PROVIDER }}
+  - name: SNS_PROVIDER
+    value: "{{ .Values.env.SNS_PROVIDER }}"
+  {{- end }}
+
   {{- if .Values.env.OUTBOUND_DELETION_SQS_PROVIDER }}
   - name: OUTBOUND_DELETION_SQS_PROVIDER
     value: "{{ .Values.env.OUTBOUND_DELETION_SQS_PROVIDER }}"
