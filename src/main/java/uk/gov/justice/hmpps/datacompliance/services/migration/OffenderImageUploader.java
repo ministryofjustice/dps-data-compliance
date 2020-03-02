@@ -28,7 +28,7 @@ class OffenderImageUploader implements OffenderAction {
         final var faceImages = elite2ApiClient.getOffenderFaceImagesFor(offenderNumber);
 
         if (faceImages.isEmpty()) {
-            log.debug("Offender: '{}' has no face images to upload", offenderNumber.getOffenderNumber());
+            log.trace("Offender: '{}' has no face images to upload", offenderNumber.getOffenderNumber());
             return;
         }
 
