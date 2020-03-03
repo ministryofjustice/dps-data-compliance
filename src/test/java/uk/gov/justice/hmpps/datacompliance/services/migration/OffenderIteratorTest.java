@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.services.migration;
 
+import io.github.resilience4j.retry.RetryConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiCl
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient.OffenderNumbersResponse;
 import uk.gov.justice.hmpps.datacompliance.services.migration.OffenderIterator.OffenderAction;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,8 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.min;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toSet;
 import static java.util.Collections.synchronizedList;
+import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;
@@ -29,6 +31,12 @@ import static org.mockito.Mockito.lenient;
 class OffenderIteratorTest {
 
     private static final int REQUEST_LIMIT = 2;
+    private static final DataComplianceProperties PROPERTIES = DataComplianceProperties.builder()
+            .elite2ApiBaseUrl("some-url")
+            .elite2ApiOffenderIdsIterationThreads(2)
+            .elite2ApiOffenderIdsLimit(REQUEST_LIMIT)
+            .elite2ApiOffenderIdsInitialOffset(0L)
+            .build();
 
     @Mock
     private Elite2ApiClient client;
@@ -37,12 +45,7 @@ class OffenderIteratorTest {
 
     @BeforeEach
     void setUp() {
-        offenderIterator = new OffenderIterator(client, DataComplianceProperties.builder()
-                .elite2ApiBaseUrl("some-url")
-                .elite2ApiOffenderIdsIterationThreads(2)
-                .elite2ApiOffenderIdsLimit(REQUEST_LIMIT)
-                .elite2ApiOffenderIdsInitialOffset(0L)
-                .build());
+        offenderIterator = new OffenderIterator(client, PROPERTIES);
     }
 
     @Test
@@ -70,21 +73,36 @@ class OffenderIteratorTest {
     }
 
     @Test
-    void exceptionPreventsFurtherBatchesProcessing() {
+    void applyForAllWithRetry() {
+
+        offenderIterator = new OffenderIterator(client, PROPERTIES,
+                RetryConfig.custom().maxAttempts(2)
+                        .waitDuration(Duration.ZERO)
+                        .build());
 
         mockOffenderNumbersResponse("offender1", "offender2", "offender3");
 
         final var processedOffenderNumbers = new ArrayList<String>();
-        final var processedFirst = new AtomicBoolean(false);
-        final OffenderAction firstActionFails = offenderNumber -> {
-            if (!processedFirst.getAndSet(true)) {
-                throw new RuntimeException("First action fails!");
-            }
-            processedOffenderNumbers.add(offenderNumber.getOffenderNumber());
-        };
 
-        assertThatThrownBy(() -> offenderIterator.applyForAll(firstActionFails))
-                .hasMessageContaining("First action fails!");
+        offenderIterator.applyForAll(throwOnFirstAttempt(
+                offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber())));
+
+        assertThat(processedOffenderNumbers).containsExactlyInAnyOrder("offender1", "offender2", "offender3");
+    }
+
+    @Test
+    void exhaustedRetriesThrowsAndPreventsFurtherBatchesProcessing() {
+
+        offenderIterator = new OffenderIterator(client, PROPERTIES,
+                RetryConfig.custom().maxAttempts(1).build());
+
+        mockOffenderNumbersResponse("offender1", "offender2", "offender3");
+
+        final var processedOffenderNumbers = new ArrayList<String>();
+        assertThatThrownBy(() -> offenderIterator.applyForAll(throwOnFirstAttempt(
+                offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber()))))
+                .hasMessageContaining("Failed!");
+
         assertThat(processedOffenderNumbers).doesNotContain("offender3");
     }
 
@@ -128,5 +146,19 @@ class OffenderIteratorTest {
                 .totalCount(total)
                 .offenderNumbers(offenderNumbers.stream().map(OffenderNumber::new).collect(toSet()))
                 .build();
+    }
+
+    private OffenderAction throwOnFirstAttempt(final OffenderAction action) {
+
+        final var failedAttempt = new AtomicBoolean();
+
+        return offenderNumber -> {
+            if (failedAttempt.get()) {
+                action.accept(offenderNumber);
+            } else {
+                failedAttempt.set(true);
+                throw new RuntimeException("Failed!");
+            }
+        };
     }
 }

@@ -11,8 +11,6 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.services.client.elite2api.Elite2ApiClient;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.ImageRecognitionClient;
-import uk.gov.justice.hmpps.datacompliance.services.client.image.recognition.IndexFacesError;
-import uk.gov.justice.hmpps.datacompliance.utils.Result;
 
 import java.util.List;
 import java.util.Optional;
