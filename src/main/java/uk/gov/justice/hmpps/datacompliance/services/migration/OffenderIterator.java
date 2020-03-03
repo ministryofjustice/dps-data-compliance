@@ -116,11 +116,7 @@ class OffenderIterator {
     interface OffenderAction extends Consumer<OffenderNumber> { }
 
     private Callable<Object> applyWithRetry(final OffenderAction offenderAction, final OffenderNumber offenderNumber) {
-        AtomicInteger i = new AtomicInteger();
         return callable(() -> Retry.of(offenderNumber.getOffenderNumber(), retryConfig)
-                .executeRunnable(() -> {
-                    System.out.println(i.getAndIncrement());
-                    offenderAction.accept(offenderNumber);
-                }));
+                .executeRunnable(() -> offenderAction.accept(offenderNumber)));
     }
 }
