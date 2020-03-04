@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.2.5.RELEASE'
+    id 'org.springframework.boot' version '2.2.5.RELEASE' // remove pinning of nimbus-jose-jwt to 8.9 when next upgrading
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'com.github.ben-manes.versions' version '0.28.0'
     id 'org.owasp.dependencycheck' version '5.3.0'
@@ -103,6 +103,8 @@ dependencies {
     implementation ('org.quartz-scheduler:quartz:2.3.2') {
         exclude group: 'com.zaxxer'
     }
+
+    implementation 'com.nimbusds:nimbus-jose-jwt:8.9'
 
     // Database
     implementation 'org.hibernate:hibernate-core:5.4.10.Final'
