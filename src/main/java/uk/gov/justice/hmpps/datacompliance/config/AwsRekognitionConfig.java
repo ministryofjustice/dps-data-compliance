@@ -14,7 +14,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
-import uk.gov.justice.hmpps.datacompliance.services.migration.OffenderImageMigrationJob;
+import uk.gov.justice.hmpps.datacompliance.imageupload.OffenderImageMigrationJob;
 
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 
