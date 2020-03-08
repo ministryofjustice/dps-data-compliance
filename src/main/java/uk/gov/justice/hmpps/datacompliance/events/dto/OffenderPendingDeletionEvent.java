@@ -15,11 +15,11 @@ import java.util.List;
 
 @Getter
 @Builder
-@ToString
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@ToString(exclude = { "firstName", "middleName", "lastName", "birthDate" })
 public class OffenderPendingDeletionEvent {
 
     @JsonProperty("offenderIdDisplay")
