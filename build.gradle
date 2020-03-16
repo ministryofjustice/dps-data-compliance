@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.2.5.RELEASE' // remove pinning of nimbus-jose-jwt to 8.9 when next upgrading
+    id 'org.springframework.boot' version '2.2.5.RELEASE' // consider removing pinned dependencies when updating
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'com.github.ben-manes.versions' version '0.28.0'
     id 'org.owasp.dependencycheck' version '5.3.0'
@@ -63,6 +63,8 @@ dependencyManagement {
     }
 }
 
+ext ['spring-security.version'] = '5.3.0.RELEASE' // pinned due to CVE-2018-1258 in 5.2.2.RELEASE brought in by spring-boot-starter-oauth2-resource-server-2.2.5.RELEASE
+
 dependencies {
 
     // Lombok
@@ -75,6 +77,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
     implementation 'org.springframework:spring-webflux:5.2.4.RELEASE'
@@ -104,7 +107,7 @@ dependencies {
         exclude group: 'com.zaxxer'
     }
 
-    implementation 'com.nimbusds:nimbus-jose-jwt:8.9'
+    implementation 'com.nimbusds:nimbus-jose-jwt:8.9' // pinned due to CVE-2019-17195 in 7.8.1 brought in by spring-boot-starter-oauth2-resource-server-2.2.5.RELEASE
 
     // Database
     implementation 'org.hibernate:hibernate-core:5.4.10.Final'
@@ -126,6 +129,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'com.squareup.okhttp3:okhttp:4.4.0'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.4.0'
+    testImplementation 'io.jsonwebtoken:jjwt:0.9.1'
 }
 
 task copyAgent(type: Copy) {

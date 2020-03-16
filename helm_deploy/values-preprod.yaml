@@ -31,6 +31,8 @@ env:
   OUTBOUND_DELETION_SQS_PROVIDER: aws
   INBOUND_REFERRAL_SQS_PROVIDER: aws
 
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth/.well-known/jwks.json"
+
   # Switching off image upload, now initial run complete:
   #ELITE2_API_OFFENDER_IDS_ITERATION_THREADS: 14
   #ELITE2_API_OFFENDER_IDS_INITIAL_OFFSET: 362900
