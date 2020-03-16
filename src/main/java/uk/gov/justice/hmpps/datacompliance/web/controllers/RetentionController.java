@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ErrorResponse;
 import uk.gov.justice.hmpps.datacompliance.web.dto.OffenderRetention;
 
@@ -21,6 +22,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(value = "/retention", produces = APPLICATION_JSON_VALUE)
 public class RetentionController {
 
+    @ApiIgnore("WIP (GDPR-77)")
     @ApiOperation(
             value = "Get retention record",
             notes = "Used to retrieve the retention record of an offender (including reasons why an offender record has been kept beyond the standard period)",
