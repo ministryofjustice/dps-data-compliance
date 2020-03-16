@@ -27,13 +27,13 @@ public class AuthAwareTokenConverter implements Converter<Jwt, AbstractAuthentic
         return new AuthAwareAuthenticationToken(jwt, principal, authorities);
     }
 
-    private String findPrincipal(final Map<String, Object> claims) {
+    private Object findPrincipal(final Map<String, Object> claims) {
 
         if (claims.containsKey("user_name")) {
-            return (String) claims.get("user_name");
+            return claims.get("user_name");
         }
 
-        return (String) claims.get("client_id");
+        return claims.get("client_id");
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
