@@ -23,11 +23,10 @@ public class RetentionController {
 
     @ApiOperation(
             value = "Get retention record",
-            notes = "Get retention record",
+            notes = "Used to retrieve the retention record of an offender (including reasons why an offender record has been kept beyond the standard period)",
             nickname = "getRetentionRecord" )
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Created", response = String.class),
-            @ApiResponse(code = 400, message = "Invalid request.", response = ErrorResponse.class),
+            @ApiResponse(code = 200, message = "OK", response = String.class),
             @ApiResponse(code = 404, message = "Requested resource not found.", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Unrecoverable error occurred whilst processing request.", response = ErrorResponse.class),
     })

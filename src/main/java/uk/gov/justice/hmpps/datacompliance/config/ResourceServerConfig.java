@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spring.web.plugins.Docket;
@@ -21,6 +20,7 @@ import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import static springfox.documentation.builders.RequestHandlerSelectors.basePackage;
 import static springfox.documentation.spi.DocumentationType.SWAGGER_2;
 
 @Configuration
@@ -60,7 +60,7 @@ public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
                 .useDefaultResponseMessages(false)
                 .apiInfo(apiInfo)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage(RetentionController.class.getPackage().getName()))
+                .apis(basePackage(RetentionController.class.getPackage().getName()))
                 .paths(PathSelectors.any())
                 .build();
 

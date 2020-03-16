@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ErrorResponse;
 
 import javax.persistence.EntityNotFoundException;
 
 @RestControllerAdvice(basePackageClasses = RetentionController.class)
 @Slf4j
-public class ControllerAdvice {
+public class ControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(RestClientResponseException.class)
     public ResponseEntity<byte[]> handleException(final RestClientResponseException e) {
