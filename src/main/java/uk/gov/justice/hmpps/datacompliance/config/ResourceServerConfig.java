@@ -12,6 +12,7 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import uk.gov.justice.hmpps.datacompliance.security.AuthAwareTokenConverter;
 import uk.gov.justice.hmpps.datacompliance.web.controllers.RetentionController;
 
 import java.time.LocalDateTime;
@@ -36,16 +37,14 @@ public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
         http
                 .sessionManagement()
                 .sessionCreationPolicy(STATELESS).and().csrf().disable()
-                .authorizeRequests()
-                .antMatchers(
+                .authorizeRequests(auth -> auth.antMatchers(
                         "/health", "/health/ping", "/info",
                         "/v2/api-docs",
                         "/swagger-resources/**",
                         "/swagger-ui.html",
                         "/webjars/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated();
+                        .permitAll().anyRequest().authenticated())
+                .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new AuthAwareTokenConverter());
     }
 
     @Bean

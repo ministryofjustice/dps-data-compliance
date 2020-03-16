@@ -32,7 +32,7 @@ public class RetentionController {
             @ApiResponse(code = 404, message = "Requested resource not found.", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Unrecoverable error occurred whilst processing request.", response = ErrorResponse.class),
     })
-    @GetMapping(path = "/offender/{offenderNo}")
+    @GetMapping(path = "/offenders/{offenderNo}")
     public OffenderRetention getRetentionRecord(
             @ApiParam(value = "offenderNo", required = true, example = "A1234BC")
             @NotEmpty
