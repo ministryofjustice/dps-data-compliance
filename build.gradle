@@ -8,7 +8,7 @@ plugins {
     id 'org.springframework.boot' version '2.2.5.RELEASE' // consider removing pinned dependencies when updating
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'com.github.ben-manes.versions' version '0.28.0'
-    id 'org.owasp.dependencycheck' version '5.3.0'
+    id 'org.owasp.dependencycheck' version '5.3.1'
 }
 
 repositories {
@@ -63,7 +63,7 @@ dependencyManagement {
     }
 }
 
-ext ['spring-security.version'] = '5.3.0.RELEASE' // pinned due to CVE-2018-1258 in 5.2.2.RELEASE brought in by spring-boot-starter-oauth2-resource-server-2.2.5.RELEASE
+ext ['spring-security.version'] = '5.3.0.RELEASE' // Updated since spring-boot-starter-oauth2-resource-server-2.2.5.RELEASE only pulls in 5.2.2.RELEASE (still affected by CVE-2018-1258 though)
 
 dependencies {
 
@@ -91,11 +91,11 @@ dependencies {
     implementation configurations.agentDeps
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.10.78')
+    implementation platform('software.amazon.awssdk:bom:2.10.87')
     implementation 'software.amazon.awssdk:rekognition'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.736')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.736'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.745')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.745'
     implementation 'com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8'
 
     // Utils
@@ -107,14 +107,14 @@ dependencies {
         exclude group: 'com.zaxxer'
     }
 
-    implementation 'com.nimbusds:nimbus-jose-jwt:8.9' // pinned due to CVE-2019-17195 in 7.8.1 brought in by spring-boot-starter-oauth2-resource-server-2.2.5.RELEASE
+    implementation 'com.nimbusds:nimbus-jose-jwt:8.10' // pinned due to CVE-2019-17195 in 7.8.1 brought in by spring-boot-starter-oauth2-resource-server-2.2.5.RELEASE
 
     // Database
     implementation 'org.hibernate:hibernate-core:5.4.10.Final'
 
     runtime 'org.hsqldb:hsqldb:2.5.0'
-    runtime 'org.flywaydb:flyway-core:6.2.4'
-    runtime 'org.postgresql:postgresql:42.2.10'
+    runtime 'org.flywaydb:flyway-core:6.3.1'
+    runtime 'org.postgresql:postgresql:42.2.11'
 
     // Swagger
     implementation 'io.springfox:springfox-swagger2:2.9.2'
@@ -127,8 +127,8 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.15.0'
     testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.14.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'com.squareup.okhttp3:okhttp:4.4.0'
-    testImplementation 'com.squareup.okhttp3:mockwebserver:4.4.0'
+    testImplementation 'com.squareup.okhttp3:okhttp:4.4.1'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.4.1'
     testImplementation 'io.jsonwebtoken:jjwt:0.9.1'
 }
 
