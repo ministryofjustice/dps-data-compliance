@@ -74,6 +74,4 @@ management:
       cache:
         time-to-live: 2000ms
 
-graceful:
-  shutdown:
-    enabled: true
+graceful.shutdown.enabled: true

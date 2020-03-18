@@ -83,6 +83,8 @@ dependencies {
     implementation 'org.springframework:spring-webflux:5.2.4.RELEASE'
     implementation 'org.springframework:spring-jms:5.2.4.RELEASE'
 
+    implementation 'com.github.timpeeters:spring-boot-graceful-shutdown:2.2.1'
+
     // Logging
     implementation 'net.logstash.logback:logstash-logback-encoder:6.3'
     implementation 'com.microsoft.azure:applicationinsights-spring-boot-starter:2.5.1'
