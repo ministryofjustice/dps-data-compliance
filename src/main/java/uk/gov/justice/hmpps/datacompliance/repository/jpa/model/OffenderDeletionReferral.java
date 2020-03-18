@@ -1,8 +1,9 @@
 package uk.gov.justice.hmpps.datacompliance.repository.jpa.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
@@ -21,9 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
+@Data
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(of = {"referralId"})
 @Table(name = "OFFENDER_DELETION_REFERRAL")
 public class OffenderDeletionReferral {
@@ -60,22 +62,6 @@ public class OffenderDeletionReferral {
 
     @OneToMany(mappedBy = "offenderDeletionReferral", cascade = CascadeType.PERSIST)
     private final List<ReferredOffenderBooking> referredOffenderBookings = new ArrayList<>();
-
-    private OffenderDeletionReferral(final Long referralId,
-                                     final String offenderNo,
-                                     final String firstName,
-                                     final String middleName,
-                                     final String lastName,
-                                     final LocalDate birthDate,
-                                     final LocalDateTime receivedDateTime) {
-        this.referralId = referralId;
-        this.offenderNo = offenderNo;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
-        this.birthDate = birthDate;
-        this.receivedDateTime = receivedDateTime;
-    }
 
     public void addReferredOffenderBooking(final ReferredOffenderBooking booking) {
         this.referredOffenderBookings.add(booking);
