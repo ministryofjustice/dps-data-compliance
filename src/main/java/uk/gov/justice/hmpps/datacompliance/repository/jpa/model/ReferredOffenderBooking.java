@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,6 +23,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"referredOffenderBookingId"})
+@ToString(exclude = "offenderDeletionReferral") // to avoid circular reference
 @Table(name = "REFERRED_OFFENDER_BOOKING")
 public class ReferredOffenderBooking {
 

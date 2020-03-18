@@ -11,7 +11,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.transaction.TestTransaction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch.ImageUploadBatchBuilder;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -34,7 +33,8 @@ class ImageUploadBatchRepositoryTest {
     @Test
     void persistImageUploadBatchAndRetrieveById() {
 
-        final var imageUploadBatch = buildImageUploadBatch()
+        final var imageUploadBatch = ImageUploadBatch.builder()
+                .uploadStartDateTime(DATE_TIME)
                 .uploadEndDateTime(DATE_TIME.plusSeconds(1))
                 .uploadCount(123L)
                 .build();
@@ -69,9 +69,5 @@ class ImageUploadBatchRepositoryTest {
         final var retrievedEntity = repository.findById(BATCH_ID).orElseThrow();
         assertThat(retrievedEntity.getUploadCount()).isEqualTo(123L);
         assertThat(retrievedEntity.getUploadEndDateTime()).isEqualTo(DATE_TIME.plusSeconds(1));
-    }
-
-    private ImageUploadBatchBuilder buildImageUploadBatch() {
-        return ImageUploadBatch.builder().uploadStartDateTime(DATE_TIME);
     }
 }
