@@ -44,8 +44,12 @@ public class ManualRetention {
     private LocalDateTime retentionDateTime;
 
     @NotNull
-    @Column(name = "STAFF_ID", nullable = false)
-    private Long staffId;
+    @Column(name = "USER_ID", nullable = false)
+    private String userId;
+
+    @NotNull
+    @Column(name = "RETENTION_VERSION", nullable = false)
+    private Integer retentionVersion;
 
     @OneToMany(mappedBy = "manualRetention", cascade = CascadeType.PERSIST)
     private final List<ManualRetentionReason> manualRetentionReasons = new ArrayList<>();

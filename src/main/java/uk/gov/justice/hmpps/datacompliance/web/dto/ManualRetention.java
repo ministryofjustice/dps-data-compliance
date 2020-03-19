@@ -31,10 +31,10 @@ public class ManualRetention {
     @JsonProperty("offenderNo")
     private String offenderNo;
 
-    @ApiModelProperty(required = true, value = "The unique staff id of the member of staff who last modified this retention record.")
+    @ApiModelProperty(required = true, value = "The user id of the member of staff who last modified this retention record.")
     @NotNull
-    @JsonProperty("staffId")
-    private Long staffId;
+    @JsonProperty("userId")
+    private String userId;
 
     @ApiModelProperty(required = true, value = "The timestamp of when this retention record was last modified.")
     @NotNull
