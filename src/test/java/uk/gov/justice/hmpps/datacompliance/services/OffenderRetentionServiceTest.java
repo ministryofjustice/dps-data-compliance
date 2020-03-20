@@ -17,10 +17,12 @@ import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReason;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonCode;
+import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonDisplayName;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionRequest;
 
 import javax.persistence.OptimisticLockException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Arrays.stream;
@@ -60,6 +62,30 @@ class OffenderRetentionServiceTest {
                 userSecurityUtils,
                 manualRetentionRepository,
                 retentionReasonCodeRepository);
+    }
+
+    @Test
+    void getRetentionReasons() {
+
+        when(retentionReasonCodeRepository.findAll()).thenReturn(List.of(
+                RetentionReasonCode.builder()
+                        .retentionReasonCodeId(Code.HIGH_PROFILE)
+                        .displayName("High Profile Offenders")
+                        .build(),
+                RetentionReasonCode.builder()
+                        .retentionReasonCodeId(Code.OTHER)
+                        .displayName("Other")
+                        .build()));
+
+        assertThat(offenderRetentionService.getRetentionReasons()).containsExactly(
+                ManualRetentionReasonDisplayName.builder()
+                        .reasonCode(HIGH_PROFILE)
+                        .displayName("High Profile Offenders")
+                        .build(),
+                ManualRetentionReasonDisplayName.builder()
+                        .reasonCode(OTHER)
+                        .displayName("Other")
+                        .build());
     }
 
     @Test
