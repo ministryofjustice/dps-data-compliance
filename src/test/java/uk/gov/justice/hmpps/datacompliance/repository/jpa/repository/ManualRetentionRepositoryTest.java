@@ -40,8 +40,9 @@ class ManualRetentionRepositoryTest {
 
         final var manualRetention = ManualRetention.builder()
                 .offenderNo("A1234BC")
-                .staffId(1234L)
+                .userId("user1")
                 .retentionDateTime(NOW)
+                .retentionVersion(1)
                 .build();
 
         manualRetention.addManualRetentionReason(ManualRetentionReason.builder()
@@ -58,8 +59,9 @@ class ManualRetentionRepositoryTest {
         final var retrievedEntity = manualRetentionRepository.findById(manualRetention.getManualRetentionId()).orElseThrow();
 
         assertThat(retrievedEntity.getOffenderNo()).isEqualTo("A1234BC");
-        assertThat(retrievedEntity.getStaffId()).isEqualTo(1234L);
+        assertThat(retrievedEntity.getUserId()).isEqualTo("user1");
         assertThat(retrievedEntity.getRetentionDateTime()).isEqualTo(NOW);
+        assertThat(retrievedEntity.getRetentionVersion()).isEqualTo(1);
         assertThat(retrievedEntity.getManualRetentionReasons()).hasSize(1);
         assertThat(retrievedEntity.getManualRetentionReasons())
                 .extracting(r -> r.getRetentionReasonCodeId().getRetentionReasonCodeId())
@@ -75,11 +77,12 @@ class ManualRetentionRepositoryTest {
     @Sql("manual_retention_reason.sql")
     void findLatestManualRetentionRecordForOffenderNo() {
 
-        final var latestManualRetention = manualRetentionRepository.findFirstByOffenderNoOrderByRetentionDateTimeDesc("A1234BC").orElseThrow();
+        final var latestManualRetention = manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc("A1234BC").orElseThrow();
 
         assertThat(latestManualRetention.getOffenderNo()).isEqualTo("A1234BC");
-        assertThat(latestManualRetention.getStaffId()).isEqualTo(3);
+        assertThat(latestManualRetention.getUserId()).isEqualTo("user3");
         assertThat(latestManualRetention.getRetentionDateTime()).isEqualTo(LocalDateTime.of(2020, 1, 3, 1, 2, 3));
+        assertThat(latestManualRetention.getRetentionVersion()).isEqualTo(3);
         assertThat(latestManualRetention.getManualRetentionReasons()).hasSize(1);
         assertThat(latestManualRetention.getManualRetentionReasons())
                 .extracting(r -> r.getRetentionReasonCodeId().getRetentionReasonCodeId())

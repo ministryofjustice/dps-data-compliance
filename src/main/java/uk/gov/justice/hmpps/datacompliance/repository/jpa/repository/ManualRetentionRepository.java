@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface ManualRetentionRepository extends CrudRepository<ManualRetention, Long> {
-    Optional<ManualRetention> findFirstByOffenderNoOrderByRetentionDateTimeDesc(final String offenderNo);
+    Optional<ManualRetention> findFirstByOffenderNoOrderByRetentionVersionDesc(final String offenderNo);
 }
