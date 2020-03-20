@@ -6,19 +6,25 @@ import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetention;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonCode;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonCode.Code;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ManualRetentionRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.RetentionReasonCodeRepository;
 import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
+import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonCode;
+import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonDisplayName;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionRequest;
 
 import javax.annotation.Nullable;
 import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -31,6 +37,13 @@ public class OffenderRetentionService {
     private final UserSecurityUtils userSecurityUtils;
     private final ManualRetentionRepository manualRetentionRepository;
     private final RetentionReasonCodeRepository retentionReasonCodeRepository;
+
+    public List<ManualRetentionReasonDisplayName> getRetentionReasons() {
+        return stream(retentionReasonCodeRepository.findAll().spliterator(), false)
+                .map(this::transform)
+                .distinct()
+                .collect(toList());
+    }
 
     public Optional<ManualRetention> findManualOffenderRetention(final OffenderNumber offenderNumber) {
         return manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(offenderNumber.getOffenderNumber());
@@ -103,6 +116,13 @@ public class OffenderRetentionService {
                         retentionReasonCodeRepository.findById(Code.valueOf(reason.getReasonCode().name()))
                                 .orElseThrow())
                 .reasonDetails(reason.getReasonDetails())
+                .build();
+    }
+
+    private ManualRetentionReasonDisplayName transform(final RetentionReasonCode reason) {
+        return ManualRetentionReasonDisplayName.builder()
+                .reasonCode(ManualRetentionReasonCode.valueOf(reason.getRetentionReasonCodeId().name()))
+                .displayName(reason.getDisplayName())
                 .build();
     }
 }

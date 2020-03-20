@@ -36,6 +36,46 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
 
     @Test
     @Sql("retention_reason_code.sql")
+    void getRetentionReasons() {
+
+        webTestClient.get().uri("/retention/offenders/retention-reasons")
+                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().json(
+                        "[" +
+                                "{\"reasonCode\":\"CHILD_SEX_ABUSE\",\"displayName\":\"Child Sex Abuse Moratorium\"}," +
+                                "{\"reasonCode\":\"HIGH_PROFILE\",\"displayName\":\"High Profile Offenders\"}," +
+                                "{\"reasonCode\":\"LITIGATION_DISPUTE\",\"displayName\":\"Litigation/Dispute\"}," +
+                                "{\"reasonCode\":\"LOOKED_AFTER_CHILDREN\",\"displayName\":\"Looked after children\"}," +
+                                "{\"reasonCode\":\"MAPPA\",\"displayName\":\"Multi-Agency Public Protection Agreement\"}," +
+                                "{\"reasonCode\":\"FOI_SAR\",\"displayName\":\"Subject to FOI/SARs\"}," +
+                                "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\"}" +
+                        "]");
+    }
+
+    @Test
+    void getRetentionReasonsWithBadTokenIsUnauthorised() {
+
+        webTestClient.get().uri("/retention/offenders/retention-reasons")
+                .header("Authorization", "Bearer BAD.TOK.EN")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void getRetentionReasonsWithNoAuthorizationHeaderIsUnauthorised() {
+
+        webTestClient.get().uri("/retention/offenders/retention-reasons")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    @Sql("retention_reason_code.sql")
     @Sql("manual_retention.sql")
     @Sql("manual_retention_reason.sql")
     void getRetentionRecord() {
@@ -226,4 +266,22 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
                         "\"developerMessage\":\"Attempting to update an old version of the retention record\"" +
                         "}");
     }
-}
+
+    @Test
+    void updateRetentionRecordWithBadTokenIsUnauthorised() {
+
+        webTestClient.put().uri("/retention/offenders/A1234BC")
+                .bodyValue(ManualRetentionRequest.builder().build())
+                .header("Authorization", "Bearer BAD.TOK.EN")
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void updateRetentionRecordWithNoAuthorizationHeaderIsUnauthorised() {
+
+        webTestClient.put().uri("/retention/offenders/A1234BC")
+                .bodyValue(ManualRetentionRequest.builder().build())
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }}
