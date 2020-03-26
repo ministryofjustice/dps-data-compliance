@@ -33,5 +33,6 @@ class RetentionReasonCodeRepositoryTest {
 
         assertThat(retrievedEntity.getDisplayName()).isEqualTo("High Profile Offenders");
         assertThat(retrievedEntity.getAllowReasonDetails()).isFalse();
+        assertThat(retrievedEntity.getDisplayOrder()).isEqualTo(1);
     }
 }

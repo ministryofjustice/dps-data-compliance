@@ -45,4 +45,8 @@ public class RetentionReasonCode {
     @NotNull
     @Column(name = "ALLOW_REASON_DETAILS", nullable = false)
     private Boolean allowReasonDetails;
+
+    @NotNull
+    @Column(name = "DISPLAY_ORDER", nullable = false)
+    private Integer displayOrder;
 }

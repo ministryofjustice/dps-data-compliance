@@ -35,4 +35,9 @@ public class ManualRetentionReasonDisplayName {
     @NotNull
     @JsonProperty("allowReasonDetails")
     private Boolean allowReasonDetails;
+
+    @ApiModelProperty(value = "Order in which the reasons are displayed to the end user")
+    @NotNull
+    @JsonProperty("displayOrder")
+    private Integer displayOrder;
 }

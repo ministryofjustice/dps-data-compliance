@@ -71,20 +71,28 @@ class OffenderRetentionServiceTest {
                 RetentionReasonCode.builder()
                         .retentionReasonCodeId(Code.HIGH_PROFILE)
                         .displayName("High Profile Offenders")
+                        .allowReasonDetails(false)
+                        .displayOrder(1)
                         .build(),
                 RetentionReasonCode.builder()
                         .retentionReasonCodeId(Code.OTHER)
                         .displayName("Other")
+                        .allowReasonDetails(true)
+                        .displayOrder(2)
                         .build()));
 
         assertThat(offenderRetentionService.getRetentionReasons()).containsExactly(
                 ManualRetentionReasonDisplayName.builder()
                         .reasonCode(HIGH_PROFILE)
                         .displayName("High Profile Offenders")
+                        .allowReasonDetails(false)
+                        .displayOrder(1)
                         .build(),
                 ManualRetentionReasonDisplayName.builder()
                         .reasonCode(OTHER)
                         .displayName("Other")
+                        .allowReasonDetails(true)
+                        .displayOrder(2)
                         .build());
     }
 

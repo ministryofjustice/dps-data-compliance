@@ -45,13 +45,13 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
                 .expectStatus().isOk()
                 .expectBody().json(
                         "[" +
-                                "{\"reasonCode\":\"CHILD_SEX_ABUSE\",\"displayName\":\"Child Sex Abuse Moratorium\",\"allowReasonDetails\":false}," +
-                                "{\"reasonCode\":\"HIGH_PROFILE\",\"displayName\":\"High Profile Offenders\",\"allowReasonDetails\":false}," +
-                                "{\"reasonCode\":\"LITIGATION_DISPUTE\",\"displayName\":\"Litigation/Dispute\",\"allowReasonDetails\":false}," +
-                                "{\"reasonCode\":\"LOOKED_AFTER_CHILDREN\",\"displayName\":\"Looked after children\",\"allowReasonDetails\":false}," +
-                                "{\"reasonCode\":\"MAPPA\",\"displayName\":\"MAPPA (Multi-Agency Public Protection Agreement)\",\"allowReasonDetails\":false}," +
-                                "{\"reasonCode\":\"FOI_SAR\",\"displayName\":\"Subject to FOI/SARs\",\"allowReasonDetails\":false}," +
-                                "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\",\"allowReasonDetails\":true}" +
+                                "{\"reasonCode\":\"CHILD_SEX_ABUSE\",\"displayName\":\"Child Sex Abuse Moratorium\",\"allowReasonDetails\":false,\"displayOrder\":0}," +
+                                "{\"reasonCode\":\"HIGH_PROFILE\",\"displayName\":\"High Profile Offenders\",\"allowReasonDetails\":false,\"displayOrder\":1}," +
+                                "{\"reasonCode\":\"LITIGATION_DISPUTE\",\"displayName\":\"Litigation/Dispute\",\"allowReasonDetails\":false,\"displayOrder\":2}," +
+                                "{\"reasonCode\":\"LOOKED_AFTER_CHILDREN\",\"displayName\":\"Looked after children\",\"allowReasonDetails\":false,\"displayOrder\":3}," +
+                                "{\"reasonCode\":\"MAPPA\",\"displayName\":\"MAPPA (Multi-Agency Public Protection Agreement)\",\"allowReasonDetails\":false,\"displayOrder\":4}," +
+                                "{\"reasonCode\":\"FOI_SAR\",\"displayName\":\"Subject to FOI/SARs\",\"allowReasonDetails\":false,\"displayOrder\":5}," +
+                                "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\",\"allowReasonDetails\":true,\"displayOrder\":6}" +
                         "]");
     }
 
