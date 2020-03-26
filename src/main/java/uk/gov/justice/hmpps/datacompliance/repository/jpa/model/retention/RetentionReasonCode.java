@@ -12,6 +12,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 @Data
 @Entity
@@ -37,6 +38,11 @@ public class RetentionReasonCode {
     @Column(name = "RETENTION_REASON_CODE_ID", nullable = false)
     private Code retentionReasonCodeId;
 
+    @NotNull
     @Column(name = "DISPLAY_NAME", nullable = false)
     private String displayName;
+
+    @NotNull
+    @Column(name = "ALLOW_REASON_DETAILS", nullable = false)
+    private Boolean allowReasonDetails;
 }

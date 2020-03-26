@@ -27,6 +27,12 @@ public class ManualRetentionReasonDisplayName {
     private ManualRetentionReasonCode reasonCode;
 
     @ApiModelProperty(value = "The UI display name")
+    @NotNull
     @JsonProperty("displayName")
     private String displayName;
+
+    @ApiModelProperty(value = "Flag identifying if end user is allowed to enter details about the retention reason")
+    @NotNull
+    @JsonProperty("allowReasonDetails")
+    private Boolean allowReasonDetails;
 }

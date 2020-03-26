@@ -45,13 +45,13 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
                 .expectStatus().isOk()
                 .expectBody().json(
                         "[" +
-                                "{\"reasonCode\":\"CHILD_SEX_ABUSE\",\"displayName\":\"Child Sex Abuse Moratorium\"}," +
-                                "{\"reasonCode\":\"HIGH_PROFILE\",\"displayName\":\"High Profile Offenders\"}," +
-                                "{\"reasonCode\":\"LITIGATION_DISPUTE\",\"displayName\":\"Litigation/Dispute\"}," +
-                                "{\"reasonCode\":\"LOOKED_AFTER_CHILDREN\",\"displayName\":\"Looked after children\"}," +
-                                "{\"reasonCode\":\"MAPPA\",\"displayName\":\"Multi-Agency Public Protection Agreement\"}," +
-                                "{\"reasonCode\":\"FOI_SAR\",\"displayName\":\"Subject to FOI/SARs\"}," +
-                                "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\"}" +
+                                "{\"reasonCode\":\"CHILD_SEX_ABUSE\",\"displayName\":\"Child Sex Abuse Moratorium\",\"allowReasonDetails\":false}," +
+                                "{\"reasonCode\":\"HIGH_PROFILE\",\"displayName\":\"High Profile Offenders\",\"allowReasonDetails\":false}," +
+                                "{\"reasonCode\":\"LITIGATION_DISPUTE\",\"displayName\":\"Litigation/Dispute\",\"allowReasonDetails\":false}," +
+                                "{\"reasonCode\":\"LOOKED_AFTER_CHILDREN\",\"displayName\":\"Looked after children\",\"allowReasonDetails\":false}," +
+                                "{\"reasonCode\":\"MAPPA\",\"displayName\":\"MAPPA (Multi-Agency Public Protection Agreement)\",\"allowReasonDetails\":false}," +
+                                "{\"reasonCode\":\"FOI_SAR\",\"displayName\":\"Subject to FOI/SARs\",\"allowReasonDetails\":false}," +
+                                "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\",\"allowReasonDetails\":true}" +
                         "]");
     }
 
