@@ -123,6 +123,8 @@ public class OffenderRetentionService {
         return ManualRetentionReasonDisplayName.builder()
                 .reasonCode(ManualRetentionReasonCode.valueOf(reason.getRetentionReasonCodeId().name()))
                 .displayName(reason.getDisplayName())
+                .allowReasonDetails(reason.getAllowReasonDetails())
+                .displayOrder(reason.getDisplayOrder())
                 .build();
     }
 }
