@@ -12,10 +12,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -26,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class Elite2ApiClientTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final LocalDateTime TIMESTAMP = LocalDateTime.of(2020, 2, 1, 3, 4, 5, 123456789);
     private static final long PAGE_LIMIT = 2;
 
     private final MockWebServer elite2ApiMock = new MockWebServer();
@@ -154,6 +156,32 @@ class Elite2ApiClientTest {
         elite2ApiMock.enqueue(new MockResponse().setResponseCode(500));
 
         assertThatThrownBy(() -> elite2ApiClient.getImageData(123L))
+                .isInstanceOf(WebClientResponseException.class);
+    }
+
+    @Test
+    void requestPendingDeletions() throws Exception {
+
+        elite2ApiMock.enqueue(new MockResponse().setResponseCode(202));
+
+        elite2ApiClient.requestPendingDeletions(TIMESTAMP, TIMESTAMP.plusSeconds(1), "request1");
+
+        RecordedRequest recordedRequest = elite2ApiMock.takeRequest();
+        assertThat(recordedRequest.getMethod()).isEqualTo("POST");
+        assertThat(recordedRequest.getPath()).isEqualTo("/api/data-compliance/offenders/pending-deletions");
+        assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("{" +
+                "\"dueForDeletionWindowStart\":\"2020-02-01T03:04:05.123456\"," +
+                "\"dueForDeletionWindowEnd\":\"2020-02-01T03:04:06.123456\"," +
+                "\"requestId\":\"request1" +
+                "\"}");
+    }
+
+    @Test
+    void requestPendingDeletionsThrowsOnNonSuccessResponse() {
+
+        elite2ApiMock.enqueue(new MockResponse().setResponseCode(500));
+
+        assertThatThrownBy(() -> elite2ApiClient.requestPendingDeletions(TIMESTAMP, TIMESTAMP.plusSeconds(1), "request1"))
                 .isInstanceOf(WebClientResponseException.class);
     }
 }

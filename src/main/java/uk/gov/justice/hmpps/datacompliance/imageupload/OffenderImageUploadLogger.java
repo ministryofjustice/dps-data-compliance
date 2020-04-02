@@ -2,7 +2,7 @@ package uk.gov.justice.hmpps.datacompliance.imageupload;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.OffenderImageUpload;

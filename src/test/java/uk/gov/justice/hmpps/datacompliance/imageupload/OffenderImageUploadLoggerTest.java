@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.OffenderImageUpload;

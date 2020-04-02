@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.dto;
+package uk.gov.justice.hmpps.datacompliance.client.elite2api.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
