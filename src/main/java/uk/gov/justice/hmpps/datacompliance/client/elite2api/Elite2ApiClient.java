@@ -7,10 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,7 @@ public class Elite2ApiClient {
     private static final String OFFENDER_IDS_PATH = "/api/offenders/ids";
     private static final String OFFENDER_IMAGE_METADATA_PATH = "/api/images/offenders/%s";
     private static final String IMAGE_DATA_PATH = "/api/images/%s/data";
+    private static final String OFFENDER_PENDING_DELETIONS_PATH = "/api/data-compliance/offenders/pending-deletions";
 
     private final WebClient webClient;
     private final DataComplianceProperties dataComplianceProperties;
@@ -76,6 +79,21 @@ public class Elite2ApiClient {
 
                 .bodyToMono(byte[].class)
                 .blockOptional();
+    }
+
+    public void requestPendingDeletions(final LocalDateTime windowStart,
+                                        final LocalDateTime windowEnd,
+                                        final String requestId) {
+        webClient.post()
+                .uri(dataComplianceProperties.getElite2ApiBaseUrl() + OFFENDER_PENDING_DELETIONS_PATH)
+                .bodyValue(PendingDeletionsRequest.builder()
+                        .dueForDeletionWindowStart(windowStart)
+                        .dueForDeletionWindowEnd(windowEnd)
+                        .requestId(requestId)
+                        .build())
+                .retrieve()
+                .toBodilessEntity()
+                .block();
     }
 
     private OffenderNumbersResponse offenderNumbersResponse(final ResponseEntity<List<OffenderNumber>> response) {
