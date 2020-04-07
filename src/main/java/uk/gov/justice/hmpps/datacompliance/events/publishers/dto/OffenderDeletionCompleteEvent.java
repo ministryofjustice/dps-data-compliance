@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.events.dto;
+package uk.gov.justice.hmpps.datacompliance.events.publishers.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

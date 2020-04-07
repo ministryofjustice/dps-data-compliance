@@ -31,7 +31,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Service
 @Transactional
 @AllArgsConstructor
-public class OffenderRetentionService {
+public class ManualRetentionService {
 
     private final TimeSource timeSource;
     private final UserSecurityUtils userSecurityUtils;

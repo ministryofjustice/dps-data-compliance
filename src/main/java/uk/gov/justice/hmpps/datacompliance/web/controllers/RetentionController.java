@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.services.OffenderRetentionService;
+import uk.gov.justice.hmpps.datacompliance.services.ManualRetentionService;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ErrorResponse;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetention;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonDisplayName;
@@ -38,7 +38,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.transform.Manua
 @RequestMapping(value = "/retention", produces = APPLICATION_JSON_VALUE)
 public class RetentionController {
 
-    private final OffenderRetentionService retentionService;
+    private final ManualRetentionService retentionService;
 
     @ApiOperation(
             value = "Get offender retention reasons",

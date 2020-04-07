@@ -36,7 +36,7 @@ import static uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonC
 import static uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonCode.OTHER;
 
 @ExtendWith(MockitoExtension.class)
-class OffenderRetentionServiceTest {
+class ManualRetentionServiceTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now();
     private static final String OFFENDER_NO = "A1234BC";
@@ -53,11 +53,11 @@ class OffenderRetentionServiceTest {
     @Mock
     private RetentionReasonCodeRepository retentionReasonCodeRepository;
 
-    private OffenderRetentionService offenderRetentionService;
+    private ManualRetentionService manualRetentionService;
 
     @BeforeEach
     void setUp() {
-        offenderRetentionService = new OffenderRetentionService(
+        manualRetentionService = new ManualRetentionService(
                 TimeSource.of(NOW),
                 userSecurityUtils,
                 manualRetentionRepository,
@@ -81,7 +81,7 @@ class OffenderRetentionServiceTest {
                         .displayOrder(2)
                         .build()));
 
-        assertThat(offenderRetentionService.getRetentionReasons()).containsExactly(
+        assertThat(manualRetentionService.getRetentionReasons()).containsExactly(
                 ManualRetentionReasonDisplayName.builder()
                         .reasonCode(HIGH_PROFILE)
                         .displayName("High Profile Offenders")
@@ -104,7 +104,7 @@ class OffenderRetentionServiceTest {
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
                 .thenReturn(Optional.of(manualRetention));
 
-        assertThat(offenderRetentionService.findManualOffenderRetention(new OffenderNumber(OFFENDER_NO)))
+        assertThat(manualRetentionService.findManualOffenderRetention(new OffenderNumber(OFFENDER_NO)))
                 .contains(manualRetention);
     }
 
@@ -126,7 +126,7 @@ class OffenderRetentionServiceTest {
         mockUsername();
         mockReasonCodeRetrieval(Code.HIGH_PROFILE);
 
-        offenderRetentionService.updateManualOffenderRetention(
+        manualRetentionService.updateManualOffenderRetention(
                 new OffenderNumber(OFFENDER_NO), requestWith(HIGH_PROFILE), null);
 
         assertEntityPersistedWith(0, Code.HIGH_PROFILE);
@@ -141,7 +141,7 @@ class OffenderRetentionServiceTest {
         mockUsername();
         mockReasonCodeRetrieval(Code.OTHER);
 
-        offenderRetentionService.updateManualOffenderRetention(
+        manualRetentionService.updateManualOffenderRetention(
                 new OffenderNumber(OFFENDER_NO), requestWith(OTHER), "\"0\"");
 
         assertEntityPersistedWith(1, Code.OTHER);
@@ -154,7 +154,7 @@ class OffenderRetentionServiceTest {
                 .thenReturn(Optional.of(EXISTING_RECORD));
 
         assertThatThrownBy(() ->
-                offenderRetentionService.updateManualOffenderRetention(
+                manualRetentionService.updateManualOffenderRetention(
                         new OffenderNumber(OFFENDER_NO), requestWith(OTHER), null))
                 .isInstanceOf(HttpClientErrorException.class)
                 .hasMessageContaining("Must provide 'If-Match' header");
@@ -167,7 +167,7 @@ class OffenderRetentionServiceTest {
                 .thenReturn(Optional.of(EXISTING_RECORD));
 
         assertThatThrownBy(() ->
-                offenderRetentionService.updateManualOffenderRetention(
+                manualRetentionService.updateManualOffenderRetention(
                         new OffenderNumber(OFFENDER_NO), requestWith(OTHER), "\"-1\""))
                 .isInstanceOf(OptimisticLockException.class)
                 .hasMessageContaining("Attempting to update an old version of the retention record");
