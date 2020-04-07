@@ -36,7 +36,7 @@ public class OffenderDeletionGrantedAwsEventPusher implements OffenderDeletionGr
     }
 
     @Override
-    public void sendEvent(final String offenderNo) {
+    public void grantDeletion(final String offenderNo) {
 
         log.debug("Sending offender deletion granted event for: {}", offenderNo);
 

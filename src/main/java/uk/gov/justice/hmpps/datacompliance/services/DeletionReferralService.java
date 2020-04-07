@@ -1,7 +1,9 @@
 package uk.gov.justice.hmpps.datacompliance.services;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
@@ -11,20 +13,26 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ReferredOffender
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class DeletionReferralService {
 
-    private TimeSource timeSource;
-    private OffenderDeletionReferralRepository offenderDeletionReferralRepository;
-    private OffenderDeletionGrantedEventPusher offenderDeletionGrantedEventPusher;
+    private final TimeSource timeSource;
+    private final OffenderDeletionReferralRepository repository;
+    private final OffenderDeletionGrantedEventPusher eventPusher;
+    private final RetentionService retentionService;
 
     public void handlePendingDeletion(final OffenderPendingDeletionEvent event) {
+
         storeOffenderDeletionReferral(event);
 
-        // TODO GDPR-51 Complete retention checks on offender record
+        if (retentionService.isOffenderEligibleForDeletion(new OffenderNumber(event.getOffenderIdDisplay()))) {
+            log.info("No reason found to retain offender record '{}', granting deletion", event.getOffenderIdDisplay());
+            eventPusher.grantDeletion(event.getOffenderIdDisplay());
+        }
 
-        offenderDeletionGrantedEventPusher.sendEvent(event.getOffenderIdDisplay());
+        log.info("Offender record '{}' has been marked for retention ", event.getOffenderIdDisplay());
     }
 
     public void handleReferralComplete(final OffenderPendingDeletionReferralCompleteEvent event) {
@@ -54,6 +62,6 @@ public class DeletionReferralService {
                                 .offenderBookId(booking.getOffenderBookId())
                                 .build())));
 
-        offenderDeletionReferralRepository.save(referral);
+        repository.save(referral);
     }
 }

@@ -33,7 +33,7 @@ public class OffenderDeletionListener {
             OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete);
 
     private final ObjectMapper objectMapper;
-    private DeletionReferralService deletionReferralService;
+    private final DeletionReferralService deletionReferralService;
 
     public OffenderDeletionListener(final ObjectMapper objectMapper,
                                     final DeletionReferralService deletionReferralService) {

@@ -39,7 +39,7 @@ class OffenderDeletionGrantedEventPusherTest {
         when(client.sendMessage(request.capture()))
                 .thenReturn(new SendMessageResult().withMessageId("message1"));
 
-        eventPusher.sendEvent("offender1");
+        eventPusher.grantDeletion("offender1");
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"offender1\"}");
@@ -50,6 +50,6 @@ class OffenderDeletionGrantedEventPusherTest {
     @Test
     void sendEventPropagatesException() {
         when(client.sendMessage(any())).thenThrow(RuntimeException.class);
-        assertThatThrownBy(() -> eventPusher.sendEvent("offender1")).isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(() -> eventPusher.grantDeletion("offender1")).isInstanceOf(RuntimeException.class);
     }
 }

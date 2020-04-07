@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -47,6 +48,13 @@ public class ManualRetentionService {
 
     public Optional<ManualRetention> findManualOffenderRetention(final OffenderNumber offenderNumber) {
         return manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(offenderNumber.getOffenderNumber());
+    }
+
+    public boolean isManuallyRetained(final OffenderNumber offenderNumber) {
+        return findManualOffenderRetention(offenderNumber)
+                .map(ManualRetention::getManualRetentionReasons)
+                .filter(not(List::isEmpty))
+                .isPresent();
     }
 
     /**

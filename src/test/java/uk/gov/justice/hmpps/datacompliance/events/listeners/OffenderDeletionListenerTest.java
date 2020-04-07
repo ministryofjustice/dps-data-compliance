@@ -87,11 +87,7 @@ class OffenderDeletionListenerTest {
     void handleOffenderDeletionEventThrowsIfEventTypeUnexpected() {
         assertThatThrownBy(() -> handleMessage("{\"offenderIdDisplay\":\"A1234AA\"}", Map.of("eventType", "UNEXPECTED!")))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Unexpected message event type: 'UNEXPECTED!', expecting one of: [" +
-                        "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE, " +
-                        "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE, " +
-                        "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION" +
-                        "]");
+                .hasMessageContaining("Unexpected message event type: 'UNEXPECTED!'");
     }
 
     @Test

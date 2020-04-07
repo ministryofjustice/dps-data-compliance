@@ -109,6 +109,53 @@ class ManualRetentionServiceTest {
     }
 
     @Test
+    void findManualOffenderRetentionReturnsEmpty() {
+
+        when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
+                .thenReturn(Optional.empty());
+
+        assertThat(manualRetentionService.findManualOffenderRetention(new OffenderNumber(OFFENDER_NO)))
+                .isEmpty();
+    }
+
+    @Test
+    void isManuallyRetainedReturnsTrueIfLatestRecordHasRetentionReasons() {
+
+        final var manualRetention = ManualRetention.builder().build();
+
+        manualRetention.addManualRetentionReason(
+                uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetentionReason.builder().build());
+
+        when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
+                .thenReturn(Optional.of(manualRetention));
+
+        assertThat(manualRetentionService.isManuallyRetained(new OffenderNumber(OFFENDER_NO)))
+                .isTrue();
+    }
+
+    @Test
+    void isManuallyRetainedReturnsFalseWhenNoRetentionRecord() {
+
+        when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
+                .thenReturn(Optional.empty());
+
+        assertThat(manualRetentionService.isManuallyRetained(new OffenderNumber(OFFENDER_NO)))
+                .isFalse();
+    }
+
+    @Test
+    void isManuallyRetainedReturnsFalseWhenReasonsAreEmpty() {
+
+        final var manualRetention = ManualRetention.builder().build();
+
+        when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
+                .thenReturn(Optional.of(manualRetention));
+
+        assertThat(manualRetentionService.isManuallyRetained(new OffenderNumber(OFFENDER_NO)))
+                .isFalse();
+    }
+
+    @Test
     void checkEnumsContainSameNames() {
 
         final var dbNames = stream(Code.values()).map(Enum::name).sorted().collect(toList());
