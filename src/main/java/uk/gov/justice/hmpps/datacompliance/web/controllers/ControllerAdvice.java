@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.datacompliance.web.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
@@ -13,6 +14,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.OptimisticLockException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestControllerAdvice(basePackageClasses = RetentionController.class)
@@ -51,6 +53,18 @@ public class ControllerAdvice extends ResponseEntityExceptionHandler {
                         .builder()
                         .status(BAD_REQUEST.value())
                         .userMessage("Client Error")
+                        .developerMessage(e.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handle(final AccessDeniedException e) {
+        return ResponseEntity
+                .status(FORBIDDEN)
+                .body(ErrorResponse
+                        .builder()
+                        .status(FORBIDDEN.value())
+                        .userMessage(e.getMessage())
                         .developerMessage(e.getMessage())
                         .build());
     }

@@ -20,3 +20,5 @@ sns:
   region: eu-west-2
 
 spring.security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
+
+graceful.shutdown.enabled: false

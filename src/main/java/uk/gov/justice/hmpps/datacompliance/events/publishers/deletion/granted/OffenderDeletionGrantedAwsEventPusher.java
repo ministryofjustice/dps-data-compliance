@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
-import uk.gov.justice.hmpps.datacompliance.events.dto.OffenderDeletionGrantedEvent;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGrantedEvent;
 
 import java.util.Map;
 

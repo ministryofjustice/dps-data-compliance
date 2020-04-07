@@ -7,9 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.hmpps.datacompliance.events.dto.OffenderPendingDeletionEvent;
-import uk.gov.justice.hmpps.datacompliance.events.dto.OffenderPendingDeletionEvent.Booking;
-import uk.gov.justice.hmpps.datacompliance.events.dto.OffenderPendingDeletionEvent.OffenderWithBookings;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.Booking;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderWithBookings;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.granted.OffenderDeletionGrantedEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
@@ -24,24 +25,26 @@ import static org.mockito.Mockito.verify;
 class DeletionReferralServiceTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now();
-    
+    private static final String OFFENDER_NUMBER = "A1234AA";
+
     @Mock
     private OffenderDeletionReferralRepository repository;
-    
+
+    @Mock
+    private OffenderDeletionGrantedEventPusher eventPusher;
+
     private DeletionReferralService service;
 
     @BeforeEach
     void setUp() {
-        service = new DeletionReferralService(TimeSource.of(NOW), repository);
+        service = new DeletionReferralService(TimeSource.of(NOW), repository, eventPusher);
     }
 
     @Test
-    void storeOffenderPendingDeletionReferral() {
+    void handlePendingDeletionReferral() {
 
-        final var referralCaptor = ArgumentCaptor.forClass(OffenderDeletionReferral.class);
-
-        service.storeOffenderDeletionReferral(OffenderPendingDeletionEvent.builder()
-                .offenderIdDisplay("A1234AA")
+        service.handlePendingDeletion(OffenderPendingDeletionEvent.builder()
+                .offenderIdDisplay(OFFENDER_NUMBER)
                 .firstName("John")
                 .middleName("Middle")
                 .lastName("Smith")
@@ -52,11 +55,19 @@ class DeletionReferralServiceTest {
                         .build())
                 .build());
 
+        verifyReferralPersisted();
+        verify(eventPusher).sendEvent(OFFENDER_NUMBER);
+    }
+
+    private void verifyReferralPersisted() {
+
+        final var referralCaptor = ArgumentCaptor.forClass(OffenderDeletionReferral.class);
+
         verify(repository).save(referralCaptor.capture());
 
         final var persistedReferral = referralCaptor.getValue();
 
-        assertThat(persistedReferral.getOffenderNo()).isEqualTo("A1234AA");
+        assertThat(persistedReferral.getOffenderNo()).isEqualTo(OFFENDER_NUMBER);
         assertThat(persistedReferral.getFirstName()).isEqualTo("John");
         assertThat(persistedReferral.getMiddleName()).isEqualTo("Middle");
         assertThat(persistedReferral.getLastName()).isEqualTo("Smith");

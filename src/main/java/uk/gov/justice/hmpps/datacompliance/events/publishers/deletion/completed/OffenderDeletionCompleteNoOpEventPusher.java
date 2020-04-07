@@ -3,7 +3,7 @@ package uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.completed
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
-import uk.gov.justice.hmpps.datacompliance.events.dto.OffenderDeletionCompleteEvent;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent;
 
 @Slf4j
 @Component
