@@ -14,7 +14,7 @@ public class OffenderDeletionGrantedNoOpEventPusher implements OffenderDeletionG
     }
 
     @Override
-    public void sendEvent(final String offenderIdDisplay) {
+    public void grantDeletion(final String offenderIdDisplay) {
         log.warn("Pretending to push offender deletion granted events for '{}' to queue", offenderIdDisplay);
     }
 }

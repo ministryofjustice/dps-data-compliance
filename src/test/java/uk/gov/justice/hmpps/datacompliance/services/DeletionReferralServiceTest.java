@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.Booking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderWithBookings;
@@ -19,7 +20,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DeletionReferralServiceTest {
@@ -33,17 +37,42 @@ class DeletionReferralServiceTest {
     @Mock
     private OffenderDeletionGrantedEventPusher eventPusher;
 
-    private DeletionReferralService service;
+    @Mock
+    private RetentionService retentionService;
+
+    private DeletionReferralService referralService;
 
     @BeforeEach
     void setUp() {
-        service = new DeletionReferralService(TimeSource.of(NOW), repository, eventPusher);
+        referralService = new DeletionReferralService(TimeSource.of(NOW), repository, eventPusher, retentionService);
     }
 
     @Test
-    void handlePendingDeletionReferral() {
+    void handlePendingDeletionWhenOffenderEligibleForDeletion() {
 
-        service.handlePendingDeletion(OffenderPendingDeletionEvent.builder()
+        when(retentionService.isOffenderEligibleForDeletion(new OffenderNumber(OFFENDER_NUMBER)))
+                .thenReturn(true);
+
+        referralService.handlePendingDeletion(generatePendingDeletionEvent());
+
+        verifyReferralPersisted();
+        verify(eventPusher).grantDeletion(OFFENDER_NUMBER);
+    }
+
+    @Test
+    void handlePendingDeletionWhenOffenderShouldBeRetained() {
+
+        when(retentionService.isOffenderEligibleForDeletion(new OffenderNumber(OFFENDER_NUMBER)))
+                .thenReturn(false);
+
+        referralService.handlePendingDeletion(generatePendingDeletionEvent());
+
+        verifyReferralPersisted();
+        verify(eventPusher, never()).grantDeletion(any());
+    }
+
+    private OffenderPendingDeletionEvent generatePendingDeletionEvent() {
+        return OffenderPendingDeletionEvent.builder()
                 .offenderIdDisplay(OFFENDER_NUMBER)
                 .firstName("John")
                 .middleName("Middle")
@@ -53,10 +82,7 @@ class DeletionReferralServiceTest {
                         .offenderId(1L)
                         .booking(new Booking(2L))
                         .build())
-                .build());
-
-        verifyReferralPersisted();
-        verify(eventPusher).sendEvent(OFFENDER_NUMBER);
+                .build();
     }
 
     private void verifyReferralPersisted() {
