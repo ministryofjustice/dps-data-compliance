@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.Booking;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderWithBookings;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.services.DeletionReferralService;
@@ -55,7 +55,7 @@ class OffenderDeletionListenerTest {
                 .birthDate(LocalDate.of(1990, 1, 2))
                 .offender(OffenderWithBookings.builder()
                         .offenderId(123L)
-                        .booking(new Booking(321L))
+                        .offenderBooking(new OffenderBooking(321L))
                         .build())
                 .build());
     }
