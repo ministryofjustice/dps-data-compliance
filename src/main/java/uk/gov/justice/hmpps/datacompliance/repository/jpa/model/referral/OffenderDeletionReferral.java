@@ -81,13 +81,13 @@ public class OffenderDeletionReferral {
     private LocalDateTime receivedDateTime;
 
     @OneToMany(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
-    private final List<ReferredOffenderBooking> referredOffenderBookings = new ArrayList<>();
+    private final List<ReferredOffenderBooking> offenderBookings = new ArrayList<>();
 
     @OneToOne(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
     private ReferralResolution referralResolution;
 
     public void addReferredOffenderBooking(final ReferredOffenderBooking booking) {
-        this.referredOffenderBookings.add(booking);
+        this.offenderBookings.add(booking);
         booking.setOffenderDeletionReferral(this);
     }
 

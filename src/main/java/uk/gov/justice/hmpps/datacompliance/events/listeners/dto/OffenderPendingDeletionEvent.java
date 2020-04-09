@@ -59,7 +59,7 @@ public class OffenderPendingDeletionEvent {
 
         @Singular
         @JsonProperty("bookings")
-        private List<Booking> bookings;
+        private List<OffenderBooking> offenderBookings;
     }
 
     @Getter
@@ -67,7 +67,7 @@ public class OffenderPendingDeletionEvent {
     @EqualsAndHashCode
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Booking {
+    public static class OffenderBooking {
 
         @JsonProperty("offenderBookId")
         private Long offenderBookId;
