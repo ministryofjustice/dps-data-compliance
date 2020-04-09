@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGrantedEvent;
 
 import java.util.Map;
@@ -36,20 +37,20 @@ public class OffenderDeletionGrantedAwsEventPusher implements OffenderDeletionGr
     }
 
     @Override
-    public void grantDeletion(final String offenderNo) {
+    public void grantDeletion(final OffenderNumber offenderNo, final Long referralId) {
 
         log.debug("Sending offender deletion granted event for: {}", offenderNo);
 
-        sqsClient.sendMessage(generateDeletionGrantedRequest(offenderNo));
+        sqsClient.sendMessage(generateDeletionGrantedRequest(offenderNo, referralId));
     }
 
-    private SendMessageRequest generateDeletionGrantedRequest(final String offenderNo) {
+    private SendMessageRequest generateDeletionGrantedRequest(final OffenderNumber offenderNo, final Long referralId) {
         return new SendMessageRequest()
                 .withQueueUrl(queueUrl)
                 .withMessageAttributes(Map.of(
                         "eventType", stringAttribute("DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED"),
                         "contentType", stringAttribute("application/json;charset=UTF-8")))
-                .withMessageBody(toJson(new OffenderDeletionGrantedEvent(offenderNo)));
+                .withMessageBody(toJson(new OffenderDeletionGrantedEvent(offenderNo.getOffenderNumber(), referralId)));
     }
 
     private MessageAttributeValue stringAttribute(final String value) {
