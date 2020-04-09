@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository;
+package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.transaction.TestTransaction;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.OffenderImageUpload;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;

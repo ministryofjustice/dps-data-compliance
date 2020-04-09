@@ -1,34 +1,54 @@
-package uk.gov.justice.hmpps.datacompliance.repository.jpa.model;
+package uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(of = {"referralId"})
 @Table(name = "OFFENDER_DELETION_REFERRAL")
 public class OffenderDeletionReferral {
+
+    // Not using @AllArgsConstructor so that retentionResolution
+    // does not appear in the builder:
+    @Builder
+    public OffenderDeletionReferral(final Long referralId,
+                                    final String offenderNo,
+                                    final String firstName,
+                                    final String middleName,
+                                    final String lastName,
+                                    final LocalDate birthDate,
+                                    final LocalDateTime receivedDateTime) {
+        this.referralId = referralId;
+        this.offenderNo = offenderNo;
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.lastName = lastName;
+        this.birthDate = birthDate;
+        this.receivedDateTime = receivedDateTime;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,11 +80,23 @@ public class OffenderDeletionReferral {
     @Column(name = "RECEIVED_DATE_TIME", nullable = false)
     private LocalDateTime receivedDateTime;
 
-    @OneToMany(mappedBy = "offenderDeletionReferral", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
     private final List<ReferredOffenderBooking> referredOffenderBookings = new ArrayList<>();
+
+    @OneToOne(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
+    private ReferralResolution referralResolution;
 
     public void addReferredOffenderBooking(final ReferredOffenderBooking booking) {
         this.referredOffenderBookings.add(booking);
         booking.setOffenderDeletionReferral(this);
+    }
+
+    public Optional<ReferralResolution> getReferralResolution() {
+        return Optional.ofNullable(referralResolution);
+    }
+
+    public void setReferralResolution(final ReferralResolution resolution) {
+        this.referralResolution = resolution;
+        resolution.setOffenderDeletionReferral(this);
     }
 }

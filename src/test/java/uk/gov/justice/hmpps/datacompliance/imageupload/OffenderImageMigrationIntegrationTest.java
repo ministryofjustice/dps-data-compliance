@@ -14,7 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ImageUploadBatchRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.ImageUploadBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;

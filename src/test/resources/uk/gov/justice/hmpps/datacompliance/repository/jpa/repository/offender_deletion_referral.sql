@@ -1,1 +1,0 @@
-INSERT INTO offender_deletion_referral(referral_id, offender_no, first_name, middle_name, last_name, birth_date, received_date_time) VALUES (1, 'A1234AA', 'John', 'Middle', 'Smith', to_timestamp('1969-01-01 01:02:03', 'YYYY-MM-DD HH:MI:SS'), to_timestamp('2020-01-01 01:02:03', 'YYYY-MM-DD HH:MI:SS'));

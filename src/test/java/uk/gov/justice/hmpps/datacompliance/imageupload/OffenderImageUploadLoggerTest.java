@@ -8,9 +8,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ImageUploadBatch;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.OffenderImageUpload;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.OffenderImageUploadRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageUploadBatch;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.OffenderImageUploadRepository;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 

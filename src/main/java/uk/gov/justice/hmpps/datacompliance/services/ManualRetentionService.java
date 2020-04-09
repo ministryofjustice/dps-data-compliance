@@ -8,8 +8,8 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Manual
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetentionReason;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonCode;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonCode.Code;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ManualRetentionRepository;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.RetentionReasonCodeRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.ManualRetentionRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.RetentionReasonCodeRepository;
 import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonCode;
