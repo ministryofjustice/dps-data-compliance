@@ -27,6 +27,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -66,7 +68,7 @@ class DeletionReferralServiceTest {
         referralService.handlePendingDeletion(generatePendingDeletionEvent());
 
         verifyReferralPersisted();
-        verify(eventPusher).grantDeletion(OFFENDER_NUMBER);
+        verify(eventPusher).grantDeletion(eq(new OffenderNumber(OFFENDER_NUMBER)), any());
     }
 
     @Test
@@ -78,7 +80,7 @@ class DeletionReferralServiceTest {
         referralService.handlePendingDeletion(generatePendingDeletionEvent());
 
         verify(repository, never()).save(any());
-        verify(eventPusher, never()).grantDeletion(any());
+        verify(eventPusher, never()).grantDeletion(any(), anyLong());
     }
 
     @Test

@@ -14,5 +14,8 @@ public class OffenderDeletionGrantedEvent {
 
     @JsonProperty("offenderIdDisplay")
     private String offenderIdDisplay;
+
+    @JsonProperty("referralId")
+    private Long referralId;
 }
 

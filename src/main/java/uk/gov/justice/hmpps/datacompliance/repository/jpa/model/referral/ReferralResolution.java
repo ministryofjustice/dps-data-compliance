@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"resolutionId"})
+@ToString(exclude = "offenderDeletionReferral") // to avoid circular reference
 @Table(name = "REFERRAL_RESOLUTION")
 public class ReferralResolution {
 
@@ -49,6 +51,7 @@ public class ReferralResolution {
     @Column(name = "RESOLUTION_TYPE", nullable = false)
     private ReferralResolution.ResolutionType resolutionType;
 
+    @NotNull
     @Column(name = "RESOLUTION_DATE_TIME")
     private LocalDateTime resolutionDateTime;
 

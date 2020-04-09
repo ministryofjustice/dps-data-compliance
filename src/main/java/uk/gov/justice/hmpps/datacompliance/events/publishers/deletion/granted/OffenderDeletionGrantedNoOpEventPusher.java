@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.granted;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 @Slf4j
 @Component
@@ -14,7 +15,8 @@ public class OffenderDeletionGrantedNoOpEventPusher implements OffenderDeletionG
     }
 
     @Override
-    public void grantDeletion(final String offenderIdDisplay) {
-        log.warn("Pretending to push offender deletion granted events for '{}' to queue", offenderIdDisplay);
+    public void grantDeletion(final OffenderNumber offenderNo, final Long referralId) {
+        log.warn("Pretending to push offender deletion granted events for '{}/{}' to queue",
+                offenderNo.getOffenderNumber(), referralId);
     }
 }

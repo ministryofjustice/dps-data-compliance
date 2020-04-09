@@ -66,10 +66,12 @@ public class DeletionReferralService {
                 .build());
 
         repository.save(referral);
-        eventPusher.grantDeletion(referral.getOffenderNo());
+        eventPusher.grantDeletion(new OffenderNumber(referral.getOffenderNo()), referral.getReferralId());
     }
 
     private void updateDestructionLog(final OffenderDeletionCompleteEvent event) {
+
+        log.info("Updating destruction log with deletion confirmation for: '{}'", event.getOffenderIdDisplay());
 
         final var referral = repository.findById(event.getReferralId())
                 .orElseThrow(illegalState("Cannot retrieve referral record for id: '%s'", event.getReferralId()));

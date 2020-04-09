@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.when;
 class OffenderDeletionGrantedEventPusherTest {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private final static OffenderNumber OFFENDER_NUMBER = new OffenderNumber("offender1");
 
     @Mock
     private AmazonSQS client;
@@ -39,10 +41,10 @@ class OffenderDeletionGrantedEventPusherTest {
         when(client.sendMessage(request.capture()))
                 .thenReturn(new SendMessageResult().withMessageId("message1"));
 
-        eventPusher.grantDeletion("offender1");
+        eventPusher.grantDeletion(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"offender1\"}");
+        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"offender1\",\"referralId\":123}");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
                 .isEqualTo("DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED");
     }
@@ -50,6 +52,6 @@ class OffenderDeletionGrantedEventPusherTest {
     @Test
     void sendEventPropagatesException() {
         when(client.sendMessage(any())).thenThrow(RuntimeException.class);
-        assertThatThrownBy(() -> eventPusher.grantDeletion("offender1")).isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(() -> eventPusher.grantDeletion(OFFENDER_NUMBER, 123L)).isInstanceOf(RuntimeException.class);
     }
 }
