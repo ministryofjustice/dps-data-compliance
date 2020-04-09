@@ -11,9 +11,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.Booking;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderWithBookings;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.completed.OffenderDeletionCompleteEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.granted.OffenderDeletionGrantedEventPusher;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.Booking;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.OffenderWithBookings.builder;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.DELETED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.DELETION_GRANTED;
 
@@ -47,7 +50,10 @@ class DeletionReferralServiceTest {
     private OffenderDeletionReferralRepository repository;
 
     @Mock
-    private OffenderDeletionGrantedEventPusher eventPusher;
+    private OffenderDeletionGrantedEventPusher deletionGrantedEventPusher;
+
+    @Mock
+    private OffenderDeletionCompleteEventPusher deletionCompleteEventPusher;
 
     @Mock
     private RetentionService retentionService;
@@ -56,7 +62,12 @@ class DeletionReferralServiceTest {
 
     @BeforeEach
     void setUp() {
-        referralService = new DeletionReferralService(TimeSource.of(NOW), repository, eventPusher, retentionService);
+        referralService = new DeletionReferralService(
+                TimeSource.of(NOW),
+                repository,
+                deletionGrantedEventPusher,
+                deletionCompleteEventPusher,
+                retentionService);
     }
 
     @Test
@@ -68,7 +79,7 @@ class DeletionReferralServiceTest {
         referralService.handlePendingDeletion(generatePendingDeletionEvent());
 
         verifyReferralPersisted();
-        verify(eventPusher).grantDeletion(eq(new OffenderNumber(OFFENDER_NUMBER)), any());
+        verify(deletionGrantedEventPusher).grantDeletion(eq(new OffenderNumber(OFFENDER_NUMBER)), any());
     }
 
     @Test
@@ -80,27 +91,41 @@ class DeletionReferralServiceTest {
         referralService.handlePendingDeletion(generatePendingDeletionEvent());
 
         verify(repository, never()).save(any());
-        verify(eventPusher, never()).grantDeletion(any(), anyLong());
+        verify(deletionGrantedEventPusher, never()).grantDeletion(any(), anyLong());
     }
 
     @Test
     void handleDeletionComplete() {
 
-        final var existingReferral = spy(OffenderDeletionReferral.builder().offenderNo(OFFENDER_NUMBER).build());
         final var referralResolution = spy(ReferralResolution.builder().resolutionType(DELETION_GRANTED).build());
+        final var existingReferral = generateOffenderDeletionReferral();
+        existingReferral.setReferralResolution(referralResolution);
 
-        when(existingReferral.getReferralResolution()).thenReturn(Optional.of(referralResolution));
         when(repository.findById(123L)).thenReturn(Optional.of(existingReferral));
+        when(repository.save(existingReferral)).thenReturn(existingReferral);
 
         referralService.handleDeletionComplete(OffenderDeletionCompleteEvent.builder()
                 .offenderIdDisplay(OFFENDER_NUMBER)
                 .referralId(123L)
                 .build());
 
-        InOrder inOrder = inOrder(referralResolution, repository);
+        InOrder inOrder = inOrder(referralResolution, repository, deletionCompleteEventPusher);
         inOrder.verify(referralResolution).setResolutionDateTime(NOW);
         inOrder.verify(referralResolution).setResolutionType(DELETED);
         inOrder.verify(repository).save(existingReferral);
+        inOrder.verify(deletionCompleteEventPusher).sendEvent(
+                uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.builder()
+                        .offenderIdDisplay(OFFENDER_NUMBER)
+                        .offender(builder()
+                                .offenderId(1L)
+                                .booking(new Booking(11L))
+                                .booking(new Booking(12L))
+                                .build())
+                        .offender(builder()
+                                .offenderId(2L)
+                                .booking(new Booking(21L))
+                                .build())
+                        .build());
     }
 
     @Test
@@ -183,7 +208,7 @@ class DeletionReferralServiceTest {
                 .birthDate(LocalDate.of(1969, 1, 1))
                 .offender(OffenderWithBookings.builder()
                         .offenderId(1L)
-                        .booking(new Booking(2L))
+                        .offenderBooking(new OffenderBooking(2L))
                         .build())
                 .build();
     }
@@ -203,8 +228,8 @@ class DeletionReferralServiceTest {
         assertThat(persistedReferral.getBirthDate()).isEqualTo(LocalDate.of(1969, 1, 1));
         assertThat(persistedReferral.getReceivedDateTime()).isEqualTo(NOW);
 
-        assertThat(persistedReferral.getReferredOffenderBookings()).hasSize(1);
-        verifyPersistedBooking(persistedReferral.getReferredOffenderBookings().get(0));
+        assertThat(persistedReferral.getOffenderBookings()).hasSize(1);
+        verifyPersistedBooking(persistedReferral.getOffenderBookings().get(0));
         verifyPersistedResolution(persistedReferral.getReferralResolution().orElseThrow());
     }
 
@@ -216,5 +241,16 @@ class DeletionReferralServiceTest {
     private void verifyPersistedResolution(final ReferralResolution resolution) {
         assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
         assertThat(resolution.getResolutionType()).isEqualTo(DELETION_GRANTED);
+    }
+
+    private OffenderDeletionReferral generateOffenderDeletionReferral() {
+
+        final var referral = spy(OffenderDeletionReferral.builder().offenderNo(OFFENDER_NUMBER).build());
+
+        referral.addReferredOffenderBooking(ReferredOffenderBooking.builder().offenderId(1L).offenderBookId(11L).build());
+        referral.addReferredOffenderBooking(ReferredOffenderBooking.builder().offenderId(1L).offenderBookId(12L).build());
+        referral.addReferredOffenderBooking(ReferredOffenderBooking.builder().offenderId(2L).offenderBookId(21L).build());
+
+        return referral;
     }
 }

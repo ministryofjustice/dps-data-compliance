@@ -46,7 +46,7 @@ class OffenderDeletionReferralRepositoryTest {
     void getOffenderDeletionReferralWithoutBookingsOrResolution() {
         final var referral = repository.findById(1L).orElseThrow();
 
-        assertThat(referral.getReferredOffenderBookings()).isEmpty();
+        assertThat(referral.getOffenderBookings()).isEmpty();
         assertThat(referral.getReferralResolution()).isEmpty();
     }
 
@@ -89,8 +89,8 @@ class OffenderDeletionReferralRepositoryTest {
         assertThat(referral.getBirthDate()).isEqualTo(LocalDate.of(1969, 1, 1));
         assertThat(referral.getReceivedDateTime()).isEqualTo(LocalDateTime.of(2020, 1, 2, 3, 4, 5));
 
-        assertThat(referral.getReferredOffenderBookings()).hasSize(1);
-        assertMatchesExpectedContents(referral.getReferredOffenderBookings().get(0));
+        assertThat(referral.getOffenderBookings()).hasSize(1);
+        assertMatchesExpectedContents(referral.getOffenderBookings().get(0));
 
         assertMatchesExpectedContents(referral.getReferralResolution().orElseThrow());
     }
