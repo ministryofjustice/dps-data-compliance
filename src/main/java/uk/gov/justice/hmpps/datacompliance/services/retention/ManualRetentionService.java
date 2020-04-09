@@ -1,13 +1,13 @@
-package uk.gov.justice.hmpps.datacompliance.services;
+package uk.gov.justice.hmpps.datacompliance.services.retention;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetention;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetentionReason;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonCode;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonCode.Code;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.RetentionReasonCode;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.RetentionReasonCode.Code;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.ManualRetentionRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.RetentionReasonCodeRepository;
 import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -50,11 +49,9 @@ public class ManualRetentionService {
         return manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(offenderNumber.getOffenderNumber());
     }
 
-    public boolean isManuallyRetained(final OffenderNumber offenderNumber) {
+    public Optional<ManualRetention> findManualOffenderRetentionWithReasons(final OffenderNumber offenderNumber) {
         return findManualOffenderRetention(offenderNumber)
-                .map(ManualRetention::getManualRetentionReasons)
-                .filter(not(List::isEmpty))
-                .isPresent();
+                .filter(retention -> !retention.getManualRetentionReasons().isEmpty());
     }
 
     /**

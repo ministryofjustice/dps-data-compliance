@@ -10,14 +10,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.transaction.TestTransaction;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetention;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetentionReason;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonCode.Code.HIGH_PROFILE;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.RetentionReasonCode.Code.HIGH_PROFILE;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")

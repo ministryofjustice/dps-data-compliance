@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services;
+package uk.gov.justice.hmpps.datacompliance.services.referral;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,9 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletio
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
+import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.Objects;
@@ -24,6 +26,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.groupingBy;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.DELETED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.DELETION_GRANTED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.RETAINED;
 import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
 
 @Slf4j
@@ -42,14 +45,10 @@ public class DeletionReferralService {
 
         final var referral = createOffenderDeletionReferral(event);
 
-        if (retentionService.isOffenderEligibleForDeletion(new OffenderNumber(event.getOffenderIdDisplay()))) {
-            log.info("No reason found to retain offender record '{}', granting deletion", event.getOffenderIdDisplay());
-            grantDeletion(referral);
-            return;
-        }
-
-        // TODO GDPR-63 Persist retention reasons
-        log.info("Offender record '{}' has been marked for retention ", event.getOffenderIdDisplay());
+        retentionService.findRetentionReason(new OffenderNumber(event.getOffenderIdDisplay()))
+                .ifPresentOrElse(
+                        retentionReason -> markForRetention(referral, retentionReason),
+                        () -> grantDeletion(referral));
     }
 
     public void handleReferralComplete(final OffenderPendingDeletionReferralCompleteEvent event) {
@@ -69,7 +68,23 @@ public class DeletionReferralService {
         publishDeletionCompleteEvent(referral);
     }
 
+    private void markForRetention(final OffenderDeletionReferral referral, final RetentionReason retentionReason) {
+
+        log.info("Offender record '{}' has been marked for retention ", referral.getOffenderNo());
+
+        final var resolution = ReferralResolution.builder()
+                .resolutionDateTime(timeSource.nowAsLocalDateTime())
+                .resolutionType(RETAINED)
+                .build();
+
+        resolution.setRetentionReason(retentionReason);
+        referral.setReferralResolution(resolution);
+        repository.save(referral);
+    }
+
     private void grantDeletion(final OffenderDeletionReferral referral) {
+
+        log.info("No reason found to retain offender record '{}', granting deletion", referral.getOffenderNo());
 
         referral.setReferralResolution(ReferralResolution.builder()
                 .resolutionDateTime(timeSource.nowAsLocalDateTime())

@@ -1,12 +1,13 @@
 package uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -22,9 +23,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(of = {"resolutionId"})
 @ToString(exclude = "offenderDeletionReferral") // to avoid circular reference
 @Table(name = "REFERRAL_RESOLUTION")
@@ -34,6 +33,19 @@ public class ReferralResolution {
         RETAINED,
         DELETION_GRANTED,
         DELETED
+    }
+
+    // Not using @AllArgsConstructor so that retentionReason
+    // does not appear in the builder:
+    @Builder
+    public ReferralResolution(final Long resolutionId,
+                              final OffenderDeletionReferral offenderDeletionReferral,
+                              final ReferralResolution.ResolutionType resolutionType,
+                              final LocalDateTime resolutionDateTime) {
+        this.resolutionId = resolutionId;
+        this.offenderDeletionReferral = offenderDeletionReferral;
+        this.resolutionType = resolutionType;
+        this.resolutionDateTime = resolutionDateTime;
     }
 
     @Id
@@ -54,6 +66,14 @@ public class ReferralResolution {
     @NotNull
     @Column(name = "RESOLUTION_DATE_TIME")
     private LocalDateTime resolutionDateTime;
+
+    @OneToOne(mappedBy = "referralResolution", cascade = CascadeType.PERSIST)
+    private RetentionReason retentionReason;
+
+    public void setRetentionReason(final RetentionReason reason) {
+        this.retentionReason = reason;
+        reason.setReferralResolution(this);
+    }
 
     public boolean isType(final ResolutionType type) {
         return type == resolutionType;
