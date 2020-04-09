@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository;
+package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

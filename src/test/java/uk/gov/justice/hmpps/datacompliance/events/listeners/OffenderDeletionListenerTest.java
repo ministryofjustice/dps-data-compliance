@@ -70,10 +70,10 @@ class OffenderDeletionListenerTest {
 
     @Test
     void handleDeletionComplete() {
-        handleMessage("{\"offenderIdDisplay\":\"A1234AA\"}",
+        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":\"123\"}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE"));
 
-        verify(service).handleDeletionComplete(new OffenderDeletionCompleteEvent("A1234AA"));
+        verify(service).handleDeletionComplete(new OffenderDeletionCompleteEvent("A1234AA", 123L));
     }
 
     @Test

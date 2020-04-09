@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.repository.jpa.model;
+package uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
