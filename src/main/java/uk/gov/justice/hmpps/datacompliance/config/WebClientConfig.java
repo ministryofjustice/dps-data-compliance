@@ -18,13 +18,21 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    private final String elite2ApiBaseUrl;
     private final String oauthApiBaseUrl;
+    private final String elite2ApiBaseUrl;
+    private final String pathfinderApiBaseUrl;
 
-    public WebClientConfig(@Value("${elite2.api.base.url}") @URL final String elite2ApiBaseUrl,
-                           @Value("${oauth.api.base.url}") @URL final String oauthApiBaseUrl) {
-        this.elite2ApiBaseUrl = elite2ApiBaseUrl;
+    public WebClientConfig(@Value("${oauth.api.base.url}") @URL final String oauthApiBaseUrl,
+                           @Value("${elite2.api.base.url}") @URL final String elite2ApiBaseUrl,
+                           @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl) {
         this.oauthApiBaseUrl = oauthApiBaseUrl;
+        this.elite2ApiBaseUrl = elite2ApiBaseUrl;
+        this.pathfinderApiBaseUrl = pathfinderApiBaseUrl;
+    }
+
+    @Bean(name = "oauthApiHealthWebClient")
+    WebClient oauthApiHealthWebClient() {
+        return WebClient.create(oauthApiBaseUrl);
     }
 
     @Bean(name = "elite2ApiHealthWebClient")
@@ -32,9 +40,9 @@ public class WebClientConfig {
         return WebClient.create(elite2ApiBaseUrl);
     }
 
-    @Bean(name = "oauthApiHealthWebClient")
-    WebClient oauthApiHealthWebClient() {
-        return WebClient.create(oauthApiBaseUrl);
+    @Bean(name = "pathfinderApiHealthWebClient")
+    WebClient pathfinderApiHealthWebClient() {
+        return WebClient.create(pathfinderApiBaseUrl);
     }
 
     @Bean(name = "authorizedWebClient")

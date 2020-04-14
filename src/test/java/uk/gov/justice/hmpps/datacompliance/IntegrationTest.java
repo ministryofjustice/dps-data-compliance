@@ -17,15 +17,18 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ContextConfiguration
 public class IntegrationTest {
 
-    protected static MockWebServer elite2ApiMock;
     protected static MockWebServer oauthApiMock;
+    protected static MockWebServer elite2ApiMock;
+    protected static MockWebServer pathfinderApiMock;
 
     @BeforeAll
     protected static void setUp() throws Exception {
-        elite2ApiMock = new MockWebServer();
-        elite2ApiMock.start(8999);
         oauthApiMock = new MockWebServer();
-        oauthApiMock.start(8998);
+        oauthApiMock.start(8999);
+        elite2ApiMock = new MockWebServer();
+        elite2ApiMock.start(8998);
+        pathfinderApiMock = new MockWebServer();
+        pathfinderApiMock.start(8997);
     }
 
     protected void mockExternalServiceResponseCode(final int status) {
@@ -35,12 +38,14 @@ public class IntegrationTest {
 
         elite2ApiMock.enqueue(response);
         oauthApiMock.enqueue(response);
+        pathfinderApiMock.enqueue(response);
     }
 
     @AfterAll
     protected static void tearDown() throws Exception {
         elite2ApiMock.shutdown();
         oauthApiMock.shutdown();
+        pathfinderApiMock.shutdown();
     }
 
     @Autowired
