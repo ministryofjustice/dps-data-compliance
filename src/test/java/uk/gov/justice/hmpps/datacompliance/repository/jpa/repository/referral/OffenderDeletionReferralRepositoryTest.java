@@ -97,6 +97,7 @@ class OffenderDeletionReferralRepositoryTest {
 
         resolution.setRetentionReason(RetentionReason.builder()
                 .manualRetention(manualRetentionRepository.findById(1L).orElseThrow())
+                .pathfinderReferred(true)
                 .build());
 
         return resolution;
@@ -130,5 +131,6 @@ class OffenderDeletionReferralRepositoryTest {
 
     private void assertMatchesExpectedContents(final RetentionReason retentionReason) {
         assertThat(retentionReason.getManualRetention().getManualRetentionId()).isEqualTo(1L);
+        assertThat(retentionReason.getPathfinderReferred()).isTrue();
     }
 }

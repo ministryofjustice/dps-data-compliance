@@ -42,4 +42,7 @@ public class RetentionReason {
     @ManyToOne
     @JoinColumn(name = "MANUAL_RETENTION_ID")
     private ManualRetention manualRetention;
+
+    @Column(name = "PATHFINDER_REFERRED", nullable = false)
+    private Boolean pathfinderReferred;
 }

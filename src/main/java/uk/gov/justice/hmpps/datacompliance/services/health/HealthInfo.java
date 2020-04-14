@@ -25,7 +25,7 @@ class HealthInfo implements HealthIndicator {
 
         var status = Health.up().withDetail("version", getVersion()).build();
 
-        log.info(status.toString());
+        log.trace(status.toString());
 
         return status;
     }
