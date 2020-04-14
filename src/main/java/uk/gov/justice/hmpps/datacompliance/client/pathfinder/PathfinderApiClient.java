@@ -32,7 +32,10 @@ public class PathfinderApiClient {
         final var response = webClient.get()
                 .uri(url)
                 .retrieve()
+
+                // Not found should not generate an exception:
                 .onStatus(NOT_FOUND::equals, ignored -> Mono.empty())
+
                 .toBodilessEntity()
                 .block(dataComplianceProperties.getPathfinderApiTimeout());
 
