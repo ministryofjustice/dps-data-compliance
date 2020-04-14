@@ -10,11 +10,14 @@ env:
   - name: JAVA_OPTS
     value: "{{ .Values.env.JAVA_OPTS }}"
 
+  - name: OAUTH_API_BASE_URL
+    value: "{{ .Values.env.OAUTH_API_BASE_URL }}"
+
   - name: ELITE2_API_BASE_URL
     value: "{{ .Values.env.ELITE2_API_BASE_URL }}"
 
-  - name: OAUTH_API_BASE_URL
-    value: "{{ .Values.env.OAUTH_API_BASE_URL }}"
+  - name: PATHFINDER_API_BASE_URL
+    value: "{{ .Values.env.PATHFINDER_API_BASE_URL }}"
 
   - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
     value: "{{ .Values.env.SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI }}"
