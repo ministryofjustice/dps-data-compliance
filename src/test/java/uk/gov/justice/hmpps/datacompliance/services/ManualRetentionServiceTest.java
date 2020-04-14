@@ -8,12 +8,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetention;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonCode;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonCode.Code;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.RetentionReasonCode;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.RetentionReasonCode.Code;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.ManualRetentionRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.RetentionReasonCodeRepository;
 import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
+import uk.gov.justice.hmpps.datacompliance.services.retention.ManualRetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReason;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonCode;
@@ -119,40 +120,40 @@ class ManualRetentionServiceTest {
     }
 
     @Test
-    void isManuallyRetainedReturnsTrueIfLatestRecordHasRetentionReasons() {
+    void findManualOffenderRetentionWithReasons() {
 
         final var manualRetention = ManualRetention.builder().build();
 
         manualRetention.addManualRetentionReason(
-                uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetentionReason.builder().build());
+                uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetentionReason.builder().build());
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
                 .thenReturn(Optional.of(manualRetention));
 
-        assertThat(manualRetentionService.isManuallyRetained(new OffenderNumber(OFFENDER_NO)))
-                .isTrue();
+        assertThat(manualRetentionService.findManualOffenderRetentionWithReasons(new OffenderNumber(OFFENDER_NO)))
+                .contains(manualRetention);
     }
 
     @Test
-    void isManuallyRetainedReturnsFalseWhenNoRetentionRecord() {
+    void findManualOffenderRetentionWithReasonsReturnsEmptyWhenNoRetentionRecord() {
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
                 .thenReturn(Optional.empty());
 
-        assertThat(manualRetentionService.isManuallyRetained(new OffenderNumber(OFFENDER_NO)))
-                .isFalse();
+        assertThat(manualRetentionService.findManualOffenderRetentionWithReasons(new OffenderNumber(OFFENDER_NO)))
+                .isEmpty();
     }
 
     @Test
-    void isManuallyRetainedReturnsFalseWhenReasonsAreEmpty() {
+    void findManualOffenderRetentionWithReasonsReturnsEmptyWhenReasonsAreEmpty() {
 
         final var manualRetention = ManualRetention.builder().build();
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
                 .thenReturn(Optional.of(manualRetention));
 
-        assertThat(manualRetentionService.isManuallyRetained(new OffenderNumber(OFFENDER_NO)))
-                .isFalse();
+        assertThat(manualRetentionService.findManualOffenderRetentionWithReasons(new OffenderNumber(OFFENDER_NO)))
+                .isEmpty();
     }
 
     @Test

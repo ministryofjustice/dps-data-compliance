@@ -12,7 +12,7 @@ import static lombok.AccessLevel.PRIVATE;
 public class ManualRetentionTransform {
 
     public static ManualRetention transform(
-            final uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetention manualRetention) {
+            final uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention manualRetention) {
 
         return ManualRetention.builder()
                 .offenderNo(manualRetention.getOffenderNo())
@@ -25,7 +25,7 @@ public class ManualRetentionTransform {
     }
 
     public static ManualRetentionReason transform(
-            final uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.ManualRetentionReason reason) {
+            final uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetentionReason reason) {
         return ManualRetentionReason.builder()
                 .reasonCode(ManualRetentionReasonCode.valueOf(reason.getRetentionReasonCodeId().getRetentionReasonCodeId().name()))
                 .reasonDetails(reason.getReasonDetails())

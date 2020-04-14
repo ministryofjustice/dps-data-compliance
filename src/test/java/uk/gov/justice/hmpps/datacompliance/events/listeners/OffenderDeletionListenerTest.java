@@ -13,7 +13,7 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingD
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderWithBookings;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
-import uk.gov.justice.hmpps.datacompliance.services.DeletionReferralService;
+import uk.gov.justice.hmpps.datacompliance.services.referral.DeletionReferralService;
 
 import java.time.LocalDate;
 import java.util.Map;

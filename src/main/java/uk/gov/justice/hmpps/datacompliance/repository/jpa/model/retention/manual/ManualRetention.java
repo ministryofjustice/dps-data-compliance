@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention;
+package uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

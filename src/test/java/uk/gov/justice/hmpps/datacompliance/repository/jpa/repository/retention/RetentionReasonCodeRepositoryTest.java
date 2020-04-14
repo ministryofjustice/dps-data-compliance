@@ -13,7 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonCode.Code.HIGH_PROFILE;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.RetentionReasonCode.Code.HIGH_PROFILE;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
