@@ -3,11 +3,14 @@ management:
     health.cache.time-to-live: 0
     info.cache.time-to-live: 0
 
-elite2:
+oauth:
   api.base.url: http://localhost:8999
 
-oauth:
+elite2:
   api.base.url: http://localhost:8998
+
+pathfinder:
+  api.base.url: http://localhost:8997
 
 app.db.url: jdbc:hsqldb:mem:data-compliance-db;sql.syntax_pgs=true;shutdown=false
 

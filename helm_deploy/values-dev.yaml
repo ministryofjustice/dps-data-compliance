@@ -22,8 +22,9 @@ ingress:
 env:
   JAVA_OPTS: "Xmx512m"
 
-  ELITE2_API_BASE_URL: "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api"
   OAUTH_API_BASE_URL: "https://gateway.t3.nomis-api.hmpps.dsd.io/auth"
+  ELITE2_API_BASE_URL: "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api"
+  PATHFINDER_API_BASE_URL: "https://dev-api.pathfinder.service.justice.gov.uk"
 
   SNS_PROVIDER: aws
 

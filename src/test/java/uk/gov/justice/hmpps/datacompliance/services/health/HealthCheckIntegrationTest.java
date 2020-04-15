@@ -19,8 +19,9 @@ public class HealthCheckIntegrationTest extends IntegrationTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.status").isEqualTo("UP")
+                .jsonPath("$.components['healthCheck.OAuthApiHealth'].status").isEqualTo("UP")
                 .jsonPath("$.components['healthCheck.Elite2ApiHealth'].status").isEqualTo("UP")
-                .jsonPath("$.components['healthCheck.OAuthApiHealth'].status").isEqualTo("UP");
+                .jsonPath("$.components['healthCheck.PathfinderApiHealth'].status").isEqualTo("UP");
     }
 
     @Test
@@ -45,10 +46,12 @@ public class HealthCheckIntegrationTest extends IntegrationTest {
                 .expectStatus().isEqualTo(503)
                 .expectBody()
                 .jsonPath("$.status").isEqualTo("DOWN")
+                .jsonPath("$.components['healthCheck.OAuthApiHealth'].status").isEqualTo("DOWN")
+                .jsonPath("$.components['healthCheck.OAuthApiHealth'].details.error").value(containsString("404 Not Found"))
                 .jsonPath("$.components['healthCheck.Elite2ApiHealth'].status").isEqualTo("DOWN")
                 .jsonPath("$.components['healthCheck.Elite2ApiHealth'].details.error").value(containsString("404 Not Found"))
-                .jsonPath("$.components['healthCheck.OAuthApiHealth'].status").isEqualTo("DOWN")
-                .jsonPath("$.components['healthCheck.OAuthApiHealth'].details.error").value(containsString("404 Not Found"));
+                .jsonPath("$.components['healthCheck.PathfinderApiHealth'].status").isEqualTo("DOWN")
+                .jsonPath("$.components['healthCheck.PathfinderApiHealth'].details.error").value(containsString("404 Not Found"));
     }
 
 }

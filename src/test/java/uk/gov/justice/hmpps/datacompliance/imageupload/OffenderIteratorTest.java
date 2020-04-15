@@ -109,7 +109,13 @@ class OffenderIteratorTest {
     @Test
     void canLimitIterationOverAConfigurableSubset() {
 
-        offenderIterator = new OffenderIterator(client, new DataComplianceProperties("some-url", 2, REQUEST_LIMIT, 1L, 1L));
+        offenderIterator = new OffenderIterator(client,
+                DataComplianceProperties.builder()
+                        .elite2ApiOffenderIdsIterationThreads(2)
+                        .elite2ApiOffenderIdsLimit(REQUEST_LIMIT)
+                        .elite2ApiOffenderIdsInitialOffset(1L)
+                        .elite2ApiOffenderIdsTotalPages(1L)
+                        .build());
 
         mockOffenderNumbersResponseWithOffset(1, "offender1", "offender2", "offender3", "offender4");
 

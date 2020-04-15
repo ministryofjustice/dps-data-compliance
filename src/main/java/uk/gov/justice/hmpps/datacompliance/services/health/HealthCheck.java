@@ -48,4 +48,11 @@ abstract class HealthCheck implements HealthIndicator {
             super(client);
         }
     }
+
+    @Component
+    static class PathfinderApiHealth extends HealthCheck {
+        protected PathfinderApiHealth(@Qualifier("pathfinderApiHealthWebClient") final WebClient client) {
+            super(client);
+        }
+    }
 }
