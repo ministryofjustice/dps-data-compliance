@@ -1,12 +1,15 @@
 package uk.gov.justice.hmpps.datacompliance.services.retention;
 
+import com.google.common.collect.ImmutableList;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.client.pathfinder.PathfinderApiClient;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonManual;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonPathfinder;
 
-import java.util.Optional;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -15,24 +18,22 @@ public class RetentionService {
     private final PathfinderApiClient pathfinderApiClient;
     private final ManualRetentionService manualRetentionService;
 
-    public Optional<RetentionReason> findRetentionReason(final OffenderNumber offenderNumber) {
+    public List<RetentionReason> findRetentionReasons(final OffenderNumber offenderNumber) {
 
         // TODO GDPR-51 complete the following checks
         //  * Duplicates
         //  * Moratoria
 
-        final var isReferredToPathfinder = pathfinderApiClient.isReferredToPathfinder(offenderNumber);
-        final var manualRetention = manualRetentionService.findManualOffenderRetentionWithReasons(offenderNumber);
+        final var retentionReasons = ImmutableList.<RetentionReason>builder();
 
-        if (!isReferredToPathfinder && manualRetention.isEmpty()) {
-            return Optional.empty();
+        if (pathfinderApiClient.isReferredToPathfinder(offenderNumber)) {
+            retentionReasons.add(new RetentionReasonPathfinder());
         }
 
-        final var retentionReason = RetentionReason.builder()
-                .pathfinderReferred(isReferredToPathfinder);
+        manualRetentionService.findManualOffenderRetentionWithReasons(offenderNumber)
+                .ifPresent(manualRetention ->
+                        retentionReasons.add(new RetentionReasonManual().setManualRetention(manualRetention)));
 
-        manualRetention.ifPresent(retentionReason::manualRetention);
-
-        return Optional.of(retentionReason.build());
+        return retentionReasons.build();
     }
 }

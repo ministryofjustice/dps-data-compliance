@@ -20,7 +20,9 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.Of
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.groupingBy;
@@ -45,10 +47,15 @@ public class DeletionReferralService {
 
         final var referral = createOffenderDeletionReferral(event);
 
-        retentionService.findRetentionReason(new OffenderNumber(event.getOffenderIdDisplay()))
-                .ifPresentOrElse(
-                        retentionReason -> markForRetention(referral, retentionReason),
-                        () -> grantDeletion(referral));
+        final var retentionReasons = retentionService.findRetentionReasons(
+                new OffenderNumber(event.getOffenderIdDisplay()));
+
+        if (!retentionReasons.isEmpty()) {
+            markForRetention(referral, retentionReasons);
+            return;
+        }
+
+        grantDeletion(referral);
     }
 
     public void handleReferralComplete(final OffenderPendingDeletionReferralCompleteEvent event) {
@@ -68,7 +75,8 @@ public class DeletionReferralService {
         publishDeletionCompleteEvent(referral);
     }
 
-    private void markForRetention(final OffenderDeletionReferral referral, final RetentionReason retentionReason) {
+    private void markForRetention(final OffenderDeletionReferral referral,
+                                  final List<RetentionReason> retentionReasons) {
 
         log.info("Offender record '{}' has been marked for retention ", referral.getOffenderNo());
 
@@ -77,7 +85,7 @@ public class DeletionReferralService {
                 .resolutionType(RETAINED)
                 .build();
 
-        resolution.setRetentionReason(retentionReason);
+        retentionReasons.forEach(resolution::addRetentionReason);
         referral.setReferralResolution(resolution);
         repository.save(referral);
     }

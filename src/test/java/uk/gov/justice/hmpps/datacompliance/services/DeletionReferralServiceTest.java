@@ -27,8 +27,10 @@ import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -77,8 +79,8 @@ class DeletionReferralServiceTest {
     @Test
     void handlePendingDeletionWhenOffenderEligibleForDeletion() {
 
-        when(retentionService.findRetentionReason(new OffenderNumber(OFFENDER_NUMBER)))
-                .thenReturn(Optional.empty());
+        when(retentionService.findRetentionReasons(new OffenderNumber(OFFENDER_NUMBER)))
+                .thenReturn(emptyList());
 
         referralService.handlePendingDeletion(generatePendingDeletionEvent());
 
@@ -94,8 +96,8 @@ class DeletionReferralServiceTest {
 
         final var retentionReason = mock(RetentionReason.class);
 
-        when(retentionService.findRetentionReason(new OffenderNumber(OFFENDER_NUMBER)))
-                .thenReturn(Optional.of(retentionReason));
+        when(retentionService.findRetentionReasons(new OffenderNumber(OFFENDER_NUMBER)))
+                .thenReturn(List.of(retentionReason));
 
         referralService.handlePendingDeletion(generatePendingDeletionEvent());
 

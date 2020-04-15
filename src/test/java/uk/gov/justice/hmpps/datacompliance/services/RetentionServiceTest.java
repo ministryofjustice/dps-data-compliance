@@ -7,7 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.client.pathfinder.PathfinderApiClient;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonManual;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonPathfinder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ManualRetentionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
@@ -43,9 +44,8 @@ class RetentionServiceTest {
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER))
                 .thenReturn(Optional.empty());
 
-        assertThat(service.findRetentionReason(OFFENDER_NUMBER)).contains(RetentionReason.builder()
-                .pathfinderReferred(true)
-                .build());
+        assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
+                .containsExactly(new RetentionReasonPathfinder());
     }
 
     @Test
@@ -57,10 +57,8 @@ class RetentionServiceTest {
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER))
                 .thenReturn(Optional.of(manualRetention));
 
-        assertThat(service.findRetentionReason(OFFENDER_NUMBER)).contains(RetentionReason.builder()
-                .pathfinderReferred(false)
-                .manualRetention(manualRetention)
-                .build());
+        assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
+                .containsExactly(new RetentionReasonManual().setManualRetention(manualRetention));
     }
 
     @Test
@@ -72,10 +70,10 @@ class RetentionServiceTest {
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER))
                 .thenReturn(Optional.of(manualRetention));
 
-        assertThat(service.findRetentionReason(OFFENDER_NUMBER)).contains(RetentionReason.builder()
-                .pathfinderReferred(true)
-                .manualRetention(manualRetention)
-                .build());
+        assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
+                .containsExactlyInAnyOrder(
+                        new RetentionReasonPathfinder(),
+                        new RetentionReasonManual().setManualRetention(manualRetention));
     }
 
     @Test
@@ -85,6 +83,6 @@ class RetentionServiceTest {
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER))
                 .thenReturn(Optional.empty());
 
-        assertThat(service.findRetentionReason(OFFENDER_NUMBER)).isEmpty();
+        assertThat(service.findRetentionReasons(OFFENDER_NUMBER)).isEmpty();
     }
 }

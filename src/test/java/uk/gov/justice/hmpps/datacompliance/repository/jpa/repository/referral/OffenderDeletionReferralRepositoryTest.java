@@ -14,14 +14,20 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Offende
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonManual;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonPathfinder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.ManualRetentionRepository;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.RETAINED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonManual.MANUAL_RETENTION;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonPathfinder.PATHFINDER_REFERRAL;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -42,6 +48,7 @@ class OffenderDeletionReferralRepositoryTest {
     @Sql("referral_resolution.sql")
     @Sql("manual_retention.sql")
     @Sql("retention_reason.sql")
+    @Sql("retention_reason_manual.sql")
     void getOffenderDeletionReferral() {
         assertMatchesExpectedContents(repository.findById(1L).orElseThrow());
     }
@@ -90,17 +97,14 @@ class OffenderDeletionReferralRepositoryTest {
     }
 
     private ReferralResolution referralResolution() {
-        final var resolution = ReferralResolution.builder()
+        return ReferralResolution.builder()
                 .resolutionType(RETAINED)
                 .resolutionDateTime(LocalDateTime.of(2021, 2, 3, 4, 5, 6))
-                .build();
+                .build()
 
-        resolution.setRetentionReason(RetentionReason.builder()
-                .manualRetention(manualRetentionRepository.findById(1L).orElseThrow())
-                .pathfinderReferred(true)
-                .build());
-
-        return resolution;
+                .addRetentionReason(new RetentionReasonPathfinder())
+                .addRetentionReason(new RetentionReasonManual()
+                        .setManualRetention(manualRetentionRepository.findById(1L).orElseThrow()));
     }
 
     private void assertMatchesExpectedContents(final OffenderDeletionReferral referral) {
@@ -126,11 +130,21 @@ class OffenderDeletionReferralRepositoryTest {
         assertThat(resolution.getResolutionType()).isEqualTo(RETAINED);
         assertThat(resolution.isType(RETAINED)).isTrue();
 
-        assertMatchesExpectedContents(resolution.getRetentionReason());
+        assertMatchesExpectedContents(resolution.getRetentionReasons());
     }
 
-    private void assertMatchesExpectedContents(final RetentionReason retentionReason) {
-        assertThat(retentionReason.getManualRetention().getManualRetentionId()).isEqualTo(1L);
-        assertThat(retentionReason.getPathfinderReferred()).isTrue();
+    private void assertMatchesExpectedContents(final List<RetentionReason> retentionReasons) {
+
+        assertThat(retentionReasons).hasSize(2);
+        assertThat(retentionReasons).extracting(RetentionReason::getReasonCode)
+                .containsExactlyInAnyOrder(MANUAL_RETENTION, PATHFINDER_REFERRAL);
+
+        retentionReasons.stream()
+                .filter(reason -> MANUAL_RETENTION.equals(reason.getReasonCode()))
+                .map(RetentionReasonManual.class::cast)
+                .findFirst()
+                .ifPresentOrElse(
+                        reason -> assertThat(reason.getManualRetention().getManualRetentionId()).isEqualTo(1L),
+                        () -> fail("Manual retention reason not found"));
     }
 }
