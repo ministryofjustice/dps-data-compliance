@@ -32,7 +32,10 @@ To upgrade the gradle wrapper version, run:
 ```
 ./gradlew wrapper --gradle-version=<VERSION>
 ```
-
+To automatically update project dependencies, run:
+```
+./gradlew useLatestVersions
+```
 ## Running
 
 The DPS Data Compliance Service, a PostgreSQL database, OAuth API, Elite2 API 
