@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,14 +17,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity
 @Data
+@Entity
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(of = {"resolutionId"})
 @ToString(exclude = "offenderDeletionReferral") // to avoid circular reference
 @Table(name = "REFERRAL_RESOLUTION")
@@ -33,19 +39,6 @@ public class ReferralResolution {
         RETAINED,
         DELETION_GRANTED,
         DELETED
-    }
-
-    // Not using @AllArgsConstructor so that retentionReason
-    // does not appear in the builder:
-    @Builder
-    public ReferralResolution(final Long resolutionId,
-                              final OffenderDeletionReferral offenderDeletionReferral,
-                              final ReferralResolution.ResolutionType resolutionType,
-                              final LocalDateTime resolutionDateTime) {
-        this.resolutionId = resolutionId;
-        this.offenderDeletionReferral = offenderDeletionReferral;
-        this.resolutionType = resolutionType;
-        this.resolutionDateTime = resolutionDateTime;
     }
 
     @Id
@@ -67,12 +60,13 @@ public class ReferralResolution {
     @Column(name = "RESOLUTION_DATE_TIME")
     private LocalDateTime resolutionDateTime;
 
-    @OneToOne(mappedBy = "referralResolution", cascade = CascadeType.PERSIST)
-    private RetentionReason retentionReason;
+    @OneToMany(mappedBy = "referralResolution", cascade = CascadeType.PERSIST)
+    private final List<RetentionReason> retentionReasons = new ArrayList<>();
 
-    public void setRetentionReason(final RetentionReason reason) {
-        this.retentionReason = reason;
+    public ReferralResolution addRetentionReason(final RetentionReason reason) {
+        this.retentionReasons.add(reason);
         reason.setReferralResolution(this);
+        return this;
     }
 
     public boolean isType(final ResolutionType type) {
