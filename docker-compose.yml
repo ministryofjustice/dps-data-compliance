@@ -2,7 +2,7 @@ version: '3.1'
 services:
 
   dps-data-compliance:
-    image: mojdigitalstudio/dps-data-compliance:latest
+    image: quay.io/hmpps/dps-data-compliance:latest
     container_name: dps-data-compliance
     depends_on:
       - localstack
@@ -71,7 +71,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=arbitrary
 
   pathfinder-api:
-    image: mojdigitalstudio/pathfinder-api:latest
+    image: quay.io/hmpps/pathfinder-api:latest
     networks:
       - hmpps
     container_name: pathfinder-api
