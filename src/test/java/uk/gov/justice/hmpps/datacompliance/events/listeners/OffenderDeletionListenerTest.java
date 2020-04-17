@@ -62,15 +62,15 @@ class OffenderDeletionListenerTest {
 
     @Test
     void handleReferralComplete() {
-        handleMessage("{\"requestId\":\"123\"}",
+        handleMessage("{\"batchId\":123}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE"));
 
-        verify(service).handleReferralComplete(new OffenderPendingDeletionReferralCompleteEvent("123"));
+        verify(service).handleReferralComplete(new OffenderPendingDeletionReferralCompleteEvent(123L));
     }
 
     @Test
     void handleDeletionComplete() {
-        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":\"123\"}",
+        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":123}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE"));
 
         verify(service).handleDeletionComplete(new OffenderDeletionCompleteEvent("A1234AA", 123L));

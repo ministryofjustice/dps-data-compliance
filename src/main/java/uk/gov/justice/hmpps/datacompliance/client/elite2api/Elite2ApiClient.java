@@ -83,13 +83,13 @@ public class Elite2ApiClient {
 
     public void requestPendingDeletions(final LocalDateTime windowStart,
                                         final LocalDateTime windowEnd,
-                                        final String requestId) {
+                                        final Long batchId) {
         webClient.post()
                 .uri(dataComplianceProperties.getElite2ApiBaseUrl() + OFFENDER_PENDING_DELETIONS_PATH)
                 .bodyValue(PendingDeletionsRequest.builder()
                         .dueForDeletionWindowStart(windowStart)
                         .dueForDeletionWindowEnd(windowEnd)
-                        .requestId(requestId)
+                        .batchId(batchId)
                         .build())
                 .retrieve()
                 .toBodilessEntity()

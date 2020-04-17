@@ -29,6 +29,6 @@ public class PendingDeletionsRequest {
     @JsonFormat(pattern = ISO_LOCAL_DATE_TIME_FORMAT)
     private LocalDateTime dueForDeletionWindowEnd;
 
-    @JsonProperty("requestId")
-    private String requestId;
+    @JsonProperty("batchId")
+    private Long batchId;
 }

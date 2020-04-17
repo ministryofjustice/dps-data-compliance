@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -35,6 +36,7 @@ public class OffenderDeletionReferral {
     // does not appear in the builder:
     @Builder
     public OffenderDeletionReferral(final Long referralId,
+                                    final OffenderDeletionBatch offenderDeletionBatch,
                                     final String offenderNo,
                                     final String firstName,
                                     final String middleName,
@@ -42,6 +44,7 @@ public class OffenderDeletionReferral {
                                     final LocalDate birthDate,
                                     final LocalDateTime receivedDateTime) {
         this.referralId = referralId;
+        this.offenderDeletionBatch = offenderDeletionBatch;
         this.offenderNo = offenderNo;
         this.firstName = firstName;
         this.middleName = middleName;
@@ -54,6 +57,11 @@ public class OffenderDeletionReferral {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "REFERRAL_ID", nullable = false)
     private Long referralId;
+
+    @NotNull
+    @OneToOne
+    @JoinColumn(name = "BATCH_ID", nullable = false)
+    private OffenderDeletionBatch offenderDeletionBatch;
 
     @NotNull
     @Length(max = 10)

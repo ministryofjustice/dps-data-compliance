@@ -22,7 +22,6 @@ import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.groupingBy;
