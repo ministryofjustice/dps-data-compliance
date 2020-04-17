@@ -164,7 +164,7 @@ class Elite2ApiClientTest {
 
         elite2ApiMock.enqueue(new MockResponse().setResponseCode(202));
 
-        elite2ApiClient.requestPendingDeletions(TIMESTAMP, TIMESTAMP.plusSeconds(1), "request1");
+        elite2ApiClient.requestPendingDeletions(TIMESTAMP, TIMESTAMP.plusSeconds(1), 123L);
 
         RecordedRequest recordedRequest = elite2ApiMock.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("POST");
@@ -172,8 +172,8 @@ class Elite2ApiClientTest {
         assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("{" +
                 "\"dueForDeletionWindowStart\":\"2020-02-01T03:04:05.123456\"," +
                 "\"dueForDeletionWindowEnd\":\"2020-02-01T03:04:06.123456\"," +
-                "\"requestId\":\"request1" +
-                "\"}");
+                "\"batchId\":123" +
+                "}");
     }
 
     @Test
@@ -181,7 +181,7 @@ class Elite2ApiClientTest {
 
         elite2ApiMock.enqueue(new MockResponse().setResponseCode(500));
 
-        assertThatThrownBy(() -> elite2ApiClient.requestPendingDeletions(TIMESTAMP, TIMESTAMP.plusSeconds(1), "request1"))
+        assertThatThrownBy(() -> elite2ApiClient.requestPendingDeletions(TIMESTAMP, TIMESTAMP.plusSeconds(1), 123L))
                 .isInstanceOf(WebClientResponseException.class);
     }
 }

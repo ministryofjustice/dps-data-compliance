@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OffenderPendingDeletionReferralCompleteEvent {
 
-    @JsonProperty("requestId")
-    private String requestId;
+    @JsonProperty("batchId")
+    private Long batchId;
 }

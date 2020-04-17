@@ -40,9 +40,13 @@ class OffenderDeletionReferralRepositoryTest {
     private ManualRetentionRepository manualRetentionRepository;
 
     @Autowired
+    private OffenderDeletionBatchRepository batchRepository;
+
+    @Autowired
     private OffenderDeletionReferralRepository repository;
 
     @Test
+    @Sql("offender_deletion_batch.sql")
     @Sql("offender_deletion_referral.sql")
     @Sql("referred_offender_booking.sql")
     @Sql("referral_resolution.sql")
@@ -54,6 +58,7 @@ class OffenderDeletionReferralRepositoryTest {
     }
 
     @Test
+    @Sql("offender_deletion_batch.sql")
     @Sql("offender_deletion_referral.sql")
     void getOffenderDeletionReferralWithoutBookingsOrResolution() {
         final var referral = repository.findById(1L).orElseThrow();
@@ -63,6 +68,7 @@ class OffenderDeletionReferralRepositoryTest {
     }
 
     @Test
+    @Sql("offender_deletion_batch.sql")
     @Sql("manual_retention.sql")
     void saveOffenderDeletionReferral() {
 
@@ -80,6 +86,7 @@ class OffenderDeletionReferralRepositoryTest {
     private OffenderDeletionReferral offenderDeletionReferral() {
         final var referral = OffenderDeletionReferral.builder()
                 .receivedDateTime(LocalDateTime.of(2020, 1, 2, 3, 4, 5))
+                .offenderDeletionBatch(batchRepository.findById(1L).orElseThrow())
                 .offenderNo("A1234AA")
                 .firstName("John")
                 .middleName("Middle")
