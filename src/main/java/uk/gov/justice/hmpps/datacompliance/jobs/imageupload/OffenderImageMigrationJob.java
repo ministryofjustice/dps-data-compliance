@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.imageupload;
+package uk.gov.justice.hmpps.datacompliance.jobs.imageupload;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

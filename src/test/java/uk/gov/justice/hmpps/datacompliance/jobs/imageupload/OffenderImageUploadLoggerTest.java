@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.imageupload;
+package uk.gov.justice.hmpps.datacompliance.jobs.imageupload;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

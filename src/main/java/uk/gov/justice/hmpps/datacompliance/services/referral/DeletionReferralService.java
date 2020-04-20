@@ -16,6 +16,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Offende
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
@@ -37,7 +38,8 @@ import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
 public class DeletionReferralService {
 
     private final TimeSource timeSource;
-    private final OffenderDeletionReferralRepository repository;
+    private final OffenderDeletionBatchRepository batchRepository;
+    private final OffenderDeletionReferralRepository referralRepository;
     private final OffenderDeletionGrantedEventPusher deletionGrantedEventPusher;
     private final OffenderDeletionCompleteEventPusher deletionCompleteEventPusher;
     private final RetentionService retentionService;
@@ -63,7 +65,7 @@ public class DeletionReferralService {
 
     public void handleDeletionComplete(final OffenderDeletionCompleteEvent event) {
 
-        final var referral = repository.findById(event.getReferralId())
+        final var referral = referralRepository.findById(event.getReferralId())
                 .orElseThrow(illegalState("Cannot retrieve referral record for id: '%s'", event.getReferralId()));
 
         checkState(Objects.equals(event.getOffenderIdDisplay(), referral.getOffenderNo()),
@@ -86,7 +88,7 @@ public class DeletionReferralService {
 
         retentionReasons.forEach(resolution::addRetentionReason);
         referral.setReferralResolution(resolution);
-        repository.save(referral);
+        referralRepository.save(referral);
     }
 
     private void grantDeletion(final OffenderDeletionReferral referral) {
@@ -98,11 +100,11 @@ public class DeletionReferralService {
                 .resolutionType(DELETION_GRANTED)
                 .build());
 
-        repository.save(referral);
+        referralRepository.save(referral);
         deletionGrantedEventPusher.grantDeletion(new OffenderNumber(referral.getOffenderNo()), referral.getReferralId());
     }
 
-    private OffenderDeletionReferral recordDeletionCompletion(final OffenderDeletionReferral referral) {
+    private void recordDeletionCompletion(final OffenderDeletionReferral referral) {
 
         log.info("Updating destruction log with deletion confirmation for: '{}'", referral.getOffenderNo());
 
@@ -113,12 +115,16 @@ public class DeletionReferralService {
         referralResolution.setResolutionDateTime(timeSource.nowAsLocalDateTime());
         referralResolution.setResolutionType(DELETED);
 
-        return repository.save(referral);
+        referralRepository.save(referral);
     }
 
     private OffenderDeletionReferral createOffenderDeletionReferral(final OffenderPendingDeletionEvent event) {
 
+        final var batch = batchRepository.findById(event.getBatchId())
+                .orElseThrow(illegalState("Cannot find deletion batch with id: '%s'", event.getBatchId()));
+
         final var referral = OffenderDeletionReferral.builder()
+                .offenderDeletionBatch(batch)
                 .receivedDateTime(timeSource.nowAsLocalDateTime())
                 .offenderNo(event.getOffenderIdDisplay())
                 .firstName(event.getFirstName())

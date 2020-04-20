@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.imageupload;
+package uk.gov.justice.hmpps.datacompliance.jobs.imageupload;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.github.resilience4j.retry.Retry;

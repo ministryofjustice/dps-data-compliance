@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.imageupload;
+package uk.gov.justice.hmpps.datacompliance.jobs.imageupload;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;

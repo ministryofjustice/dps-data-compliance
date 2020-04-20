@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.With;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 public class OffenderDeletionBatch {
 
     @Id
+    @With
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BATCH_ID", nullable = false)
     private Long batchId;

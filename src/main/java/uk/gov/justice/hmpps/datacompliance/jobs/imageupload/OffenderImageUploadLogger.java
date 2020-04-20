@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.imageupload;
+package uk.gov.justice.hmpps.datacompliance.jobs.imageupload;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
