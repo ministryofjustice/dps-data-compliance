@@ -47,9 +47,11 @@ public class OffenderDeletionListener {
     @JmsListener(destination = "${inbound.referral.sqs.queue.name}")
     public void handleEvent(final Message<String> message) {
 
-        log.debug("Handling incoming offender deletion event: {}", message.getPayload());
+        final var eventType = getEventType(message.getHeaders());
 
-        messageHandlers.get(getEventType(message.getHeaders())).handle(message);
+        log.debug("Handling incoming offender deletion event of type: {}", eventType);
+
+        messageHandlers.get(eventType).handle(message);
     }
 
     private String getEventType(final MessageHeaders messageHeaders) {

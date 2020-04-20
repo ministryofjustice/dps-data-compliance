@@ -15,11 +15,13 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingD
 import uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.completed.OffenderDeletionCompleteEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.granted.OffenderDeletionGrantedEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.Booking;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.services.referral.DeletionReferralService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
@@ -50,10 +52,14 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 class DeletionReferralServiceTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final long BATCH_ID = 123L;
     private static final String OFFENDER_NUMBER = "A1234AA";
 
     @Mock
-    private OffenderDeletionReferralRepository repository;
+    private OffenderDeletionBatchRepository batchRepository;
+
+    @Mock
+    private OffenderDeletionReferralRepository referralRepository;
 
     @Mock
     private OffenderDeletionGrantedEventPusher deletionGrantedEventPusher;
@@ -64,13 +70,17 @@ class DeletionReferralServiceTest {
     @Mock
     private RetentionService retentionService;
 
+    @Mock
+    private OffenderDeletionBatch batch;
+
     private DeletionReferralService referralService;
 
     @BeforeEach
     void setUp() {
         referralService = new DeletionReferralService(
                 TimeSource.of(NOW),
-                repository,
+                batchRepository,
+                referralRepository,
                 deletionGrantedEventPusher,
                 deletionCompleteEventPusher,
                 retentionService);
@@ -79,6 +89,7 @@ class DeletionReferralServiceTest {
     @Test
     void handlePendingDeletionWhenOffenderEligibleForDeletion() {
 
+        when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
         when(retentionService.findRetentionReasons(new OffenderNumber(OFFENDER_NUMBER)))
                 .thenReturn(emptyList());
 
@@ -96,6 +107,7 @@ class DeletionReferralServiceTest {
 
         final var retentionReason = mock(RetentionReason.class);
 
+        when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
         when(retentionService.findRetentionReasons(new OffenderNumber(OFFENDER_NUMBER)))
                 .thenReturn(List.of(retentionReason));
 
@@ -113,8 +125,8 @@ class DeletionReferralServiceTest {
         final var existingReferral = generateOffenderDeletionReferral();
         existingReferral.setReferralResolution(referralResolution);
 
-        when(repository.findById(123L)).thenReturn(Optional.of(existingReferral));
-        when(repository.save(existingReferral)).thenReturn(existingReferral);
+        when(referralRepository.findById(123L)).thenReturn(Optional.of(existingReferral));
+        when(referralRepository.save(existingReferral)).thenReturn(existingReferral);
 
         referralService.handleDeletionComplete(OffenderDeletionCompleteEvent.builder()
                 .offenderIdDisplay(OFFENDER_NUMBER)
@@ -141,20 +153,20 @@ class DeletionReferralServiceTest {
     @Test
     void handleDeletionCompleteThrowsIfReferralNotFound() {
 
-        when(repository.findById(123L)).thenReturn(Optional.empty());
+        when(referralRepository.findById(123L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 referralService.handleDeletionComplete(OffenderDeletionCompleteEvent.builder().referralId(123L).build()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Cannot retrieve referral record for id: '123'");
 
-        verify(repository, never()).save(any());
+        verify(referralRepository, never()).save(any());
     }
 
     @Test
     void handleDeletionCompleteThrowsIfOffenderNumbersDoNotMatch() {
 
-        when(repository.findById(123L)).thenReturn(Optional.of(OffenderDeletionReferral.builder()
+        when(referralRepository.findById(123L)).thenReturn(Optional.of(OffenderDeletionReferral.builder()
                 .referralId(123L)
                 .offenderNo("offender1")
                 .build()));
@@ -167,13 +179,13 @@ class DeletionReferralServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Offender number 'offender1' of referral '123' does not match 'offender2'");
 
-        verify(repository, never()).save(any());
+        verify(referralRepository, never()).save(any());
     }
 
     @Test
     void handleDeletionCompleteThrowsIfResolutionNotFound() {
 
-        when(repository.findById(123L)).thenReturn(Optional.of(OffenderDeletionReferral.builder()
+        when(referralRepository.findById(123L)).thenReturn(Optional.of(OffenderDeletionReferral.builder()
                 .referralId(123L)
                 .offenderNo(OFFENDER_NUMBER)
                 .build()));
@@ -186,7 +198,7 @@ class DeletionReferralServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Referral '123' does not have expected resolution type");
 
-        verify(repository, never()).save(any());
+        verify(referralRepository, never()).save(any());
     }
 
     @Test
@@ -198,7 +210,7 @@ class DeletionReferralServiceTest {
                 .build();
         existingReferral.setReferralResolution(ReferralResolution.builder().resolutionType(DELETED).build());
 
-        when(repository.findById(123L)).thenReturn(Optional.of(existingReferral));
+        when(referralRepository.findById(123L)).thenReturn(Optional.of(existingReferral));
 
         assertThatThrownBy(() ->
                 referralService.handleDeletionComplete(OffenderDeletionCompleteEvent.builder()
@@ -211,6 +223,7 @@ class DeletionReferralServiceTest {
 
     private OffenderPendingDeletionEvent generatePendingDeletionEvent() {
         return OffenderPendingDeletionEvent.builder()
+                .batchId(BATCH_ID)
                 .offenderIdDisplay(OFFENDER_NUMBER)
                 .firstName("John")
                 .middleName("Middle")
@@ -227,10 +240,11 @@ class DeletionReferralServiceTest {
 
         final var referralCaptor = ArgumentCaptor.forClass(OffenderDeletionReferral.class);
 
-        verify(repository).save(referralCaptor.capture());
+        verify(referralRepository).save(referralCaptor.capture());
 
         final var persistedReferral = referralCaptor.getValue();
 
+        assertThat(persistedReferral.getOffenderDeletionBatch()).isEqualTo(batch);
         assertThat(persistedReferral.getOffenderNo()).isEqualTo(OFFENDER_NUMBER);
         assertThat(persistedReferral.getFirstName()).isEqualTo("John");
         assertThat(persistedReferral.getMiddleName()).isEqualTo("Middle");
@@ -254,6 +268,7 @@ class DeletionReferralServiceTest {
     private OffenderDeletionReferral generateOffenderDeletionReferral() {
 
         final var referral = spy(OffenderDeletionReferral.builder()
+                .offenderDeletionBatch(batch)
                 .offenderNo(OFFENDER_NUMBER)
                 .firstName("John")
                 .middleName("Middle")

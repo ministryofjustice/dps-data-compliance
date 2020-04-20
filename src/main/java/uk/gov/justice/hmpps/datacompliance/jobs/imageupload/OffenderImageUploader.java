@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.imageupload;
+package uk.gov.justice.hmpps.datacompliance.jobs.imageupload;
 
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
@@ -7,7 +7,7 @@ import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMet
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
-import uk.gov.justice.hmpps.datacompliance.imageupload.OffenderIterator.OffenderAction;
+import uk.gov.justice.hmpps.datacompliance.jobs.imageupload.OffenderIterator.OffenderAction;
 
 @Slf4j
 @AllArgsConstructor
