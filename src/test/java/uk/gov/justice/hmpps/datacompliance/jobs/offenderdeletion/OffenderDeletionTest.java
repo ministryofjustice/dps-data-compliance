@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -70,6 +71,44 @@ class OffenderDeletionTest {
         offenderDeletion.run();
 
         verify(elite2ApiClient).requestPendingDeletions(INITIAL_WINDOW_START.plusDays(1), INITIAL_WINDOW_START.plusDays(2), BATCH_ID);
+    }
+
+    @Test
+    void offenderDeletionRequestFailsIfStartDateInFuture() {
+
+        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
+                batchWith(NOW.plusSeconds(1))));
+
+        assertThatThrownBy(() -> offenderDeletion.run())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Deletion due date cannot be in the future, window start date is not valid");
+    }
+
+    @Test
+    void offenderDeletionRequestFailsIfEndDateInFuture() {
+
+        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
+                batchWith(NOW.minusDays(2).plusSeconds(1))));
+
+        assertThatThrownBy(() -> offenderDeletion.run())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Deletion due date cannot be in the future, window end date is not valid");
+    }
+
+    @Test
+    void offenderDeletionRequestFailsIfWindowDatesIllogical() {
+
+        final var badConfig = OffenderDeletionConfig.builder()
+                .initialWindowStart(INITIAL_WINDOW_START)
+                .windowLength(Duration.ofDays(-1))
+                .build();
+
+        offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), badConfig, batchRepository, elite2ApiClient);
+        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> offenderDeletion.run())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Deletion due window dates are illogical");
     }
 
     private OffenderDeletionBatch batchWith(final LocalDateTime windowStart) {
