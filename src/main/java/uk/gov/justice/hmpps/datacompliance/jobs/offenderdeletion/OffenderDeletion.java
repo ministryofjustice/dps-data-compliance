@@ -11,6 +11,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.Of
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -29,8 +30,7 @@ class OffenderDeletion {
 
         log.info("Running offender deletion");
 
-        final var windowStart = getLastBatch().map(OffenderDeletionBatch::getWindowEndDateTime)
-                .orElse(config.getInitialWindowStart());
+        final var windowStart = windowStart();
         final var windowEnd = windowStart.plus(config.getWindowLength());
 
         log.info("Deleting offenders due for deletion between: {} and {}", windowStart, windowEnd);
@@ -44,6 +44,11 @@ class OffenderDeletion {
         elite2ApiClient.requestPendingDeletions(windowStart, windowEnd, batch.getBatchId());
 
         log.info("Offender deletion request complete");
+    }
+
+    private LocalDateTime windowStart() {
+        return getLastBatch().map(OffenderDeletionBatch::getWindowEndDateTime)
+                .orElse(config.getInitialWindowStart());
     }
 
     private Optional<OffenderDeletionBatch> getLastBatch() {
