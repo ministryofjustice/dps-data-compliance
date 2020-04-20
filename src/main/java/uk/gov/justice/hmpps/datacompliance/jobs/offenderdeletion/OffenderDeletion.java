@@ -14,6 +14,9 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
+
 @Slf4j
 @Service
 @Transactional
@@ -32,6 +35,7 @@ class OffenderDeletion {
 
         final var windowStart = windowStart();
         final var windowEnd = windowStart.plus(config.getWindowLength());
+        validateWindow(windowStart, windowEnd);
 
         log.info("Deleting offenders due for deletion between: {} and {}", windowStart, windowEnd);
 
@@ -53,5 +57,14 @@ class OffenderDeletion {
 
     private Optional<OffenderDeletionBatch> getLastBatch() {
         return repository.findFirstByOrderByRequestDateTimeDesc();
+    }
+
+    private void validateWindow(final LocalDateTime windowStart, final LocalDateTime windowEnd) {
+        checkArgument(windowStart.isBefore(timeSource.nowAsLocalDateTime()),
+                "Deletion due date cannot be in the future, window start date is not valid: %s", windowStart);
+        checkArgument(windowEnd.isBefore(timeSource.nowAsLocalDateTime()),
+                "Deletion due date cannot be in the future, window end date is not valid: %s", windowEnd);
+        checkState(windowStart.isBefore(windowEnd),
+                "Deletion due window dates are illogical: '%s' > '%s'", windowStart, windowEnd);
     }
 }
