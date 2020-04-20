@@ -67,6 +67,21 @@ env:
     value: "{{ .Values.env.INBOUND_REFERRAL_SQS_PROVIDER }}"
   {{- end }}
 
+  {{- if .Values.env.OFFENDER_DELETION_CRON }}
+  - name: OFFENDER_DELETION_CRON
+    value: "{{ .Values.env.OFFENDER_DELETION_CRON }}"
+  {{- end }}
+
+  {{- if .Values.env.OFFENDER_DELETION_INITIAL_WINDOW_START }}
+  - name: OFFENDER_DELETION_INITIAL_WINDOW_START
+    value: "{{ .Values.env.OFFENDER_DELETION_INITIAL_WINDOW_START }}"
+  {{- end }}
+
+  {{- if .Values.env.OFFENDER_DELETION_WINDOW_LENGTH }}
+  - name: OFFENDER_DELETION_WINDOW_LENGTH
+    value: "{{ .Values.env.OFFENDER_DELETION_WINDOW_LENGTH }}"
+  {{- end }}
+
   - name: SPRING_DATASOURCE_USERNAME
     valueFrom:
       secretKeyRef:
