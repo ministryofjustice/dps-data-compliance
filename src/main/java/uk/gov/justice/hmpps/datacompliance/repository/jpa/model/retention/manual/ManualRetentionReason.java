@@ -18,6 +18,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import static javax.persistence.FetchType.LAZY;
+
 @Data
 @Entity
 @Builder
@@ -34,12 +36,12 @@ public class ManualRetentionReason {
     private Long manualRetentionReasonId;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "MANUAL_RETENTION_ID", nullable = false)
     private ManualRetention manualRetention;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "RETENTION_REASON_CODE_ID", nullable = false)
     private RetentionReasonCode retentionReasonCodeId;
 

@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -24,6 +23,9 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.FetchType.LAZY;
 
 @Data
 @Entity
@@ -47,7 +49,7 @@ public class ReferralResolution {
     private Long resolutionId;
 
     @NotNull
-    @OneToOne
+    @OneToOne(fetch = LAZY)
     @JoinColumn(name = "REFERRAL_ID", nullable = false)
     private OffenderDeletionReferral offenderDeletionReferral;
 
@@ -60,7 +62,7 @@ public class ReferralResolution {
     @Column(name = "RESOLUTION_DATE_TIME")
     private LocalDateTime resolutionDateTime;
 
-    @OneToMany(mappedBy = "referralResolution", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "referralResolution", cascade = PERSIST, fetch = LAZY)
     private final List<RetentionReason> retentionReasons = new ArrayList<>();
 
     public ReferralResolution addRetentionReason(final RetentionReason reason) {

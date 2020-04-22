@@ -18,6 +18,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+import static javax.persistence.FetchType.LAZY;
+
 @Data
 @Entity
 @Builder
@@ -49,8 +51,9 @@ public class OffenderImageUpload {
     @Column(name = "UPLOAD_DATE_TIME", nullable = false)
     private LocalDateTime uploadDateTime;
 
-    @ManyToOne
-    @JoinColumn(name = "BATCH_ID")
+    @NotNull
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "BATCH_ID", nullable = false)
     private ImageUploadBatch imageUploadBatch;
 
     @Length(max = 255)

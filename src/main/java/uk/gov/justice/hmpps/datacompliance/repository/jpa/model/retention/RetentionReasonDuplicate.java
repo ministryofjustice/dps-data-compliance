@@ -9,11 +9,9 @@ import lombok.ToString;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -24,16 +22,19 @@ import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.FetchType.LAZY;
+
 @Entity
 @DiscriminatorValue(RetentionReasonDuplicate.DUPLICATE)
 public class RetentionReasonDuplicate extends RetentionReason {
 
     public static final String DUPLICATE = "DUPLICATE";
 
-    @OneToMany(mappedBy = "retentionReason", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "retentionReason", cascade = PERSIST, fetch = LAZY)
     private final List<RetentionReasonDataDuplicate> dataDuplicates = new ArrayList<>();
 
-    @OneToMany(mappedBy = "retentionReason", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "retentionReason", cascade = PERSIST, fetch = LAZY)
     private final List<RetentionReasonImageDuplicate> imageDuplicates = new ArrayList<>();
 
     public RetentionReasonDuplicate() {
@@ -71,11 +72,11 @@ public class RetentionReasonDuplicate extends RetentionReason {
         @Column(name = "RET_REASON_DATA_DUP_ID", nullable = false)
         private Long duplicateId;
 
-        @ManyToOne
+        @ManyToOne(fetch = LAZY)
         @JoinColumn(name = "RETENTION_REASON_ID")
         private RetentionReasonDuplicate retentionReason;
 
-        @ManyToOne
+        @ManyToOne(fetch = LAZY)
         @JoinColumn(name = "DATA_DUPLICATE_ID")
         private DataDuplicate dataDuplicate;
     }
@@ -95,11 +96,11 @@ public class RetentionReasonDuplicate extends RetentionReason {
         @Column(name = "RET_REASON_IMG_DUP_ID", nullable = false)
         private Long duplicateId;
 
-        @ManyToOne
+        @ManyToOne(fetch = LAZY)
         @JoinColumn(name = "RETENTION_REASON_ID")
         private RetentionReasonDuplicate retentionReason;
 
-        @ManyToOne
+        @ManyToOne(fetch = LAZY)
         @JoinColumn(name = "IMAGE_DUPLICATE_ID")
         private ImageDuplicate imageDuplicate;
     }

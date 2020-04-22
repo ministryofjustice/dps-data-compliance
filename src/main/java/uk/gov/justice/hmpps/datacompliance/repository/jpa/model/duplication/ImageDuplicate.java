@@ -17,6 +17,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+import static javax.persistence.FetchType.LAZY;
+
 @Data
 @Entity
 @Builder
@@ -32,12 +34,12 @@ public class ImageDuplicate {
     private Long imageDuplicateId;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "REFERENCE_OFFENDER_UPLOAD_ID", referencedColumnName = "UPLOAD_ID", nullable = false)
     private OffenderImageUpload referenceOffenderImageUpload;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "DUPLICATE_OFFENDER_UPLOAD_ID", referencedColumnName = "UPLOAD_ID", nullable = false)
     private OffenderImageUpload duplicateOffenderImageUpload;
 
