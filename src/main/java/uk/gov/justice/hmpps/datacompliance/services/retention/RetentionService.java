@@ -11,6 +11,9 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+
 @Service
 @AllArgsConstructor
 public class RetentionService {
@@ -24,16 +27,21 @@ public class RetentionService {
         //  * Duplicates
         //  * Moratoria
 
-        final var retentionReasons = ImmutableList.<RetentionReason>builder();
+        return ImmutableList.<RetentionReason>builder()
+                .addAll(pathfinderReferral(offenderNumber))
+                .addAll(manualRetention(offenderNumber))
+                .build();
+    }
 
-        if (pathfinderApiClient.isReferredToPathfinder(offenderNumber)) {
-            retentionReasons.add(new RetentionReasonPathfinder());
-        }
+    private List<RetentionReason> pathfinderReferral(final OffenderNumber offenderNumber) {
+        return pathfinderApiClient.isReferredToPathfinder(offenderNumber)
+                ? List.of(new RetentionReasonPathfinder())
+                : emptyList();
+    }
 
-        manualRetentionService.findManualOffenderRetentionWithReasons(offenderNumber)
-                .ifPresent(manualRetention ->
-                        retentionReasons.add(new RetentionReasonManual().setManualRetention(manualRetention)));
-
-        return retentionReasons.build();
+    private List<RetentionReason> manualRetention(final OffenderNumber offenderNumber) {
+        return manualRetentionService.findManualOffenderRetentionWithReasons(offenderNumber)
+                .map(manualRetention -> new RetentionReasonManual().setManualRetention(manualRetention))
+                .stream().collect(toList());
     }
 }

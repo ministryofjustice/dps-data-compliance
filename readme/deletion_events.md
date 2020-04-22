@@ -41,12 +41,12 @@ are copied into an auto-execution directory in the container.
 
 The following command can be run after the docker containers have started up
 in order to simulate a deletion (replacing `SOME_OFFENDER_ID_DISPLAY` with a
-valid offender number:
+valid offender number, and using an existing offender referral id):
 
 ```bash
 aws --endpoint-url=http://localhost:4576 sqs send-message \
     --queue-url http://localstack:4576/queue/outbound_deletion_queue \
-    --message-body '{"offenderIdDisplay":"A1234AA"}' \
+    --message-body '{"offenderIdDisplay":"SOME_OFFENDER_ID_DISPLAY","referralId":1}' \
     --message-attributes "eventType={StringValue=DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED,DataType=String}"
 ```
 
@@ -56,7 +56,7 @@ the offender for deletion eligibility:
 ```bash
 aws --endpoint-url=http://localhost:4576 sqs send-message \
     --queue-url http://localstack:4576/queue/inbound_referral_queue \
-    --message-body '{"offenderIdDisplay":"A1234AA"}' \
+    --message-body '{"offenderIdDisplay":"SOME_OFFENDER_ID_DISPLAY"}' \
     --message-attributes "eventType={StringValue=DATA_COMPLIANCE_OFFENDER-PENDING-DELETION,DataType=String}"
 ```
 
