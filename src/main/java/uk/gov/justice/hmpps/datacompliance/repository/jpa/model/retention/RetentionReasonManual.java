@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -20,13 +19,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.FetchType.LAZY;
+
 @Entity
 @DiscriminatorValue(RetentionReasonManual.MANUAL_RETENTION)
 public class RetentionReasonManual extends RetentionReason {
 
     public static final String MANUAL_RETENTION = "MANUAL_RETENTION";
 
-    @OneToOne(mappedBy = "retentionReason", cascade = CascadeType.PERSIST)
+    @OneToOne(mappedBy = "retentionReason", cascade = PERSIST, fetch = LAZY)
     private ManualRetentionLinkTable manualRetentionLinkTable;
 
     public RetentionReasonManual() {
@@ -60,11 +62,11 @@ public class RetentionReasonManual extends RetentionReason {
         @Column(name = "RETENTION_REASON_MANUAL_ID", nullable = false)
         private Long retentionReasonManualId;
 
-        @ManyToOne
+        @ManyToOne(fetch = LAZY)
         @JoinColumn(name = "RETENTION_REASON_ID")
         private RetentionReasonManual retentionReason;
 
-        @ManyToOne
+        @ManyToOne(fetch = LAZY)
         @JoinColumn(name = "MANUAL_RETENTION_ID")
         private ManualRetention manualRetention;
 

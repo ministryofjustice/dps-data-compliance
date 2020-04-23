@@ -17,6 +17,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import static javax.persistence.FetchType.LAZY;
+
 @Data
 @Entity
 @Builder
@@ -32,7 +34,7 @@ public class ReferredOffenderBooking {
     @Column(name = "REFERRED_OFFENDER_BOOKING_ID", nullable = false)
     private Long referredOffenderBookingId;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "REFERRAL_ID")
     private OffenderDeletionReferral offenderDeletionReferral;
 

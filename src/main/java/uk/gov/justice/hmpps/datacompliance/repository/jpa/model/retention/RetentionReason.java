@@ -19,6 +19,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import static javax.persistence.FetchType.LAZY;
+
 @Data
 @Entity
 @Inheritance
@@ -36,7 +38,7 @@ public abstract class RetentionReason {
     private Long retentionReasonId;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "RESOLUTION_ID", nullable = false)
     private ReferralResolution referralResolution;
 
