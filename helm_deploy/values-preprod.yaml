@@ -34,9 +34,10 @@ env:
 
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth/.well-known/jwks.json"
 
-  OFFENDER_DELETION_CRON: "0 0 10 29 4 ? *"
-  OFFENDER_DELETION_INITIAL_WINDOW_START: "2000-05-10T00:00:00"
-  OFFENDER_DELETION_WINDOW_LENGTH: "P700D"
+  # Temporarily switching off deletion testing in preprod until we get go-ahead from DBAs:
+  #OFFENDER_DELETION_CRON: "0 0 10 29 4 ? *"
+  #OFFENDER_DELETION_INITIAL_WINDOW_START: "2000-05-10T00:00:00"
+  #OFFENDER_DELETION_WINDOW_LENGTH: "P700D"
 
   # Switching off image upload, now initial run complete:
   #ELITE2_API_OFFENDER_IDS_ITERATION_THREADS: 14
