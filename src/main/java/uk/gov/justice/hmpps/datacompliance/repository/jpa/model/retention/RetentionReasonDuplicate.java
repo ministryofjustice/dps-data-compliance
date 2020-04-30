@@ -41,20 +41,28 @@ public class RetentionReasonDuplicate extends RetentionReason {
         super(null, null, DUPLICATE);
     }
 
-    public RetentionReasonDuplicate addDataDuplicate(final DataDuplicate dataDuplicate) {
+    public RetentionReasonDuplicate addDataDuplicates(final List<DataDuplicate> dataDuplicates) {
+        dataDuplicates.forEach(this::addDataDuplicate);
+        return this;
+    }
+
+    public RetentionReasonDuplicate addImageDuplicates(final List<ImageDuplicate> imageDuplicates) {
+        imageDuplicates.forEach(this::addImageDuplicate);
+        return this;
+    }
+
+    private void addDataDuplicate(final DataDuplicate dataDuplicate) {
         dataDuplicates.add(RetentionReasonDataDuplicate.builder()
                 .retentionReason(this)
                 .dataDuplicate(dataDuplicate)
                 .build());
-        return this;
     }
 
-    public RetentionReasonDuplicate addImageDuplicate(final ImageDuplicate imageDuplicate) {
+    private void addImageDuplicate(final ImageDuplicate imageDuplicate) {
         imageDuplicates.add(RetentionReasonImageDuplicate.builder()
                 .retentionReason(this)
                 .imageDuplicate(imageDuplicate)
                 .build());
-        return this;
     }
 
     @Data
