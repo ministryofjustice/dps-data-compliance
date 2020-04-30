@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.utils.Result;
 
+import java.util.Set;
+
+import static java.util.Collections.emptySet;
 import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.FACE_NOT_FOUND;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.error;
 
@@ -22,7 +25,13 @@ public class NoOpImageRecognitionClient implements ImageRecognitionClient {
     public Result<FaceId, IndexFacesError> uploadImageToCollection(final byte[] imageData,
                                                                    final OffenderNumber offenderNumber,
                                                                    final long imageId) {
-        log.warn("Pretending to upload image data for offender: {}, image: {}", offenderNumber, imageId);
+        log.warn("Pretending to upload image data for offender: '{}', image: '{}'", offenderNumber, imageId);
         return error(FACE_NOT_FOUND);
+    }
+
+    @Override
+    public Set<FaceId> findMatchesFor(final FaceId faceId) {
+        log.warn("Pretending to find matching faces for faceId: '{}'", faceId.getFaceId());
+        return emptySet();
     }
 }
