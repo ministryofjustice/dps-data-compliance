@@ -5,16 +5,28 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
-import software.amazon.awssdk.services.rekognition.model.*;
+import software.amazon.awssdk.services.rekognition.model.DeleteFacesRequest;
+import software.amazon.awssdk.services.rekognition.model.Face;
+import software.amazon.awssdk.services.rekognition.model.FaceMatch;
+import software.amazon.awssdk.services.rekognition.model.FaceRecord;
+import software.amazon.awssdk.services.rekognition.model.Image;
+import software.amazon.awssdk.services.rekognition.model.IndexFacesRequest;
+import software.amazon.awssdk.services.rekognition.model.IndexFacesResponse;
+import software.amazon.awssdk.services.rekognition.model.SearchFacesRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.utils.Result;
 
 import java.util.List;
+import java.util.Set;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toSet;
 import static software.amazon.awssdk.core.SdkBytes.fromByteArray;
 import static software.amazon.awssdk.services.rekognition.model.QualityFilter.HIGH;
-import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.*;
+import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.FACE_NOT_FOUND;
+import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.FACE_POOR_QUALITY;
+import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.MULTIPLE_FACES_FOUND;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.error;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.success;
 
@@ -24,15 +36,18 @@ import static uk.gov.justice.hmpps.datacompliance.utils.Result.success;
 public class AwsImageRecognitionClient implements ImageRecognitionClient {
 
     private final String collectionId;
+    private final double faceSimilarityThreshold;
     private final RekognitionClient client;
 
     public AwsImageRecognitionClient(final RekognitionClient client,
-                                     @Value("${image.recognition.aws.collection.id}") final String collectionId) {
+                                     @Value("${image.recognition.aws.collection.id}") final String collectionId,
+                                     @Value("${image.recognition.aws.face.similarity.threshold:95.0}") final double faceSimilarityThreshold) {
 
         log.info("Configured to use AWS Rekognition for image recognition");
 
         this.client = client;
         this.collectionId = collectionId;
+        this.faceSimilarityThreshold = faceSimilarityThreshold;
     }
 
     @Override
@@ -46,6 +61,16 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
                 generateIndexFaceRequest(imageData, offenderNumber, imageId));
 
         return ensureOnlyOneFaceIndexed(offenderNumber, imageId, result);
+    }
+
+    @Override
+    public Set<FaceId> findMatchesFor(final FaceId faceId) {
+
+        log.trace("Finding face matches for faceId: '{}'", faceId.getFaceId());
+
+        final var result = client.searchFaces(generateSearchFacesRequest(faceId));
+
+        return result.hasFaceMatches() ? transformFaceMatches(result.faceMatches()) : emptySet();
     }
 
     private Result<FaceId, IndexFacesError> ensureOnlyOneFaceIndexed(final OffenderNumber offenderNumber,
@@ -118,5 +143,21 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
 
     private Result<FaceId, IndexFacesError> singleFaceId(final String faceId) {
         return success(new FaceId(faceId));
+    }
+
+    private SearchFacesRequest generateSearchFacesRequest(final FaceId faceId) {
+        return SearchFacesRequest.builder()
+                .collectionId(collectionId)
+                .faceId(faceId.getFaceId())
+                .faceMatchThreshold((float) faceSimilarityThreshold)
+                .build();
+    }
+
+    private Set<FaceId> transformFaceMatches(final List<FaceMatch> faceMatches) {
+        return faceMatches.stream()
+                .map(FaceMatch::face)
+                .map(Face::faceId)
+                .map(FaceId::new)
+                .collect(toSet());
     }
 }

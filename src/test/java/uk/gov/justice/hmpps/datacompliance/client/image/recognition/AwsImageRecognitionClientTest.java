@@ -27,6 +27,7 @@ class AwsImageRecognitionClientTest {
     private static final long OFFENDER_IMAGE_ID = 1L;
     private static final String EXPECTED_FACE_ID = "face1";
     private static final String COLLECTION_NAME = "collection_name";
+    private static final float SIMILARITY_THRESHOLD = 99.9f;
 
     @Mock
     private RekognitionClient awsClient;
@@ -35,7 +36,7 @@ class AwsImageRecognitionClientTest {
 
     @BeforeEach
     void setUp() {
-        client = new AwsImageRecognitionClient(awsClient, COLLECTION_NAME);
+        client = new AwsImageRecognitionClient(awsClient, COLLECTION_NAME, SIMILARITY_THRESHOLD);
     }
 
     @Test
@@ -96,6 +97,28 @@ class AwsImageRecognitionClientTest {
                 .isEqualTo(FACE_POOR_QUALITY);
     }
 
+    @Test
+    void findMatches() {
+
+        var request = ArgumentCaptor.forClass(SearchFacesRequest.class);
+
+        when(awsClient.searchFaces(request.capture())).thenReturn(matchingFace());
+
+        assertThat(client.findMatchesFor(new FaceId("someFace")))
+                .extracting(FaceId::getFaceId).contains(EXPECTED_FACE_ID);
+        assertThat(request.getValue().collectionId()).isEqualTo(COLLECTION_NAME);
+        assertThat(request.getValue().faceId()).isEqualTo("someFace");
+        assertThat(request.getValue().faceMatchThreshold()).isEqualTo(SIMILARITY_THRESHOLD);
+    }
+
+    @Test
+    void findMatchesReturnsNoResults() {
+
+        when(awsClient.searchFaces(any(SearchFacesRequest.class))).thenReturn(noMatchingFace());
+
+        assertThat(client.findMatchesFor(new FaceId("someFace"))).isEmpty();
+    }
+
     private IndexFacesResponse indexedFaces(final String ... faceIds) {
         return indexedFacesBuilder(faceIds).build();
     }
@@ -109,5 +132,19 @@ class AwsImageRecognitionClientTest {
                                         .build())
                                 .build())
                         .collect(toList()));
+    }
+
+    private SearchFacesResponse matchingFace() {
+        return SearchFacesResponse.builder()
+                .faceMatches(FaceMatch.builder()
+                        .face(Face.builder()
+                                .faceId(EXPECTED_FACE_ID)
+                                .build())
+                        .build())
+                .build();
+    }
+
+    private SearchFacesResponse noMatchingFace() {
+        return SearchFacesResponse.builder().build();
     }
 }
