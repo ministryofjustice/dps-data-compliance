@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.PendingDeletionsRequest;
@@ -73,11 +74,12 @@ public class Elite2ApiClient {
                 .uri(dataComplianceProperties.getElite2ApiBaseUrl() + format(IMAGE_DATA_PATH, imageId))
                 .accept(IMAGE_JPEG)
                 .retrieve()
+                .bodyToMono(byte[].class)
 
                 // Handling edge case where image had no image data and a 404 response was returned
-                .onStatus(NOT_FOUND::equals, ignored -> Mono.empty())
+                .onErrorResume(WebClientResponseException.class,
+                        ex -> NOT_FOUND.equals(ex.getStatusCode()) ? Mono.empty() : Mono.error(ex))
 
-                .bodyToMono(byte[].class)
                 .blockOptional();
     }
 
