@@ -145,6 +145,8 @@ class Elite2ApiClientTest {
     void getImageDataHandlesMissingImageData() {
 
         elite2ApiMock.enqueue(new MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"message\":\"Not Found\"}")
                 .setResponseCode(404));
 
         assertThat(elite2ApiClient.getImageData(123L)).isEmpty();
