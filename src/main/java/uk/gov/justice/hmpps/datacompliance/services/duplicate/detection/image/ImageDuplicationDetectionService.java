@@ -96,7 +96,7 @@ public class ImageDuplicationDetectionService {
         }
 
         private String getDuplicateOffenderNo() {
-            return referenceImage.getOffenderNo();
+            return duplicateImage.getOffenderNo();
         }
 
         private long getReferenceImageId() {
