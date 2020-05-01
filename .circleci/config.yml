@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  dps: ministryofjustice/dps@1.2.1
+  hmpps: ministryofjustice/hmpps@1.0.0
   owasp: entur/owasp@0.0.10
 
 executors:
@@ -37,21 +37,23 @@ jobs:
             - build.gradle
 
 workflows:
-  version: 2
   build-test-and-deploy:
     jobs:
       - validate:
           filters:
             tags:
               ignore: /.*/
-      - dps/helm_lint:
+      - hmpps/helm_lint:
           name: helm_lint
-      - dps/build_docker:
+      - hmpps/build_docker:
           name: build_docker
+          snyk-fail-build: false
+          snyk-scan: true
+          snyk-threshold: high
           filters:
             branches:
               only: master
-      - dps/deploy_env:
+      - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
           filters:
@@ -66,7 +68,7 @@ workflows:
           type: approval
           requires:
             - deploy_dev
-      - dps/deploy_env:
+      - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
           context: prison-data-compliance-preprod
