@@ -10,7 +10,8 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonPathfinder;
-import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.DuplicateDetectionService;
+import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.data.DataDuplicationDetectionService;
+import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.image.ImageDuplicationDetectionService;
 
 import java.util.List;
 
@@ -24,7 +25,8 @@ public class RetentionService {
 
     private final PathfinderApiClient pathfinderApiClient;
     private final ManualRetentionService manualRetentionService;
-    private final DuplicateDetectionService duplicateDetectionService;
+    private final ImageDuplicationDetectionService imageDuplicationDetectionService;
+    private final DataDuplicationDetectionService dataDuplicationDetectionService;
 
     public List<RetentionReason> findRetentionReasons(final OffenderNumber offenderNumber) {
 
@@ -51,8 +53,8 @@ public class RetentionService {
     }
 
     private List<RetentionReason> potentialDuplicates(final OffenderNumber offenderNumber) {
-        final var dataDuplicates = duplicateDetectionService.findDuplicatesByDataFor(offenderNumber);
-        final var imageDuplicates = duplicateDetectionService.findDuplicatesByImageFor(offenderNumber);
+        final var dataDuplicates = dataDuplicationDetectionService.findDuplicatesFor(offenderNumber);
+        final var imageDuplicates = imageDuplicationDetectionService.findDuplicatesFor(offenderNumber);
 
         if (dataDuplicates.isEmpty() && imageDuplicates.isEmpty()) {
             log.info("No duplicate found for offender: '{}'", offenderNumber);

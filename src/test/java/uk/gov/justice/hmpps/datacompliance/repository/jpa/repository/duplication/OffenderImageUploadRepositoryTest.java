@@ -81,6 +81,17 @@ class OffenderImageUploadRepositoryTest {
         assertThat(uploadRepository.findByOffenderNoAndImageId("UNKNOWN", 999L)).isEmpty();
     }
 
+    @Test
+    void findOffenderImageUploadByFaceId() {
+        assertThat(uploadRepository.findByFaceId("1").orElseThrow().getUploadId())
+                .isEqualTo(1L);
+    }
+
+    @Test
+    void findOffenderImageUploadByFaceIdReturnsEmpty() {
+        assertThat(uploadRepository.findByFaceId("UNKNOWN")).isEmpty();
+    }
+
     private OffenderImageUpload buildOffenderImageUpload() {
         return OffenderImageUpload.builder()
                 .offenderNo("A1234AA")

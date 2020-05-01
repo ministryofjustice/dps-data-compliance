@@ -13,7 +13,8 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonPathfinder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
-import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.DuplicateDetectionService;
+import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.data.DataDuplicationDetectionService;
+import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.image.ImageDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ManualRetentionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 
@@ -37,14 +38,21 @@ class RetentionServiceTest {
     private PathfinderApiClient pathfinderApiClient;
 
     @Mock
-    private DuplicateDetectionService duplicateDetectionService;
+    private ImageDuplicationDetectionService imageDuplicationDetectionService;
+
+    @Mock
+    private DataDuplicationDetectionService dataDuplicationDetectionService;
 
     private RetentionService service;
 
     @BeforeEach
     void setUp() {
         mockEmptyResponses();
-        service = new RetentionService(pathfinderApiClient, manualRetentionService, duplicateDetectionService);
+        service = new RetentionService(
+                pathfinderApiClient,
+                manualRetentionService,
+                imageDuplicationDetectionService,
+                dataDuplicationDetectionService);
     }
 
     @Test
@@ -73,7 +81,7 @@ class RetentionServiceTest {
 
         final var imageDuplicate = mock(ImageDuplicate.class);
 
-        when(duplicateDetectionService.findDuplicatesByImageFor(OFFENDER_NUMBER))
+        when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER))
                 .thenReturn(List.of(imageDuplicate));
 
         assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
@@ -85,7 +93,7 @@ class RetentionServiceTest {
 
         final var dataDuplicate = mock(DataDuplicate.class);
 
-        when(duplicateDetectionService.findDuplicatesByDataFor(OFFENDER_NUMBER))
+        when(dataDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER))
                 .thenReturn(List.of(dataDuplicate));
 
         assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
@@ -102,8 +110,8 @@ class RetentionServiceTest {
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(true);
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER))
                 .thenReturn(Optional.of(manualRetention));
-        when(duplicateDetectionService.findDuplicatesByDataFor(OFFENDER_NUMBER)).thenReturn(List.of(dataDuplicate));
-        when(duplicateDetectionService.findDuplicatesByImageFor(OFFENDER_NUMBER)).thenReturn(List.of(imageDuplicate));
+        when(dataDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(List.of(dataDuplicate));
+        when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(List.of(imageDuplicate));
 
         assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
                 .containsExactlyInAnyOrder(
@@ -122,7 +130,7 @@ class RetentionServiceTest {
     private void mockEmptyResponses() {
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(false);
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER)).thenReturn(Optional.empty());
-        when(duplicateDetectionService.findDuplicatesByDataFor(OFFENDER_NUMBER)).thenReturn(emptyList());
-        when(duplicateDetectionService.findDuplicatesByImageFor(OFFENDER_NUMBER)).thenReturn(emptyList());
+        when(dataDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(emptyList());
+        when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(emptyList());
     }
 }
