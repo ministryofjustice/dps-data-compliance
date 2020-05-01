@@ -55,4 +55,21 @@ class ImageDuplicateRepositoryTest {
         assertThat(retrievedEntity.getReferenceOffenderImageUpload().getUploadId()).isEqualTo(1L);
         assertThat(retrievedEntity.getDuplicateOffenderImageUpload().getUploadId()).isEqualTo(2L);
     }
+
+    @Test
+    @Sql("image_upload_batch.sql")
+    @Sql("offender_image_upload.sql")
+    @Sql("image_duplicate.sql")
+    void findByOffenderImageUploadIds() {
+        assertThat(repository.findByOffenderImageUploadIds(1L, 2L).orElseThrow().getImageDuplicateId()).isEqualTo(1L);
+        assertThat(repository.findByOffenderImageUploadIds(2L, 1L).orElseThrow().getImageDuplicateId()).isEqualTo(1L);
+    }
+
+    @Test
+    @Sql("image_upload_batch.sql")
+    @Sql("offender_image_upload.sql")
+    @Sql("image_duplicate.sql")
+    void findByOffenderImageUploadIdsReturnsEmpty() {
+        assertThat(repository.findByOffenderImageUploadIds(111L, 222L)).isEmpty();
+    }
 }
