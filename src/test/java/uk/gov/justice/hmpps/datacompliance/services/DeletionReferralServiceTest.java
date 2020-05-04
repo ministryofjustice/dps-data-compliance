@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
@@ -12,6 +13,7 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletion
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderWithBookings;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.completed.OffenderDeletionCompleteEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.granted.OffenderDeletionGrantedEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.Booking;
@@ -38,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -219,6 +222,31 @@ class DeletionReferralServiceTest {
                         .build()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Referral '123' does not have expected resolution type");
+    }
+
+    @Test
+    void handleReferralComplete() {
+
+        when(batchRepository.findById(123L)).thenReturn(Optional.of(batch));
+
+        referralService.handleReferralComplete(new OffenderPendingDeletionReferralCompleteEvent(123L));
+
+        InOrder inOrder = inOrder(batch, batchRepository);
+        inOrder.verify(batch).setReferralCompletionDateTime(NOW);
+        inOrder.verify(batchRepository).save(batch);
+    }
+
+    @Test
+    void handleReferralCompleteThrowsIfBatchNotFound() {
+
+        when(batchRepository.findById(123L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                referralService.handleReferralComplete(new OffenderPendingDeletionReferralCompleteEvent(123L)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot find batch with id: '123'");
+
+        verify(batchRepository, never()).save(any());
     }
 
     private OffenderPendingDeletionEvent generatePendingDeletionEvent() {

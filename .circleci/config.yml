@@ -47,9 +47,6 @@ workflows:
           name: helm_lint
       - hmpps/build_docker:
           name: build_docker
-          snyk-fail-build: false
-          snyk-scan: true
-          snyk-threshold: high
           filters:
             branches:
               only: master
