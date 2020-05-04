@@ -60,7 +60,15 @@ public class DeletionReferralService {
     }
 
     public void handleReferralComplete(final OffenderPendingDeletionReferralCompleteEvent event) {
-        // TODO GDPR-99 Track referral requests and add health check
+
+        log.info("All offenders pending deletion in batch: '{}' have been added to the queue", event.getBatchId());
+
+        final var batch = batchRepository.findById(event.getBatchId())
+                .orElseThrow(illegalState("Cannot find batch with id: '%s'", event.getBatchId()));
+
+        batch.setReferralCompletionDateTime(timeSource.nowAsLocalDateTime());
+
+        batchRepository.save(batch);
     }
 
     public void handleDeletionComplete(final OffenderDeletionCompleteEvent event) {
