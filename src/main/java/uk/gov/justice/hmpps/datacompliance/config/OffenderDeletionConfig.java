@@ -9,15 +9,19 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.justice.hmpps.datacompliance.jobs.offenderdeletion.OffenderDeletionJob;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 
@@ -37,8 +41,22 @@ public class OffenderDeletionConfig {
     @Value("${offender.deletion.window.length}")
     private Duration windowLength;
 
+    @Value("${offender.deletion.cron}")
+    private String offenderDeletionCron;
+
+    @Autowired
+    private SchedulerFactoryBean schedulerFactoryBean;
+
     @Bean
-    public Trigger offenderDeletionTrigger(@Value("${offender.deletion.cron}") final String offenderDeletionCron) {
+    public ApplicationRunner rescheduleOffenderDeletion() {
+        return args -> schedulerFactoryBean.getScheduler()
+                .scheduleJob(
+                        offenderDeletionJobDetails(),
+                        Set.of(offenderDeletionTrigger()),
+                        true);
+    }
+
+    public Trigger offenderDeletionTrigger() {
 
         log.info("Configured to delete offenders with schedule: '{}'", offenderDeletionCron);
 
@@ -48,7 +66,6 @@ public class OffenderDeletionConfig {
                 .build();
     }
 
-    @Bean
     public JobDetail offenderDeletionJobDetails() {
         return JobBuilder.newJob(OffenderDeletionJob.class)
                 .withIdentity("offender-deletion-job")
