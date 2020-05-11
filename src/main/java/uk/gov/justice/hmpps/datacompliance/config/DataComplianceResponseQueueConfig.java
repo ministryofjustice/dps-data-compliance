@@ -23,14 +23,14 @@ import javax.jms.Session;
 @Slf4j
 @EnableJms
 @Configuration
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('${inbound.referral.sqs.provider}')")
-public class InboundReferralQueueConfig {
+@ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.response.sqs.provider}')")
+public class DataComplianceResponseQueueConfig {
 
     @Bean
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
-            @Qualifier("inboundReferralSqsClient") final AmazonSQS awsSqsClient,
-            @Value("${inbound.referral.sqs.concurrency:1}") final String concurrency) {
+            @Qualifier("dataComplianceResponseSqsClient") final AmazonSQS awsSqsClient,
+            @Value("${data.compliance.response.sqs.concurrency:1}") final String concurrency) {
 
         final var factory = new DefaultJmsListenerContainerFactory();
 
@@ -44,13 +44,13 @@ public class InboundReferralQueueConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "inbound.referral.sqs.provider", havingValue = "aws")
-    public AmazonSQS inboundReferralSqsClient(
-            @Value("${inbound.referral.sqs.aws.access.key.id}") final String accessKey,
-            @Value("${inbound.referral.sqs.aws.secret.access.key}") final String secretKey,
-            @Value("${inbound.referral.sqs.region}") final String region) {
+    @ConditionalOnProperty(name = "data.compliance.response.sqs.provider", havingValue = "aws")
+    public AmazonSQS dataComplianceResponseSqsClient(
+            @Value("${data.compliance.response.sqs.aws.access.key.id}") final String accessKey,
+            @Value("${data.compliance.response.sqs.aws.secret.access.key}") final String secretKey,
+            @Value("${data.compliance.response.sqs.region}") final String region) {
 
-        log.info("Creating AWS inbound referral SQS client");
+        log.info("Creating AWS data compliance response SQS client");
 
         var credentials = new BasicAWSCredentials(accessKey, secretKey);
 
@@ -61,13 +61,13 @@ public class InboundReferralQueueConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "inbound.referral.sqs.provider", havingValue = "aws")
-    public AmazonSQS inboundReferralSqsDlqClient(
-            @Value("${inbound.referral.sqs.dlq.aws.access.key.id}") final String accessKey,
-            @Value("${inbound.referral.sqs.dlq.aws.secret.access.key}") final String secretKey,
-            @Value("${inbound.referral.sqs.region}") final String region) {
+    @ConditionalOnProperty(name = "data.compliance.response.sqs.provider", havingValue = "aws")
+    public AmazonSQS dataComplianceResponseSqsDlqClient(
+            @Value("${data.compliance.response.sqs.dlq.aws.access.key.id}") final String accessKey,
+            @Value("${data.compliance.response.sqs.dlq.aws.secret.access.key}") final String secretKey,
+            @Value("${data.compliance.response.sqs.region}") final String region) {
 
-        log.info("Creating AWS inbound referral SQS client for DLQ");
+        log.info("Creating AWS data compliance response SQS client for DLQ");
 
         var credentials = new BasicAWSCredentials(accessKey, secretKey);
 
@@ -77,26 +77,26 @@ public class InboundReferralQueueConfig {
                 .build();
     }
 
-    @Bean("inboundReferralSqsClient")
-    @ConditionalOnProperty(name = "inbound.referral.sqs.provider", havingValue = "localstack")
+    @Bean("dataComplianceResponseSqsClient")
+    @ConditionalOnProperty(name = "data.compliance.response.sqs.provider", havingValue = "localstack")
     public AmazonSQS sqsClientLocalstack(
-            @Value("${inbound.referral.sqs.endpoint.url}") final String serviceEndpoint,
-            @Value("${inbound.referral.sqs.region}") final String region) {
+            @Value("${data.compliance.response.sqs.endpoint.url}") final String serviceEndpoint,
+            @Value("${data.compliance.response.sqs.region}") final String region) {
 
-        log.info("Creating Localstack inbound referral SQS client");
+        log.info("Creating Localstack data compliance response SQS client");
 
         return AmazonSQSAsyncClientBuilder.standard()
                 .withEndpointConfiguration(new EndpointConfiguration(serviceEndpoint, region))
                 .build();
     }
 
-    @Bean("inboundReferralSqsDlqClient")
-    @ConditionalOnProperty(name = "inbound.referral.sqs.provider", havingValue = "localstack")
+    @Bean("dataComplianceResponseSqsDlqClient")
+    @ConditionalOnProperty(name = "data.compliance.response.sqs.provider", havingValue = "localstack")
     public AmazonSQS sqsDlqClientLocalstack(
-            @Value("${inbound.referral.sqs.endpoint.url}") final String serviceEndpoint,
-            @Value("${inbound.referral.sqs.region}") final String region) {
+            @Value("${data.compliance.response.sqs.endpoint.url}") final String serviceEndpoint,
+            @Value("${data.compliance.response.sqs.region}") final String region) {
 
-        log.info("Creating Localstack inbound referral SQS client for DLQ");
+        log.info("Creating Localstack data compliance response SQS client for DLQ");
 
         return AmazonSQSAsyncClientBuilder.standard()
                 .withEndpointConfiguration(new EndpointConfiguration(serviceEndpoint, region))

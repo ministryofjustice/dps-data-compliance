@@ -5,7 +5,7 @@
 The DPS Data Compliance Service communicates with Elite2 API to retrieve referrals
 for offender deletion and to send commands to delete offender data.
 
-This is done using two SQS queues, one inbound and one outbound.
+This is done using two SQS queues, one for outbound requests and one for inbound responses.
 
 The Data Compliance Service requests, via an async API, that Elite2 populates the
 offender pending deletion queue with a batch of referrals.  The Data Compliance service 
@@ -45,7 +45,7 @@ valid offender number, and using an existing offender referral id):
 
 ```bash
 aws --endpoint-url=http://localhost:4576 sqs send-message \
-    --queue-url http://localstack:4576/queue/outbound_deletion_queue \
+    --queue-url http://localstack:4576/queue/data_compliance_request_queue \
     --message-body '{"offenderIdDisplay":"SOME_OFFENDER_ID_DISPLAY","referralId":1}' \
     --message-attributes "eventType={StringValue=DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED,DataType=String}"
 ```
@@ -55,7 +55,7 @@ the offender for deletion eligibility:
 
 ```bash
 aws --endpoint-url=http://localhost:4576 sqs send-message \
-    --queue-url http://localstack:4576/queue/inbound_referral_queue \
+    --queue-url http://localstack:4576/queue/data_compliance_response_queue \
     --message-body '{"offenderIdDisplay":"SOME_OFFENDER_ID_DISPLAY"}' \
     --message-attributes "eventType={StringValue=DATA_COMPLIANCE_OFFENDER-PENDING-DELETION,DataType=String}"
 ```
@@ -65,5 +65,5 @@ In order to manually test reading off the queue, the following command
 can be run (would need to stop the relevant container to prevent it picking up
 the event first).
 ```bash
-aws --endpoint-url=http://localhost:4576 sqs receive-message --queue-url http://localhost:4576/queue/outbound_deletion_queue
+aws --endpoint-url=http://localhost:4576 sqs receive-message --queue-url http://localhost:4576/queue/data_compliance_request_queue
 ```

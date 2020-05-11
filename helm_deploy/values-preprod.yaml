@@ -29,8 +29,8 @@ env:
 
   SNS_PROVIDER: aws
 
-  OUTBOUND_DELETION_SQS_PROVIDER: aws
-  INBOUND_REFERRAL_SQS_PROVIDER: aws
+  DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
+  DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: aws
 
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth/.well-known/jwks.json"
 

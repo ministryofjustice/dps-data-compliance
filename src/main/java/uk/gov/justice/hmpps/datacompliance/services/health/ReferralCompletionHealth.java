@@ -24,7 +24,7 @@ public class ReferralCompletionHealth implements HealthIndicator {
     private final TimeSource timeSource;
 
     public ReferralCompletionHealth(final OffenderDeletionBatchRepository repository,
-                                    @Value("${inbound.referral.completion.tolerance:1h}") final Duration tolerance,
+                                    @Value("${referral.completion.tolerance:1h}") final Duration tolerance,
                                     final TimeSource timeSource) {
         this.tolerance = tolerance;
         this.repository = repository;

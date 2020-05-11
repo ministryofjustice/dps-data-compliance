@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 @Slf4j
 @Service
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('${inbound.referral.sqs.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.response.sqs.provider}')")
 public class OffenderDeletionListener {
 
     private static final String OFFENDER_PENDING_DELETION_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION";
@@ -44,7 +44,7 @@ public class OffenderDeletionListener {
         this.deletionReferralService = deletionReferralService;
     }
 
-    @JmsListener(destination = "${inbound.referral.sqs.queue.name}")
+    @JmsListener(destination = "${data.compliance.response.sqs.queue.name}")
     public void handleEvent(final Message<String> message) {
 
         final var eventType = getEventType(message.getHeaders());
