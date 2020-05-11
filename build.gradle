@@ -1,69 +1,8 @@
-import org.springframework.boot.gradle.plugin.SpringBootPlugin
-
-import java.time.Instant
-import java.time.LocalDate
-
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '2.2.6.RELEASE' // consider removing pinned dependencies when updating
-    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.28.0'
-    id 'org.owasp.dependencycheck' version '5.3.2.1'
-    id 'se.patrikerdes.use-latest-versions' version '0.2.13'
-    id 'com.gorylenko.gradle-git-properties' version '2.2.2'
+    id 'uk.gov.justice.hmpps.gradle-spring-boot' version "0.3.0"
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
-configurations {
-    agentDeps
-    agentDeps.transitive = false
-}
-
-dependencyCheck {
-    failBuildOnCVSS = 5
-    suppressionFiles = ['dependency-check-suppress-spring.xml']
-    format = 'ALL'
-    analyzers {
-        assemblyEnabled = false
-    }
-}
-
-project.sourceCompatibility = 11
-project.targetCompatibility = 11
-
-group = 'uk.gov.justice.hmpps'
-
-def todaysDate = LocalDate.now().format('yyyy-MM-dd')
-version = System.getenv().containsKey("BUILD_NUMBER") ? System.getenv("BUILD_NUMBER") : todaysDate
-
-springBoot {
-    buildInfo {
-        properties {
-            artifact = rootProject.name
-            version
-            group
-            name = rootProject.name
-            time = Instant.now()
-            additional = [
-                    by                   : System.properties['user.name'],
-                    operatingSystem      : "${System.properties['os.name']} (${System.properties['os.version']})",
-                    machine              : InetAddress.localHost.hostName
-            ]
-        }
-    }
-}
-
-dependencyManagement {
-    imports {
-        mavenBom(SpringBootPlugin.BOM_COORDINATES)
-    }
-}
-
-ext ['spring-security.version'] = '5.3.1.RELEASE' // Updated since spring-boot-starter-oauth2-resource-server-2.2.6.RELEASE only pulls in 5.2.2.RELEASE (still affected by CVE-2018-1258 though)
+ext ["spring-security.version"] = "5.3.2.RELEASE"
 
 dependencies {
 
@@ -72,37 +11,25 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
 
     // Spring
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
-    implementation 'org.springframework:spring-webflux:5.2.5.RELEASE'
-    implementation 'org.springframework:spring-jms:5.2.5.RELEASE'
-
-    implementation 'com.github.timpeeters:spring-boot-graceful-shutdown:2.2.1'
-
-    // Logging
-    implementation 'net.logstash.logback:logstash-logback-encoder:6.3'
-    implementation 'com.microsoft.azure:applicationinsights-spring-boot-starter:2.6.0'
-    implementation 'com.microsoft.azure:applicationinsights-logging-logback:2.6.0'
-    agentDeps 'com.microsoft.azure:applicationinsights-agent:2.6.0'
-    implementation configurations.agentDeps
+    implementation 'org.springframework:spring-webflux:5.2.6.RELEASE'
+    implementation 'org.springframework:spring-jms:5.2.6.RELEASE'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.11.12')
+    implementation platform('software.amazon.awssdk:bom:2.13.13')
     implementation 'software.amazon.awssdk:rekognition'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.762')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.762'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.779')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.779'
     implementation 'com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8'
 
     // Utils
-    implementation 'io.github.resilience4j:resilience4j-retry:1.3.1'
-    implementation 'com.google.guava:guava:29.0-jre'
+    implementation 'io.github.resilience4j:resilience4j-retry:1.4.0'
     implementation 'org.apache.commons:commons-lang3:3.10'
     implementation 'commons-io:commons-io:2.6'
     implementation ('org.quartz-scheduler:quartz:2.3.2') {
@@ -110,10 +37,10 @@ dependencies {
     }
 
     // Database
-    implementation 'org.hibernate:hibernate-core:5.4.13.Final'
+    implementation 'org.hibernate:hibernate-core:5.4.15.Final'
 
     runtimeOnly 'org.hsqldb:hsqldb:2.5.0'
-    runtimeOnly 'org.flywaydb:flyway-core:6.3.3'
+    runtimeOnly 'org.flywaydb:flyway-core:6.4.1'
     runtimeOnly 'org.postgresql:postgresql:42.2.12'
 
     // Swagger
@@ -123,31 +50,8 @@ dependencies {
     // Test
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
     testCompileOnly 'org.projectlombok:lombok:1.18.12'
-    testImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
-    testImplementation 'org.assertj:assertj-core:3.15.0'
     testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.17.0'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'com.squareup.okhttp3:okhttp:4.5.0'
-    testImplementation 'com.squareup.okhttp3:mockwebserver:4.5.0'
+    testImplementation 'com.squareup.okhttp3:okhttp:4.6.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.6.0'
     testImplementation 'io.jsonwebtoken:jjwt:0.9.1'
-}
-
-task copyAgent(type: Copy) {
-    from configurations.agentDeps
-    into "$buildDir/libs"
-}
-
-assemble.dependsOn copyAgent
-
-test {
-    useJUnitPlatform()
-}
-
-bootJar {
-    manifest {
-        attributes(
-                'Implementation-Version': rootProject.version,
-                'Implementation-Title': rootProject.name
-        )
-    }
 }
