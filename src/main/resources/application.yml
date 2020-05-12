@@ -46,8 +46,8 @@ image.recognition:
   aws.collection.id: dps-offender-images
 
 sns.region: eu-west-2
-outbound.deletion.sqs.region: eu-west-2
-inbound.referral.sqs.region: eu-west-2
+data.compliance.request.sqs.region: eu-west-2
+data.compliance.response.sqs.region: eu-west-2
 
 server:
   port: 8080

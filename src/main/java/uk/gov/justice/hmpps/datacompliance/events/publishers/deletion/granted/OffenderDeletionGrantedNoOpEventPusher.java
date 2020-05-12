@@ -7,7 +7,7 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 @Slf4j
 @Component
-@ConditionalOnExpression("!{'aws', 'localstack'}.contains('${outbound.deletion.sqs.provider}')")
+@ConditionalOnExpression("!{'aws', 'localstack'}.contains('${data.compliance.request.sqs.provider}')")
 public class OffenderDeletionGrantedNoOpEventPusher implements OffenderDeletionGrantedEventPusher {
 
     public OffenderDeletionGrantedNoOpEventPusher() {

@@ -1,16 +1,16 @@
-outbound.deletion:
+data.compliance.request:
   sqs:
     provider: localstack
-    queue.name: outbound_deletion_queue
-    queue.url: http://localstack:4576/queue/outbound_deletion_queue
-    dlq.name: outbound_deletion_dead_letter_queue
+    queue.name: data_compliance_request_queue
+    queue.url: http://localstack:4576/queue/data_compliance_request_queue
+    dlq.name: data_compliance_request_dead_letter_queue
     endpoint.url: http://localstack:4576
 
-inbound.referral:
+data.compliance.response:
   sqs:
     provider: localstack
-    queue.name: inbound_referral_queue
-    dlq.name: inbound_referral_dead_letter_queue
+    queue.name: data_compliance_response_queue
+    dlq.name: data_compliance_response_dead_letter_queue
     endpoint.url: http://localstack:4576
 
 sns:

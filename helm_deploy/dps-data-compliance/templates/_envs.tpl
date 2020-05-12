@@ -57,14 +57,14 @@ env:
     value: "{{ .Values.env.SNS_PROVIDER }}"
   {{- end }}
 
-  {{- if .Values.env.OUTBOUND_DELETION_SQS_PROVIDER }}
-  - name: OUTBOUND_DELETION_SQS_PROVIDER
-    value: "{{ .Values.env.OUTBOUND_DELETION_SQS_PROVIDER }}"
+  {{- if .Values.env.DATA_COMPLIANCE_REQUEST_SQS_PROVIDER }}
+  - name: DATA_COMPLIANCE_REQUEST_SQS_PROVIDER
+    value: "{{ .Values.env.DATA_COMPLIANCE_REQUEST_SQS_PROVIDER }}"
   {{- end }}
 
-  {{- if .Values.env.INBOUND_REFERRAL_SQS_PROVIDER }}
-  - name: INBOUND_REFERRAL_SQS_PROVIDER
-    value: "{{ .Values.env.INBOUND_REFERRAL_SQS_PROVIDER }}"
+  {{- if .Values.env.DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER }}
+  - name: DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER
+    value: "{{ .Values.env.DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER }}"
   {{- end }}
 
   {{- if .Values.env.OFFENDER_DELETION_CRON }}
@@ -157,79 +157,79 @@ env:
         name: offender-events-topic
         key: topic_arn
 
-  - name: INBOUND_REFERRAL_SQS_AWS_ACCESS_KEY_ID
+  - name: DATA_COMPLIANCE_RESPONSE_SQS_AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs
         key: access_key_id
 
-  - name: INBOUND_REFERRAL_SQS_AWS_SECRET_ACCESS_KEY
+  - name: DATA_COMPLIANCE_RESPONSE_SQS_AWS_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs
         key: secret_access_key
 
-  - name: INBOUND_REFERRAL_SQS_QUEUE_NAME
+  - name: DATA_COMPLIANCE_RESPONSE_SQS_QUEUE_NAME
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs
         key: sqs_dc_resp_name
 
-  - name: INBOUND_REFERRAL_SQS_DLQ_AWS_ACCESS_KEY_ID
+  - name: DATA_COMPLIANCE_RESPONSE_SQS_DLQ_AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs-dl
         key: access_key_id
 
-  - name: INBOUND_REFERRAL_SQS_DLQ_AWS_SECRET_ACCESS_KEY
+  - name: DATA_COMPLIANCE_RESPONSE_SQS_DLQ_AWS_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs-dl
         key: secret_access_key
 
-  - name: INBOUND_REFERRAL_SQS_DLQ_NAME
+  - name: DATA_COMPLIANCE_RESPONSE_SQS_DLQ_NAME
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs-dl
         key: sqs_dc_resp_name
 
-  - name: OUTBOUND_DELETION_SQS_AWS_ACCESS_KEY_ID
+  - name: DATA_COMPLIANCE_REQUEST_SQS_AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs
         key: access_key_id
 
-  - name: OUTBOUND_DELETION_SQS_AWS_SECRET_ACCESS_KEY
+  - name: DATA_COMPLIANCE_REQUEST_SQS_AWS_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs
         key: secret_access_key
 
-  - name: OUTBOUND_DELETION_SQS_QUEUE_NAME
+  - name: DATA_COMPLIANCE_REQUEST_SQS_QUEUE_NAME
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs
         key: sqs_dc_req_name
 
-  - name: OUTBOUND_DELETION_SQS_QUEUE_URL
+  - name: DATA_COMPLIANCE_REQUEST_SQS_QUEUE_URL
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs
         key: sqs_dc_req_url
 
-  - name: OUTBOUND_DELETION_SQS_DLQ_AWS_ACCESS_KEY_ID
+  - name: DATA_COMPLIANCE_REQUEST_SQS_DLQ_AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs-dl
         key: access_key_id
 
-  - name: OUTBOUND_DELETION_SQS_DLQ_AWS_SECRET_ACCESS_KEY
+  - name: DATA_COMPLIANCE_REQUEST_SQS_DLQ_AWS_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs-dl
         key: secret_access_key
 
-  - name: OUTBOUND_DELETION_SQS_DLQ_NAME
+  - name: DATA_COMPLIANCE_REQUEST_SQS_DLQ_NAME
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs-dl

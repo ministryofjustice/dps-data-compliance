@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('${outbound.deletion.sqs.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.request.sqs.provider}')")
 public class OffenderDeletionGrantedAwsEventPusher implements OffenderDeletionGrantedEventPusher {
 
     private final ObjectMapper objectMapper;
@@ -25,8 +25,8 @@ public class OffenderDeletionGrantedAwsEventPusher implements OffenderDeletionGr
     private final String queueUrl;
 
     public OffenderDeletionGrantedAwsEventPusher(
-            @Autowired @Qualifier("outboundDeletionSqsClient") final AmazonSQS sqsClient,
-            @Value("${outbound.deletion.sqs.queue.url}") final String queueUrl,
+            @Autowired @Qualifier("dataComplianceRequestSqsClient") final AmazonSQS sqsClient,
+            @Value("${data.compliance.request.sqs.queue.url}") final String queueUrl,
             final ObjectMapper objectMapper) {
 
         log.info("Configured to push offender deletion granted events to SQS queue: {}", queueUrl);
