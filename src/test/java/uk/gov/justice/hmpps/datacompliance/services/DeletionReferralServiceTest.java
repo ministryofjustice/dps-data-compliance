@@ -34,13 +34,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -117,6 +117,20 @@ class DeletionReferralServiceTest {
 
         final var referral = verifyReferralPersisted();
         verifyPersistedResolution(referral.getReferralResolution().orElseThrow(), RETAINED);
+        verify(deletionGrantedEventPusher, never()).grantDeletion(any(), anyLong());
+    }
+
+    @Test
+    void handlePendingDeletionThrowsWhenNoChecksAreReturned() {
+
+        when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
+        when(retentionService.conductRetentionChecks(new OffenderNumber(OFFENDER_NUMBER)))
+                .thenReturn(emptyList());
+
+        assertThatThrownBy(() -> referralService.handlePendingDeletion(generatePendingDeletionEvent()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("No retention checks have been conducted for offender: 'A1234AA'");
+
         verify(deletionGrantedEventPusher, never()).grantDeletion(any(), anyLong());
     }
 
