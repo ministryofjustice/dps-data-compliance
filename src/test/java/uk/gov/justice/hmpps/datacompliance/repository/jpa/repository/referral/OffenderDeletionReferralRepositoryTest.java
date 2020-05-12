@@ -10,12 +10,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.transaction.TestTransaction;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonManual;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonPathfinder;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.ImageDuplicateRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.ManualRetentionRepository;
 
 import javax.transaction.Transactional;
@@ -24,10 +28,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.RETAINED;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonManual.MANUAL_RETENTION;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonPathfinder.PATHFINDER_REFERRAL;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate.IMAGE_DUPLICATE;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual.MANUAL_RETENTION;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder.PATHFINDER_REFERRAL;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -35,6 +41,9 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 @Transactional
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class OffenderDeletionReferralRepositoryTest {
+
+    @Autowired
+    private ImageDuplicateRepository imageDuplicateRepository;
 
     @Autowired
     private ManualRetentionRepository manualRetentionRepository;
@@ -46,13 +55,17 @@ class OffenderDeletionReferralRepositoryTest {
     private OffenderDeletionReferralRepository repository;
 
     @Test
+    @Sql("image_upload_batch.sql")
+    @Sql("offender_image_upload.sql")
+    @Sql("image_duplicate.sql")
     @Sql("offender_deletion_batch.sql")
     @Sql("offender_deletion_referral.sql")
     @Sql("referred_offender_booking.sql")
     @Sql("referral_resolution.sql")
     @Sql("manual_retention.sql")
-    @Sql("retention_reason.sql")
+    @Sql("retention_check.sql")
     @Sql("retention_reason_manual.sql")
+    @Sql("retention_reason_image_duplicate.sql")
     void getOffenderDeletionReferral() {
         assertMatchesExpectedContents(repository.findById(1L).orElseThrow());
     }
@@ -68,6 +81,9 @@ class OffenderDeletionReferralRepositoryTest {
     }
 
     @Test
+    @Sql("image_upload_batch.sql")
+    @Sql("offender_image_upload.sql")
+    @Sql("image_duplicate.sql")
     @Sql("offender_deletion_batch.sql")
     @Sql("manual_retention.sql")
     void saveOffenderDeletionReferral() {
@@ -105,13 +121,15 @@ class OffenderDeletionReferralRepositoryTest {
 
     private ReferralResolution referralResolution() {
         return ReferralResolution.builder()
-                .resolutionType(RETAINED)
+                .resolutionStatus(PENDING)
                 .resolutionDateTime(LocalDateTime.of(2021, 2, 3, 4, 5, 6))
                 .build()
 
-                .addRetentionReason(new RetentionReasonPathfinder())
-                .addRetentionReason(new RetentionReasonManual()
-                        .setManualRetention(manualRetentionRepository.findById(1L).orElseThrow()));
+                .addRetentionCheck(new RetentionCheckManual(Status.PENDING)
+                        .setManualRetention(manualRetentionRepository.findById(1L).orElseThrow()))
+                .addRetentionCheck(new RetentionCheckPathfinder(RETENTION_REQUIRED))
+                .addRetentionCheck(new RetentionCheckImageDuplicate(RETENTION_NOT_REQUIRED)
+                        .addImageDuplicate(imageDuplicateRepository.findById(1L).orElseThrow()));
     }
 
     private void assertMatchesExpectedContents(final OffenderDeletionReferral referral) {
@@ -134,24 +152,35 @@ class OffenderDeletionReferralRepositoryTest {
 
     private void assertMatchesExpectedContents(final ReferralResolution resolution) {
         assertThat(resolution.getResolutionDateTime()).isEqualTo(LocalDateTime.of(2021, 2, 3, 4, 5, 6));
-        assertThat(resolution.getResolutionType()).isEqualTo(RETAINED);
-        assertThat(resolution.isType(RETAINED)).isTrue();
+        assertThat(resolution.getResolutionStatus()).isEqualTo(PENDING);
+        assertThat(resolution.isType(PENDING)).isTrue();
 
-        assertMatchesExpectedContents(resolution.getRetentionReasons());
+        assertMatchesExpectedContents(resolution.getRetentionChecks());
     }
 
-    private void assertMatchesExpectedContents(final List<RetentionReason> retentionReasons) {
+    private void assertMatchesExpectedContents(final List<RetentionCheck> retentionChecks) {
 
-        assertThat(retentionReasons).hasSize(2);
-        assertThat(retentionReasons).extracting(RetentionReason::getReasonCode)
-                .containsExactlyInAnyOrder(MANUAL_RETENTION, PATHFINDER_REFERRAL);
+        assertThat(retentionChecks).hasSize(3);
 
-        retentionReasons.stream()
-                .filter(reason -> MANUAL_RETENTION.equals(reason.getReasonCode()))
-                .map(RetentionReasonManual.class::cast)
+        final var manualRetentionCheck = getRetentionCheck(retentionChecks, MANUAL_RETENTION, RetentionCheckManual.class);
+        assertThat(manualRetentionCheck.getCheckStatus()).isEqualTo(Status.PENDING);
+        assertThat(manualRetentionCheck.getManualRetention().getManualRetentionId()).isEqualTo(1L);
+
+        final var pathfinderReferralCheck = getRetentionCheck(retentionChecks, PATHFINDER_REFERRAL, RetentionCheckPathfinder.class);
+        assertThat(pathfinderReferralCheck.getCheckStatus()).isEqualTo(RETENTION_REQUIRED);
+
+        final var imageDuplicateCheck = getRetentionCheck(retentionChecks, IMAGE_DUPLICATE, RetentionCheckImageDuplicate.class);
+        assertThat(imageDuplicateCheck.getCheckStatus()).isEqualTo(RETENTION_NOT_REQUIRED);
+        assertThat(imageDuplicateCheck.getImageDuplicates()).extracting(ImageDuplicate::getImageDuplicateId).containsExactly(1L);
+    }
+
+    private <T extends RetentionCheck> T getRetentionCheck(final List<RetentionCheck> retentionChecks,
+                                                           final String checkType,
+                                                           final Class<T> retentionCheckClass) {
+        return retentionChecks.stream()
+                .filter(check -> checkType.equals(check.getCheckType()))
+                .map(retentionCheckClass::cast)
                 .findFirst()
-                .ifPresentOrElse(
-                        reason -> assertThat(reason.getManualRetention().getManualRetentionId()).isEqualTo(1L),
-                        () -> fail("Manual retention reason not found"));
+                .orElseThrow();
     }
 }

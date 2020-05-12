@@ -7,13 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.client.pathfinder.PathfinderApiClient;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonDuplicate;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonManual;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReasonPathfinder;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
-import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.data.DataDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.image.ImageDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ManualRetentionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
@@ -25,6 +23,8 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
 
 @ExtendWith(MockitoExtension.class)
 class RetentionServiceTest {
@@ -40,97 +40,46 @@ class RetentionServiceTest {
     @Mock
     private ImageDuplicationDetectionService imageDuplicationDetectionService;
 
-    @Mock
-    private DataDuplicationDetectionService dataDuplicationDetectionService;
-
     private RetentionService service;
 
     @BeforeEach
     void setUp() {
-        mockEmptyResponses();
         service = new RetentionService(
                 pathfinderApiClient,
                 manualRetentionService,
-                imageDuplicationDetectionService,
-                dataDuplicationDetectionService);
+                imageDuplicationDetectionService);
     }
 
     @Test
-    void retentionReasonFoundIfOffenderReferredToPathfinder() {
-
-        when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(true);
-
-        assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
-                .containsExactly(new RetentionReasonPathfinder());
-    }
-
-    @Test
-    void retentionReasonFoundIfManualRetentionExists() {
-
-        final var manualRetention = mock(ManualRetention.class);
-
-        when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER))
-                .thenReturn(Optional.of(manualRetention));
-
-        assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
-                .containsExactly(new RetentionReasonManual().setManualRetention(manualRetention));
-    }
-
-    @Test
-    void retentionReasonFoundIfImageDuplicateExists() {
-
-        final var imageDuplicate = mock(ImageDuplicate.class);
-
-        when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER))
-                .thenReturn(List.of(imageDuplicate));
-
-        assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
-                .containsExactly(new RetentionReasonDuplicate().addImageDuplicates(List.of(imageDuplicate)));
-    }
-
-    @Test
-    void retentionReasonFoundIfDataDuplicateExists() {
-
-        final var dataDuplicate = mock(DataDuplicate.class);
-
-        when(dataDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER))
-                .thenReturn(List.of(dataDuplicate));
-
-        assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
-                .containsExactly(new RetentionReasonDuplicate().addDataDuplicates(List.of(dataDuplicate)));
-    }
-
-    @Test
-    void retentionReasonRecordsAllReasons() {
+    void conductRetentionChecksRetentionRequired() {
 
         final var manualRetention = mock(ManualRetention.class);
         final var imageDuplicate = mock(ImageDuplicate.class);
-        final var dataDuplicate = mock(DataDuplicate.class);
 
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(true);
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER))
                 .thenReturn(Optional.of(manualRetention));
-        when(dataDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(List.of(dataDuplicate));
         when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(List.of(imageDuplicate));
 
-        assertThat(service.findRetentionReasons(OFFENDER_NUMBER))
+        assertThat(service.conductRetentionChecks(OFFENDER_NUMBER))
                 .containsExactlyInAnyOrder(
-                        new RetentionReasonPathfinder(),
-                        new RetentionReasonManual().setManualRetention(manualRetention),
-                        new RetentionReasonDuplicate()
-                                .addDataDuplicates(List.of(dataDuplicate))
+                        new RetentionCheckPathfinder(RETENTION_REQUIRED),
+                        new RetentionCheckManual(RETENTION_REQUIRED).setManualRetention(manualRetention),
+                        new RetentionCheckImageDuplicate(RETENTION_REQUIRED)
                                 .addImageDuplicates(List.of(imageDuplicate)));
     }
 
     @Test
-    void retentionReasonReturnsEmpty() {
-        assertThat(service.findRetentionReasons(OFFENDER_NUMBER)).isEmpty();
-    }
+    void conductRetentionChecksRetentionNotRequired() {
 
-    private void mockEmptyResponses() {
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(false);
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER)).thenReturn(Optional.empty());
-        when(dataDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(emptyList());
         when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(emptyList());
+
+        assertThat(service.conductRetentionChecks(OFFENDER_NUMBER))
+                .containsExactlyInAnyOrder(
+                        new RetentionCheckPathfinder(RETENTION_NOT_REQUIRED),
+                        new RetentionCheckManual(RETENTION_NOT_REQUIRED),
+                        new RetentionCheckImageDuplicate(RETENTION_NOT_REQUIRED));
     }
 }

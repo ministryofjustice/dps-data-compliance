@@ -14,8 +14,10 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletio
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.OffenderWithBookings;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
@@ -26,9 +28,10 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.groupingBy;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.DELETED;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.DELETION_GRANTED;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.RETAINED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
 import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
 
 @Slf4j
@@ -48,15 +51,10 @@ public class DeletionReferralService {
 
         final var referral = createOffenderDeletionReferral(event);
 
-        final var retentionReasons = retentionService.findRetentionReasons(
+        final var retentionChecks = retentionService.conductRetentionChecks(
                 new OffenderNumber(event.getOffenderIdDisplay()));
 
-        if (!retentionReasons.isEmpty()) {
-            markForRetention(referral, retentionReasons);
-            return;
-        }
-
-        grantDeletion(referral);
+        processRetentionChecks(referral, retentionChecks);
     }
 
     public void handleReferralComplete(final OffenderPendingDeletionReferralCompleteEvent event) {
@@ -84,17 +82,45 @@ public class DeletionReferralService {
         publishDeletionCompleteEvent(referral);
     }
 
-    private void markForRetention(final OffenderDeletionReferral referral,
-                                  final List<RetentionReason> retentionReasons) {
+    private void processRetentionChecks(final OffenderDeletionReferral referral,
+                                        final List<RetentionCheck> retentionChecks) {
 
-        log.info("Offender record '{}' has been marked for retention ", referral.getOffenderNo());
+        checkState(!retentionChecks.isEmpty(),
+                "No retention checks have been conducted for offender: '%s'", referral.getOffenderNo());
+
+        if (!allComplete(retentionChecks)) {
+            persistRetentionChecks(referral, retentionChecks, PENDING);
+            return;
+        }
+
+        if (canGrantDeletion(retentionChecks)) {
+            grantDeletion(referral);
+            return;
+        }
+
+        persistRetentionChecks(referral, retentionChecks, RETAINED);
+    }
+
+    private boolean allComplete(final List<RetentionCheck> retentionChecks) {
+        return retentionChecks.stream().allMatch(RetentionCheck::isComplete);
+    }
+
+    private boolean canGrantDeletion(final List<RetentionCheck> retentionChecks) {
+        return retentionChecks.stream().allMatch(check -> check.isStatus(Status.RETENTION_NOT_REQUIRED));
+    }
+
+    private void persistRetentionChecks(final OffenderDeletionReferral referral,
+                                        final List<RetentionCheck> retentionChecks,
+                                        final ResolutionStatus resolutionStatus) {
+
+        log.info("Offender referral '{}' has resolution status : '{}'", referral.getOffenderNo(), resolutionStatus);
 
         final var resolution = ReferralResolution.builder()
                 .resolutionDateTime(timeSource.nowAsLocalDateTime())
-                .resolutionType(RETAINED)
+                .resolutionStatus(resolutionStatus)
                 .build();
 
-        retentionReasons.forEach(resolution::addRetentionReason);
+        retentionChecks.forEach(resolution::addRetentionCheck);
         referral.setReferralResolution(resolution);
         referralRepository.save(referral);
     }
@@ -105,7 +131,7 @@ public class DeletionReferralService {
 
         referral.setReferralResolution(ReferralResolution.builder()
                 .resolutionDateTime(timeSource.nowAsLocalDateTime())
-                .resolutionType(DELETION_GRANTED)
+                .resolutionStatus(DELETION_GRANTED)
                 .build());
 
         referralRepository.save(referral);
@@ -121,7 +147,7 @@ public class DeletionReferralService {
                 .orElseThrow(illegalState("Referral '%s' does not have expected resolution type", referral.getReferralId()));
 
         referralResolution.setResolutionDateTime(timeSource.nowAsLocalDateTime());
-        referralResolution.setResolutionType(DELETED);
+        referralResolution.setResolutionStatus(DELETED);
 
         referralRepository.save(referral);
     }
