@@ -10,6 +10,8 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Referra
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,22 +22,29 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import static javax.persistence.FetchType.LAZY;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.PENDING;
 
 @Data
 @Entity
 @Inheritance
 @NoArgsConstructor
 @AllArgsConstructor
-@DiscriminatorColumn(name = "REASON_CODE")
+@DiscriminatorColumn(name = "CHECK_TYPE")
 @ToString(exclude = {"referralResolution"}) // to avoid circular reference
-@EqualsAndHashCode(of = {"retentionReasonId"})
-@Table(name = "RETENTION_REASON")
-public abstract class RetentionReason {
+@EqualsAndHashCode(of = {"retentionCheckId"})
+@Table(name = "RETENTION_CHECK")
+public abstract class RetentionCheck {
+
+    public enum Status {
+        PENDING,
+        RETENTION_REQUIRED,
+        RETENTION_NOT_REQUIRED
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "RETENTION_REASON_ID", nullable = false)
-    private Long retentionReasonId;
+    @Column(name = "RETENTION_CHECK_ID", nullable = false)
+    private Long retentionCheckId;
 
     @NotNull
     @ManyToOne(fetch = LAZY)
@@ -43,6 +52,19 @@ public abstract class RetentionReason {
     private ReferralResolution referralResolution;
 
     @NotNull
-    @Column(name = "REASON_CODE", nullable = false, insertable = false, updatable = false)
-    private String reasonCode;
+    @Column(name = "CHECK_TYPE", nullable = false, insertable = false, updatable = false)
+    private String checkType;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "CHECK_STATUS", nullable = false)
+    private RetentionCheck.Status checkStatus;
+
+    public boolean isComplete() {
+        return checkStatus != null && checkStatus != PENDING;
+    }
+
+    public boolean isStatus(final Status value) {
+        return checkStatus != null && checkStatus == value;
+    }
 }

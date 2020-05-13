@@ -20,9 +20,9 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletio
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.services.referral.DeletionReferralService;
@@ -41,15 +41,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.OffenderWithBookings.builder;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.DELETED;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.DELETION_GRANTED;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionType.RETAINED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
 
 @ExtendWith(MockitoExtension.class)
 class DeletionReferralServiceTest {
@@ -93,8 +94,8 @@ class DeletionReferralServiceTest {
     void handlePendingDeletionWhenOffenderEligibleForDeletion() {
 
         when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
-        when(retentionService.findRetentionReasons(new OffenderNumber(OFFENDER_NUMBER)))
-                .thenReturn(emptyList());
+        when(retentionService.conductRetentionChecks(new OffenderNumber(OFFENDER_NUMBER)))
+                .thenReturn(List.of(new RetentionCheckManual(RETENTION_NOT_REQUIRED)));
 
         referralService.handlePendingDeletion(generatePendingDeletionEvent());
 
@@ -108,11 +109,9 @@ class DeletionReferralServiceTest {
     @Test
     void handlePendingDeletionWhenOffenderShouldBeRetained() {
 
-        final var retentionReason = mock(RetentionReason.class);
-
         when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
-        when(retentionService.findRetentionReasons(new OffenderNumber(OFFENDER_NUMBER)))
-                .thenReturn(List.of(retentionReason));
+        when(retentionService.conductRetentionChecks(new OffenderNumber(OFFENDER_NUMBER)))
+                .thenReturn(List.of(new RetentionCheckManual(RETENTION_REQUIRED)));
 
         referralService.handlePendingDeletion(generatePendingDeletionEvent());
 
@@ -122,9 +121,23 @@ class DeletionReferralServiceTest {
     }
 
     @Test
+    void handlePendingDeletionThrowsWhenNoChecksAreReturned() {
+
+        when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
+        when(retentionService.conductRetentionChecks(new OffenderNumber(OFFENDER_NUMBER)))
+                .thenReturn(emptyList());
+
+        assertThatThrownBy(() -> referralService.handlePendingDeletion(generatePendingDeletionEvent()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("No retention checks have been conducted for offender: 'A1234AA'");
+
+        verify(deletionGrantedEventPusher, never()).grantDeletion(any(), anyLong());
+    }
+
+    @Test
     void handleDeletionComplete() {
 
-        final var referralResolution = spy(ReferralResolution.builder().resolutionType(DELETION_GRANTED).build());
+        final var referralResolution = spy(ReferralResolution.builder().resolutionStatus(DELETION_GRANTED).build());
         final var existingReferral = generateOffenderDeletionReferral();
         existingReferral.setReferralResolution(referralResolution);
 
@@ -211,7 +224,7 @@ class DeletionReferralServiceTest {
                 .offenderNo(OFFENDER_NUMBER)
                 .referralId(123L)
                 .build();
-        existingReferral.setReferralResolution(ReferralResolution.builder().resolutionType(DELETED).build());
+        existingReferral.setReferralResolution(ReferralResolution.builder().resolutionStatus(DELETED).build());
 
         when(referralRepository.findById(123L)).thenReturn(Optional.of(existingReferral));
 
@@ -288,9 +301,9 @@ class DeletionReferralServiceTest {
         assertThat(offenderBooking.getOffenderBookId()).isEqualTo(2L);
     }
 
-    private void verifyPersistedResolution(final ReferralResolution resolution, final ResolutionType type) {
+    private void verifyPersistedResolution(final ReferralResolution resolution, final ResolutionStatus type) {
         assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
-        assertThat(resolution.getResolutionType()).isEqualTo(type);
+        assertThat(resolution.getResolutionStatus()).isEqualTo(type);
     }
 
     private OffenderDeletionReferral generateOffenderDeletionReferral() {

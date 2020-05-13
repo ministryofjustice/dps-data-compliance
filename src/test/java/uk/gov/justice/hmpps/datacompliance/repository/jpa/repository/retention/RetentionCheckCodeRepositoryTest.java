@@ -20,7 +20,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 @SpringBootTest
 @Transactional
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-class RetentionReasonCodeRepositoryTest {
+class RetentionCheckCodeRepositoryTest {
 
     @Autowired
     private RetentionReasonCodeRepository repository;

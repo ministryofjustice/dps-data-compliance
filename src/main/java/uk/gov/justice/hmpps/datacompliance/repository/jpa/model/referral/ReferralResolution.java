@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionReason;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,7 +37,8 @@ import static javax.persistence.FetchType.LAZY;
 @Table(name = "REFERRAL_RESOLUTION")
 public class ReferralResolution {
 
-    public enum ResolutionType {
+    public enum ResolutionStatus {
+        PENDING,
         RETAINED,
         DELETION_GRANTED,
         DELETED
@@ -55,23 +56,23 @@ public class ReferralResolution {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "RESOLUTION_TYPE", nullable = false)
-    private ReferralResolution.ResolutionType resolutionType;
+    @Column(name = "RESOLUTION_STATUS", nullable = false)
+    private ReferralResolution.ResolutionStatus resolutionStatus;
 
     @NotNull
     @Column(name = "RESOLUTION_DATE_TIME")
     private LocalDateTime resolutionDateTime;
 
     @OneToMany(mappedBy = "referralResolution", cascade = PERSIST, fetch = LAZY)
-    private final List<RetentionReason> retentionReasons = new ArrayList<>();
+    private final List<RetentionCheck> retentionChecks = new ArrayList<>();
 
-    public ReferralResolution addRetentionReason(final RetentionReason reason) {
-        this.retentionReasons.add(reason);
+    public ReferralResolution addRetentionCheck(final RetentionCheck reason) {
+        this.retentionChecks.add(reason);
         reason.setReferralResolution(this);
         return this;
     }
 
-    public boolean isType(final ResolutionType type) {
-        return type == resolutionType;
+    public boolean isType(final ResolutionStatus type) {
+        return type == resolutionStatus;
     }
 }

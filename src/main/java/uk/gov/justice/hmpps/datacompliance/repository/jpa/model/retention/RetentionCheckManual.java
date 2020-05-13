@@ -23,28 +23,32 @@ import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
-@DiscriminatorValue(RetentionReasonManual.MANUAL_RETENTION)
-public class RetentionReasonManual extends RetentionReason {
+@DiscriminatorValue(RetentionCheckManual.MANUAL_RETENTION)
+public class RetentionCheckManual extends RetentionCheck {
 
     public static final String MANUAL_RETENTION = "MANUAL_RETENTION";
 
-    @OneToOne(mappedBy = "retentionReason", cascade = PERSIST, fetch = LAZY)
-    private ManualRetentionLinkTable manualRetentionLinkTable;
+    @OneToOne(mappedBy = "retentionCheck", cascade = PERSIST, fetch = LAZY)
+    private RetentionReasonManual retentionReasonManual;
 
-    public RetentionReasonManual() {
-        super(null, null, MANUAL_RETENTION);
+    public RetentionCheckManual() {
+        this(null);
     }
 
-    public RetentionReasonManual setManualRetention(final ManualRetention manualRetention) {
-        this.manualRetentionLinkTable = ManualRetentionLinkTable.builder()
-                .retentionReason(this)
+    public RetentionCheckManual(final Status status) {
+        super(null, null, MANUAL_RETENTION, status);
+    }
+
+    public RetentionCheckManual setManualRetention(final ManualRetention manualRetention) {
+        this.retentionReasonManual = RetentionReasonManual.builder()
+                .retentionCheck(this)
                 .manualRetention(manualRetention)
                 .build();
         return this;
     }
 
     public ManualRetention getManualRetention() {
-        return manualRetentionLinkTable.getManualRetention();
+        return retentionReasonManual.getManualRetention();
     }
 
     @Data
@@ -55,7 +59,7 @@ public class RetentionReasonManual extends RetentionReason {
     @AllArgsConstructor
     @EqualsAndHashCode(of = {"retentionReasonManualId"})
     @Table(name = "RETENTION_REASON_MANUAL")
-    private static class ManualRetentionLinkTable {
+    private static class RetentionReasonManual {
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,8 +67,8 @@ public class RetentionReasonManual extends RetentionReason {
         private Long retentionReasonManualId;
 
         @ManyToOne(fetch = LAZY)
-        @JoinColumn(name = "RETENTION_REASON_ID")
-        private RetentionReasonManual retentionReason;
+        @JoinColumn(name = "RETENTION_CHECK_ID")
+        private RetentionCheckManual retentionCheck;
 
         @ManyToOne(fetch = LAZY)
         @JoinColumn(name = "MANUAL_RETENTION_ID")
