@@ -25,20 +25,20 @@ import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
-@DiscriminatorValue(RetentionCheckDataDuplicate.DUPLICATE)
+@DiscriminatorValue(RetentionCheckDataDuplicate.DATA_DUPLICATE)
 public class RetentionCheckDataDuplicate extends RetentionCheck {
 
-    public static final String DUPLICATE = "DATA_DUPLICATE";
+    public static final String DATA_DUPLICATE = "DATA_DUPLICATE";
 
     @OneToMany(mappedBy = "retentionCheck", cascade = PERSIST, fetch = LAZY)
     private final List<RetentionReasonDataDuplicate> dataDuplicates = new ArrayList<>();
 
-    public RetentionCheckDataDuplicate() {
+    private RetentionCheckDataDuplicate() {
         this(null);
     }
 
     public RetentionCheckDataDuplicate(final Status status) {
-        super(null, null, DUPLICATE, status);
+        super(null, null, DATA_DUPLICATE, status);
     }
 
     public RetentionCheckDataDuplicate addDataDuplicates(final List<DataDuplicate> dataDuplicates) {

@@ -9,7 +9,7 @@ public class RetentionCheckPathfinder extends RetentionCheck {
 
     public static final String PATHFINDER_REFERRAL = "PATHFINDER_REFERRAL";
 
-    public RetentionCheckPathfinder() {
+    private RetentionCheckPathfinder() {
         this(null);
     }
 

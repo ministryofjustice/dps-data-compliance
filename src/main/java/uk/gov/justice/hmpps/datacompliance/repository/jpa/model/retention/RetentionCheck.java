@@ -22,7 +22,6 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import static javax.persistence.FetchType.LAZY;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.PENDING;
 
 @Data
 @Entity
@@ -60,11 +59,4 @@ public abstract class RetentionCheck {
     @Column(name = "CHECK_STATUS", nullable = false)
     private RetentionCheck.Status checkStatus;
 
-    public boolean isComplete() {
-        return checkStatus != null && checkStatus != PENDING;
-    }
-
-    public boolean isStatus(final Status value) {
-        return checkStatus != null && checkStatus == value;
-    }
 }

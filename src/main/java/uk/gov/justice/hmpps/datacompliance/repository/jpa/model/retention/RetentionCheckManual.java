@@ -31,7 +31,7 @@ public class RetentionCheckManual extends RetentionCheck {
     @OneToOne(mappedBy = "retentionCheck", cascade = PERSIST, fetch = LAZY)
     private RetentionReasonManual retentionReasonManual;
 
-    public RetentionCheckManual() {
+    private RetentionCheckManual() {
         this(null);
     }
 

@@ -34,7 +34,7 @@ public class RetentionCheckImageDuplicate extends RetentionCheck {
     @OneToMany(mappedBy = "retentionCheck", cascade = PERSIST, fetch = LAZY)
     private final List<RetentionReasonImageDuplicate> imageDuplicates = new ArrayList<>();
 
-    public RetentionCheckImageDuplicate() {
+    private RetentionCheckImageDuplicate() {
         this(null);
     }
 

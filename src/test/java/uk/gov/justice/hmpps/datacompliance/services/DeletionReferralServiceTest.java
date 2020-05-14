@@ -22,10 +22,13 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Offende
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.services.referral.DeletionReferralService;
+import uk.gov.justice.hmpps.datacompliance.services.retention.ActionableRetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
@@ -49,6 +52,7 @@ import static uk.gov.justice.hmpps.datacompliance.events.publishers.dto.Offender
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
 
@@ -93,30 +97,46 @@ class DeletionReferralServiceTest {
     @Test
     void handlePendingDeletionWhenOffenderEligibleForDeletion() {
 
+        final var retentionNotRequired = new RetentionCheckManual(RETENTION_NOT_REQUIRED);
+
         when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
         when(retentionService.conductRetentionChecks(new OffenderNumber(OFFENDER_NUMBER)))
-                .thenReturn(List.of(new RetentionCheckManual(RETENTION_NOT_REQUIRED)));
+                .thenReturn(List.of(new ActionableRetentionCheck(retentionNotRequired)));
 
         referralService.handlePendingDeletion(generatePendingDeletionEvent());
 
-        final var referral = verifyReferralPersisted();
-        assertThat(referral.getOffenderBookings()).hasSize(1);
-        verifyPersistedBooking(referral.getOffenderBookings().get(0));
-        verifyPersistedResolution(referral.getReferralResolution().orElseThrow(), DELETION_GRANTED);
+        verifyReferralPersisted(DELETION_GRANTED, retentionNotRequired);
         verify(deletionGrantedEventPusher).grantDeletion(eq(new OffenderNumber(OFFENDER_NUMBER)), any());
     }
 
     @Test
     void handlePendingDeletionWhenOffenderShouldBeRetained() {
 
+        final var retentionRequired = new RetentionCheckManual(RETENTION_REQUIRED);
+
         when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
         when(retentionService.conductRetentionChecks(new OffenderNumber(OFFENDER_NUMBER)))
-                .thenReturn(List.of(new RetentionCheckManual(RETENTION_REQUIRED)));
+                .thenReturn(List.of(new ActionableRetentionCheck(retentionRequired)));
 
         referralService.handlePendingDeletion(generatePendingDeletionEvent());
 
-        final var referral = verifyReferralPersisted();
-        verifyPersistedResolution(referral.getReferralResolution().orElseThrow(), RETAINED);
+        verifyReferralPersisted(RETAINED, retentionRequired);
+        verify(deletionGrantedEventPusher, never()).grantDeletion(any(), anyLong());
+    }
+
+    @Test
+    void handlePendingDeletionWithPendingRetentionChecks() {
+
+        final var pendingCheck = spy(new ActionableRetentionCheck(new RetentionCheckDataDuplicate(PENDING)));
+
+        when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
+        when(retentionService.conductRetentionChecks(new OffenderNumber(OFFENDER_NUMBER)))
+                .thenReturn(List.of(pendingCheck));
+
+        referralService.handlePendingDeletion(generatePendingDeletionEvent());
+
+        verifyReferralPersisted(ResolutionStatus.PENDING, pendingCheck.getRetentionCheck());
+        verify(pendingCheck).triggerPendingCheck();
         verify(deletionGrantedEventPusher, never()).grantDeletion(any(), anyLong());
     }
 
@@ -137,9 +157,7 @@ class DeletionReferralServiceTest {
     @Test
     void handleDeletionComplete() {
 
-        final var referralResolution = spy(ReferralResolution.builder().resolutionStatus(DELETION_GRANTED).build());
         final var existingReferral = generateOffenderDeletionReferral();
-        existingReferral.setReferralResolution(referralResolution);
 
         when(referralRepository.findById(123L)).thenReturn(Optional.of(existingReferral));
         when(referralRepository.save(existingReferral)).thenReturn(existingReferral);
@@ -149,8 +167,10 @@ class DeletionReferralServiceTest {
                 .referralId(123L)
                 .build());
 
-        final var referral = verifyReferralPersisted();
-        verifyPersistedResolution(referral.getReferralResolution().orElseThrow(), DELETED);
+        final var resolution = existingReferral.getReferralResolution().orElseThrow();
+        assertThat(resolution.getResolutionStatus()).isEqualTo(DELETED);
+        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+
         verify(deletionCompleteEventPusher).sendEvent(
                 uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.builder()
                         .offenderIdDisplay(OFFENDER_NUMBER)
@@ -277,7 +297,7 @@ class DeletionReferralServiceTest {
                 .build();
     }
 
-    private OffenderDeletionReferral verifyReferralPersisted() {
+    private void verifyReferralPersisted(final ResolutionStatus resolutionStatus, final RetentionCheck retentionCheck) {
 
         final var referralCaptor = ArgumentCaptor.forClass(OffenderDeletionReferral.class);
 
@@ -293,17 +313,34 @@ class DeletionReferralServiceTest {
         assertThat(persistedReferral.getBirthDate()).isEqualTo(LocalDate.of(1969, 1, 1));
         assertThat(persistedReferral.getReceivedDateTime()).isEqualTo(NOW);
 
-        return persistedReferral;
+        verifyPersistedBooking(persistedReferral);
+        verifyPersistedResolution(persistedReferral, resolutionStatus, retentionCheck);
     }
 
-    private void verifyPersistedBooking(final ReferredOffenderBooking offenderBooking) {
+    private void verifyPersistedBooking(final OffenderDeletionReferral referral) {
+
+        assertThat(referral.getOffenderBookings()).hasSize(1);
+
+        final var offenderBooking = referral.getOffenderBookings().get(0);
+
         assertThat(offenderBooking.getOffenderId()).isEqualTo(1L);
         assertThat(offenderBooking.getOffenderBookId()).isEqualTo(2L);
     }
 
-    private void verifyPersistedResolution(final ReferralResolution resolution, final ResolutionStatus type) {
+    private void verifyPersistedResolution(final OffenderDeletionReferral referral,
+                                           final ResolutionStatus resolutionStatus,
+                                           final RetentionCheck check) {
+
+        final var resolution = referral.getReferralResolution().orElseThrow();
         assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
-        assertThat(resolution.getResolutionStatus()).isEqualTo(type);
+        assertThat(resolution.getResolutionStatus()).isEqualTo(resolutionStatus);
+
+        verifyPersistedRetentionCheck(resolution, check);
+    }
+
+    private void verifyPersistedRetentionCheck(final ReferralResolution resolution, final RetentionCheck check) {
+        assertThat(resolution.getRetentionChecks()).extracting(RetentionCheck::getCheckType).containsOnly(check.getCheckType());
+        assertThat(resolution.getRetentionChecks()).extracting(RetentionCheck::getCheckStatus).containsOnly(check.getCheckStatus());
     }
 
     private OffenderDeletionReferral generateOffenderDeletionReferral() {
@@ -321,6 +358,11 @@ class DeletionReferralServiceTest {
         referral.addReferredOffenderBooking(ReferredOffenderBooking.builder().offenderId(1L).offenderBookId(11L).build());
         referral.addReferredOffenderBooking(ReferredOffenderBooking.builder().offenderId(1L).offenderBookId(12L).build());
         referral.addReferredOffenderBooking(ReferredOffenderBooking.builder().offenderId(2L).offenderBookId(21L).build());
+
+        referral.setReferralResolution(ReferralResolution.builder()
+                .resolutionStatus(DELETION_GRANTED)
+                .build()
+                .addRetentionCheck(new RetentionCheckManual(RETENTION_NOT_REQUIRED)));
 
         return referral;
     }

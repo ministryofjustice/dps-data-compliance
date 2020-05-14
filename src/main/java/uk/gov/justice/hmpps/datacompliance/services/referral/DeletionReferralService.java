@@ -16,10 +16,9 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Offende
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
+import uk.gov.justice.hmpps.datacompliance.services.retention.ActionableRetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
@@ -32,6 +31,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
 import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
 
 @Slf4j
@@ -49,7 +49,7 @@ public class DeletionReferralService {
 
     public void handlePendingDeletion(final OffenderPendingDeletionEvent event) {
 
-        final var referral = createOffenderDeletionReferral(event);
+        final var referral = createReferral(event);
 
         final var retentionChecks = retentionService.conductRetentionChecks(
                 new OffenderNumber(event.getOffenderIdDisplay()));
@@ -83,17 +83,19 @@ public class DeletionReferralService {
     }
 
     private void processRetentionChecks(final OffenderDeletionReferral referral,
-                                        final List<RetentionCheck> retentionChecks) {
+                                        final List<ActionableRetentionCheck> retentionChecks) {
 
         checkState(!retentionChecks.isEmpty(),
                 "No retention checks have been conducted for offender: '%s'", referral.getOffenderNo());
 
-        if (!allComplete(retentionChecks)) {
+        if (existPending(retentionChecks)) {
             persistRetentionChecks(referral, retentionChecks, PENDING);
+            retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
             return;
         }
 
         if (canGrantDeletion(retentionChecks)) {
+            persistRetentionChecks(referral, retentionChecks, DELETION_GRANTED);
             grantDeletion(referral);
             return;
         }
@@ -101,16 +103,16 @@ public class DeletionReferralService {
         persistRetentionChecks(referral, retentionChecks, RETAINED);
     }
 
-    private boolean allComplete(final List<RetentionCheck> retentionChecks) {
-        return retentionChecks.stream().allMatch(RetentionCheck::isComplete);
+    private boolean existPending(final List<ActionableRetentionCheck> retentionChecks) {
+        return retentionChecks.stream().anyMatch(ActionableRetentionCheck::isPending);
     }
 
-    private boolean canGrantDeletion(final List<RetentionCheck> retentionChecks) {
-        return retentionChecks.stream().allMatch(check -> check.isStatus(Status.RETENTION_NOT_REQUIRED));
+    private boolean canGrantDeletion(final List<ActionableRetentionCheck> retentionChecks) {
+        return retentionChecks.stream().allMatch(check -> check.isStatus(RETENTION_NOT_REQUIRED));
     }
 
     private void persistRetentionChecks(final OffenderDeletionReferral referral,
-                                        final List<RetentionCheck> retentionChecks,
+                                        final List<ActionableRetentionCheck> retentionChecks,
                                         final ResolutionStatus resolutionStatus) {
 
         log.info("Offender referral '{}' has resolution status : '{}'", referral.getOffenderNo(), resolutionStatus);
@@ -120,21 +122,15 @@ public class DeletionReferralService {
                 .resolutionStatus(resolutionStatus)
                 .build();
 
-        retentionChecks.forEach(resolution::addRetentionCheck);
+        retentionChecks.stream()
+                .map(ActionableRetentionCheck::getRetentionCheck)
+                .forEach(resolution::addRetentionCheck);
+
         referral.setReferralResolution(resolution);
         referralRepository.save(referral);
     }
 
     private void grantDeletion(final OffenderDeletionReferral referral) {
-
-        log.info("No reason found to retain offender record '{}', granting deletion", referral.getOffenderNo());
-
-        referral.setReferralResolution(ReferralResolution.builder()
-                .resolutionDateTime(timeSource.nowAsLocalDateTime())
-                .resolutionStatus(DELETION_GRANTED)
-                .build());
-
-        referralRepository.save(referral);
         deletionGrantedEventPusher.grantDeletion(new OffenderNumber(referral.getOffenderNo()), referral.getReferralId());
     }
 
@@ -152,7 +148,7 @@ public class DeletionReferralService {
         referralRepository.save(referral);
     }
 
-    private OffenderDeletionReferral createOffenderDeletionReferral(final OffenderPendingDeletionEvent event) {
+    private OffenderDeletionReferral createReferral(final OffenderPendingDeletionEvent event) {
 
         final var batch = batchRepository.findById(event.getBatchId())
                 .orElseThrow(illegalState("Cannot find deletion batch with id: '%s'", event.getBatchId()));
