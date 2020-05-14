@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.completed;
+package uk.gov.justice.hmpps.datacompliance.events.publishers.sns;
 
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent;
 

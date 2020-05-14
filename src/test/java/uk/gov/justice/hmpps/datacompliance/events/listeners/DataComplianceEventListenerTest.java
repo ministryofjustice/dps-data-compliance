@@ -22,16 +22,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class OffenderDeletionListenerTest {
+class DataComplianceEventListenerTest {
 
     @Mock
     private DeletionReferralService service;
 
-    private OffenderDeletionListener listener;
+    private DataComplianceEventListener listener;
 
     @BeforeEach
     void setUp() {
-        listener = new OffenderDeletionListener(new ObjectMapper(), service);
+        listener = new DataComplianceEventListener(new ObjectMapper(), service);
     }
 
     @Test

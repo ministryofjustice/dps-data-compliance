@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.completed;
+package uk.gov.justice.hmpps.datacompliance.events.publishers.sns;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;

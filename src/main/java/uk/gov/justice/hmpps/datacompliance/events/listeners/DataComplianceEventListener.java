@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkState;
 @Slf4j
 @Service
 @ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.response.sqs.provider}')")
-public class OffenderDeletionListener {
+public class DataComplianceEventListener {
 
     private static final String OFFENDER_PENDING_DELETION_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION";
     private static final String OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE";
@@ -35,8 +35,8 @@ public class OffenderDeletionListener {
     private final ObjectMapper objectMapper;
     private final DeletionReferralService deletionReferralService;
 
-    public OffenderDeletionListener(final ObjectMapper objectMapper,
-                                    final DeletionReferralService deletionReferralService) {
+    public DataComplianceEventListener(final ObjectMapper objectMapper,
+                                       final DeletionReferralService deletionReferralService) {
 
         log.info("Configured to listen to Offender Deletion events");
 
