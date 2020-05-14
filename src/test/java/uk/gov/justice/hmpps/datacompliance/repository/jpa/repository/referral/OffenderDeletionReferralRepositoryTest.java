@@ -31,9 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate.IMAGE_DUPLICATE;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual.MANUAL_RETENTION;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder.PATHFINDER_REFERRAL;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -162,23 +159,22 @@ class OffenderDeletionReferralRepositoryTest {
 
         assertThat(retentionChecks).hasSize(3);
 
-        final var manualRetentionCheck = getRetentionCheck(retentionChecks, MANUAL_RETENTION, RetentionCheckManual.class);
+        final var manualRetentionCheck = getRetentionCheck(retentionChecks, RetentionCheckManual.class);
         assertThat(manualRetentionCheck.getCheckStatus()).isEqualTo(Status.PENDING);
         assertThat(manualRetentionCheck.getManualRetention().getManualRetentionId()).isEqualTo(1L);
 
-        final var pathfinderReferralCheck = getRetentionCheck(retentionChecks, PATHFINDER_REFERRAL, RetentionCheckPathfinder.class);
+        final var pathfinderReferralCheck = getRetentionCheck(retentionChecks, RetentionCheckPathfinder.class);
         assertThat(pathfinderReferralCheck.getCheckStatus()).isEqualTo(RETENTION_REQUIRED);
 
-        final var imageDuplicateCheck = getRetentionCheck(retentionChecks, IMAGE_DUPLICATE, RetentionCheckImageDuplicate.class);
+        final var imageDuplicateCheck = getRetentionCheck(retentionChecks, RetentionCheckImageDuplicate.class);
         assertThat(imageDuplicateCheck.getCheckStatus()).isEqualTo(RETENTION_NOT_REQUIRED);
         assertThat(imageDuplicateCheck.getImageDuplicates()).extracting(ImageDuplicate::getImageDuplicateId).containsExactly(1L);
     }
 
     private <T extends RetentionCheck> T getRetentionCheck(final List<RetentionCheck> retentionChecks,
-                                                           final String checkType,
                                                            final Class<T> retentionCheckClass) {
         return retentionChecks.stream()
-                .filter(check -> checkType.equals(check.getCheckType()))
+                .filter(retentionCheckClass::isInstance)
                 .map(retentionCheckClass::cast)
                 .findFirst()
                 .orElseThrow();
