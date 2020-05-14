@@ -11,14 +11,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceAwsEventPusher;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OffenderDeletionGrantedEventPusherTest {
+class DataComplianceEventPusherTest {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final static OffenderNumber OFFENDER_NUMBER = new OffenderNumber("offender1");
@@ -26,15 +26,15 @@ class OffenderDeletionGrantedEventPusherTest {
     @Mock
     private AmazonSQS client;
 
-    private OffenderDeletionGrantedEventPusher eventPusher;
+    private DataComplianceEventPusher eventPusher;
 
     @BeforeEach
     void setUp() {
-        eventPusher = new OffenderDeletionGrantedAwsEventPusher(client, "queue.url", OBJECT_MAPPER);
+        eventPusher = new DataComplianceAwsEventPusher(client, "queue.url", OBJECT_MAPPER);
     }
 
     @Test
-    void sendEvent() {
+    void grantDeletion() {
 
         final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
 
@@ -50,8 +50,18 @@ class OffenderDeletionGrantedEventPusherTest {
     }
 
     @Test
-    void sendEventPropagatesException() {
-        when(client.sendMessage(any())).thenThrow(RuntimeException.class);
-        assertThatThrownBy(() -> eventPusher.grantDeletion(OFFENDER_NUMBER, 123L)).isInstanceOf(RuntimeException.class);
+    void requestDataDuplicateCheck() {
+
+        final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
+
+        when(client.sendMessage(request.capture()))
+                .thenReturn(new SendMessageResult().withMessageId("message1"));
+
+        eventPusher.requestDataDuplicateCheck(OFFENDER_NUMBER, 123L);
+
+        assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
+        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"offender1\",\"retentionCheckId\":123}");
+        assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
+                .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-CHECK");
     }
 }

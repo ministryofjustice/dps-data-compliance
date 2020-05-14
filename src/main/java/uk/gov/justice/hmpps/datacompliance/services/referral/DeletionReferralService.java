@@ -8,8 +8,8 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.completed.OffenderDeletionCompleteEventPusher;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.granted.OffenderDeletionGrantedEventPusher;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteEventPusher;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.Booking;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.OffenderWithBookings;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
@@ -43,7 +43,7 @@ public class DeletionReferralService {
     private final TimeSource timeSource;
     private final OffenderDeletionBatchRepository batchRepository;
     private final OffenderDeletionReferralRepository referralRepository;
-    private final OffenderDeletionGrantedEventPusher deletionGrantedEventPusher;
+    private final DataComplianceEventPusher deletionGrantedEventPusher;
     private final OffenderDeletionCompleteEventPusher deletionCompleteEventPusher;
     private final RetentionService retentionService;
 
@@ -88,7 +88,7 @@ public class DeletionReferralService {
         checkState(!retentionChecks.isEmpty(),
                 "No retention checks have been conducted for offender: '%s'", referral.getOffenderNo());
 
-        if (existPending(retentionChecks)) {
+        if (anyPending(retentionChecks)) {
             persistRetentionChecks(referral, retentionChecks, PENDING);
             retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
             return;
@@ -103,7 +103,7 @@ public class DeletionReferralService {
         persistRetentionChecks(referral, retentionChecks, RETAINED);
     }
 
-    private boolean existPending(final List<ActionableRetentionCheck> retentionChecks) {
+    private boolean anyPending(final List<ActionableRetentionCheck> retentionChecks) {
         return retentionChecks.stream().anyMatch(ActionableRetentionCheck::isPending);
     }
 

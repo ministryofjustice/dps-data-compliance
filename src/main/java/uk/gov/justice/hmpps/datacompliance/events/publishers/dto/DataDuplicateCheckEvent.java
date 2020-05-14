@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OffenderDeletionGrantedEvent {
+public class DataDuplicateCheckEvent {
 
     @JsonProperty("offenderIdDisplay")
     private String offenderIdDisplay;
 
-    @JsonProperty("referralId")
-    private Long referralId;
+    @JsonProperty("retentionCheckId")
+    private Long retentionCheckId;
 }
 
