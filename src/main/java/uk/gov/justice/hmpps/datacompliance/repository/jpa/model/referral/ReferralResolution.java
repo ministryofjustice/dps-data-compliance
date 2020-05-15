@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.OffenderEntity;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 
 import javax.persistence.Column;
@@ -35,7 +37,7 @@ import static javax.persistence.FetchType.LAZY;
 @EqualsAndHashCode(of = {"resolutionId"})
 @ToString(exclude = "offenderDeletionReferral") // to avoid circular reference
 @Table(name = "REFERRAL_RESOLUTION")
-public class ReferralResolution {
+public class ReferralResolution implements OffenderEntity {
 
     public enum ResolutionStatus {
         PENDING,
@@ -74,5 +76,10 @@ public class ReferralResolution {
 
     public boolean isType(final ResolutionStatus type) {
         return type == resolutionStatus;
+    }
+
+    @Override
+    public OffenderNumber getOffenderNumber() {
+        return getOffenderDeletionReferral().getOffenderNumber();
     }
 }

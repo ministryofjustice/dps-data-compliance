@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services;
+package uk.gov.justice.hmpps.datacompliance.services.retention;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,6 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.ManualRetentionRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.RetentionReasonCodeRepository;
 import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
-import uk.gov.justice.hmpps.datacompliance.services.retention.ManualRetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReason;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonCode;

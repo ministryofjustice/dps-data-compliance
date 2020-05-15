@@ -3,9 +3,6 @@ package uk.gov.justice.hmpps.datacompliance.services.retention;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status;
-
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.PENDING;
 
 /**
  * A wrapper class for the RetentionCheck,
@@ -30,14 +27,6 @@ public class ActionableRetentionCheck {
         if (pendingCheck != null) {
             pendingCheck.triggerCheck(retentionCheck);
         }
-    }
-
-    public boolean isPending() {
-        return retentionCheck.getCheckStatus() != null && retentionCheck.getCheckStatus() == PENDING;
-    }
-
-    public boolean isStatus(final Status value) {
-        return retentionCheck.getCheckStatus() != null && retentionCheck.getCheckStatus() == value;
     }
 
     @FunctionalInterface

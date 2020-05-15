@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
-import uk.gov.justice.hmpps.datacompliance.services.referral.DeletionReferralService;
+import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
+import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -33,15 +34,18 @@ public class DataComplianceEventListener {
             OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete);
 
     private final ObjectMapper objectMapper;
-    private final DeletionReferralService deletionReferralService;
+    private final ReferralService referralService;
+    private final DeletionService deletionService;
 
     public DataComplianceEventListener(final ObjectMapper objectMapper,
-                                       final DeletionReferralService deletionReferralService) {
+                                       final ReferralService referralService,
+                                       final DeletionService deletionService) {
 
         log.info("Configured to listen to Offender Deletion events");
 
         this.objectMapper = objectMapper;
-        this.deletionReferralService = deletionReferralService;
+        this.referralService = referralService;
+        this.deletionService = deletionService;
     }
 
     @JmsListener(destination = "${data.compliance.response.sqs.queue.name}")
@@ -66,17 +70,17 @@ public class DataComplianceEventListener {
     }
 
     private void handleDeletionComplete(final Message<String> message) {
-        deletionReferralService.handleDeletionComplete(
+        deletionService.handleDeletionComplete(
                 parseEvent(message.getPayload(), OffenderDeletionCompleteEvent.class));
     }
 
     private void handleReferralComplete(final Message<String> message) {
-        deletionReferralService.handleReferralComplete(
+        referralService.handleReferralComplete(
                 parseEvent(message.getPayload(), OffenderPendingDeletionReferralCompleteEvent.class));
     }
 
     private void handlePendingDeletion(final Message<String> message) {
-        deletionReferralService.handlePendingDeletion(
+        referralService.handlePendingDeletionReferral(
                 parseEvent(message.getPayload(), OffenderPendingDeletionEvent.class));
     }
 

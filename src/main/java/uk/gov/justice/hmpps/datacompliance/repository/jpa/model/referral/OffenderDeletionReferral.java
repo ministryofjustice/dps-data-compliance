@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.OffenderEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,7 +32,7 @@ import static javax.persistence.FetchType.LAZY;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"referralId"})
 @Table(name = "OFFENDER_DELETION_REFERRAL")
-public class OffenderDeletionReferral {
+public class OffenderDeletionReferral implements OffenderEntity {
 
     // Not using @AllArgsConstructor so that retentionResolution
     // does not appear in the builder:
@@ -106,5 +108,10 @@ public class OffenderDeletionReferral {
     public void setReferralResolution(final ReferralResolution resolution) {
         this.referralResolution = resolution;
         resolution.setOffenderDeletionReferral(this);
+    }
+
+    @Override
+    public OffenderNumber getOffenderNumber() {
+        return new OffenderNumber(offenderNo);
     }
 }
