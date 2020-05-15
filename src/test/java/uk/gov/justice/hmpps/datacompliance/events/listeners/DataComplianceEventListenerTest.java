@@ -1,37 +1,44 @@
 package uk.gov.justice.hmpps.datacompliance.events.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.mockito.Mock;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderWithBookings;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
-import uk.gov.justice.hmpps.datacompliance.services.referral.DeletionReferralService;
+import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
+import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
 
 import java.time.LocalDate;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DataComplianceEventListenerTest {
 
     @Mock
-    private DeletionReferralService service;
+    private ReferralService referralService;
+
+    @Mock
+    private DeletionService deletionService;
 
     private DataComplianceEventListener listener;
 
     @BeforeEach
     void setUp() {
-        listener = new DataComplianceEventListener(new ObjectMapper(), service);
+        listener = new DataComplianceEventListener(new ObjectMapper(), referralService, deletionService);
     }
 
     @Test
@@ -47,7 +54,7 @@ class DataComplianceEventListenerTest {
                 "}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION"));
 
-        verify(service).handlePendingDeletion(OffenderPendingDeletionEvent.builder()
+        verify(referralService).handlePendingDeletionReferral(OffenderPendingDeletionEvent.builder()
                 .offenderIdDisplay("A1234AA")
                 .firstName("Bob")
                 .middleName("Middle")
@@ -65,7 +72,7 @@ class DataComplianceEventListenerTest {
         handleMessage("{\"batchId\":123}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE"));
 
-        verify(service).handleReferralComplete(new OffenderPendingDeletionReferralCompleteEvent(123L));
+        verify(referralService).handleReferralComplete(new OffenderPendingDeletionReferralCompleteEvent(123L));
     }
 
     @Test
@@ -73,7 +80,7 @@ class DataComplianceEventListenerTest {
         handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":123}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE"));
 
-        verify(service).handleDeletionComplete(new OffenderDeletionCompleteEvent("A1234AA", 123L));
+        verify(deletionService).handleDeletionComplete(new OffenderDeletionCompleteEvent("A1234AA", 123L));
     }
 
     @Test

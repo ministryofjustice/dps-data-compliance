@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.OffenderEntity;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 
 import javax.persistence.Column;
@@ -22,6 +24,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import static javax.persistence.FetchType.LAZY;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.PENDING;
 
 @Data
 @Entity
@@ -32,7 +35,7 @@ import static javax.persistence.FetchType.LAZY;
 @ToString(exclude = {"referralResolution"}) // to avoid circular reference
 @EqualsAndHashCode(of = {"retentionCheckId"})
 @Table(name = "RETENTION_CHECK")
-public abstract class RetentionCheck {
+public abstract class RetentionCheck implements OffenderEntity {
 
     public enum Status {
         PENDING,
@@ -59,4 +62,16 @@ public abstract class RetentionCheck {
     @Column(name = "CHECK_STATUS", nullable = false)
     private RetentionCheck.Status checkStatus;
 
+    @Override
+    public OffenderNumber getOffenderNumber() {
+        return getReferralResolution().getOffenderNumber();
+    }
+
+    public boolean isPending() {
+        return checkStatus == PENDING;
+    }
+
+    public boolean isStatus(final Status value) {
+        return checkStatus == value;
+    }
 }

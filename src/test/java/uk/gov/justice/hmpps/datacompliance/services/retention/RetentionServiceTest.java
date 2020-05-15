@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services;
+package uk.gov.justice.hmpps.datacompliance.services.retention;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,9 +15,6 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.data.DataDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.image.ImageDuplicationDetectionService;
-import uk.gov.justice.hmpps.datacompliance.services.retention.ActionableRetentionCheck;
-import uk.gov.justice.hmpps.datacompliance.services.retention.ManualRetentionService;
-import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 
 import java.util.List;
 import java.util.Optional;
