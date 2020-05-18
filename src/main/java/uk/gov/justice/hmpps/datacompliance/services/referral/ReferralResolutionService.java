@@ -9,14 +9,17 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Referra
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.ReferralResolutionRepository;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ActionableRetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
+import static javax.persistence.LockModeType.PESSIMISTIC_WRITE;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
@@ -29,8 +32,10 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 public class ReferralResolutionService {
 
     private final TimeSource timeSource;
+    private final EntityManager entityManager;
     private final DeletionService deletionService;
     private final OffenderDeletionReferralRepository referralRepository;
+    private final ReferralResolutionRepository referralResolutionRepository;
 
     public void processReferral(final OffenderDeletionReferral referral,
                                 final List<ActionableRetentionCheck> actionableRetentionChecks) {
@@ -48,10 +53,33 @@ public class ReferralResolutionService {
 
         if (resolution == PENDING) {
             actionableRetentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
+            return;
         }
 
         if (resolution == DELETION_GRANTED) {
             deletionService.grantDeletion(referral);
+        }
+    }
+
+    public void processUpdatedRetentionCheck(final RetentionCheck retentionCheck) {
+
+        final var referralResolution = retentionCheck.getReferralResolution();
+
+        // TODO GDPR-125 Integration test to demonstrate the pesimistic lock
+        // Ensure no race condition when we check other retention check statuses:
+        entityManager.lock(referralResolution, PESSIMISTIC_WRITE);
+
+        final var resolutionStatus = findResolution(referralResolution.getRetentionChecks());
+
+        log.info("Updating offender referral '{}' to resolution status : '{}'",
+                referralResolution.getOffenderNumber(), resolutionStatus);
+
+        referralResolution.setResolutionStatus(resolutionStatus);
+        referralResolution.setResolutionDateTime(timeSource.nowAsLocalDateTime());
+        referralResolutionRepository.save(referralResolution);
+
+        if (resolutionStatus == DELETION_GRANTED) {
+            deletionService.grantDeletion(referralResolution.getOffenderDeletionReferral());
         }
     }
 

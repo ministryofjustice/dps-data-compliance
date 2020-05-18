@@ -1,0 +1,1 @@
+INSERT INTO data_duplicate(data_duplicate_id, reference_offender_no, duplicate_offender_no, detection_date_time) VALUES (1, 'A1234AA', 'B4321BB', to_timestamp('2020-01-01 01:02:03', 'YYYY-MM-DD HH:MI:SS'));
