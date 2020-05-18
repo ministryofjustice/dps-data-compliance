@@ -15,13 +15,16 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.ReferralResolutionRepository;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ActionableRetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
+import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,7 +46,13 @@ class ReferralResolutionServiceTest {
     private static final LocalDateTime NOW = LocalDateTime.now();
 
     @Mock
+    private EntityManager entityManager;
+
+    @Mock
     private OffenderDeletionReferralRepository referralRepository;
+
+    @Mock
+    private ReferralResolutionRepository referralResolutionRepository;
 
     @Mock
     private DeletionService deletionService;
@@ -54,8 +63,10 @@ class ReferralResolutionServiceTest {
     void setUp() {
         referralResolutionService = new ReferralResolutionService(
                 TimeSource.of(NOW),
+                entityManager,
                 deletionService,
-                referralRepository);
+                referralRepository,
+                referralResolutionRepository);
     }
 
     @Test
@@ -108,6 +119,66 @@ class ReferralResolutionServiceTest {
                 .hasMessage("No retention checks have been conducted for offender: 'A1234AA'");
 
         verify(deletionService, never()).grantDeletion(any());
+    }
+
+    @Test
+    void processUpdatedRetentionCheckResultsInPendingStatus() {
+
+        final var updatedRetentionCheck = checkWithStatus(RETENTION_REQUIRED);
+        final var resolution = pendingResolution(updatedRetentionCheck, checkWithStatus(Status.PENDING));
+
+        referralResolutionService.processUpdatedRetentionCheck(updatedRetentionCheck);
+
+        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getResolutionStatus()).isEqualTo(PENDING);
+
+        verify(referralResolutionRepository).save(resolution);
+        verify(deletionService, never()).grantDeletion(any());
+    }
+
+    @Test
+    void processUpdatedRetentionCheckResultsInRetention() {
+
+        final var updatedRetentionCheck = checkWithStatus(RETENTION_REQUIRED);
+        final var resolution = pendingResolution(updatedRetentionCheck, checkWithStatus(RETENTION_REQUIRED));
+
+        referralResolutionService.processUpdatedRetentionCheck(updatedRetentionCheck);
+
+        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getResolutionStatus()).isEqualTo(RETAINED);
+
+        verify(referralResolutionRepository).save(resolution);
+        verify(deletionService, never()).grantDeletion(any());
+    }
+
+    @Test
+    void processUpdatedRetentionCheckResultsInDeletionGranted() {
+
+        final var updatedRetentionCheck = checkWithStatus(RETENTION_NOT_REQUIRED);
+        final var resolution = pendingResolution(updatedRetentionCheck, checkWithStatus(RETENTION_NOT_REQUIRED));
+
+        referralResolutionService.processUpdatedRetentionCheck(updatedRetentionCheck);
+
+        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getResolutionStatus()).isEqualTo(DELETION_GRANTED);
+
+        verify(referralResolutionRepository).save(resolution);
+        verify(deletionService).grantDeletion(resolution.getOffenderDeletionReferral());
+    }
+
+    private ReferralResolution pendingResolution(final RetentionCheck... checks) {
+        final var resolution = ReferralResolution.builder()
+                .resolutionStatus(ResolutionStatus.PENDING)
+                .offenderDeletionReferral(OffenderDeletionReferral.builder().offenderNo("A1234AA").build())
+                .build();
+
+        stream(checks).forEach(resolution::addRetentionCheck);
+
+        return resolution;
+    }
+
+    private RetentionCheck checkWithStatus(final Status status) {
+        return new RetentionCheckManual(status);
     }
 
     private void verifyPersistence(final OffenderDeletionReferral referral,
