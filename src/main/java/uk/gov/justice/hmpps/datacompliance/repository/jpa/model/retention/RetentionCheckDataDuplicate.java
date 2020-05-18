@@ -21,6 +21,8 @@ import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+import static javax.persistence.CascadeType.MERGE;
 import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.FetchType.LAZY;
 
@@ -30,7 +32,7 @@ public class RetentionCheckDataDuplicate extends RetentionCheck {
 
     public static final String DATA_DUPLICATE = "DATA_DUPLICATE";
 
-    @OneToMany(mappedBy = "retentionCheck", cascade = PERSIST, fetch = LAZY)
+    @OneToMany(mappedBy = "retentionCheck", cascade = {PERSIST, MERGE}, fetch = LAZY)
     private final List<RetentionReasonDataDuplicate> dataDuplicates = new ArrayList<>();
 
     private RetentionCheckDataDuplicate() {
@@ -44,6 +46,12 @@ public class RetentionCheckDataDuplicate extends RetentionCheck {
     public RetentionCheckDataDuplicate addDataDuplicates(final List<DataDuplicate> dataDuplicates) {
         dataDuplicates.forEach(this::addDataDuplicate);
         return this;
+    }
+
+    public List<DataDuplicate> getDataDuplicates() {
+        return dataDuplicates.stream()
+                .map(RetentionReasonDataDuplicate::getDataDuplicate)
+                .collect(toList());
     }
 
     private void addDataDuplicate(final DataDuplicate dataDuplicate) {

@@ -35,6 +35,9 @@ public class DeletionService {
     private final DataComplianceEventPusher deletionGrantedEventPusher;
 
     public void grantDeletion(final OffenderDeletionReferral referral) {
+
+        log.info("Granting deletion of offender: '{}'", referral.getOffenderNo());
+
         deletionGrantedEventPusher.grantDeletion(new OffenderNumber(referral.getOffenderNo()), referral.getReferralId());
     }
 

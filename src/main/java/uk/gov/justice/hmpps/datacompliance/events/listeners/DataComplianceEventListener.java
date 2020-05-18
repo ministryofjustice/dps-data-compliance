@@ -7,11 +7,13 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
+import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -27,24 +29,29 @@ public class DataComplianceEventListener {
     private static final String OFFENDER_PENDING_DELETION_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION";
     private static final String OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE";
     private static final String OFFENDER_DELETION_COMPLETE_EVENT = "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE";
+    private static final String DATA_DUPLICATE_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-RESULT";
 
     private final Map<String, MessageHandler> messageHandlers = Map.of(
-            OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletion,
+            OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral,
             OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete,
-            OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete);
+            OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
+            DATA_DUPLICATE_RESULT, this::handleDataDuplicateResult);
 
     private final ObjectMapper objectMapper;
     private final ReferralService referralService;
+    private final RetentionService retentionService;
     private final DeletionService deletionService;
 
     public DataComplianceEventListener(final ObjectMapper objectMapper,
                                        final ReferralService referralService,
+                                       final RetentionService retentionService,
                                        final DeletionService deletionService) {
 
         log.info("Configured to listen to Offender Deletion events");
 
         this.objectMapper = objectMapper;
         this.referralService = referralService;
+        this.retentionService = retentionService;
         this.deletionService = deletionService;
     }
 
@@ -79,9 +86,14 @@ public class DataComplianceEventListener {
                 parseEvent(message.getPayload(), OffenderPendingDeletionReferralCompleteEvent.class));
     }
 
-    private void handlePendingDeletion(final Message<String> message) {
+    private void handlePendingDeletionReferral(final Message<String> message) {
         referralService.handlePendingDeletionReferral(
                 parseEvent(message.getPayload(), OffenderPendingDeletionEvent.class));
+    }
+
+    private void handleDataDuplicateResult(final Message<String> message) {
+        retentionService.handleDataDuplicateResult(
+                parseEvent(message.getPayload(), DataDuplicateResult.class));
     }
 
     private <T> T parseEvent(final String requestJson, final Class<T> eventType) {

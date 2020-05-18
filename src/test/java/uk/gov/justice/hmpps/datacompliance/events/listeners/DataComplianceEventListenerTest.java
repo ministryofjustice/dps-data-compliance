@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderBooking;
@@ -15,8 +16,10 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingD
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
+import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -34,11 +37,14 @@ class DataComplianceEventListenerTest {
     @Mock
     private DeletionService deletionService;
 
+    @Mock
+    private RetentionService retentionService;
+
     private DataComplianceEventListener listener;
 
     @BeforeEach
     void setUp() {
-        listener = new DataComplianceEventListener(new ObjectMapper(), referralService, deletionService);
+        listener = new DataComplianceEventListener(new ObjectMapper(), referralService, retentionService, deletionService);
     }
 
     @Test
@@ -84,28 +90,36 @@ class DataComplianceEventListenerTest {
     }
 
     @Test
-    void handleOffenderDeletionEventThrowsIfMessageAttributesNotPresent() {
+    void handleDataDuplicateResult() {
+        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"duplicateOffenders\":[\"B1234BB\"]}",
+                Map.of("eventType", "DATA_COMPLIANCE_DATA-DUPLICATE-RESULT"));
+
+        verify(retentionService).handleDataDuplicateResult(new DataDuplicateResult("A1234AA", 123L, List.of("B1234BB")));
+    }
+
+    @Test
+    void handleEventThrowsIfMessageAttributesNotPresent() {
         assertThatThrownBy(() -> handleMessage("{\"offenderIdDisplay\":\"A1233AA\"}", Map.of()))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("Message event type not found");
     }
 
     @Test
-    void handleOffenderDeletionEventThrowsIfEventTypeUnexpected() {
+    void handleEventThrowsIfEventTypeUnexpected() {
         assertThatThrownBy(() -> handleMessage("{\"offenderIdDisplay\":\"A1234AA\"}", Map.of("eventType", "UNEXPECTED!")))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Unexpected message event type: 'UNEXPECTED!'");
     }
 
     @Test
-    void handleOffenderDeletionEventThrowsIfMessageNotPresent() {
+    void handleEventThrowsIfMessageNotPresent() {
         assertThatThrownBy(() -> handleMessage(null, Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("argument \"content\" is null");
     }
 
     @Test
-    void handleOffenderDeletionEventThrowsIfMessageUnparsable() {
+    void handleEventThrowsIfMessageUnparsable() {
         assertThatThrownBy(() -> handleMessage("BAD MESSAGE!", Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION")))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Failed to parse request");
