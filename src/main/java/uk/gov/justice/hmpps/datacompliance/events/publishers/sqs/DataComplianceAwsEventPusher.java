@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DataDuplicateCheckEvent;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGrantedEvent;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DataDuplicateCheck;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGranted;
 
 import java.util.Map;
 
@@ -59,13 +59,13 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     private SendMessageRequest generateDeletionGrantedRequest(final OffenderNumber offenderNo,
                                                               final Long referralId) {
         return generateRequest(OFFENDER_DELETION_GRANTED,
-                new OffenderDeletionGrantedEvent(offenderNo.getOffenderNumber(), referralId));
+                new OffenderDeletionGranted(offenderNo.getOffenderNumber(), referralId));
     }
 
     private SendMessageRequest generateDataDuplicateCheckRequest(final OffenderNumber offenderNo,
                                                                  final Long retentionCheckId) {
         return generateRequest(DATA_DUPLICATE_CHECK,
-                new DataDuplicateCheckEvent(offenderNo.getOffenderNumber(), retentionCheckId));
+                new DataDuplicateCheck(offenderNo.getOffenderNumber(), retentionCheckId));
     }
 
     private SendMessageRequest generateRequest(final String eventType, final Object messageBody) {

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.Booking;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.Booking;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.OffenderWithBookings.builder;
+import static uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.OffenderWithBookings.builder;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
@@ -84,7 +84,7 @@ class DeletionServiceTest {
         when(referralRepository.findById(123L)).thenReturn(Optional.of(existingReferral));
         when(referralRepository.save(existingReferral)).thenReturn(existingReferral);
 
-        deletionService.handleDeletionComplete(OffenderDeletionCompleteEvent.builder()
+        deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
                 .offenderIdDisplay(OFFENDER_NUMBER)
                 .referralId(123L)
                 .build());
@@ -94,7 +94,7 @@ class DeletionServiceTest {
         assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
 
         verify(deletionCompleteEventPusher).sendEvent(
-                uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.builder()
+                uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.builder()
                         .offenderIdDisplay(OFFENDER_NUMBER)
                         .offender(builder()
                                 .offenderId(1L)
@@ -114,7 +114,7 @@ class DeletionServiceTest {
         when(referralRepository.findById(123L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                deletionService.handleDeletionComplete(OffenderDeletionCompleteEvent.builder().referralId(123L).build()))
+                deletionService.handleDeletionComplete(OffenderDeletionComplete.builder().referralId(123L).build()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Cannot retrieve referral record for id: '123'");
 
@@ -130,7 +130,7 @@ class DeletionServiceTest {
                 .build()));
 
         assertThatThrownBy(() ->
-                deletionService.handleDeletionComplete(OffenderDeletionCompleteEvent.builder()
+                deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
                         .offenderIdDisplay("offender2")
                         .referralId(123L)
                         .build()))
@@ -149,7 +149,7 @@ class DeletionServiceTest {
                 .build()));
 
         assertThatThrownBy(() ->
-                deletionService.handleDeletionComplete(OffenderDeletionCompleteEvent.builder()
+                deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
                         .offenderIdDisplay(OFFENDER_NUMBER)
                         .referralId(123L)
                         .build()))
@@ -171,7 +171,7 @@ class DeletionServiceTest {
         when(referralRepository.findById(123L)).thenReturn(Optional.of(existingReferral));
 
         assertThatThrownBy(() ->
-                deletionService.handleDeletionComplete(OffenderDeletionCompleteEvent.builder()
+                deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
                         .offenderIdDisplay(OFFENDER_NUMBER)
                         .referralId(123L)
                         .build()))

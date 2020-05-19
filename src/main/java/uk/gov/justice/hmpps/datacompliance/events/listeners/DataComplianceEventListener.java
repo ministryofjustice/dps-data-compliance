@@ -8,9 +8,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
@@ -60,7 +60,7 @@ public class DataComplianceEventListener {
 
         final var eventType = getEventType(message.getHeaders());
 
-        log.debug("Handling incoming offender deletion event of type: {}", eventType);
+        log.debug("Handling incoming data compliance event of type: {}", eventType);
 
         messageHandlers.get(eventType).handle(message);
     }
@@ -78,17 +78,17 @@ public class DataComplianceEventListener {
 
     private void handleDeletionComplete(final Message<String> message) {
         deletionService.handleDeletionComplete(
-                parseEvent(message.getPayload(), OffenderDeletionCompleteEvent.class));
+                parseEvent(message.getPayload(), OffenderDeletionComplete.class));
     }
 
     private void handleReferralComplete(final Message<String> message) {
         referralService.handleReferralComplete(
-                parseEvent(message.getPayload(), OffenderPendingDeletionReferralCompleteEvent.class));
+                parseEvent(message.getPayload(), OffenderPendingDeletionReferralComplete.class));
     }
 
     private void handlePendingDeletionReferral(final Message<String> message) {
         referralService.handlePendingDeletionReferral(
-                parseEvent(message.getPayload(), OffenderPendingDeletionEvent.class));
+                parseEvent(message.getPayload(), OffenderPendingDeletion.class));
     }
 
     private void handleDataDuplicateResult(final Message<String> message) {

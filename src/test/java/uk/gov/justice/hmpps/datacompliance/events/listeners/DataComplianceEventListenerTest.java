@@ -9,11 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionCompleteEvent;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderBooking;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderWithBookings;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderWithBookings;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
@@ -60,7 +60,7 @@ class DataComplianceEventListenerTest {
                 "}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION"));
 
-        verify(referralService).handlePendingDeletionReferral(OffenderPendingDeletionEvent.builder()
+        verify(referralService).handlePendingDeletionReferral(OffenderPendingDeletion.builder()
                 .offenderIdDisplay("A1234AA")
                 .firstName("Bob")
                 .middleName("Middle")
@@ -78,7 +78,7 @@ class DataComplianceEventListenerTest {
         handleMessage("{\"batchId\":123}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE"));
 
-        verify(referralService).handleReferralComplete(new OffenderPendingDeletionReferralCompleteEvent(123L));
+        verify(referralService).handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L));
     }
 
     @Test
@@ -86,7 +86,7 @@ class DataComplianceEventListenerTest {
         handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":123}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE"));
 
-        verify(deletionService).handleDeletionComplete(new OffenderDeletionCompleteEvent("A1234AA", 123L));
+        verify(deletionService).handleDeletionComplete(new OffenderDeletionComplete("A1234AA", 123L));
     }
 
     @Test

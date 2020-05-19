@@ -13,9 +13,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteAwsEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteEventPusher;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.Booking;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent.OffenderWithBookings;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.Booking;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.OffenderWithBookings;
 
 import java.io.IOException;
 
@@ -61,8 +61,8 @@ class OffenderDeletionCompleteEventPusherTest {
         assertThatThrownBy(() -> eventPusher.sendEvent(any())).isInstanceOf(RuntimeException.class);
     }
 
-    private OffenderDeletionCompleteEvent deletionCompleteEvent() {
-        return OffenderDeletionCompleteEvent.builder()
+    private OffenderDeletionComplete deletionCompleteEvent() {
+        return OffenderDeletionComplete.builder()
                 .offenderIdDisplay("offender1")
                 .offender(OffenderWithBookings.builder()
                         .offenderId(1L)

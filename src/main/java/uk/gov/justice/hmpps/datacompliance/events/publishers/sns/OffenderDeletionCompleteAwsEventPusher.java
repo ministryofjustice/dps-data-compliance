@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionCompleteEvent;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete;
 
 import java.util.Map;
 
@@ -31,11 +31,11 @@ public class OffenderDeletionCompleteAwsEventPusher implements OffenderDeletionC
     }
 
     @Override
-    public void sendEvent(final OffenderDeletionCompleteEvent event) {
+    public void sendEvent(final OffenderDeletionComplete event) {
         amazonSns.publish(generateRequest(event));
     }
 
-    private PublishRequest generateRequest(final OffenderDeletionCompleteEvent event) {
+    private PublishRequest generateRequest(final OffenderDeletionComplete event) {
         return new PublishRequest()
                 .withTopicArn(topicArn)
                 .withMessageAttributes(Map.of(
@@ -50,7 +50,7 @@ public class OffenderDeletionCompleteAwsEventPusher implements OffenderDeletionC
                 .withStringValue(value);
     }
 
-    private String toJson(final OffenderDeletionCompleteEvent event) {
+    private String toJson(final OffenderDeletionComplete event) {
         try {
             return objectMapper.writeValueAsString(event);
         } catch (final Exception e) {
