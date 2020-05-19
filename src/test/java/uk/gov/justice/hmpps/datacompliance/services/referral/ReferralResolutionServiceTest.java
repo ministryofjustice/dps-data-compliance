@@ -13,6 +13,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Referra
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.ReferralResolutionRepository;
@@ -37,6 +38,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.DISABLED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
 
@@ -115,6 +117,19 @@ class ReferralResolutionServiceTest {
         final var referral = OffenderDeletionReferral.builder().offenderNo("A1234AA").build();
 
         assertThatThrownBy(() -> referralResolutionService.processReferral(referral, emptyList()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("No retention checks have been conducted for offender: 'A1234AA'");
+
+        verify(deletionService, never()).grantDeletion(any());
+    }
+
+    @Test
+    void handlePendingDeletionThrowsWhenOnlyDisabledChecksAreReturned() {
+
+        final var referral = OffenderDeletionReferral.builder().offenderNo("A1234AA").build();
+
+        assertThatThrownBy(() -> referralResolutionService.processReferral(referral,
+                List.of(new ActionableRetentionCheck(new RetentionCheckDataDuplicate(DISABLED)))))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("No retention checks have been conducted for offender: 'A1234AA'");
 

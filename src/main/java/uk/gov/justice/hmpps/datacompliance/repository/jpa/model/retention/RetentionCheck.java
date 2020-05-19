@@ -40,7 +40,8 @@ public abstract class RetentionCheck implements OffenderEntity {
     public enum Status {
         PENDING,
         RETENTION_REQUIRED,
-        RETENTION_NOT_REQUIRED
+        RETENTION_NOT_REQUIRED,
+        DISABLED
     }
 
     @Id
