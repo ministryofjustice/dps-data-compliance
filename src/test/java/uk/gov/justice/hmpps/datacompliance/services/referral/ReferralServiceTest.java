@@ -9,10 +9,10 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderBooking;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent.OffenderWithBookings;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderWithBookings;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
@@ -85,7 +85,7 @@ class ReferralServiceTest {
 
         when(batchRepository.findById(123L)).thenReturn(Optional.of(batch));
 
-        referralService.handleReferralComplete(new OffenderPendingDeletionReferralCompleteEvent(123L));
+        referralService.handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L));
 
         InOrder inOrder = inOrder(batch, batchRepository);
         inOrder.verify(batch).setReferralCompletionDateTime(NOW);
@@ -98,15 +98,15 @@ class ReferralServiceTest {
         when(batchRepository.findById(123L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                referralService.handleReferralComplete(new OffenderPendingDeletionReferralCompleteEvent(123L)))
+                referralService.handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L)))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Cannot find batch with id: '123'");
 
         verify(batchRepository, never()).save(any());
     }
 
-    private OffenderPendingDeletionEvent generatePendingDeletionEvent() {
-        return OffenderPendingDeletionEvent.builder()
+    private OffenderPendingDeletion generatePendingDeletionEvent() {
+        return OffenderPendingDeletion.builder()
                 .batchId(BATCH_ID)
                 .offenderIdDisplay(OFFENDER_NUMBER)
                 .firstName("John")

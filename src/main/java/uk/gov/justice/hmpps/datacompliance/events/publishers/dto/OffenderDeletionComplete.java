@@ -1,8 +1,10 @@
 package uk.gov.justice.hmpps.datacompliance.events.publishers.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,19 +13,20 @@ import lombok.ToString;
 
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 /**
  * This event signifies that an offender
  * has been successfully deleted in NOMIS
  * and that downstream services should handle
  * appropriately.
  */
-@Getter
+@Data
 @Builder
-@ToString
-@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-public class OffenderDeletionCompleteEvent {
+@JsonInclude(NON_NULL)
+public class OffenderDeletionComplete {
 
     @JsonProperty("offenderIdDisplay")
     private String offenderIdDisplay;

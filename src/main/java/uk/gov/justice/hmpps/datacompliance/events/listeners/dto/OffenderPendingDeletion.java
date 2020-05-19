@@ -23,7 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ToString(exclude = { "firstName", "middleName", "lastName", "birthDate" })
-public class OffenderPendingDeletionEvent {
+public class OffenderPendingDeletion {
 
     @JsonProperty("offenderIdDisplay")
     private String offenderIdDisplay;

@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionEvent;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralCompleteEvent;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
@@ -26,7 +26,7 @@ public class ReferralService {
     private final RetentionService retentionService;
     private final ReferralResolutionService referralResolutionService;
 
-    public void handlePendingDeletionReferral(final OffenderPendingDeletionEvent event) {
+    public void handlePendingDeletionReferral(final OffenderPendingDeletion event) {
 
         final var referral = createReferral(event);
 
@@ -36,7 +36,7 @@ public class ReferralService {
         referralResolutionService.processReferral(referral, retentionChecks);
     }
 
-    public void handleReferralComplete(final OffenderPendingDeletionReferralCompleteEvent event) {
+    public void handleReferralComplete(final OffenderPendingDeletionReferralComplete event) {
 
         log.info("All offenders pending deletion in batch: '{}' have been added to the queue", event.getBatchId());
 
@@ -48,7 +48,7 @@ public class ReferralService {
         batchRepository.save(batch);
     }
 
-    private OffenderDeletionReferral createReferral(final OffenderPendingDeletionEvent event) {
+    private OffenderDeletionReferral createReferral(final OffenderPendingDeletion event) {
 
         final var batch = batchRepository.findById(event.getBatchId())
                 .orElseThrow(illegalState("Cannot find deletion batch with id: '%s'", event.getBatchId()));
