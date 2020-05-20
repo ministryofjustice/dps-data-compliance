@@ -39,8 +39,8 @@ public class DataComplianceProperties {
                                     @Value("${elite2.api.offender.ids.total.pages:#{null}}") final Long elite2ApiOffenderIdsTotalPages,
                                     @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl,
                                     @Value("${pathfinder.api.timeout:5s}") final Duration pathfinderApiTimeout,
-                                    @Value("${offender.retention.sql.data.duplicate.check.enabled:true}") final boolean sqlDataDuplicateCheckEnabled,
-                                    @Value("${offender.retention.ap.data.duplicate.check.enabled:true}") final boolean analyticalPlatformDataDuplicateCheckEnabled) {
+                                    @Value("${offender.retention.sql.data.duplicate.check.enabled}") final boolean sqlDataDuplicateCheckEnabled,
+                                    @Value("${offender.retention.ap.data.duplicate.check.enabled}") final boolean analyticalPlatformDataDuplicateCheckEnabled) {
 
         log.info("Image upload - number of threads: {}", elite2ApiOffenderIdsIterationThreads);
         log.info("Image upload - page limit: {}", elite2ApiOffenderIdsLimit);
