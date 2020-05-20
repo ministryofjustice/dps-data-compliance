@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 @Data
@@ -52,7 +53,7 @@ public class ReferralResolution implements OffenderEntity {
     private Long resolutionId;
 
     @NotNull
-    @OneToOne(fetch = LAZY)
+    @OneToOne(fetch = EAGER)
     @JoinColumn(name = "REFERRAL_ID", nullable = false)
     private OffenderDeletionReferral offenderDeletionReferral;
 

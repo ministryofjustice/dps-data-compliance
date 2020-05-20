@@ -23,7 +23,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import static javax.persistence.FetchType.LAZY;
+import static javax.persistence.FetchType.EAGER;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.PENDING;
 
 @Data
@@ -50,7 +50,7 @@ public abstract class RetentionCheck implements OffenderEntity {
     private Long retentionCheckId;
 
     @NotNull
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = EAGER)
     @JoinColumn(name = "RESOLUTION_ID", nullable = false)
     private ReferralResolution referralResolution;
 
