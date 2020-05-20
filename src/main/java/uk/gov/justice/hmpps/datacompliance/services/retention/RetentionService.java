@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.client.pathfinder.PathfinderApiClient;
+import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
@@ -21,6 +22,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.DISABLED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
@@ -37,6 +39,7 @@ public class RetentionService {
     private final DataDuplicationDetectionService dataDuplicationDetectionService;
     private final RetentionCheckRepository retentionCheckRepository;
     private final ReferralResolutionService referralResolutionService;
+    private final DataComplianceProperties dataComplianceProperties;
 
     public List<ActionableRetentionCheck> conductRetentionChecks(final OffenderNumber offenderNumber) {
 
@@ -107,6 +110,12 @@ public class RetentionService {
     }
 
     private ActionableRetentionCheck dataDuplicateCheck(final OffenderNumber offenderNumber) {
+
+        if (!dataComplianceProperties.isSqlDataDuplicateCheckEnabled()) {
+            // TODO GDPR-127 Still perform the Analytical Platform check
+            return new ActionableRetentionCheck(new RetentionCheckDataDuplicate(DISABLED));
+        }
+
         return new ActionableRetentionCheck(new RetentionCheckDataDuplicate(PENDING))
                 .setPendingCheck(retentionCheck -> dataDuplicationDetectionService.searchForDuplicates(
                         offenderNumber, retentionCheck.getRetentionCheckId()));

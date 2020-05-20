@@ -23,6 +23,7 @@ import static javax.persistence.LockModeType.PESSIMISTIC_WRITE;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.DISABLED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
 
 @Slf4j
@@ -44,7 +45,7 @@ public class ReferralResolutionService {
                 .map(ActionableRetentionCheck::getRetentionCheck)
                 .collect(toList());
 
-        checkState(!retentionChecks.isEmpty(),
+        checkState(retentionChecks.stream().anyMatch(check -> !check.isStatus(DISABLED)),
                 "No retention checks have been conducted for offender: '%s'", referral.getOffenderNo());
 
         final var resolution = findResolution(retentionChecks);
@@ -101,7 +102,8 @@ public class ReferralResolutionService {
     }
 
     private boolean canGrantDeletion(final List<RetentionCheck> retentionChecks) {
-        return retentionChecks.stream().allMatch(check -> check.isStatus(RETENTION_NOT_REQUIRED));
+        return retentionChecks.stream().allMatch(check ->
+                check.isStatus(RETENTION_NOT_REQUIRED) || check.isStatus(DISABLED));
     }
 
     private void persistRetentionChecks(final OffenderDeletionReferral referral,

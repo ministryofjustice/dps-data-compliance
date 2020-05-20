@@ -29,6 +29,8 @@ public class DataComplianceProperties {
     private final Long elite2ApiOffenderIdsTotalPages;
     private final String pathfinderApiBaseUrl;
     private final Duration pathfinderApiTimeout;
+    private final boolean sqlDataDuplicateCheckEnabled;
+    private final boolean analyticalPlatformDataDuplicateCheckEnabled;
 
     public DataComplianceProperties(@Value("${elite2.api.base.url}") @URL final String elite2ApiBaseUrl,
                                     @Value("${elite2.api.offender.ids.iteration.threads:1}") final int elite2ApiOffenderIdsIterationThreads,
@@ -36,12 +38,16 @@ public class DataComplianceProperties {
                                     @Value("${elite2.api.offender.ids.initial.offset:0}") final long elite2ApiOffenderIdsInitialOffset,
                                     @Value("${elite2.api.offender.ids.total.pages:#{null}}") final Long elite2ApiOffenderIdsTotalPages,
                                     @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl,
-                                    @Value("${pathfinder.api.timeout:5s}") final Duration pathfinderApiTimeout) {
+                                    @Value("${pathfinder.api.timeout:5s}") final Duration pathfinderApiTimeout,
+                                    @Value("${offender.retention.sql.data.duplicate.check.enabled:true}") final boolean sqlDataDuplicateCheckEnabled,
+                                    @Value("${offender.retention.ap.data.duplicate.check.enabled:true}") final boolean analyticalPlatformDataDuplicateCheckEnabled) {
 
         log.info("Image upload - number of threads: {}", elite2ApiOffenderIdsIterationThreads);
         log.info("Image upload - page limit: {}", elite2ApiOffenderIdsLimit);
         log.info("Image upload - initial offset: {}", elite2ApiOffenderIdsInitialOffset);
         log.info("Image upload - total pages: {}", elite2ApiOffenderIdsTotalPages);
+        log.info("Configured to run SQL data duplicate check ({}) and Analytical Platform data duplicate check ({})",
+                sqlDataDuplicateCheckEnabled, analyticalPlatformDataDuplicateCheckEnabled);
 
         this.elite2ApiBaseUrl = elite2ApiBaseUrl;
         this.elite2ApiOffenderIdsIterationThreads = elite2ApiOffenderIdsIterationThreads;
@@ -50,6 +56,8 @@ public class DataComplianceProperties {
         this.elite2ApiOffenderIdsTotalPages = elite2ApiOffenderIdsTotalPages;
         this.pathfinderApiBaseUrl = pathfinderApiBaseUrl;
         this.pathfinderApiTimeout = pathfinderApiTimeout;
+        this.sqlDataDuplicateCheckEnabled = sqlDataDuplicateCheckEnabled;
+        this.analyticalPlatformDataDuplicateCheckEnabled = analyticalPlatformDataDuplicateCheckEnabled;
     }
 
     public Optional<Long> getOffenderIdsTotalPages() {
