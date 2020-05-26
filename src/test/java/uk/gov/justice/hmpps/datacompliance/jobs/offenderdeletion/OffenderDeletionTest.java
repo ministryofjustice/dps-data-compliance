@@ -26,6 +26,8 @@ class OffenderDeletionTest {
     private static final LocalDateTime NOW = LocalDateTime.now();
     private static final LocalDateTime INITIAL_WINDOW_START = LocalDateTime.of(2020, 1, 2, 3, 4, 5);
     private static final Duration DURATION = Duration.ofDays(1);
+    private static final int NONE_REMAINING_IN_WINDOW = 0;
+    private static final int SOME_REMAINING_IN_WINDOW = 1;
 
     private static final OffenderDeletionConfig CONFIG = OffenderDeletionConfig.builder()
             .initialWindowStart(INITIAL_WINDOW_START)
@@ -61,11 +63,10 @@ class OffenderDeletionTest {
     @Test
     void sendSubsequentDeletionRequest() {
 
-        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
-                batchWith(INITIAL_WINDOW_START)));
-
         final var expectedBatch = batchWith(INITIAL_WINDOW_START.plus(DURATION));
 
+        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
+                completedBatchWith(INITIAL_WINDOW_START, NONE_REMAINING_IN_WINDOW)));
         when(batchRepository.save(expectedBatch)).thenReturn(expectedBatch.withBatchId(BATCH_ID));
 
         offenderDeletion.run();
@@ -74,10 +75,37 @@ class OffenderDeletionTest {
     }
 
     @Test
+    void useSameWindowForNextBatchIfRemainingOffendersInWindow() {
+
+        final var expectedBatch = batchWith(INITIAL_WINDOW_START);
+
+        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
+                completedBatchWith(INITIAL_WINDOW_START, SOME_REMAINING_IN_WINDOW)));
+        when(batchRepository.save(expectedBatch)).thenReturn(expectedBatch.withBatchId(BATCH_ID));
+
+        offenderDeletion.run();
+
+        verify(elite2ApiClient).requestPendingDeletions(INITIAL_WINDOW_START, INITIAL_WINDOW_START.plus(DURATION), BATCH_ID);
+    }
+
+    @Test
+    void offenderDeletionRequestFailsIfLastBatchDidNotComplete() {
+
+        final var incompleteBatch = batchWith(INITIAL_WINDOW_START);
+        incompleteBatch.setBatchId(BATCH_ID);
+
+        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(incompleteBatch));
+
+        assertThatThrownBy(() -> offenderDeletion.run())
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("Previous referral (123) did not complete");
+    }
+
+    @Test
     void offenderDeletionRequestFailsIfStartDateInFuture() {
 
         when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
-                batchWith(NOW.plusSeconds(1))));
+                completedBatchWith(NOW.plusSeconds(1), NONE_REMAINING_IN_WINDOW)));
 
         assertThatThrownBy(() -> offenderDeletion.run())
                 .isInstanceOf(IllegalArgumentException.class)
@@ -88,7 +116,7 @@ class OffenderDeletionTest {
     void offenderDeletionRequestFailsIfEndDateInFuture() {
 
         when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
-                batchWith(NOW.minusDays(2).plusSeconds(1))));
+                completedBatchWith(NOW.minusDays(2).plusSeconds(1), NONE_REMAINING_IN_WINDOW)));
 
         assertThatThrownBy(() -> offenderDeletion.run())
                 .isInstanceOf(IllegalArgumentException.class)
@@ -117,5 +145,12 @@ class OffenderDeletionTest {
                 .windowStartDateTime(windowStart)
                 .windowEndDateTime(windowStart.plus(DURATION))
                 .build();
+    }
+
+    private OffenderDeletionBatch completedBatchWith(final LocalDateTime windowStart, final int remainingInWindow) {
+        final var batch = batchWith(windowStart);
+        batch.setRemainingInWindow(remainingInWindow);
+        batch.setReferralCompletionDateTime(NOW);
+        return batch;
     }
 }
