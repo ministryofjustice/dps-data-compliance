@@ -14,7 +14,6 @@ import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ActionableRetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -33,7 +32,6 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 public class ReferralResolutionService {
 
     private final TimeSource timeSource;
-    private final EntityManager entityManager;
     private final DeletionService deletionService;
     private final OffenderDeletionReferralRepository referralRepository;
     private final ReferralResolutionRepository referralResolutionRepository;
@@ -64,11 +62,12 @@ public class ReferralResolutionService {
 
     public void processUpdatedRetentionCheck(final RetentionCheck retentionCheck) {
 
-        final var referralResolution = retentionCheck.getReferralResolution();
+        final var referralResolution =
+                referralResolutionRepository.findById(retentionCheck.getReferralResolution().getResolutionId())
+                        .orElseThrow();
 
-        // TODO GDPR-125 Integration test to demonstrate the pesimistic lock
         // Ensure no race condition when we check other retention check statuses:
-        entityManager.lock(referralResolution, PESSIMISTIC_WRITE);
+        referralResolutionRepository.lock(referralResolution, PESSIMISTIC_WRITE);
 
         final var resolutionStatus = findResolution(referralResolution.getRetentionChecks());
 

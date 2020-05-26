@@ -21,9 +21,9 @@ import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ActionableRetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
@@ -35,6 +35,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
@@ -46,9 +47,6 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 class ReferralResolutionServiceTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now();
-
-    @Mock
-    private EntityManager entityManager;
 
     @Mock
     private OffenderDeletionReferralRepository referralRepository;
@@ -65,7 +63,6 @@ class ReferralResolutionServiceTest {
     void setUp() {
         referralResolutionService = new ReferralResolutionService(
                 TimeSource.of(NOW),
-                entityManager,
                 deletionService,
                 referralRepository,
                 referralResolutionRepository);
@@ -188,6 +185,8 @@ class ReferralResolutionServiceTest {
                 .build();
 
         stream(checks).forEach(resolution::addRetentionCheck);
+
+        when(referralResolutionRepository.findById(any())).thenReturn(Optional.of(resolution));
 
         return resolution;
     }

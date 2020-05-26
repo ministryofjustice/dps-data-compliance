@@ -27,5 +27,3 @@ jwt:
 
 offender.retention.ap.data.duplicate.check.enabled: true
 offender.retention.sql.data.duplicate.check.enabled: true
-
-graceful.shutdown.enabled: false
