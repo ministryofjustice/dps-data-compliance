@@ -88,6 +88,11 @@ env:
     value: "{{ .Values.env.OFFENDER_DELETION_WINDOW_LENGTH }}"
   {{- end }}
 
+  {{- if .Values.env.OFFENDER_DELETION_REFERRAL_LIMIT }}
+  - name: OFFENDER_DELETION_REFERRAL_LIMIT
+    value: "{{ .Values.env.OFFENDER_DELETION_REFERRAL_LIMIT }}"
+  {{- end }}
+
   - name: SPRING_DATASOURCE_USERNAME
     valueFrom:
       secretKeyRef:

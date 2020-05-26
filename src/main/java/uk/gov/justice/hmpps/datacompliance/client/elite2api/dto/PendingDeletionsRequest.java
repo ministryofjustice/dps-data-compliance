@@ -31,4 +31,7 @@ public class PendingDeletionsRequest {
 
     @JsonProperty("batchId")
     private Long batchId;
+
+    @JsonProperty("limit")
+    private Integer limit;
 }

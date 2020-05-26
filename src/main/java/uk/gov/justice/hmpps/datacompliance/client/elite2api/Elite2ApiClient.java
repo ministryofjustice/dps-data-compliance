@@ -13,7 +13,6 @@ import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.PendingDeletions
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -83,16 +82,10 @@ public class Elite2ApiClient {
                 .blockOptional();
     }
 
-    public void requestPendingDeletions(final LocalDateTime windowStart,
-                                        final LocalDateTime windowEnd,
-                                        final Long batchId) {
+    public void requestPendingDeletions(final PendingDeletionsRequest request) {
         webClient.post()
                 .uri(dataComplianceProperties.getElite2ApiBaseUrl() + OFFENDER_PENDING_DELETIONS_PATH)
-                .bodyValue(PendingDeletionsRequest.builder()
-                        .dueForDeletionWindowStart(windowStart)
-                        .dueForDeletionWindowEnd(windowEnd)
-                        .batchId(batchId)
-                        .build())
+                .bodyValue(request)
                 .retrieve()
                 .toBodilessEntity()
                 .block();

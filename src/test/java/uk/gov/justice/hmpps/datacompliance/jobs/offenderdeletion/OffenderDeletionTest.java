@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient;
+import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.OffenderDeletionConfig;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
@@ -28,10 +29,12 @@ class OffenderDeletionTest {
     private static final Duration DURATION = Duration.ofDays(1);
     private static final int NONE_REMAINING_IN_WINDOW = 0;
     private static final int SOME_REMAINING_IN_WINDOW = 1;
+    private static final int REFERRAL_LIMIT = 1;
 
     private static final OffenderDeletionConfig CONFIG = OffenderDeletionConfig.builder()
             .initialWindowStart(INITIAL_WINDOW_START)
             .windowLength(DURATION)
+            .referralLimit(REFERRAL_LIMIT)
             .build();
 
     @Mock
@@ -57,7 +60,12 @@ class OffenderDeletionTest {
 
         offenderDeletion.run();
 
-        verify(elite2ApiClient).requestPendingDeletions(INITIAL_WINDOW_START, INITIAL_WINDOW_START.plus(DURATION), BATCH_ID);
+        verify(elite2ApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
+                        .dueForDeletionWindowStart(INITIAL_WINDOW_START)
+                        .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plus(DURATION))
+                        .batchId(BATCH_ID)
+                        .limit(REFERRAL_LIMIT)
+                        .build());
     }
 
     @Test
@@ -71,7 +79,12 @@ class OffenderDeletionTest {
 
         offenderDeletion.run();
 
-        verify(elite2ApiClient).requestPendingDeletions(INITIAL_WINDOW_START.plusDays(1), INITIAL_WINDOW_START.plusDays(2), BATCH_ID);
+        verify(elite2ApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
+                .dueForDeletionWindowStart(INITIAL_WINDOW_START.plusDays(1))
+                .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(2))
+                .batchId(BATCH_ID)
+                .limit(REFERRAL_LIMIT)
+                .build());
     }
 
     @Test
@@ -85,7 +98,12 @@ class OffenderDeletionTest {
 
         offenderDeletion.run();
 
-        verify(elite2ApiClient).requestPendingDeletions(INITIAL_WINDOW_START, INITIAL_WINDOW_START.plus(DURATION), BATCH_ID);
+        verify(elite2ApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
+                .dueForDeletionWindowStart(INITIAL_WINDOW_START)
+                .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plus(DURATION))
+                .batchId(BATCH_ID)
+                .limit(REFERRAL_LIMIT)
+                .build());
     }
 
     @Test

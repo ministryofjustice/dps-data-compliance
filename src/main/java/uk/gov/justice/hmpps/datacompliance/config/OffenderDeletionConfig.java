@@ -21,6 +21,7 @@ import uk.gov.justice.hmpps.datacompliance.jobs.offenderdeletion.OffenderDeletio
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.quartz.CronScheduleBuilder.cronSchedule;
@@ -43,6 +44,9 @@ public class OffenderDeletionConfig {
 
     @Value("${offender.deletion.cron}")
     private String offenderDeletionCron;
+
+    @Value("${offender.deletion.referral.limit:#{null}}")
+    private Integer referralLimit;
 
     @Autowired
     private SchedulerFactoryBean schedulerFactoryBean;
@@ -71,5 +75,9 @@ public class OffenderDeletionConfig {
                 .withIdentity("offender-deletion-job")
                 .storeDurably()
                 .build();
+    }
+
+    public Optional<Integer> getReferralLimit() {
+        return Optional.ofNullable(referralLimit);
     }
 }
