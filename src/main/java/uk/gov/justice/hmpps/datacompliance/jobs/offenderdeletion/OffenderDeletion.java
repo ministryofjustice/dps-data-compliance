@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient;
+import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.OffenderDeletionConfig;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
@@ -34,21 +35,32 @@ class OffenderDeletion {
 
         log.info("Running offender deletion");
 
+        final var newBatch = persistNewBatch();
+        final var request = PendingDeletionsRequest.builder()
+                .dueForDeletionWindowStart(newBatch.getWindowStartDateTime())
+                .dueForDeletionWindowEnd(newBatch.getWindowEndDateTime())
+                .batchId(newBatch.getBatchId());
+
+        config.getReferralLimit().ifPresent(request::limit);
+
+        elite2ApiClient.requestPendingDeletions(request.build());
+
+        log.info("Offender deletion request complete");
+    }
+
+    private OffenderDeletionBatch persistNewBatch() {
+
         final var windowStart = windowStart();
         final var windowEnd = windowStart.plus(config.getWindowLength());
         validateWindow(windowStart, windowEnd);
 
         log.info("Deleting offenders due for deletion between: {} and {}", windowStart, windowEnd);
 
-        final var batch = repository.save(OffenderDeletionBatch.builder()
+        return repository.save(OffenderDeletionBatch.builder()
                 .requestDateTime(timeSource.nowAsLocalDateTime())
                 .windowStartDateTime(windowStart)
                 .windowEndDateTime(windowEnd)
                 .build());
-
-        elite2ApiClient.requestPendingDeletions(windowStart, windowEnd, batch.getBatchId());
-
-        log.info("Offender deletion request complete");
     }
 
     private LocalDateTime windowStart() {

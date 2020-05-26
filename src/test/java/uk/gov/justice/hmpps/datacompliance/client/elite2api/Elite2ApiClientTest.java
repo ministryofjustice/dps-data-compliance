@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
@@ -166,7 +167,12 @@ class Elite2ApiClientTest {
 
         elite2ApiMock.enqueue(new MockResponse().setResponseCode(202));
 
-        elite2ApiClient.requestPendingDeletions(TIMESTAMP, TIMESTAMP.plusSeconds(1), 123L);
+        elite2ApiClient.requestPendingDeletions(PendingDeletionsRequest.builder()
+                .dueForDeletionWindowStart(TIMESTAMP)
+                .dueForDeletionWindowEnd(TIMESTAMP.plusSeconds(1))
+                .batchId(123L)
+                .limit(1)
+                .build());
 
         RecordedRequest recordedRequest = elite2ApiMock.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("POST");
@@ -174,7 +180,8 @@ class Elite2ApiClientTest {
         assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("{" +
                 "\"dueForDeletionWindowStart\":\"2020-02-01T03:04:05.123456\"," +
                 "\"dueForDeletionWindowEnd\":\"2020-02-01T03:04:06.123456\"," +
-                "\"batchId\":123" +
+                "\"batchId\":123," +
+                "\"limit\":1" +
                 "}");
     }
 
@@ -183,7 +190,7 @@ class Elite2ApiClientTest {
 
         elite2ApiMock.enqueue(new MockResponse().setResponseCode(500));
 
-        assertThatThrownBy(() -> elite2ApiClient.requestPendingDeletions(TIMESTAMP, TIMESTAMP.plusSeconds(1), 123L))
+        assertThatThrownBy(() -> elite2ApiClient.requestPendingDeletions(PendingDeletionsRequest.builder().build()))
                 .isInstanceOf(WebClientResponseException.class);
     }
 }
