@@ -14,4 +14,10 @@ public class OffenderPendingDeletionReferralComplete {
 
     @JsonProperty("batchId")
     private Long batchId;
+
+    @JsonProperty("numberReferred")
+    private Long numberReferred;
+
+    @JsonProperty("totalInWindow")
+    private Long totalInWindow;
 }

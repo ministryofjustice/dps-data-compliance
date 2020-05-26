@@ -44,6 +44,7 @@ public class ReferralService {
                 .orElseThrow(illegalState("Cannot find batch with id: '%s'", event.getBatchId()));
 
         batch.setReferralCompletionDateTime(timeSource.nowAsLocalDateTime());
+        batch.setRemainingInWindow((int) (event.getTotalInWindow() - event.getNumberReferred()));
 
         batchRepository.save(batch);
     }

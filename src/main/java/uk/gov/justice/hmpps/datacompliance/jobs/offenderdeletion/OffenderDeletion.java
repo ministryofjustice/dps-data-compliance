@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 @Slf4j
@@ -51,12 +52,21 @@ class OffenderDeletion {
     }
 
     private LocalDateTime windowStart() {
-        return getLastBatch().map(OffenderDeletionBatch::getWindowEndDateTime)
+        return getLastBatch()
+                .map(this::getNextWindowStart)
                 .orElse(config.getInitialWindowStart());
     }
 
     private Optional<OffenderDeletionBatch> getLastBatch() {
         return repository.findFirstByOrderByRequestDateTimeDesc();
+    }
+
+    private LocalDateTime getNextWindowStart(final OffenderDeletionBatch lastBatch) {
+
+        checkNotNull(lastBatch.getReferralCompletionDateTime(),
+                "Previous referral (%s) did not complete", lastBatch.getBatchId());
+
+        return lastBatch.hasRemainingInWindow() ? lastBatch.getWindowStartDateTime() : lastBatch.getWindowEndDateTime();
     }
 
     private void validateWindow(final LocalDateTime windowStart, final LocalDateTime windowEnd) {

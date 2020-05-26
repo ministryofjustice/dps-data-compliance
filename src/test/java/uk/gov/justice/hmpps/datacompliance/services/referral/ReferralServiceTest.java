@@ -85,10 +85,11 @@ class ReferralServiceTest {
 
         when(batchRepository.findById(123L)).thenReturn(Optional.of(batch));
 
-        referralService.handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L));
+        referralService.handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L, 4L, 5L));
 
         InOrder inOrder = inOrder(batch, batchRepository);
         inOrder.verify(batch).setReferralCompletionDateTime(NOW);
+        inOrder.verify(batch).setRemainingInWindow(1);
         inOrder.verify(batchRepository).save(batch);
     }
 
@@ -98,7 +99,7 @@ class ReferralServiceTest {
         when(batchRepository.findById(123L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                referralService.handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L)))
+                referralService.handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L, 4L, 5L)))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Cannot find batch with id: '123'");
 

@@ -45,4 +45,11 @@ public class OffenderDeletionBatch {
     @NotNull
     @Column(name = "WINDOW_END_DATE_TIME", nullable = false)
     private LocalDateTime windowEndDateTime;
+
+    @Column(name = "REMAINING_IN_WINDOW")
+    private Integer remainingInWindow;
+
+    public boolean hasRemainingInWindow() {
+        return remainingInWindow != null && remainingInWindow != 0;
+    }
 }

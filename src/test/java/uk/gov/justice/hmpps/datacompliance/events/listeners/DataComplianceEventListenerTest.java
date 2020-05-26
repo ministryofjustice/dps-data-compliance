@@ -75,10 +75,10 @@ class DataComplianceEventListenerTest {
 
     @Test
     void handleReferralComplete() {
-        handleMessage("{\"batchId\":123}",
+        handleMessage("{\"batchId\":123,\"numberReferred\":4,\"totalInWindow\":5}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE"));
 
-        verify(referralService).handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L));
+        verify(referralService).handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L, 4L, 5L));
     }
 
     @Test
