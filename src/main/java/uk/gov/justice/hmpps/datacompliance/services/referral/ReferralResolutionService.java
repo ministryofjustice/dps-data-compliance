@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.services.referral;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -83,7 +84,8 @@ public class ReferralResolutionService {
         }
     }
 
-    private ResolutionStatus findResolution(final List<RetentionCheck> retentionChecks) {
+    @VisibleForTesting
+    ResolutionStatus findResolution(final List<RetentionCheck> retentionChecks) {
 
         if (anyPending(retentionChecks)) {
             return PENDING;
