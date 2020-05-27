@@ -18,6 +18,7 @@ spring:
   jpa.hibernate.ddl-auto: create-drop
   flyway.locations: classpath:db/migration
   security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
+  lifecycle.timeout-per-shutdown-phase: 0s
 
 jwt:
   keystore:
@@ -27,5 +28,3 @@ jwt:
 
 offender.retention.ap.data.duplicate.check.enabled: true
 offender.retention.sql.data.duplicate.check.enabled: true
-
-graceful.shutdown.enabled: false

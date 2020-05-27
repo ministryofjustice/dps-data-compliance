@@ -74,4 +74,4 @@ management:
       cache:
         time-to-live: 2000ms
 
-graceful.shutdown.enabled: true
+server.shutdown: graceful
