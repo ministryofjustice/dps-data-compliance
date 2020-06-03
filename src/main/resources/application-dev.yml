@@ -12,7 +12,8 @@ app.db.url: jdbc:hsqldb:mem:data-compliance-db;sql.syntax_pgs=true;shutdown=fals
 spring:
   flyway.locations: classpath:db/migration
   security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
-  lifecycle.timeout-per-shutdown-phase: 0s
 
 offender.retention.ap.data.duplicate.check.enabled: true
 offender.retention.sql.data.duplicate.check.enabled: true
+
+server.shutdown: immediate

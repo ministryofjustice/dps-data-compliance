@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 class OffenderImageUploadLoggerTest {
 
     private static final LocalDateTime DATE_TIME = LocalDateTime.now();
-    private static final String OFFENDER_NUMBER = "offender1";
+    private static final String OFFENDER_NUMBER = "A1234AA";
     private static final FaceId FACE_ID = new FaceId("face1");
     private static final long IMAGE_ID = 123L;
 

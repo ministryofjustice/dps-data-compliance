@@ -24,7 +24,7 @@ import static uk.gov.justice.hmpps.datacompliance.utils.Result.success;
 @ExtendWith(MockitoExtension.class)
 class OffenderImageUploaderTest {
 
-    private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("offender1");
+    private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
     private static final long IMAGE_ID = 123L;
     private static final byte[] IMAGE_DATA = new byte[]{0x12};
     private static final OffenderImageMetadata IMAGE_METADATA = new OffenderImageMetadata(IMAGE_ID, "FACE");

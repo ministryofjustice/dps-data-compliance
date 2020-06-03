@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class DataComplianceEventPusherTest {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private final static OffenderNumber OFFENDER_NUMBER = new OffenderNumber("offender1");
+    private final static OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
 
     @Mock
     private AmazonSQS client;
@@ -44,7 +44,7 @@ class DataComplianceEventPusherTest {
         eventPusher.grantDeletion(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"offender1\",\"referralId\":123}");
+        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":123}");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
                 .isEqualTo("DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED");
     }
@@ -60,7 +60,7 @@ class DataComplianceEventPusherTest {
         eventPusher.requestDataDuplicateCheck(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"offender1\",\"retentionCheckId\":123}");
+        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123}");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
                 .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-CHECK");
     }
