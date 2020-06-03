@@ -23,7 +23,7 @@ import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.Index
 class AwsImageRecognitionClientTest {
 
     private static final byte[] DATA = new byte[] { (byte) 0x01 };
-    private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("offender1");
+    private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
     private static final long OFFENDER_IMAGE_ID = 1L;
     private static final String EXPECTED_FACE_ID = "face1";
     private static final String COLLECTION_NAME = "collection_name";

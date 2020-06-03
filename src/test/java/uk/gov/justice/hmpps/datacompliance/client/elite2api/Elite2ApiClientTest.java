@@ -54,8 +54,8 @@ class Elite2ApiClientTest {
     void getOffenderNumbers() throws Exception {
 
         var offenderNumbers = List.of(
-                new OffenderNumber("offender1"),
-                new OffenderNumber("offender2"));
+                new OffenderNumber("A1234AA"),
+                new OffenderNumber("B1234BB"));
 
         elite2ApiMock.enqueue(new MockResponse()
                 .setBody(OBJECT_MAPPER.writeValueAsString(offenderNumbers))
@@ -65,7 +65,7 @@ class Elite2ApiClientTest {
         var response = elite2ApiClient.getOffenderNumbers(0, PAGE_LIMIT);
 
         assertThat(response.getOffenderNumbers()).extracting(OffenderNumber::getOffenderNumber)
-                .containsExactlyInAnyOrder("offender1", "offender2");
+                .containsExactlyInAnyOrder("A1234AA", "B1234BB");
         assertThat(response.getTotalCount()).isEqualTo(123);
 
         RecordedRequest recordedRequest = elite2ApiMock.takeRequest();
@@ -106,13 +106,13 @@ class Elite2ApiClientTest {
                 .setBody(OBJECT_MAPPER.writeValueAsString(offenderImages))
                 .setHeader("Content-Type", "application/json"));
 
-        var result = elite2ApiClient.getOffenderFaceImagesFor(new OffenderNumber("offender1"));
+        var result = elite2ApiClient.getOffenderFaceImagesFor(new OffenderNumber("A1234AA"));
 
         assertThat(result).containsOnly(new OffenderImageMetadata(123L, "FACE"));
 
         RecordedRequest recordedRequest = elite2ApiMock.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("GET");
-        assertThat(recordedRequest.getPath()).isEqualTo("/api/images/offenders/offender1");
+        assertThat(recordedRequest.getPath()).isEqualTo("/api/images/offenders/A1234AA");
     }
 
     @Test
@@ -120,7 +120,7 @@ class Elite2ApiClientTest {
 
         elite2ApiMock.enqueue(new MockResponse().setResponseCode(500));
 
-        assertThatThrownBy(() -> elite2ApiClient.getOffenderFaceImagesFor(new OffenderNumber("offender1")))
+        assertThatThrownBy(() -> elite2ApiClient.getOffenderFaceImagesFor(new OffenderNumber("A1234AA")))
                 .isInstanceOf(WebClientResponseException.class);
     }
 

@@ -23,6 +23,7 @@ import java.util.List;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.regex.Pattern.compile;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,9 +74,9 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
         migration.run();
 
-        verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x01}, new OffenderNumber("offender1"), 1L);
-        verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x02}, new OffenderNumber("offender2"), 2L);
-        verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x03}, new OffenderNumber("offender3"), 3L);
+        verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x01}, offenderNo(1), 1L);
+        verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x02}, offenderNo(2), 2L);
+        verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x03}, offenderNo(3), 3L);
         verifyNoMoreInteractions(imageRecognitionClient);
 
         var persistedBatch = repository.findAll().iterator().next();
@@ -93,16 +94,16 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
                 var path = requireNonNull(request.getPath());
                 var offenderIdsMatch = compile("^/api/offenders/ids$").matcher(path);
-                var imageMetaDataMatch = compile("^/api/images/offenders/.*([1-9])+$").matcher(path);
+                var imageMetaDataMatch = compile("^/api/images/offenders/A([0-9]){4}AA$").matcher(path);
                 var imageDataMatch = compile("^/api/images/([1-9]+)/data$").matcher(path);
 
                 if (offenderIdsMatch.find()) {
 
                     return new MockResponse()
                             .setBody(OBJECT_MAPPER.writeValueAsString(List.of(
-                                    new OffenderNumber("offender1"),
-                                    new OffenderNumber("offender2"),
-                                    new OffenderNumber("offender3"))))
+                                    offenderNo(1),
+                                    offenderNo(2),
+                                    offenderNo(3))))
                             .setHeader("Content-Type", "application/json")
                             .setHeader("Total-Records", "3");
 
@@ -125,5 +126,9 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
                 return new MockResponse().setResponseCode(404);
             }
         };
+    }
+
+    private OffenderNumber offenderNo(final int index) {
+        return new OffenderNumber(format("A%04dAA", index));
     }
 }

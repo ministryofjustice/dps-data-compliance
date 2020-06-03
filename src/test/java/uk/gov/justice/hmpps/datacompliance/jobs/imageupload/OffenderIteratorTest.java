@@ -30,6 +30,10 @@ import static org.mockito.Mockito.lenient;
 @ExtendWith(MockitoExtension.class)
 class OffenderIteratorTest {
 
+    private static final String OFFENDER_1 = "A1234AA";
+    private static final String OFFENDER_2 = "B1234BB";
+    private static final String OFFENDER_3 = "C1234CC";
+    private static final String OFFENDER_4 = "D1234DD";
     private static final int REQUEST_LIMIT = 2;
     private static final DataComplianceProperties PROPERTIES = DataComplianceProperties.builder()
             .elite2ApiBaseUrl("some-url")
@@ -56,20 +60,20 @@ class OffenderIteratorTest {
 
     @Test
     void applyForAllHandlesCountLessThanRequestLimit() {
-        mockOffenderNumbersResponse("offender1");
-        assertThat(processedOffenderNumbers()).containsExactlyInAnyOrder("offender1");
+        mockOffenderNumbersResponse(OFFENDER_1);
+        assertThat(processedOffenderNumbers()).containsExactlyInAnyOrder(OFFENDER_1);
     }
 
     @Test
     void applyForAllHandlesCountEqualToRequestLimit() {
-        mockOffenderNumbersResponse("offender1", "offender2");
-        assertThat(processedOffenderNumbers()).containsExactlyInAnyOrder("offender1", "offender2");
+        mockOffenderNumbersResponse(OFFENDER_1, OFFENDER_2);
+        assertThat(processedOffenderNumbers()).containsExactlyInAnyOrder(OFFENDER_1, OFFENDER_2);
     }
 
     @Test
     void applyForAllHandlesCountGreaterThanRequestLimit() {
-        mockOffenderNumbersResponse("offender1", "offender2", "offender3");
-        assertThat(processedOffenderNumbers()).containsExactlyInAnyOrder("offender1", "offender2", "offender3");
+        mockOffenderNumbersResponse(OFFENDER_1, OFFENDER_2, OFFENDER_3);
+        assertThat(processedOffenderNumbers()).containsExactlyInAnyOrder(OFFENDER_1, OFFENDER_2, OFFENDER_3);
     }
 
     @Test
@@ -80,14 +84,14 @@ class OffenderIteratorTest {
                         .waitDuration(Duration.ZERO)
                         .build());
 
-        mockOffenderNumbersResponse("offender1", "offender2", "offender3");
+        mockOffenderNumbersResponse(OFFENDER_1, OFFENDER_2, OFFENDER_3);
 
         final var processedOffenderNumbers = new ArrayList<String>();
 
         offenderIterator.applyForAll(throwOnFirstAttempt(
                 offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber())));
 
-        assertThat(processedOffenderNumbers).containsExactlyInAnyOrder("offender1", "offender2", "offender3");
+        assertThat(processedOffenderNumbers).containsExactlyInAnyOrder(OFFENDER_1, OFFENDER_2, OFFENDER_3);
     }
 
     @Test
@@ -96,14 +100,14 @@ class OffenderIteratorTest {
         offenderIterator = new OffenderIterator(client, PROPERTIES,
                 RetryConfig.custom().maxAttempts(1).build());
 
-        mockOffenderNumbersResponse("offender1", "offender2", "offender3");
+        mockOffenderNumbersResponse(OFFENDER_1, OFFENDER_2, OFFENDER_3);
 
         final var processedOffenderNumbers = new ArrayList<String>();
         assertThatThrownBy(() -> offenderIterator.applyForAll(throwOnFirstAttempt(
                 offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber()))))
                 .hasMessageContaining("Failed!");
 
-        assertThat(processedOffenderNumbers).doesNotContain("offender3");
+        assertThat(processedOffenderNumbers).doesNotContain(OFFENDER_3);
     }
 
     @Test
@@ -117,9 +121,9 @@ class OffenderIteratorTest {
                         .elite2ApiOffenderIdsTotalPages(1L)
                         .build());
 
-        mockOffenderNumbersResponseWithOffset(1, "offender1", "offender2", "offender3", "offender4");
+        mockOffenderNumbersResponseWithOffset(1, OFFENDER_1, OFFENDER_2, OFFENDER_3, OFFENDER_4);
 
-        assertThat(processedOffenderNumbers()).containsOnly("offender2", "offender3");
+        assertThat(processedOffenderNumbers()).containsOnly(OFFENDER_2, OFFENDER_3);
 
     }
 

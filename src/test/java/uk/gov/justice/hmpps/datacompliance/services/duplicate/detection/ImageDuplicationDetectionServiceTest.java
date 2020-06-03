@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
@@ -177,7 +178,7 @@ class ImageDuplicationDetectionServiceTest {
         return new FaceId("face" + suffix);
     }
 
-    private OffenderNumber offenderNo(final long suffix) {
-        return new OffenderNumber("offender" + suffix);
+    private OffenderNumber offenderNo(final long index) {
+        return new OffenderNumber(format("A%04dAA", index));
     }
 }
