@@ -38,7 +38,7 @@ public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(STATELESS).and().csrf().disable()
                 .authorizeRequests(auth -> auth.antMatchers(
-                        "/health", "/health/ping", "/info",
+                        "/health/**", "/info",
                         "/v2/api-docs",
                         "/swagger-resources/**",
                         "/swagger-ui.html",
