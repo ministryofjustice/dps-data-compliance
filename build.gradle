@@ -1,5 +1,5 @@
 plugins {
-    id 'uk.gov.justice.hmpps.gradle-spring-boot' version "0.4.0"
+    id 'uk.gov.justice.hmpps.gradle-spring-boot' version "0.4.1"
 }
 
 ext ["spring-security.version"] = "5.3.2.RELEASE"
@@ -21,27 +21,29 @@ dependencies {
     implementation 'org.springframework:spring-jms:5.2.6.RELEASE'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.13.23')
+    implementation platform('software.amazon.awssdk:bom:2.13.30')
     implementation 'software.amazon.awssdk:rekognition'
+    implementation 'software.amazon.awssdk:athena'
+    implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.789')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.789'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.796')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.796'
     implementation 'com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8'
 
     // Utils
-    implementation 'io.github.resilience4j:resilience4j-retry:1.4.0'
+    implementation 'io.github.resilience4j:resilience4j-retry:1.5.0'
     implementation 'org.apache.commons:commons-lang3:3.10'
-    implementation 'commons-io:commons-io:2.6'
+    implementation 'commons-io:commons-io:2.7'
     implementation ('org.quartz-scheduler:quartz:2.3.2') {
         exclude group: 'com.zaxxer'
     }
 
     // Database
-    implementation 'org.hibernate:hibernate-core:5.4.16.Final'
+    implementation 'org.hibernate:hibernate-core:5.4.17.Final'
 
     runtimeOnly 'org.hsqldb:hsqldb:2.5.0'
-    runtimeOnly 'org.flywaydb:flyway-core:6.4.2'
-    runtimeOnly 'org.postgresql:postgresql:42.2.12'
+    runtimeOnly 'org.flywaydb:flyway-core:6.4.3'
+    runtimeOnly 'org.postgresql:postgresql:42.2.13'
 
     // Swagger
     implementation 'io.springfox:springfox-swagger2:2.9.2'
