@@ -34,8 +34,9 @@ env:
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth/.well-known/jwks.json"
 
   # Switching off data duplicate checks in preprod because the supporting materialised view is not yet available:
-  OFFENDER_RETENTION_SQL_DATA_DUPLICATE_CHECK_ENABLED: false
-  OFFENDER_RETENTION_AP_DATA_DUPLICATE_CHECK_ENABLED: false
+  OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED: false
+  OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED: false
+  OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED: false
 
   OFFENDER_DELETION_CRON: "0 30 15 9 6 ? *"
   OFFENDER_DELETION_INITIAL_WINDOW_START: "2020-06-07T00:00:00"

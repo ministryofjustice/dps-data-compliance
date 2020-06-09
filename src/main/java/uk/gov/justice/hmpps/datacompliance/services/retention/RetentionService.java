@@ -7,8 +7,11 @@ import uk.gov.justice.hmpps.datacompliance.client.pathfinder.PathfinderApiClient
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDatabaseDataDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder;
@@ -50,10 +53,11 @@ public class RetentionService {
                 pathfinderReferralCheck(offenderNumber),
                 manualRetentionCheck(offenderNumber),
                 imageDuplicateCheck(offenderNumber),
-                dataDuplicateCheck(offenderNumber));
+                idDataDuplicateCheck(offenderNumber),
+                databaseDataDuplicateCheck(offenderNumber));
     }
 
-    public void handleDataDuplicateResult(final DataDuplicateResult result) {
+    public void handleDataDuplicateResult(final DataDuplicateResult result, final Method method) {
 
         final var retentionCheck = findRetentionCheck(result.getRetentionCheckId(), RetentionCheckDataDuplicate.class);
         final var referredOffenderNo = retentionCheck.getOffenderNumber();
@@ -66,7 +70,7 @@ public class RetentionService {
                 result.getOffenderIdDisplay(), result.getRetentionCheckId(), referredOffenderNo);
 
         retentionCheck.addDataDuplicates(
-                dataDuplicationDetectionService.persistDataDuplicates(referredOffenderNo, duplicateOffenderNos));
+                dataDuplicationDetectionService.persistDataDuplicates(referredOffenderNo, duplicateOffenderNos, method));
 
         retentionCheck.setCheckStatus(duplicateOffenderNos.isEmpty() ? RETENTION_NOT_REQUIRED : RETENTION_REQUIRED);
 
@@ -109,15 +113,25 @@ public class RetentionService {
         return new ActionableRetentionCheck(check);
     }
 
-    private ActionableRetentionCheck dataDuplicateCheck(final OffenderNumber offenderNumber) {
+    private ActionableRetentionCheck idDataDuplicateCheck(final OffenderNumber offenderNumber) {
 
-        if (!dataComplianceProperties.isSqlDataDuplicateCheckEnabled()) {
-            // TODO GDPR-127 Still perform the Analytical Platform check
-            return new ActionableRetentionCheck(new RetentionCheckDataDuplicate(DISABLED));
+        if (!dataComplianceProperties.isIdDataDuplicateCheckEnabled()) {
+            return new ActionableRetentionCheck(new RetentionCheckIdDataDuplicate(DISABLED));
         }
 
-        return new ActionableRetentionCheck(new RetentionCheckDataDuplicate(PENDING))
-                .setPendingCheck(retentionCheck -> dataDuplicationDetectionService.searchForDuplicates(
+        return new ActionableRetentionCheck(new RetentionCheckIdDataDuplicate(PENDING))
+                .setPendingCheck(retentionCheck -> dataDuplicationDetectionService.searchForIdDuplicates(
+                        offenderNumber, retentionCheck.getRetentionCheckId()));
+    }
+
+    private ActionableRetentionCheck databaseDataDuplicateCheck(final OffenderNumber offenderNumber) {
+
+        if (!dataComplianceProperties.isDatabaseDataDuplicateCheckEnabled()) {
+            return new ActionableRetentionCheck(new RetentionCheckDatabaseDataDuplicate(DISABLED));
+        }
+
+        return new ActionableRetentionCheck(new RetentionCheckDatabaseDataDuplicate(PENDING))
+                .setPendingCheck(retentionCheck -> dataDuplicationDetectionService.searchForDatabaseDuplicates(
                         offenderNumber, retentionCheck.getRetentionCheckId()));
     }
 }

@@ -13,7 +13,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Referra
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.ReferralResolutionRepository;
@@ -126,7 +126,7 @@ class ReferralResolutionServiceTest {
         final var referral = OffenderDeletionReferral.builder().offenderNo("A1234AA").build();
 
         assertThatThrownBy(() -> referralResolutionService.processReferral(referral,
-                List.of(new ActionableRetentionCheck(new RetentionCheckDataDuplicate(DISABLED)))))
+                List.of(new ActionableRetentionCheck(new RetentionCheckIdDataDuplicate(DISABLED)))))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("No retention checks have been conducted for offender: 'A1234AA'");
 

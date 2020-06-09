@@ -21,8 +21,14 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
     }
 
     @Override
-    public void requestDataDuplicateCheck(final OffenderNumber offenderNo, final Long retentionCheckId) {
-        log.warn("Pretending to push data duplicate check request '{}/{}' to queue",
+    public void requestIdDataDuplicateCheck(final OffenderNumber offenderNo, final Long retentionCheckId) {
+        log.warn("Pretending to push ID data duplicate check '{}/{}' to queue",
+                offenderNo.getOffenderNumber(), retentionCheckId);
+    }
+
+    @Override
+    public void requestDatabaseDataDuplicateCheck(final OffenderNumber offenderNo, final Long retentionCheckId) {
+        log.warn("Pretending to push data duplicate database check '{}/{}' to queue",
                 offenderNo.getOffenderNumber(), retentionCheckId);
     }
 }

@@ -15,6 +15,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method.ANALYTICAL_PLATFORM;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -35,6 +36,7 @@ class DataDuplicateRepositoryTest {
                 .referenceOffenderNo("A1234AA")
                 .duplicateOffenderNo("B1234BB")
                 .detectionDateTime(DATE_TIME)
+                .method(ANALYTICAL_PLATFORM)
                 .build();
 
         repository.save(dataDuplicate);
@@ -48,5 +50,6 @@ class DataDuplicateRepositoryTest {
         assertThat(retrievedEntity.getReferenceOffenderNo()).isEqualTo("A1234AA");
         assertThat(retrievedEntity.getDuplicateOffenderNo()).isEqualTo("B1234BB");
         assertThat(retrievedEntity.getDetectionDateTime()).isEqualTo(DATE_TIME);
+        assertThat(retrievedEntity.getMethod()).isEqualTo(ANALYTICAL_PLATFORM);
     }
 }

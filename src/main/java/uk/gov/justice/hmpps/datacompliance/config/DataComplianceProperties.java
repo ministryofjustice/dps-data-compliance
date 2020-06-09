@@ -29,8 +29,9 @@ public class DataComplianceProperties {
     private final Long elite2ApiOffenderIdsTotalPages;
     private final String pathfinderApiBaseUrl;
     private final Duration pathfinderApiTimeout;
-    private final boolean sqlDataDuplicateCheckEnabled;
-    private final boolean analyticalPlatformDataDuplicateCheckEnabled;
+    private final boolean idDataDuplicateCheckEnabled;  // Duplicate check based only on IDs (PNC, CRO, LIDS numbers)
+    private final boolean databaseDataDuplicateCheckEnabled;  // Duplicate check based on points based similarity SQL query on NOMIS database
+    private final boolean analyticalPlatformDataDuplicateCheckEnabled;  // Duplicate check based on Analytical Platform's Apache Spark deduplication solution (Splink)
 
     public DataComplianceProperties(@Value("${elite2.api.base.url}") @URL final String elite2ApiBaseUrl,
                                     @Value("${elite2.api.offender.ids.iteration.threads:1}") final int elite2ApiOffenderIdsIterationThreads,
@@ -39,15 +40,17 @@ public class DataComplianceProperties {
                                     @Value("${elite2.api.offender.ids.total.pages:#{null}}") final Long elite2ApiOffenderIdsTotalPages,
                                     @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl,
                                     @Value("${pathfinder.api.timeout:5s}") final Duration pathfinderApiTimeout,
-                                    @Value("${offender.retention.sql.data.duplicate.check.enabled}") final boolean sqlDataDuplicateCheckEnabled,
-                                    @Value("${offender.retention.ap.data.duplicate.check.enabled}") final boolean analyticalPlatformDataDuplicateCheckEnabled) {
+                                    @Value("${offender.retention.data.duplicate.id.check.enabled}") final boolean idDataDuplicateCheckEnabled,
+                                    @Value("${offender.retention.data.duplicate.db.check.enabled}") final boolean databaseDataDuplicateCheckEnabled,
+                                    @Value("${offender.retention.data.duplicate.ap.check.enabled}") final boolean analyticalPlatformDataDuplicateCheckEnabled) {
 
         log.info("Image upload - number of threads: {}", elite2ApiOffenderIdsIterationThreads);
         log.info("Image upload - page limit: {}", elite2ApiOffenderIdsLimit);
         log.info("Image upload - initial offset: {}", elite2ApiOffenderIdsInitialOffset);
         log.info("Image upload - total pages: {}", elite2ApiOffenderIdsTotalPages);
-        log.info("Configured to run SQL data duplicate check ({}) and Analytical Platform data duplicate check ({})",
-                sqlDataDuplicateCheckEnabled, analyticalPlatformDataDuplicateCheckEnabled);
+        log.info("Data Duplicate - ID check enabled: {}", idDataDuplicateCheckEnabled);
+        log.info("Data Duplicate - SQL query check enabled: {}", databaseDataDuplicateCheckEnabled);
+        log.info("Data Duplicate - Analytical Platform check enabled: {}", analyticalPlatformDataDuplicateCheckEnabled);
 
         this.elite2ApiBaseUrl = elite2ApiBaseUrl;
         this.elite2ApiOffenderIdsIterationThreads = elite2ApiOffenderIdsIterationThreads;
@@ -56,7 +59,8 @@ public class DataComplianceProperties {
         this.elite2ApiOffenderIdsTotalPages = elite2ApiOffenderIdsTotalPages;
         this.pathfinderApiBaseUrl = pathfinderApiBaseUrl;
         this.pathfinderApiTimeout = pathfinderApiTimeout;
-        this.sqlDataDuplicateCheckEnabled = sqlDataDuplicateCheckEnabled;
+        this.idDataDuplicateCheckEnabled = idDataDuplicateCheckEnabled;
+        this.databaseDataDuplicateCheckEnabled = databaseDataDuplicateCheckEnabled;
         this.analyticalPlatformDataDuplicateCheckEnabled = analyticalPlatformDataDuplicateCheckEnabled;
     }
 
