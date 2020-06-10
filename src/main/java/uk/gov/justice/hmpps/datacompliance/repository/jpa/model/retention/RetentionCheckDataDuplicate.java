@@ -9,7 +9,6 @@ import lombok.ToString;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate;
 
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -27,20 +26,17 @@ import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
-@DiscriminatorValue(RetentionCheckDataDuplicate.DATA_DUPLICATE)
-public class RetentionCheckDataDuplicate extends RetentionCheck {
-
-    public static final String DATA_DUPLICATE = "DATA_DUPLICATE";
+public abstract class RetentionCheckDataDuplicate extends RetentionCheck {
 
     @OneToMany(mappedBy = "retentionCheck", cascade = {PERSIST, MERGE}, fetch = LAZY)
     private final List<RetentionReasonDataDuplicate> dataDuplicates = new ArrayList<>();
 
-    private RetentionCheckDataDuplicate() {
-        this(null);
+    RetentionCheckDataDuplicate() {
+        this(null, null);
     }
 
-    public RetentionCheckDataDuplicate(final Status status) {
-        super(null, null, DATA_DUPLICATE, status);
+    public RetentionCheckDataDuplicate(final String checkType, final Status status) {
+        super(null, null, checkType, status);
     }
 
     public RetentionCheckDataDuplicate addDataDuplicates(final List<DataDuplicate> dataDuplicates) {

@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.granted;
+package uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.sqs;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DataComplianceEventPusherTest {
+class DataComplianceAwsEventPusherTest {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final static OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
@@ -50,18 +50,34 @@ class DataComplianceEventPusherTest {
     }
 
     @Test
-    void requestDataDuplicateCheck() {
+    void requestIdDataDuplicateCheck() {
 
         final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
 
         when(client.sendMessage(request.capture()))
                 .thenReturn(new SendMessageResult().withMessageId("message1"));
 
-        eventPusher.requestDataDuplicateCheck(OFFENDER_NUMBER, 123L);
+        eventPusher.requestIdDataDuplicateCheck(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123}");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
-                .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-CHECK");
+                .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-ID-CHECK");
+    }
+
+    @Test
+    void requestDatabaseDataDuplicateCheck() {
+
+        final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
+
+        when(client.sendMessage(request.capture()))
+                .thenReturn(new SendMessageResult().withMessageId("message1"));
+
+        eventPusher.requestDatabaseDataDuplicateCheck(OFFENDER_NUMBER, 123L);
+
+        assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
+        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123}");
+        assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
+                .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK");
     }
 }

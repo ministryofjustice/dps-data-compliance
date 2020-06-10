@@ -20,6 +20,8 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method.DATABASE;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method.ID;
 
 @Slf4j
 @Service
@@ -29,13 +31,15 @@ public class DataComplianceEventListener {
     private static final String OFFENDER_PENDING_DELETION_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION";
     private static final String OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE";
     private static final String OFFENDER_DELETION_COMPLETE_EVENT = "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE";
-    private static final String DATA_DUPLICATE_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-RESULT";
+    private static final String DATA_DUPLICATE_ID_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-RESULT";
+    private static final String DATA_DUPLICATE_DB_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-RESULT";
 
     private final Map<String, MessageHandler> messageHandlers = Map.of(
             OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral,
             OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete,
             OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
-            DATA_DUPLICATE_RESULT, this::handleDataDuplicateResult);
+            DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult,
+            DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult);
 
     private final ObjectMapper objectMapper;
     private final ReferralService referralService;
@@ -91,9 +95,14 @@ public class DataComplianceEventListener {
                 parseEvent(message.getPayload(), OffenderPendingDeletion.class));
     }
 
-    private void handleDataDuplicateResult(final Message<String> message) {
+    private void handleDataDuplicateIdResult(final Message<String> message) {
         retentionService.handleDataDuplicateResult(
-                parseEvent(message.getPayload(), DataDuplicateResult.class));
+                parseEvent(message.getPayload(), DataDuplicateResult.class), ID);
+    }
+
+    private void handleDataDuplicateDbResult(final Message<String> message) {
+        retentionService.handleDataDuplicateResult(
+                parseEvent(message.getPayload(), DataDuplicateResult.class), DATABASE);
     }
 
     private <T> T parseEvent(final String requestJson, final Class<T> eventType) {

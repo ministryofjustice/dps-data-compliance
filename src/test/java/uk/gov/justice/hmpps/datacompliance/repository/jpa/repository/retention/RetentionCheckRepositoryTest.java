@@ -11,6 +11,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.transaction.TestTransaction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.DataDuplicateRepository;
 
 import javax.transaction.Transactional;
@@ -64,7 +65,7 @@ class RetentionCheckRepositoryTest {
 
     private RetentionCheckDataDuplicate getRetentionCheck() {
         return retentionCheckRepository.findById(1L)
-                .map(RetentionCheckDataDuplicate.class::cast)
+                .map(RetentionCheckIdDataDuplicate.class::cast)
                 .orElseThrow();
     }
 }

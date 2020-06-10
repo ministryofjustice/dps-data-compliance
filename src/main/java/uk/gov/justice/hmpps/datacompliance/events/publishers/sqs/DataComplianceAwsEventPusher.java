@@ -22,7 +22,8 @@ import java.util.Map;
 public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
 
     private static final String OFFENDER_DELETION_GRANTED = "DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED";
-    private static final String DATA_DUPLICATE_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-CHECK";
+    private static final String DATA_DUPLICATE_ID_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-CHECK";
+    private static final String DATA_DUPLICATE_DB_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK";
 
     private final ObjectMapper objectMapper;
     private final AmazonSQS sqsClient;
@@ -45,27 +46,26 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
 
         log.debug("Sending grant deletion event for: '{}/{}'", offenderNo.getOffenderNumber(), referralId);
 
-        sqsClient.sendMessage(generateDeletionGrantedRequest(offenderNo, referralId));
+        sqsClient.sendMessage(generateRequest(OFFENDER_DELETION_GRANTED,
+                new OffenderDeletionGranted(offenderNo.getOffenderNumber(), referralId)));
     }
 
     @Override
-    public void requestDataDuplicateCheck(final OffenderNumber offenderNo, final Long retentionCheckId) {
+    public void requestIdDataDuplicateCheck(final OffenderNumber offenderNo, final Long retentionCheckId) {
 
-        log.debug("Sending data duplicate check request for: '{}/{}'", offenderNo.getOffenderNumber(), retentionCheckId);
+        log.debug("Requesting ID data duplicate check for: '{}/{}'", offenderNo.getOffenderNumber(), retentionCheckId);
 
-        sqsClient.sendMessage(generateDataDuplicateCheckRequest(offenderNo, retentionCheckId));
+        sqsClient.sendMessage(generateRequest(DATA_DUPLICATE_ID_CHECK,
+                new DataDuplicateCheck(offenderNo.getOffenderNumber(), retentionCheckId)));
     }
 
-    private SendMessageRequest generateDeletionGrantedRequest(final OffenderNumber offenderNo,
-                                                              final Long referralId) {
-        return generateRequest(OFFENDER_DELETION_GRANTED,
-                new OffenderDeletionGranted(offenderNo.getOffenderNumber(), referralId));
-    }
+    @Override
+    public void requestDatabaseDataDuplicateCheck(final OffenderNumber offenderNo, Long retentionCheckId) {
 
-    private SendMessageRequest generateDataDuplicateCheckRequest(final OffenderNumber offenderNo,
-                                                                 final Long retentionCheckId) {
-        return generateRequest(DATA_DUPLICATE_CHECK,
-                new DataDuplicateCheck(offenderNo.getOffenderNumber(), retentionCheckId));
+        log.debug("Requesting data duplicate database check for: '{}/{}'", offenderNo.getOffenderNumber(), retentionCheckId);
+
+        sqsClient.sendMessage(generateRequest(DATA_DUPLICATE_DB_CHECK,
+                new DataDuplicateCheck(offenderNo.getOffenderNumber(), retentionCheckId)));
     }
 
     private SendMessageRequest generateRequest(final String eventType, final Object messageBody) {

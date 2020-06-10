@@ -27,6 +27,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method.DATABASE;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method.ID;
 
 @ExtendWith(MockitoExtension.class)
 class DataComplianceEventListenerTest {
@@ -90,11 +92,19 @@ class DataComplianceEventListenerTest {
     }
 
     @Test
-    void handleDataDuplicateResult() {
+    void handleDataDuplicateIdResult() {
         handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"duplicateOffenders\":[\"B1234BB\"]}",
-                Map.of("eventType", "DATA_COMPLIANCE_DATA-DUPLICATE-RESULT"));
+                Map.of("eventType", "DATA_COMPLIANCE_DATA-DUPLICATE-ID-RESULT"));
 
-        verify(retentionService).handleDataDuplicateResult(new DataDuplicateResult("A1234AA", 123L, List.of("B1234BB")));
+        verify(retentionService).handleDataDuplicateResult(new DataDuplicateResult("A1234AA", 123L, List.of("B1234BB")), ID);
+    }
+
+    @Test
+    void handleDataDuplicateDbResult() {
+        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"duplicateOffenders\":[\"B1234BB\"]}",
+                Map.of("eventType", "DATA_COMPLIANCE_DATA-DUPLICATE-DB-RESULT"));
+
+        verify(retentionService).handleDataDuplicateResult(new DataDuplicateResult("A1234AA", 123L, List.of("B1234BB")), DATABASE);
     }
 
     @Test

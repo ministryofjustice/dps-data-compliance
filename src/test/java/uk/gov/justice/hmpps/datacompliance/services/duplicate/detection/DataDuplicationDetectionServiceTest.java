@@ -19,6 +19,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method.ID;
 
 @ExtendWith(MockitoExtension.class)
 class DataDuplicationDetectionServiceTest {
@@ -42,17 +43,25 @@ class DataDuplicationDetectionServiceTest {
     }
 
     @Test
-    void searchForDuplicates() {
+    void searchForIdDuplicates() {
 
-        service.searchForDuplicates(OFFENDER_NUMBER, 1L);
+        service.searchForIdDuplicates(OFFENDER_NUMBER, 1L);
 
-        verify(eventPusher).requestDataDuplicateCheck(OFFENDER_NUMBER, 1L);
+        verify(eventPusher).requestIdDataDuplicateCheck(OFFENDER_NUMBER, 1L);
+    }
+
+    @Test
+    void searchForDbDuplicates() {
+
+        service.searchForDatabaseDuplicates(OFFENDER_NUMBER, 1L);
+
+        verify(eventPusher).requestDatabaseDataDuplicateCheck(OFFENDER_NUMBER, 1L);
     }
 
     @Test
     void persistDataDuplicates() {
 
-        service.persistDataDuplicates(OFFENDER_NUMBER, List.of(DUPLICATE_OFFENDER_NUMBER_1, DUPLICATE_OFFENDER_NUMBER_2));
+        service.persistDataDuplicates(OFFENDER_NUMBER, List.of(DUPLICATE_OFFENDER_NUMBER_1, DUPLICATE_OFFENDER_NUMBER_2), ID);
 
         final var dataDuplicateCaptor = ArgumentCaptor.forClass(DataDuplicate.class);
         verify(dataDuplicateRepository, times(2)).save(dataDuplicateCaptor.capture());
@@ -60,11 +69,11 @@ class DataDuplicationDetectionServiceTest {
         final var dataDuplicates = dataDuplicateCaptor.getAllValues();
         assertThat(dataDuplicates).extracting(DataDuplicate::getDetectionDateTime).allMatch(NOW::equals);
         assertThat(dataDuplicates).extracting(DataDuplicate::getReferenceOffenderNo).allMatch(OFFENDER_NUMBER.getOffenderNumber()::equals);
+        assertThat(dataDuplicates).extracting(DataDuplicate::getMethod).allMatch(ID::equals);
         assertThat(dataDuplicates)
                 .extracting(DataDuplicate::getDuplicateOffenderNo)
                 .containsExactlyInAnyOrder(
                         DUPLICATE_OFFENDER_NUMBER_1.getOffenderNumber(),
                         DUPLICATE_OFFENDER_NUMBER_2.getOffenderNumber());
-
     }
 }

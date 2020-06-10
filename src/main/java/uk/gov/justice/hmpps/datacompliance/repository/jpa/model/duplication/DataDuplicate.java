@@ -9,6 +9,8 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -24,6 +26,12 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(of = {"dataDuplicateId"})
 @Table(name = "DATA_DUPLICATE")
 public class DataDuplicate {
+
+    public enum Method {
+        ID,
+        DATABASE,
+        ANALYTICAL_PLATFORM
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,4 +51,9 @@ public class DataDuplicate {
     @NotNull
     @Column(name = "DETECTION_DATE_TIME", nullable = false)
     private LocalDateTime detectionDateTime;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "METHOD", nullable = false)
+    private Method method;
 }

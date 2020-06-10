@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.DataDuplicateRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
@@ -24,16 +25,25 @@ public class DataDuplicationDetectionService {
     private final DataComplianceEventPusher eventPusher;
     private final DataDuplicateRepository dataDuplicateRepository;
 
-    public void searchForDuplicates(final OffenderNumber offenderNumber, final Long retentionCheckId) {
+    public void searchForIdDuplicates(final OffenderNumber offenderNumber, final Long retentionCheckId) {
 
-        log.debug("Submitting a request to search for data duplicates: '{}/{}'",
+        log.debug("Submitting a request to search for data duplicates by ID: '{}/{}'",
                 offenderNumber.getOffenderNumber(), retentionCheckId);
 
-        eventPusher.requestDataDuplicateCheck(offenderNumber, retentionCheckId);
+        eventPusher.requestIdDataDuplicateCheck(offenderNumber, retentionCheckId);
+    }
+
+    public void searchForDatabaseDuplicates(final OffenderNumber offenderNumber, final Long retentionCheckId) {
+
+        log.debug("Submitting a request to search for data duplicates (using similarity query on NOMIS DB): '{}/{}'",
+                offenderNumber.getOffenderNumber(), retentionCheckId);
+
+        eventPusher.requestDatabaseDataDuplicateCheck(offenderNumber, retentionCheckId);
     }
 
     public List<DataDuplicate> persistDataDuplicates(final OffenderNumber referenceOffenderNo,
-                                                     final List<OffenderNumber> duplicateOffenders) {
+                                                     final List<OffenderNumber> duplicateOffenders,
+                                                     final Method method) {
 
         final var timestamp = timeSource.nowAsLocalDateTime();
 
@@ -42,6 +52,7 @@ public class DataDuplicationDetectionService {
                         .detectionDateTime(timestamp)
                         .referenceOffenderNo(referenceOffenderNo.getOffenderNumber())
                         .duplicateOffenderNo(duplicate.getOffenderNumber())
+                        .method(method)
                         .build()))
                 .collect(toList());
     }
