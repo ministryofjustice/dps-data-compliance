@@ -37,6 +37,7 @@ class DataDuplicateRepositoryTest {
                 .duplicateOffenderNo("B1234BB")
                 .detectionDateTime(DATE_TIME)
                 .method(ANALYTICAL_PLATFORM)
+                .confidence(98.76)
                 .build();
 
         repository.save(dataDuplicate);
@@ -51,5 +52,6 @@ class DataDuplicateRepositoryTest {
         assertThat(retrievedEntity.getDuplicateOffenderNo()).isEqualTo("B1234BB");
         assertThat(retrievedEntity.getDetectionDateTime()).isEqualTo(DATE_TIME);
         assertThat(retrievedEntity.getMethod()).isEqualTo(ANALYTICAL_PLATFORM);
+        assertThat(retrievedEntity.getConfidence()).isEqualTo(98.76);
     }
 }

@@ -56,4 +56,7 @@ public class DataDuplicate {
     @Enumerated(EnumType.STRING)
     @Column(name = "METHOD", nullable = false)
     private Method method;
+
+    @Column(name = "CONFIDENCE", precision = 4, scale = 2)
+    private Double confidence;
 }
