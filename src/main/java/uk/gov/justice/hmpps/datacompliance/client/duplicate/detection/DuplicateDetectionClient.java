@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.client.duplicate.detection;
 
+import uk.gov.justice.hmpps.datacompliance.dto.DuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 import java.util.Set;

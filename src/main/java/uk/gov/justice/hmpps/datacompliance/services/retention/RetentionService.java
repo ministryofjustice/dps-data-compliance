@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.client.pathfinder.PathfinderApiClient;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
+import uk.gov.justice.hmpps.datacompliance.dto.DuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckAnalyticalPlatformDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDatabaseDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
@@ -25,6 +27,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method.ID;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.DISABLED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
@@ -35,6 +38,8 @@ import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
 @Service
 @AllArgsConstructor
 public class RetentionService {
+
+    private static final double MAXIMUM_CONFIDENCE = 100.0;
 
     private final PathfinderApiClient pathfinderApiClient;
     private final ManualRetentionService manualRetentionService;
@@ -54,7 +59,8 @@ public class RetentionService {
                 manualRetentionCheck(offenderNumber),
                 imageDuplicateCheck(offenderNumber),
                 idDataDuplicateCheck(offenderNumber),
-                databaseDataDuplicateCheck(offenderNumber));
+                databaseDataDuplicateCheck(offenderNumber),
+                analyticalPlatformDataDuplicateCheck(offenderNumber));
     }
 
     public void handleDataDuplicateResult(final DataDuplicateResult result, final Method method) {
@@ -63,6 +69,7 @@ public class RetentionService {
         final var referredOffenderNo = retentionCheck.getOffenderNumber();
         final var duplicateOffenderNos = result.getDuplicateOffenders().stream()
                 .map(OffenderNumber::new)
+                .map(duplicate -> new DuplicateResult(duplicate, ID == method ? MAXIMUM_CONFIDENCE : null))
                 .collect(toList());
 
         checkState(Objects.equals(result.getOffenderIdDisplay(), referredOffenderNo.getOffenderNumber()),
@@ -133,5 +140,21 @@ public class RetentionService {
         return new ActionableRetentionCheck(new RetentionCheckDatabaseDataDuplicate(PENDING))
                 .setPendingCheck(retentionCheck -> dataDuplicationDetectionService.searchForDatabaseDuplicates(
                         offenderNumber, retentionCheck.getRetentionCheckId()));
+    }
+
+    private ActionableRetentionCheck analyticalPlatformDataDuplicateCheck(final OffenderNumber offenderNumber) {
+
+        if (!dataComplianceProperties.isAnalyticalPlatformDataDuplicateCheckEnabled()) {
+            return new ActionableRetentionCheck(new RetentionCheckAnalyticalPlatformDataDuplicate(DISABLED));
+        }
+
+        final var duplicates = dataDuplicationDetectionService.searchForAnalyticalPlatformDuplicates(offenderNumber);
+
+        final var check = duplicates.isEmpty() ?
+                new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_NOT_REQUIRED) :
+                new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_REQUIRED)
+                        .addDataDuplicates(duplicates);
+
+        return new ActionableRetentionCheck(check);
     }
 }

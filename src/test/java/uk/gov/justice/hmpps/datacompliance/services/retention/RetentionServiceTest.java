@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.client.pathfinder.PathfinderApiClient;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
+import uk.gov.justice.hmpps.datacompliance.dto.DuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate;
@@ -29,15 +30,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method.ID;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.DISABLED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckAnalyticalPlatformDataDuplicate.DATA_DUPLICATE_AP;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDatabaseDataDuplicate.DATA_DUPLICATE_DB;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate.DATA_DUPLICATE_ID;
 
@@ -80,6 +82,7 @@ class RetentionServiceTest {
                 DataComplianceProperties.builder()
                         .idDataDuplicateCheckEnabled(true)
                         .databaseDataDuplicateCheckEnabled(true)
+                        .analyticalPlatformDataDuplicateCheckEnabled(true)
                         .build());
     }
 
@@ -88,21 +91,25 @@ class RetentionServiceTest {
 
         final var manualRetention = mock(ManualRetention.class);
         final var imageDuplicate = mock(ImageDuplicate.class);
+        final var dataDuplicate = mock(DataDuplicate.class);
 
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(true);
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER))
                 .thenReturn(Optional.of(manualRetention));
         when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(List.of(imageDuplicate));
+        when(dataDuplicationDetectionService.searchForAnalyticalPlatformDuplicates(OFFENDER_NUMBER))
+                .thenReturn(List.of(dataDuplicate));
 
         final var retentionChecks = service.conductRetentionChecks(OFFENDER_NUMBER);
 
         assertThat(retentionChecks).extracting(ActionableRetentionCheck::getRetentionCheck)
-                .allMatch(check -> isDataDuplicateCheck(check)
+                .allMatch(check -> isPendingCheck(check)
                         ? check.getCheckStatus() == PENDING
                         : check.getCheckStatus() == RETENTION_REQUIRED);
 
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
         verify(dataDuplicationDetectionService).searchForIdDuplicates(eq(OFFENDER_NUMBER), any());
+        verify(dataDuplicationDetectionService).searchForDatabaseDuplicates(eq(OFFENDER_NUMBER), any());
     }
 
     @Test
@@ -111,16 +118,18 @@ class RetentionServiceTest {
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(false);
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER)).thenReturn(Optional.empty());
         when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(emptyList());
+        when(dataDuplicationDetectionService.searchForAnalyticalPlatformDuplicates(OFFENDER_NUMBER)).thenReturn(emptyList());
 
         final var retentionChecks = service.conductRetentionChecks(OFFENDER_NUMBER);
 
         assertThat(retentionChecks).extracting(ActionableRetentionCheck::getRetentionCheck)
-                .allMatch(check -> isDataDuplicateCheck(check)
+                .allMatch(check -> isPendingCheck(check)
                         ? check.getCheckStatus() == PENDING
                         : check.getCheckStatus() == RETENTION_NOT_REQUIRED);
 
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
         verify(dataDuplicationDetectionService).searchForIdDuplicates(eq(OFFENDER_NUMBER), any());
+        verify(dataDuplicationDetectionService).searchForDatabaseDuplicates(eq(OFFENDER_NUMBER), any());
     }
 
     @Test
@@ -136,6 +145,7 @@ class RetentionServiceTest {
                 DataComplianceProperties.builder()
                         .idDataDuplicateCheckEnabled(false)
                         .databaseDataDuplicateCheckEnabled(false)
+                        .analyticalPlatformDataDuplicateCheckEnabled(false)
                         .build());
 
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(false);
@@ -145,12 +155,12 @@ class RetentionServiceTest {
         final var retentionChecks = service.conductRetentionChecks(OFFENDER_NUMBER);
 
         assertThat(retentionChecks).extracting(ActionableRetentionCheck::getRetentionCheck)
-                .allMatch(check -> isDataDuplicateCheck(check)
+                .allMatch(check -> isDisabledCheck(check)
                         ? check.getCheckStatus() == DISABLED
                         : check.getCheckStatus() == RETENTION_NOT_REQUIRED);
 
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
-        verify(dataDuplicationDetectionService, never()).searchForIdDuplicates(any(), any());
+        verifyNoInteractions(dataDuplicationDetectionService);
     }
 
     @Test
@@ -199,12 +209,22 @@ class RetentionServiceTest {
 
     private List<DataDuplicate> mockedDataDuplicates() {
         final var dataDuplicates = List.of(mock(DataDuplicate.class));
-        when(dataDuplicationDetectionService.persistDataDuplicates(OFFENDER_NUMBER, List.of(DUPLICATE_OFFENDER_NUMBER), ID))
+        when(dataDuplicationDetectionService.persistDataDuplicates(
+                OFFENDER_NUMBER,
+                List.of(new DuplicateResult(DUPLICATE_OFFENDER_NUMBER, 100.0)),
+                ID))
                 .thenReturn(dataDuplicates);
         return dataDuplicates;
     }
 
-    private boolean isDataDuplicateCheck(final RetentionCheck check) {
-        return DATA_DUPLICATE_ID.equals(check.getCheckType()) || DATA_DUPLICATE_DB.equals(check.getCheckType());
+    private boolean isPendingCheck(final RetentionCheck check) {
+        return DATA_DUPLICATE_ID.equals(check.getCheckType())
+                || DATA_DUPLICATE_DB.equals(check.getCheckType());
+    }
+
+    private boolean isDisabledCheck(final RetentionCheck check) {
+        return DATA_DUPLICATE_ID.equals(check.getCheckType())
+                || DATA_DUPLICATE_DB.equals(check.getCheckType())
+                || DATA_DUPLICATE_AP.equals(check.getCheckType());
     }
 }

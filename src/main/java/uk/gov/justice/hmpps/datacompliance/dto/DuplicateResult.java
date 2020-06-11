@@ -1,10 +1,9 @@
-package uk.gov.justice.hmpps.datacompliance.client.duplicate.detection;
+package uk.gov.justice.hmpps.datacompliance.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 @Getter
 @ToString
@@ -12,5 +11,5 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 @AllArgsConstructor
 public class DuplicateResult {
     private final OffenderNumber duplicateOffenderNumber;
-    private final double confidence;
+    private final Double confidence;
 }
