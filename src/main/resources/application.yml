@@ -45,6 +45,12 @@ image.recognition:
   region: eu-west-2
   aws.collection.id: dps-offender-images
 
+duplicate.detection:
+  region: eu-west-1
+  athena:
+    database: ap_nomis_dedupe
+    table: id_pairs_and_scores_test
+
 sns.region: eu-west-2
 data.compliance.request.sqs.region: eu-west-2
 data.compliance.response.sqs.region: eu-west-2

@@ -249,4 +249,32 @@ env:
         name: data-compliance-request-sqs-dl
         key: sqs_dc_req_name
 
+  {{- if .Values.env.DUPLICATE_DETECTION_PROVIDER }}
+
+  - name: DUPLICATE_DETECTION_AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: data-compliance-ap-user
+        key: data_compliance_ap_access_key_id
+
+  - name: DUPLICATE_DETECTION_AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: data-compliance-ap-user
+        key: data_compliance_ap_secret_access_key
+
+  - name: DUPLICATE_DETECTION_ROLE_ARN
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: DUPLICATE_DETECTION_ROLE_ARN
+
+  - name: DUPLICATE_DETECTION_ATHENA_OUTPUT_LOCATION
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: DUPLICATE_DETECTION_ATHENA_OUTPUT_LOCATION
+
+  {{- end }}
+
 {{- end -}}

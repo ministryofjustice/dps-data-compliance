@@ -21,13 +21,13 @@ dependencies {
     implementation 'org.springframework:spring-jms:5.2.7.RELEASE'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.13.33')
+    implementation platform('software.amazon.awssdk:bom:2.13.35')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.799')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.799'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.801')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.801'
     implementation 'com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8'
 
     // Utils
@@ -42,7 +42,7 @@ dependencies {
     implementation 'org.hibernate:hibernate-core:5.4.17.Final'
 
     runtimeOnly 'org.hsqldb:hsqldb:2.5.0'
-    runtimeOnly 'org.flywaydb:flyway-core:6.4.3'
+    runtimeOnly 'org.flywaydb:flyway-core:6.4.4'
     runtimeOnly 'org.postgresql:postgresql:42.2.14'
 
     // Swagger
