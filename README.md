@@ -1,6 +1,6 @@
 # DPS Data Compliance 
 
-[![CircleCI](https://circleci.com/gh/ministryofjustice/dps-data-compliance.svg?style=svg)](https://circleci.com/gh/ministryofjustice/dps-data-compliance)
+[![CircleCI](https://circleci.com/gh/ministryofjustice/dps-data-compliance/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/dps-data-compliance)
 [![Docker Repository on Quay](https://quay.io/repository/hmpps/dps-data-compliance/status)](https://quay.io/repository/hmpps/dps-data-compliance)
 
 A Spring Boot app to manage data compliance for the Digital Prison Services

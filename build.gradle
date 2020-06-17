@@ -1,5 +1,5 @@
 plugins {
-    id 'uk.gov.justice.hmpps.gradle-spring-boot' version "0.4.1"
+    id 'uk.gov.justice.hmpps.gradle-spring-boot' version "0.4.2"
 }
 
 ext ["spring-security.version"] = "5.3.2.RELEASE"
@@ -21,13 +21,13 @@ dependencies {
     implementation 'org.springframework:spring-jms:5.2.7.RELEASE'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.13.35')
+    implementation platform('software.amazon.awssdk:bom:2.13.38')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.801')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.801'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.804')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.804'
     implementation 'com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8'
 
     // Utils
@@ -52,7 +52,7 @@ dependencies {
     // Test
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
     testCompileOnly 'org.projectlombok:lombok:1.18.12'
-    testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.17.0'
+    testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.18.0'
     testImplementation 'com.squareup.okhttp3:okhttp:4.7.2'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.7.2'
     testImplementation 'io.jsonwebtoken:jjwt:0.9.1'
