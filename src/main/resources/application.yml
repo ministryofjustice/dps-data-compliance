@@ -43,8 +43,9 @@ spring:
 
 image.recognition:
   region: eu-west-2
-  aws.collection.id: dps-offender-images
-  face.similarity.threshold: 96.0
+  aws:
+    collection.id: dps-offender-images
+    face.similarity.threshold: 96.0
 
 duplicate.detection:
   region: eu-west-1
