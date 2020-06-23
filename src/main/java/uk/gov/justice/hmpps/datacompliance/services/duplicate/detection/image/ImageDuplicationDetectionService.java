@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceMatch;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
@@ -51,33 +52,37 @@ public class ImageDuplicationDetectionService {
         final var matchingFaceIds = imageRecognitionClient.findMatchesFor(new FaceId(referenceImage.getFaceId()));
 
         return matchingFaceIds.stream()
-                .map(matchingFaceId -> getImagePair(referenceImage, matchingFaceId))
-                .filter(ImagePair::haveDifferentOffenderNumbers)
+                .map(matchingFaceId -> getImageMatch(referenceImage, matchingFaceId))
+                .filter(ImageMatch::haveDifferentOffenderNumbers)
                 .map(this::findOrPersistDuplicate);
     }
 
-    private ImagePair getImagePair(final OffenderImageUpload referenceImage, final FaceId matchingFaceId) {
+    private ImageMatch getImageMatch(final OffenderImageUpload referenceImage, final FaceMatch matchingFace) {
 
         log.debug("Duplicate face ('{}') found for offender: '{}' and image: '{}'",
-                matchingFaceId, referenceImage.getOffenderNo(), referenceImage.getImageId());
+                matchingFace.getFaceId(), referenceImage.getOffenderNo(), referenceImage.getImageId());
 
-        final var matchingImage = imageUploadRepository.findByFaceId(matchingFaceId.getFaceId())
-                .orElseThrow(illegalState("Cannot find image upload for faceId: '%s'", matchingFaceId.getFaceId()));
+        final var matchingImage = imageUploadRepository.findByFaceId(matchingFace.getFaceId())
+                .orElseThrow(illegalState("Cannot find image upload for faceId: '%s'", matchingFace.getFaceId()));
 
-        return new ImagePair(referenceImage, matchingImage);
+        return new ImageMatch(referenceImage, matchingImage, matchingFace.getSimilarity());
     }
 
-    private ImageDuplicate findOrPersistDuplicate(final ImagePair imagePair) {
+    private ImageDuplicate findOrPersistDuplicate(final ImageMatch imageMatch) {
 
         log.info("Image duplicate found for reference offender: '{}', and duplicate offender: '{}'",
-                imagePair.getReferenceOffenderNo(), imagePair.getDuplicateOffenderNo());
+                imageMatch.getReferenceOffenderNo(), imageMatch.getDuplicateOffenderNo());
 
-        return imageDuplicateRepository.findByOffenderImageUploadIds(imagePair.getReferenceImageId(), imagePair.getDuplicateImageId())
-                .orElseGet(() -> persistDuplicate(imagePair.getReferenceImage(), imagePair.getDuplicateImage()));
+        return imageDuplicateRepository.findByOffenderImageUploadIds(imageMatch.getReferenceImageId(), imageMatch.getDuplicateImageId())
+                .orElseGet(() -> persistDuplicate(
+                        imageMatch.getReferenceImage(),
+                        imageMatch.getDuplicateImage(),
+                        imageMatch.getSimilarity()));
     }
 
     private ImageDuplicate persistDuplicate(final OffenderImageUpload referenceImage,
-                                            final OffenderImageUpload duplicateImage) {
+                                            final OffenderImageUpload duplicateImage,
+                                            final double similarity) {
         return imageDuplicateRepository.save(ImageDuplicate.builder()
                 .referenceOffenderImageUpload(referenceImage)
                 .duplicateOffenderImageUpload(duplicateImage)
@@ -87,9 +92,10 @@ public class ImageDuplicationDetectionService {
 
     @Getter
     @AllArgsConstructor
-    private static class ImagePair {
+    private static class ImageMatch {
         private final OffenderImageUpload referenceImage;
         private final OffenderImageUpload duplicateImage;
+        private final double similarity;
 
         private String getReferenceOffenderNo() {
             return referenceImage.getOffenderNo();

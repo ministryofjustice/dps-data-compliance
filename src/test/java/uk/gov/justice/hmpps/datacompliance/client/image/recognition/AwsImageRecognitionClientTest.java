@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import software.amazon.awssdk.services.rekognition.model.*;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -100,12 +101,15 @@ class AwsImageRecognitionClientTest {
     @Test
     void findMatches() {
 
-        var request = ArgumentCaptor.forClass(SearchFacesRequest.class);
+        final var request = ArgumentCaptor.forClass(SearchFacesRequest.class);
 
         when(awsClient.searchFaces(request.capture())).thenReturn(matchingFace());
 
-        assertThat(client.findMatchesFor(new FaceId("someFace")))
-                .extracting(FaceId::getFaceId).contains(EXPECTED_FACE_ID);
+        final var matches = client.findMatchesFor(new FaceId("someFace"));
+
+        assertThat(matches).extracting(FaceMatch::getFaceId).containsExactly(EXPECTED_FACE_ID);
+        assertThat(matches).extracting(match -> format("%.2f", match.getSimilarity())).containsExactly("97.89");
+
         assertThat(request.getValue().collectionId()).isEqualTo(COLLECTION_NAME);
         assertThat(request.getValue().faceId()).isEqualTo("someFace");
         assertThat(request.getValue().faceMatchThreshold()).isEqualTo(SIMILARITY_THRESHOLD);
@@ -136,7 +140,8 @@ class AwsImageRecognitionClientTest {
 
     private SearchFacesResponse matchingFace() {
         return SearchFacesResponse.builder()
-                .faceMatches(FaceMatch.builder()
+                .faceMatches(software.amazon.awssdk.services.rekognition.model.FaceMatch.builder()
+                        .similarity(97.89f)
                         .face(Face.builder()
                                 .faceId(EXPECTED_FACE_ID)
                                 .build())
