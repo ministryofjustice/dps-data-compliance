@@ -17,5 +17,5 @@ public interface ImageRecognitionClient {
     /**
      * Find all matching faces in the collection that match the provided faceId
      */
-    Set<FaceId> findMatchesFor(FaceId faceId);
+    Set<FaceMatch> findMatchesFor(FaceId faceId);
 }

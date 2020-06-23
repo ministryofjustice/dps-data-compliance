@@ -7,6 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceMatch;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
@@ -38,6 +39,7 @@ class ImageDuplicationDetectionServiceTest {
     private static final long DUPLICATE_1 = 1L;
     private static final long DUPLICATE_2 = 2L;
     private static final long DUPLICATE_3 = 3L;
+    private static final double SIMILARITY = 97.89;
     private static final LocalDateTime NOW = LocalDateTime.now();
 
     @Mock
@@ -117,7 +119,7 @@ class ImageDuplicationDetectionServiceTest {
 
     private ImageDuplicationDetectionServiceTest andImageRecognitionFindsMatchesWith(final long... duplicateIds) {
         when(imageRecognitionClient.findMatchesFor(faceId(REFERENCE_ID)))
-                .thenReturn(stream(duplicateIds).mapToObj(this::faceId).collect(toSet()));
+                .thenReturn(stream(duplicateIds).mapToObj(id -> new FaceMatch(faceId(id), SIMILARITY)).collect(toSet()));
         return this;
     }
 

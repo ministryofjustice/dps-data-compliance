@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import software.amazon.awssdk.services.rekognition.model.DeleteFacesRequest;
 import software.amazon.awssdk.services.rekognition.model.Face;
-import software.amazon.awssdk.services.rekognition.model.FaceMatch;
 import software.amazon.awssdk.services.rekognition.model.FaceRecord;
 import software.amazon.awssdk.services.rekognition.model.Image;
 import software.amazon.awssdk.services.rekognition.model.IndexFacesRequest;
@@ -64,7 +63,7 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
     }
 
     @Override
-    public Set<FaceId> findMatchesFor(final FaceId faceId) {
+    public Set<FaceMatch> findMatchesFor(final FaceId faceId) {
 
         log.trace("Finding face matches for faceId: '{}'", faceId.getFaceId());
 
@@ -153,11 +152,11 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
                 .build();
     }
 
-    private Set<FaceId> transformFaceMatches(final List<FaceMatch> faceMatches) {
+    private Set<FaceMatch> transformFaceMatches(
+            final List<software.amazon.awssdk.services.rekognition.model.FaceMatch> faceMatches) {
+
         return faceMatches.stream()
-                .map(FaceMatch::face)
-                .map(Face::faceId)
-                .map(FaceId::new)
+                .map(match -> new FaceMatch(new FaceId(match.face().faceId()), match.similarity()))
                 .collect(toSet());
     }
 }

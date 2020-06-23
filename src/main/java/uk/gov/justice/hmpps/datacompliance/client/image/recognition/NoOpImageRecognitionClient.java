@@ -30,7 +30,7 @@ public class NoOpImageRecognitionClient implements ImageRecognitionClient {
     }
 
     @Override
-    public Set<FaceId> findMatchesFor(final FaceId faceId) {
+    public Set<FaceMatch> findMatchesFor(final FaceId faceId) {
         log.warn("Pretending to find matching faces for faceId: '{}'", faceId.getFaceId());
         return emptySet();
     }

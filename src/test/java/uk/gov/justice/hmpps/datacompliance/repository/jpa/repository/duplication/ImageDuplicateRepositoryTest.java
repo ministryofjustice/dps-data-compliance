@@ -41,6 +41,7 @@ class ImageDuplicateRepositoryTest {
                 .referenceOffenderImageUpload(offenderImageUploadRepository.findById(1L).orElseThrow())
                 .duplicateOffenderImageUpload(offenderImageUploadRepository.findById(2L).orElseThrow())
                 .detectionDateTime(DATE_TIME)
+                .similarity(97.89)
                 .build();
 
         repository.save(imageDuplicate);
@@ -54,6 +55,7 @@ class ImageDuplicateRepositoryTest {
         assertThat(retrievedEntity.getDetectionDateTime()).isEqualTo(DATE_TIME);
         assertThat(retrievedEntity.getReferenceOffenderImageUpload().getUploadId()).isEqualTo(1L);
         assertThat(retrievedEntity.getDuplicateOffenderImageUpload().getUploadId()).isEqualTo(2L);
+        assertThat(retrievedEntity.getSimilarity()).isEqualTo(97.89);
     }
 
     @Test
