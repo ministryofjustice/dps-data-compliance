@@ -41,7 +41,7 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
 
     public AwsImageRecognitionClient(final RekognitionClient client,
                                      @Value("${image.recognition.aws.collection.id}") final String collectionId,
-                                     @Value("${image.recognition.aws.face.similarity.threshold:95.0}") final double faceSimilarityThreshold) {
+                                     @Value("${image.recognition.aws.face.similarity.threshold}") final double faceSimilarityThreshold) {
 
         log.info("Configured to use AWS Rekognition for image recognition");
 

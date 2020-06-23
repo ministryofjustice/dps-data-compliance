@@ -22,6 +22,7 @@ import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.data.Dat
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.image.ImageDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralResolutionService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,6 +37,7 @@ import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
 
 @Slf4j
 @Service
+@Transactional
 @AllArgsConstructor
 public class RetentionService {
 
