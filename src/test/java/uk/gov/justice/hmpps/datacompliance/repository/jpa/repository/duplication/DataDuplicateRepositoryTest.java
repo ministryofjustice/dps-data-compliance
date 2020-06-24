@@ -54,4 +54,26 @@ class DataDuplicateRepositoryTest {
         assertThat(retrievedEntity.getMethod()).isEqualTo(ANALYTICAL_PLATFORM);
         assertThat(retrievedEntity.getConfidence()).isEqualTo(98.76);
     }
+
+    @Test
+    void persistDataDuplicateWith100PercentConfidence() {
+
+        final var dataDuplicate = DataDuplicate.builder()
+                .referenceOffenderNo("A1234AA")
+                .duplicateOffenderNo("B1234BB")
+                .detectionDateTime(DATE_TIME)
+                .method(ANALYTICAL_PLATFORM)
+                .confidence(100.00)
+                .build();
+
+        repository.save(dataDuplicate);
+        assertThat(dataDuplicate.getDataDuplicateId()).isNotNull();
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var retrievedEntity = repository.findById(dataDuplicate.getDataDuplicateId()).orElseThrow();
+        assertThat(retrievedEntity.getConfidence()).isEqualTo(100.00);
+    }
 }

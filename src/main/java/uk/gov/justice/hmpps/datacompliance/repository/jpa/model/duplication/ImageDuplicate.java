@@ -47,6 +47,6 @@ public class ImageDuplicate {
     @Column(name = "DETECTION_DATE_TIME", nullable = false)
     private LocalDateTime detectionDateTime;
 
-    @Column(name = "SIMILARITY", precision = 4, scale = 2)
+    @Column(name = "SIMILARITY", precision = 5, scale = 2)
     private Double similarity;
 }
