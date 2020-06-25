@@ -87,6 +87,7 @@ public class ImageDuplicationDetectionService {
                 .referenceOffenderImageUpload(referenceImage)
                 .duplicateOffenderImageUpload(duplicateImage)
                 .detectionDateTime(timeSource.nowAsLocalDateTime())
+                .similarity(similarity)
                 .build());
     }
 
