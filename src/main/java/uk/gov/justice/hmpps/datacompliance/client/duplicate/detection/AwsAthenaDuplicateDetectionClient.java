@@ -89,7 +89,7 @@ public class AwsAthenaDuplicateDetectionClient implements DuplicateDetectionClie
         throw new IllegalStateException(format("Athena query '%s' has timed out", queryExecutionId));
     }
 
-    public Set<DuplicateResult> retrieveResult(final String queryExecutionId, final OffenderNumber referenceOffender) {
+    private Set<DuplicateResult> retrieveResult(final String queryExecutionId, final OffenderNumber referenceOffender) {
 
         return athenaClient.getQueryResultsPaginator(queryFactory.getQueryResults(queryExecutionId)).stream()
                 .flatMap(resultPage -> getDuplicatesFromPagedResult(resultPage, referenceOffender))
