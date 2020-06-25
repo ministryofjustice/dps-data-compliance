@@ -61,6 +61,29 @@ class ImageDuplicateRepositoryTest {
     @Test
     @Sql("image_upload_batch.sql")
     @Sql("offender_image_upload.sql")
+    void persistImageDuplicateWith100PercentSimilarity() {
+
+        final var imageDuplicate = ImageDuplicate.builder()
+                .referenceOffenderImageUpload(offenderImageUploadRepository.findById(1L).orElseThrow())
+                .duplicateOffenderImageUpload(offenderImageUploadRepository.findById(2L).orElseThrow())
+                .detectionDateTime(DATE_TIME)
+                .similarity(100.00)
+                .build();
+
+        repository.save(imageDuplicate);
+        assertThat(imageDuplicate.getImageDuplicateId()).isNotNull();
+
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+        TestTransaction.start();
+
+        final var retrievedEntity = repository.findById(imageDuplicate.getImageDuplicateId()).orElseThrow();
+        assertThat(retrievedEntity.getSimilarity()).isEqualTo(100.00);
+    }
+
+    @Test
+    @Sql("image_upload_batch.sql")
+    @Sql("offender_image_upload.sql")
     @Sql("image_duplicate.sql")
     void findByOffenderImageUploadIds() {
         assertThat(repository.findByOffenderImageUploadIds(1L, 2L).orElseThrow().getImageDuplicateId()).isEqualTo(1L);

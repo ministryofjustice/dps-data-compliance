@@ -57,6 +57,6 @@ public class DataDuplicate {
     @Column(name = "METHOD", nullable = false)
     private Method method;
 
-    @Column(name = "CONFIDENCE", precision = 4, scale = 2)
+    @Column(name = "CONFIDENCE", precision = 5, scale = 2)
     private Double confidence;
 }
