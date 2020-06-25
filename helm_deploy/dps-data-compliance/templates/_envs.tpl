@@ -251,6 +251,9 @@ env:
 
   {{- if .Values.env.DUPLICATE_DETECTION_PROVIDER }}
 
+  - name: DUPLICATE_DETECTION_PROVIDER
+    value: "{{ .Values.env.DUPLICATE_DETECTION_PROVIDER }}"
+
   - name: DUPLICATE_DETECTION_AWS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
