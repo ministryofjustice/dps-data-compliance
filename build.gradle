@@ -41,7 +41,7 @@ dependencies {
     // Database
     implementation 'org.hibernate:hibernate-core:5.4.18.Final'
 
-    runtimeOnly 'org.hsqldb:hsqldb:2.5.1'
+    runtimeOnly 'org.hsqldb:hsqldb:2.5.0'
     runtimeOnly 'org.flywaydb:flyway-core:6.5.0'
     runtimeOnly 'org.postgresql:postgresql:42.2.14'
 
