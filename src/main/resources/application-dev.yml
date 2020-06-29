@@ -13,7 +13,9 @@ spring:
   flyway.locations: classpath:db/migration
   security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
 
-offender.retention.ap.data.duplicate.check.enabled: true
-offender.retention.sql.data.duplicate.check.enabled: true
+offender.retention.data.duplicate:
+  id.check.enabled: false
+  db.check.enabled: false
+  ap.check.enabled: false
 
 server.shutdown: immediate
