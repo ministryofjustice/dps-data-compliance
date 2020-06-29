@@ -31,4 +31,12 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
         log.warn("Pretending to push data duplicate database check '{}/{}' to queue",
                 offenderNo.getOffenderNumber(), retentionCheckId);
     }
+
+    @Override
+    public void requestFreeTextMoratoriumCheck(final OffenderNumber offenderNo,
+                                               final Long retentionCheckId,
+                                               final String regex) {
+        log.warn("Pretending to push free text moratorium check '{}/{}' to queue",
+                offenderNo.getOffenderNumber(), retentionCheckId);
+    }
 }

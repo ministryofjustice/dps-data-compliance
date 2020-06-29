@@ -80,4 +80,20 @@ class DataComplianceAwsEventPusherTest {
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
                 .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK");
     }
+
+    @Test
+    void requestFreeTextMoratoriumCheck() {
+
+        final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
+
+        when(client.sendMessage(request.capture()))
+                .thenReturn(new SendMessageResult().withMessageId("message1"));
+
+        eventPusher.requestFreeTextMoratoriumCheck(OFFENDER_NUMBER, 123L, "^(some|regex)$");
+
+        assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
+        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"regex\":\"^(some|regex)$\"}");
+        assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
+                .isEqualTo("DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK");
+    }
 }
