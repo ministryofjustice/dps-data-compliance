@@ -66,7 +66,7 @@ public class RetentionCheckManual extends RetentionCheck {
         @Column(name = "RETENTION_REASON_MANUAL_ID", nullable = false)
         private Long retentionReasonManualId;
 
-        @ManyToOne(fetch = LAZY)
+        @OneToOne(fetch = LAZY)
         @JoinColumn(name = "RETENTION_CHECK_ID")
         private RetentionCheckManual retentionCheck;
 

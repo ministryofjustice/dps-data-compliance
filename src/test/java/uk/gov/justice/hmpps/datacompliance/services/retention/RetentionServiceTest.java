@@ -41,6 +41,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckAnalyticalPlatformDataDuplicate.DATA_DUPLICATE_AP;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDatabaseDataDuplicate.DATA_DUPLICATE_DB;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckFreeTextSearch.FREE_TEXT_SEARCH;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate.DATA_DUPLICATE_ID;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,6 +69,9 @@ class RetentionServiceTest {
     @Mock
     private ReferralResolutionService referralResolutionService;
 
+    @Mock
+    private MoratoriumCheckService moratoriumCheckService;
+
     private RetentionService service;
 
     @BeforeEach
@@ -79,6 +83,7 @@ class RetentionServiceTest {
                 dataDuplicationDetectionService,
                 retentionCheckRepository,
                 referralResolutionService,
+                moratoriumCheckService,
                 DataComplianceProperties.builder()
                         .idDataDuplicateCheckEnabled(true)
                         .databaseDataDuplicateCheckEnabled(true)
@@ -103,13 +108,12 @@ class RetentionServiceTest {
         final var retentionChecks = service.conductRetentionChecks(OFFENDER_NUMBER);
 
         assertThat(retentionChecks).extracting(ActionableRetentionCheck::getRetentionCheck)
-                .allMatch(check -> isPendingCheck(check)
-                        ? check.getCheckStatus() == PENDING
-                        : check.getCheckStatus() == RETENTION_REQUIRED);
+                .allMatch(check -> isExpectedStatusWhenChecksEnabled(check, RETENTION_REQUIRED));
 
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
         verify(dataDuplicationDetectionService).searchForIdDuplicates(eq(OFFENDER_NUMBER), any());
         verify(dataDuplicationDetectionService).searchForDatabaseDuplicates(eq(OFFENDER_NUMBER), any());
+        verify(moratoriumCheckService).requestFreeTextSearch(eq(OFFENDER_NUMBER), any());
     }
 
     @Test
@@ -123,13 +127,12 @@ class RetentionServiceTest {
         final var retentionChecks = service.conductRetentionChecks(OFFENDER_NUMBER);
 
         assertThat(retentionChecks).extracting(ActionableRetentionCheck::getRetentionCheck)
-                .allMatch(check -> isPendingCheck(check)
-                        ? check.getCheckStatus() == PENDING
-                        : check.getCheckStatus() == RETENTION_NOT_REQUIRED);
+                .allMatch(check -> isExpectedStatusWhenChecksEnabled(check, RETENTION_NOT_REQUIRED));
 
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
         verify(dataDuplicationDetectionService).searchForIdDuplicates(eq(OFFENDER_NUMBER), any());
         verify(dataDuplicationDetectionService).searchForDatabaseDuplicates(eq(OFFENDER_NUMBER), any());
+        verify(moratoriumCheckService).requestFreeTextSearch(eq(OFFENDER_NUMBER), any());
     }
 
     @Test
@@ -142,6 +145,7 @@ class RetentionServiceTest {
                 dataDuplicationDetectionService,
                 retentionCheckRepository,
                 referralResolutionService,
+                moratoriumCheckService,
                 DataComplianceProperties.builder()
                         .idDataDuplicateCheckEnabled(false)
                         .databaseDataDuplicateCheckEnabled(false)
@@ -155,11 +159,10 @@ class RetentionServiceTest {
         final var retentionChecks = service.conductRetentionChecks(OFFENDER_NUMBER);
 
         assertThat(retentionChecks).extracting(ActionableRetentionCheck::getRetentionCheck)
-                .allMatch(check -> isDisabledCheck(check)
-                        ? check.getCheckStatus() == DISABLED
-                        : check.getCheckStatus() == RETENTION_NOT_REQUIRED);
+                .allMatch(check -> isExpectedStatusWhenChecksDisabled(check, RETENTION_NOT_REQUIRED));
 
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
+        verify(moratoriumCheckService).requestFreeTextSearch(eq(OFFENDER_NUMBER), any());
         verifyNoInteractions(dataDuplicationDetectionService);
     }
 
@@ -217,9 +220,20 @@ class RetentionServiceTest {
         return dataDuplicates;
     }
 
+    private boolean isExpectedStatusWhenChecksEnabled(final RetentionCheck check,
+                                                      final RetentionCheck.Status resolvedStatus) {
+        return check.isStatus(isPendingCheck(check) ? PENDING : resolvedStatus);
+    }
+
+    private boolean isExpectedStatusWhenChecksDisabled(final RetentionCheck check,
+                                                       final RetentionCheck.Status resolvedStatus) {
+        return check.isStatus(isDisabledCheck(check) ? DISABLED : isPendingCheck(check) ? PENDING : resolvedStatus);
+    }
+
     private boolean isPendingCheck(final RetentionCheck check) {
         return DATA_DUPLICATE_ID.equals(check.getCheckType())
-                || DATA_DUPLICATE_DB.equals(check.getCheckType());
+                || DATA_DUPLICATE_DB.equals(check.getCheckType())
+                || FREE_TEXT_SEARCH.equals(check.getCheckType());
     }
 
     private boolean isDisabledCheck(final RetentionCheck check) {
