@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DataDuplicateCheck;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.FreeTextSearchRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGranted;
 
 import java.util.Map;
@@ -24,6 +25,7 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     private static final String OFFENDER_DELETION_GRANTED = "DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED";
     private static final String DATA_DUPLICATE_ID_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-CHECK";
     private static final String DATA_DUPLICATE_DB_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK";
+    private static final String FREE_TEXT_MORATORIUM_CHECK = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK";
 
     private final ObjectMapper objectMapper;
     private final AmazonSQS sqsClient;
@@ -66,6 +68,17 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
 
         sqsClient.sendMessage(generateRequest(DATA_DUPLICATE_DB_CHECK,
                 new DataDuplicateCheck(offenderNo.getOffenderNumber(), retentionCheckId)));
+    }
+
+    @Override
+    public void requestFreeTextMoratoriumCheck(final OffenderNumber offenderNo,
+                                               final Long retentionCheckId,
+                                               final String regex) {
+
+        log.debug("Requesting data duplicate database check for: '{}/{}'", offenderNo.getOffenderNumber(), retentionCheckId);
+
+        sqsClient.sendMessage(generateRequest(FREE_TEXT_MORATORIUM_CHECK,
+                new FreeTextSearchRequest(offenderNo.getOffenderNumber(), retentionCheckId, regex)));
     }
 
     private SendMessageRequest generateRequest(final String eventType, final Object messageBody) {
