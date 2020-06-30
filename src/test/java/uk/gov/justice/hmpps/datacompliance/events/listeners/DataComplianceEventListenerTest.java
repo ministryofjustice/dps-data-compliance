@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
@@ -109,10 +110,10 @@ class DataComplianceEventListenerTest {
 
     @Test
     void handleFreeTextSearchResult() {
-        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"matchingTables\":[\"B1234BB\"]}",
+        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"matchingTables\":[\"TABLE1\"]}",
                 Map.of("eventType", "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT"));
 
-        verify(retentionService).handleDataDuplicateResult(new DataDuplicateResult("A1234AA", 123L, List.of("B1234BB")), DATABASE);
+        verify(retentionService).handleFreeTextSearchResult(new FreeTextSearchResult("A1234AA", 123L, List.of("TABLE1")));
     }
 
     @Test
