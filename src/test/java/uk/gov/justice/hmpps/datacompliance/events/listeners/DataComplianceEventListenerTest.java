@@ -108,6 +108,14 @@ class DataComplianceEventListenerTest {
     }
 
     @Test
+    void handleFreeTextSearchResult() {
+        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"matchingTables\":[\"B1234BB\"]}",
+                Map.of("eventType", "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT"));
+
+        verify(retentionService).handleDataDuplicateResult(new DataDuplicateResult("A1234AA", 123L, List.of("B1234BB")), DATABASE);
+    }
+
+    @Test
     void handleEventThrowsIfMessageAttributesNotPresent() {
         assertThatThrownBy(() -> handleMessage("{\"offenderIdDisplay\":\"A1233AA\"}", Map.of()))
                 .isInstanceOf(NullPointerException.class)

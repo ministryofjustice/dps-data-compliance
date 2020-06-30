@@ -8,11 +8,13 @@ import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.DuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckAnalyticalPlatformDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDatabaseDataDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckFreeTextSearch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
@@ -49,6 +51,7 @@ public class RetentionService {
     private final DataDuplicationDetectionService dataDuplicationDetectionService;
     private final RetentionCheckRepository retentionCheckRepository;
     private final ReferralResolutionService referralResolutionService;
+    private final MoratoriumCheckService moratoriumCheckService;
     private final DataComplianceProperties dataComplianceProperties;
 
     public List<ActionableRetentionCheck> conductRetentionChecks(final OffenderNumber offenderNumber) {
@@ -62,7 +65,8 @@ public class RetentionService {
                 imageDuplicateCheck(offenderNumber),
                 idDataDuplicateCheck(offenderNumber),
                 databaseDataDuplicateCheck(offenderNumber),
-                analyticalPlatformDataDuplicateCheck(offenderNumber));
+                analyticalPlatformDataDuplicateCheck(offenderNumber),
+                freeTextSearch(offenderNumber));
     }
 
     public void handleDataDuplicateResult(final DataDuplicateResult result, final Method method) {
@@ -85,6 +89,10 @@ public class RetentionService {
 
         retentionCheckRepository.save(retentionCheck);
         referralResolutionService.processUpdatedRetentionCheck(retentionCheck);
+    }
+
+    public void handleFreeTextSearchResult(final FreeTextSearchResult result) {
+        // TODO GDPR-57 Handle free text search result
     }
 
     private <T extends RetentionCheck> T findRetentionCheck(final long retentionCheckId,
@@ -158,5 +166,12 @@ public class RetentionService {
                         .addDataDuplicates(duplicates);
 
         return new ActionableRetentionCheck(check);
+    }
+
+    private ActionableRetentionCheck freeTextSearch(final OffenderNumber offenderNumber) {
+
+        return new ActionableRetentionCheck(new RetentionCheckFreeTextSearch(PENDING))
+                .setPendingCheck(retentionCheck -> moratoriumCheckService.requestFreeTextSearch(
+                        offenderNumber, retentionCheck.getRetentionCheckId()));
     }
 }

@@ -75,7 +75,7 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
                                                final Long retentionCheckId,
                                                final String regex) {
 
-        log.debug("Requesting data duplicate database check for: '{}/{}'", offenderNo.getOffenderNumber(), retentionCheckId);
+        log.debug("Requesting free text moratorium check for: '{}/{}'", offenderNo.getOffenderNumber(), retentionCheckId);
 
         sqsClient.sendMessage(generateRequest(FREE_TEXT_MORATORIUM_CHECK,
                 new FreeTextSearchRequest(offenderNo.getOffenderNumber(), retentionCheckId, regex)));

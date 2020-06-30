@@ -8,6 +8,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
@@ -33,13 +34,15 @@ public class DataComplianceEventListener {
     private static final String OFFENDER_DELETION_COMPLETE_EVENT = "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE";
     private static final String DATA_DUPLICATE_ID_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-RESULT";
     private static final String DATA_DUPLICATE_DB_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-RESULT";
+    private static final String FREE_TEXT_MORATORIUM_RESULT = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT";
 
     private final Map<String, MessageHandler> messageHandlers = Map.of(
             OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral,
             OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete,
             OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
             DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult,
-            DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult);
+            DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult,
+            FREE_TEXT_MORATORIUM_RESULT, this::handleFreeTextSearchResult);
 
     private final ObjectMapper objectMapper;
     private final ReferralService referralService;
@@ -103,6 +106,11 @@ public class DataComplianceEventListener {
     private void handleDataDuplicateDbResult(final Message<String> message) {
         retentionService.handleDataDuplicateResult(
                 parseEvent(message.getPayload(), DataDuplicateResult.class), DATABASE);
+    }
+
+    private void handleFreeTextSearchResult(final Message<String> message) {
+        retentionService.handleFreeTextSearchResult(
+                parseEvent(message.getPayload(), FreeTextSearchResult.class));
     }
 
     private <T> T parseEvent(final String requestJson, final Class<T> eventType) {
