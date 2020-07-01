@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.datacompliance.events.listeners.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -14,7 +15,11 @@ import lombok.Singular;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 @Getter
 @Builder
@@ -49,6 +54,16 @@ public class OffenderPendingDeletion {
     @JsonProperty("offenders")
     private List<OffenderWithBookings> offenders;
 
+    @JsonIgnore
+    public List<String> getOffenceCodes() {
+        return offenders.stream()
+                .map(OffenderWithBookings::getOffenderBookings)
+                .flatMap(Collection::stream)
+                .map(OffenderBooking::getOffenceCodes)
+                .flatMap(Collection::stream)
+                .collect(toList());
+    }
+
     @Getter
     @Builder
     @ToString
@@ -66,6 +81,7 @@ public class OffenderPendingDeletion {
     }
 
     @Getter
+    @Builder
     @ToString
     @EqualsAndHashCode
     @NoArgsConstructor
@@ -74,5 +90,9 @@ public class OffenderPendingDeletion {
 
         @JsonProperty("offenderBookId")
         private Long offenderBookId;
+
+        @Singular
+        @JsonProperty("offenceCodes")
+        private Set<String> offenceCodes;
     }
 }

@@ -7,6 +7,7 @@ import uk.gov.justice.hmpps.datacompliance.client.pathfinder.PathfinderApiClient
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.DuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method;
@@ -18,6 +19,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckOffenceCode;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.RetentionCheckRepository;
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.data.DataDuplicationDetectionService;
@@ -54,10 +56,9 @@ public class RetentionService {
     private final MoratoriumCheckService moratoriumCheckService;
     private final DataComplianceProperties dataComplianceProperties;
 
-    public List<ActionableRetentionCheck> conductRetentionChecks(final OffenderNumber offenderNumber) {
+    public List<ActionableRetentionCheck> conductRetentionChecks(final OffenderToCheck offenderToCheck) {
 
-        // TODO GDPR-56 complete the following checks
-        //  * Offence code check
+        final var offenderNumber = offenderToCheck.getOffenderNumber();
 
         return List.of(
                 pathfinderReferralCheck(offenderNumber),
@@ -66,7 +67,8 @@ public class RetentionService {
                 idDataDuplicateCheck(offenderNumber),
                 databaseDataDuplicateCheck(offenderNumber),
                 analyticalPlatformDataDuplicateCheck(offenderNumber),
-                freeTextSearch(offenderNumber));
+                freeTextSearch(offenderNumber),
+                offenceCodeCheck(offenderToCheck));
     }
 
     public void handleDataDuplicateResult(final DataDuplicateResult result, final Method method) {
@@ -189,5 +191,10 @@ public class RetentionService {
         return new ActionableRetentionCheck(new RetentionCheckFreeTextSearch(PENDING))
                 .setPendingCheck(retentionCheck -> moratoriumCheckService.requestFreeTextSearch(
                         offenderNumber, retentionCheck.getRetentionCheckId()));
+    }
+
+    private ActionableRetentionCheck offenceCodeCheck(final OffenderToCheck offenderToCheck) {
+        return new ActionableRetentionCheck(new RetentionCheckOffenceCode(
+                moratoriumCheckService.retainDueToOffence(offenderToCheck) ? RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
     }
 }

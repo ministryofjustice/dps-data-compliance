@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
@@ -31,7 +32,10 @@ public class ReferralService {
         final var referral = createReferral(event);
 
         final var retentionChecks = retentionService.conductRetentionChecks(
-                new OffenderNumber(event.getOffenderIdDisplay()));
+                OffenderToCheck.builder()
+                        .offenderNumber(new OffenderNumber(event.getOffenderIdDisplay()))
+                        .offenceCodes(event.getOffenceCodes())
+                        .build());
 
         referralResolutionService.processReferral(referral, retentionChecks);
     }

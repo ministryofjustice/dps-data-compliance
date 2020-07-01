@@ -6,10 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 
 import java.util.List;
 
+import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.hmpps.datacompliance.services.retention.MoratoriumCheckService.CHILD_ABUSE_REGEX;
@@ -53,5 +55,25 @@ class MoratoriumCheckServiceTest {
 
         assertThat("Some text mentioning abuse of children.".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
         assertThat("Some text containing unrelated comments.".matches(CHILD_ABUSE_REGEX_REVERSED)).isFalse();
+    }
+
+    @Test
+    void retainDueToOffence() {
+
+        assertThat(service.retainDueToOffence(offenderWithOffenceCodes("SX56099")));
+        assertThat(service.retainDueToOffence(offenderWithOffenceCodes("SX56100", "SX56050", "NOT A MATCH")));
+
+        assertThat(service.retainDueToOffence(offenderWithOffenceCodes("NOT A MATCH"))).isFalse();
+        assertThat(service.retainDueToOffence(offenderWithNoOffenceCode())).isFalse();
+    }
+
+    private OffenderToCheck offenderWithOffenceCodes(final String... offenceCodes) {
+        final var offender = OffenderToCheck.builder().offenderNumber(OFFENDER_NUMBER);
+        stream(offenceCodes).forEach(offender::offenceCode);
+        return offender.build();
+    }
+
+    private OffenderToCheck offenderWithNoOffenceCode() {
+        return offenderWithOffenceCodes();
     }
 }

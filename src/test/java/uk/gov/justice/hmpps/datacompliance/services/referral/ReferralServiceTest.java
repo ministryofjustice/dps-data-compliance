@@ -9,6 +9,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderWithBookings;
@@ -70,7 +71,7 @@ class ReferralServiceTest {
 
         final var retentionCheck = mock(ActionableRetentionCheck.class);
         when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
-        when(retentionService.conductRetentionChecks(new OffenderNumber(OFFENDER_NUMBER)))
+        when(retentionService.conductRetentionChecks(OffenderToCheck.builder().offenderNumber(new OffenderNumber(OFFENDER_NUMBER)).build()))
                 .thenReturn(List.of(retentionCheck));
 
         referralService.handlePendingDeletionReferral(generatePendingDeletionEvent());
@@ -116,7 +117,7 @@ class ReferralServiceTest {
                 .birthDate(LocalDate.of(1969, 1, 1))
                 .offender(OffenderWithBookings.builder()
                         .offenderId(1L)
-                        .offenderBooking(new OffenderBooking(2L))
+                        .offenderBooking(OffenderBooking.builder().offenderBookId(2L).build())
                         .build())
                 .build();
     }
