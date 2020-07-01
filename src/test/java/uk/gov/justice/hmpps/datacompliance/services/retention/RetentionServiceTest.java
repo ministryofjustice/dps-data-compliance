@@ -10,10 +10,12 @@ import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.DuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckFreeTextSearch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.RetentionCheckRepository;
@@ -50,6 +52,7 @@ class RetentionServiceTest {
     private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
     private static final OffenderNumber DUPLICATE_OFFENDER_NUMBER = new OffenderNumber("B1234BB");
     private static final long DATA_DUPLICATE_CHECK_ID = 1;
+    private static final long FREE_TEXT_CHECK_ID = 2;
 
     @Mock
     private ManualRetentionService manualRetentionService;
@@ -202,12 +205,53 @@ class RetentionServiceTest {
         verify(referralResolutionService).processUpdatedRetentionCheck(dataDuplicateCheck);
     }
 
+    @Test
+    void handleFreeTextSearchResultWhenMatchesFound() {
+
+        final var freeTextCheck = persistedFreeTextCheck();
+
+        service.handleFreeTextSearchResult(FreeTextSearchResult.builder()
+                .offenderIdDisplay(OFFENDER_NUMBER.getOffenderNumber())
+                .retentionCheckId(DATA_DUPLICATE_CHECK_ID)
+                .matchingTable("SOME_TABLE")
+                .build());
+
+        assertThat(freeTextCheck.getCheckStatus()).isEqualTo(RETENTION_REQUIRED);
+
+        verify(retentionCheckRepository).save(freeTextCheck);
+        verify(referralResolutionService).processUpdatedRetentionCheck(freeTextCheck);
+    }
+
+    @Test
+    void handleFreeTextSearchResultWhenNoMatch() {
+
+        final var freeTextCheck = persistedFreeTextCheck();
+
+        service.handleFreeTextSearchResult(FreeTextSearchResult.builder()
+                .offenderIdDisplay(OFFENDER_NUMBER.getOffenderNumber())
+                .retentionCheckId(DATA_DUPLICATE_CHECK_ID)
+                .build());
+
+        assertThat(freeTextCheck.getCheckStatus()).isEqualTo(RETENTION_NOT_REQUIRED);
+
+        verify(retentionCheckRepository).save(freeTextCheck);
+        verify(referralResolutionService).processUpdatedRetentionCheck(freeTextCheck);
+    }
+
     private RetentionCheckDataDuplicate persistedDataDuplicateCheck() {
         final var dataDuplicateCheck = spy(new RetentionCheckIdDataDuplicate(PENDING));
         dataDuplicateCheck.setRetentionCheckId(DATA_DUPLICATE_CHECK_ID);
         doReturn(OFFENDER_NUMBER).when(dataDuplicateCheck).getOffenderNumber();
         when(retentionCheckRepository.findById(DATA_DUPLICATE_CHECK_ID)).thenReturn(Optional.of(dataDuplicateCheck));
         return dataDuplicateCheck;
+    }
+
+    private RetentionCheckFreeTextSearch persistedFreeTextCheck() {
+        final var freeTextCheck = spy(new RetentionCheckFreeTextSearch(PENDING));
+        freeTextCheck.setRetentionCheckId(FREE_TEXT_CHECK_ID);
+        doReturn(OFFENDER_NUMBER).when(freeTextCheck).getOffenderNumber();
+        when(retentionCheckRepository.findById(DATA_DUPLICATE_CHECK_ID)).thenReturn(Optional.of(freeTextCheck));
+        return freeTextCheck;
     }
 
     private List<DataDuplicate> mockedDataDuplicates() {

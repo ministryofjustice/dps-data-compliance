@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
+import java.util.List;
+
 @Slf4j
 @Component
 @ConditionalOnExpression("!{'aws', 'localstack'}.contains('${data.compliance.request.sqs.provider}')")
@@ -35,7 +37,7 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
     @Override
     public void requestFreeTextMoratoriumCheck(final OffenderNumber offenderNo,
                                                final Long retentionCheckId,
-                                               final String regex) {
+                                               final List<String> regex) {
         log.warn("Pretending to push free text moratorium check '{}/{}' to queue",
                 offenderNo.getOffenderNumber(), retentionCheckId);
     }

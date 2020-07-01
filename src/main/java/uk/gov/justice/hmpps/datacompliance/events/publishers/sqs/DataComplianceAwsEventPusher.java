@@ -15,6 +15,7 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DataDuplicateCh
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.FreeTextSearchRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGranted;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -73,7 +74,7 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     @Override
     public void requestFreeTextMoratoriumCheck(final OffenderNumber offenderNo,
                                                final Long retentionCheckId,
-                                               final String regex) {
+                                               final List<String> regex) {
 
         log.debug("Requesting free text moratorium check for: '{}/{}'", offenderNo.getOffenderNumber(), retentionCheckId);
 
