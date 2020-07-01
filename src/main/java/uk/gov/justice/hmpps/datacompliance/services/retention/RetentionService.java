@@ -56,8 +56,8 @@ public class RetentionService {
 
     public List<ActionableRetentionCheck> conductRetentionChecks(final OffenderNumber offenderNumber) {
 
-        // TODO GDPR-112 complete the following checks
-        //  * Moratoria
+        // TODO GDPR-56 complete the following checks
+        //  * Offence code check
 
         return List.of(
                 pathfinderReferralCheck(offenderNumber),
@@ -92,7 +92,23 @@ public class RetentionService {
     }
 
     public void handleFreeTextSearchResult(final FreeTextSearchResult result) {
-        // TODO GDPR-57 Handle free text search result
+
+        final var retentionCheck = findRetentionCheck(result.getRetentionCheckId(), RetentionCheckFreeTextSearch.class);
+        final var referredOffenderNo = retentionCheck.getOffenderNumber();
+
+        checkState(Objects.equals(result.getOffenderIdDisplay(), referredOffenderNo.getOffenderNumber()),
+                "Offender number '%s' of result '%s' does not match '%s'",
+                result.getOffenderIdDisplay(), result.getRetentionCheckId(), referredOffenderNo);
+
+        if (!result.getMatchingTables().isEmpty()) {
+            log.info("The following tables for offender: '{}' matched the free text search: {}",
+                    referredOffenderNo.getOffenderNumber(), result.getMatchingTables());
+        }
+
+        retentionCheck.setCheckStatus(result.getMatchingTables().isEmpty() ? RETENTION_NOT_REQUIRED : RETENTION_REQUIRED);
+
+        retentionCheckRepository.save(retentionCheck);
+        referralResolutionService.processUpdatedRetentionCheck(retentionCheck);
     }
 
     private <T extends RetentionCheck> T findRetentionCheck(final long retentionCheckId,
