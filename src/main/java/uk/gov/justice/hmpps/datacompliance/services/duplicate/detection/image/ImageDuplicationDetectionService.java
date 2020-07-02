@@ -40,6 +40,7 @@ public class ImageDuplicationDetectionService {
         final var imageUploads = imageUploadRepository.findByOffenderNo(offenderNumber.getOffenderNumber());
 
         return imageUploads.stream()
+                .filter(OffenderImageUpload::isNoUploadError)
                 .flatMap(this::findDuplicates)
                 .collect(toList());
     }

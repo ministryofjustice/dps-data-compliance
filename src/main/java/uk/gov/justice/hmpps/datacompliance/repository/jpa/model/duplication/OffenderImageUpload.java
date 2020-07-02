@@ -59,4 +59,8 @@ public class OffenderImageUpload {
     @Length(max = 255)
     @Column(name = "UPLOAD_ERROR_REASON")
     private String uploadErrorReason;
+
+    public boolean isNoUploadError() {
+        return uploadErrorReason == null;
+    }
 }
