@@ -12,6 +12,7 @@ import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecogni
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload.OffenderImageUploadBuilder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.ImageDuplicateRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.OffenderImageUploadRepository;
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.image.ImageDuplicationDetectionService;
@@ -68,7 +69,7 @@ class ImageDuplicationDetectionServiceTest {
     @Test
     void findDuplicates() {
 
-        givenOffenderHasAnUploaded(imageWith(REFERENCE_ID))
+        givenOffenderHasAnUploaded(imageWith(REFERENCE_ID).build())
                 .andImageRecognitionFindsMatchesWith(DUPLICATE_1, DUPLICATE_2, DUPLICATE_3)
                 .andUploadedImagesExistForMatches(DUPLICATE_1, DUPLICATE_2)
                 .andUploadedImageSharesSameOffenderNumberAsReference(DUPLICATE_3)
@@ -93,9 +94,21 @@ class ImageDuplicationDetectionServiceTest {
     }
 
     @Test
+    void findDuplicatesReturnsEmptyWhenImageUploadFailedForOffender() {
+
+        givenOffenderHasAnUploaded(imageWith(REFERENCE_ID)
+                .uploadErrorReason("Upload failed for some reason.")
+                .build());
+
+        assertThat(service.findDuplicatesFor(offenderNo(REFERENCE_ID))).isEmpty();
+
+        verifyNoInteractions(imageDuplicateRepository);
+    }
+
+    @Test
     void findDuplicatesThrowsIfImageUploadRepositoryDoesNotContainFaceId() {
 
-        givenOffenderHasAnUploaded(imageWith(REFERENCE_ID))
+        givenOffenderHasAnUploaded(imageWith(REFERENCE_ID).build())
                 .andImageRecognitionFindsMatchesWith(DUPLICATE_1)
                 .andUploadedImagesExistForMatches(false, DUPLICATE_1);
 
@@ -130,7 +143,7 @@ class ImageDuplicationDetectionServiceTest {
     private ImageDuplicationDetectionServiceTest andUploadedImagesExistForMatches(final boolean exists, final long... duplicateIds) {
         stream(duplicateIds).forEach(duplicateId ->
                 when(offenderImageUploadRepository.findByFaceId(faceId(duplicateId).getFaceId()))
-                        .thenReturn(exists ? Optional.of(imageWith(duplicateId)) : Optional.empty()));
+                        .thenReturn(exists ? Optional.of(imageWith(duplicateId).build()) : Optional.empty()));
         return this;
     }
 
@@ -168,13 +181,12 @@ class ImageDuplicationDetectionServiceTest {
         assertThat(persistedDuplicate.getValue().getSimilarity()).isEqualTo(SIMILARITY);
     }
 
-    private OffenderImageUpload imageWith(final long id) {
+    private OffenderImageUploadBuilder imageWith(final long id) {
         return OffenderImageUpload.builder()
                 .imageId(id)
                 .uploadId(id)
                 .faceId(faceId(id).getFaceId())
-                .offenderNo(offenderNo(id).getOffenderNumber())
-                .build();
+                .offenderNo(offenderNo(id).getOffenderNumber());
     }
 
     private FaceId faceId(final long suffix) {
