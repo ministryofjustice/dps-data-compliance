@@ -59,7 +59,10 @@ class DataComplianceEventListenerTest {
                         "\"middleName\":\"Middle\"," +
                         "\"lastName\":\"Jones\"," +
                         "\"birthDate\":\"1990-01-02\"," +
-                        "\"offenders\":[{\"offenderId\":123,\"bookings\":[{\"offenderBookId\":321}]}]" +
+                        "\"offenders\":[{" +
+                            "\"offenderId\":123," +
+                            "\"bookings\":[{\"offenderBookId\":321,\"offenceCodes\":[\"offence1\"]}]" +
+                        "}]" +
                 "}",
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION"));
 
@@ -71,7 +74,10 @@ class DataComplianceEventListenerTest {
                 .birthDate(LocalDate.of(1990, 1, 2))
                 .offender(OffenderWithBookings.builder()
                         .offenderId(123L)
-                        .offenderBooking(new OffenderBooking(321L))
+                        .offenderBooking(OffenderBooking.builder()
+                                .offenderBookId(321L)
+                                .offenceCode("offence1")
+                                .build())
                         .build())
                 .build());
     }
