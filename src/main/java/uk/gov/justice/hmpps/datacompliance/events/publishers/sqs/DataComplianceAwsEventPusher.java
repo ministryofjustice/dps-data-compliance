@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DataDuplicateCheck;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.FreeTextSearchRequest;
@@ -45,12 +46,17 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     }
 
     @Override
-    public void grantDeletion(final OffenderNumber offenderNo, final Long referralId) {
+    public void grantDeletion(final OffenderDeletionGrant offenderDeletionGrant) {
 
-        log.debug("Sending grant deletion event for: '{}/{}'", offenderNo.getOffenderNumber(), referralId);
+        log.debug("Sending grant deletion event for: '{}/{}'",
+                offenderDeletionGrant.getOffenderNumber().getOffenderNumber(), offenderDeletionGrant.getReferralId());
 
-        sqsClient.sendMessage(generateRequest(OFFENDER_DELETION_GRANTED,
-                new OffenderDeletionGranted(offenderNo.getOffenderNumber(), referralId)));
+        sqsClient.sendMessage(generateRequest(OFFENDER_DELETION_GRANTED, OffenderDeletionGranted.builder()
+                .offenderIdDisplay(offenderDeletionGrant.getOffenderNumber().getOffenderNumber())
+                .referralId(offenderDeletionGrant.getReferralId())
+                .offenderIds(offenderDeletionGrant.getOffenderIds())
+                .offenderBookIds(offenderDeletionGrant.getOffenderBookIds())
+                .build()));
     }
 
     @Override

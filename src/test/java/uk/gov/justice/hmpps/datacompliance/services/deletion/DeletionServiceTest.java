@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.Booking;
@@ -40,6 +41,9 @@ class DeletionServiceTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now();
     private static final String OFFENDER_NUMBER = "A1234AA";
+    private static final long REFERRAL_ID = 123;
+    private static final long OFFENDER_ID = 456;
+    private static final long OFFENDER_BOOK_ID = 788;
 
     @Mock
     private OffenderDeletionReferralRepository referralRepository;
@@ -69,11 +73,21 @@ class DeletionServiceTest {
 
         deletionService.grantDeletion(
                 OffenderDeletionReferral.builder()
-                        .referralId(1L)
+                        .referralId(REFERRAL_ID)
                         .offenderNo(OFFENDER_NUMBER)
-                        .build());
+                        .build()
+                        .addReferredOffenderBooking(ReferredOffenderBooking.builder()
+                                .offenderId(OFFENDER_ID)
+                                .offenderBookId(OFFENDER_BOOK_ID)
+                                .build()));
 
-        verify(deletionGrantedEventPusher).grantDeletion(new OffenderNumber(OFFENDER_NUMBER), 1L);
+        verify(deletionGrantedEventPusher).grantDeletion(
+                OffenderDeletionGrant.builder()
+                        .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
+                        .referralId(REFERRAL_ID)
+                        .offenderId(OFFENDER_ID)
+                        .offenderBookId(OFFENDER_BOOK_ID)
+                        .build());
     }
 
     @Test
@@ -81,12 +95,12 @@ class DeletionServiceTest {
 
         final var existingReferral = generateOffenderDeletionReferral();
 
-        when(referralRepository.findById(123L)).thenReturn(Optional.of(existingReferral));
+        when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.of(existingReferral));
         when(referralRepository.save(existingReferral)).thenReturn(existingReferral);
 
         deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
                 .offenderIdDisplay(OFFENDER_NUMBER)
-                .referralId(123L)
+                .referralId(REFERRAL_ID)
                 .build());
 
         final var resolution = existingReferral.getReferralResolution().orElseThrow();
@@ -111,7 +125,7 @@ class DeletionServiceTest {
     @Test
     void handleDeletionCompleteThrowsIfReferralNotFound() {
 
-        when(referralRepository.findById(123L)).thenReturn(Optional.empty());
+        when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
                 deletionService.handleDeletionComplete(OffenderDeletionComplete.builder().referralId(123L).build()))
@@ -124,15 +138,15 @@ class DeletionServiceTest {
     @Test
     void handleDeletionCompleteThrowsIfOffenderNumbersDoNotMatch() {
 
-        when(referralRepository.findById(123L)).thenReturn(Optional.of(OffenderDeletionReferral.builder()
-                .referralId(123L)
+        when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.of(OffenderDeletionReferral.builder()
+                .referralId(REFERRAL_ID)
                 .offenderNo("offender1")
                 .build()));
 
         assertThatThrownBy(() ->
                 deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
                         .offenderIdDisplay("offender2")
-                        .referralId(123L)
+                        .referralId(REFERRAL_ID)
                         .build()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Offender number 'offender1' of referral '123' does not match 'offender2'");
@@ -143,15 +157,15 @@ class DeletionServiceTest {
     @Test
     void handleDeletionCompleteThrowsIfResolutionNotFound() {
 
-        when(referralRepository.findById(123L)).thenReturn(Optional.of(OffenderDeletionReferral.builder()
-                .referralId(123L)
+        when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.of(OffenderDeletionReferral.builder()
+                .referralId(REFERRAL_ID)
                 .offenderNo(OFFENDER_NUMBER)
                 .build()));
 
         assertThatThrownBy(() ->
                 deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
                         .offenderIdDisplay(OFFENDER_NUMBER)
-                        .referralId(123L)
+                        .referralId(REFERRAL_ID)
                         .build()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Referral '123' does not have expected resolution type");
@@ -164,16 +178,16 @@ class DeletionServiceTest {
 
         final var existingReferral = OffenderDeletionReferral.builder()
                 .offenderNo(OFFENDER_NUMBER)
-                .referralId(123L)
+                .referralId(REFERRAL_ID)
                 .build();
         existingReferral.setReferralResolution(ReferralResolution.builder().resolutionStatus(DELETED).build());
 
-        when(referralRepository.findById(123L)).thenReturn(Optional.of(existingReferral));
+        when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.of(existingReferral));
 
         assertThatThrownBy(() ->
                 deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
                         .offenderIdDisplay(OFFENDER_NUMBER)
-                        .referralId(123L)
+                        .referralId(REFERRAL_ID)
                         .build()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Referral '123' does not have expected resolution type");

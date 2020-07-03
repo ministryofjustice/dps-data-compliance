@@ -96,9 +96,10 @@ public class OffenderDeletionReferral implements OffenderEntity {
     @OneToOne(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
     private ReferralResolution referralResolution;
 
-    public void addReferredOffenderBooking(final ReferredOffenderBooking booking) {
+    public OffenderDeletionReferral addReferredOffenderBooking(final ReferredOffenderBooking booking) {
         this.offenderBookings.add(booking);
         booking.setOffenderDeletionReferral(this);
+        return this;
     }
 
     public Optional<ReferralResolution> getReferralResolution() {

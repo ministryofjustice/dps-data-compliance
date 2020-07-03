@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceAwsEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
@@ -24,6 +25,9 @@ class DataComplianceAwsEventPusherTest {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final static OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
+    private final static long REFERRAL_ID = 123;
+    private final static long OFFENDER_ID = 456;
+    private final static long OFFENDER_BOOK_ID = 789;
 
     @Mock
     private AmazonSQS client;
@@ -43,12 +47,24 @@ class DataComplianceAwsEventPusherTest {
         when(client.sendMessage(request.capture()))
                 .thenReturn(new SendMessageResult().withMessageId("message1"));
 
-        eventPusher.grantDeletion(OFFENDER_NUMBER, 123L);
+        eventPusher.grantDeletion(
+                OffenderDeletionGrant.builder()
+                        .offenderNumber(OFFENDER_NUMBER)
+                        .referralId(REFERRAL_ID)
+                        .offenderId(OFFENDER_ID)
+                        .offenderBookId(OFFENDER_BOOK_ID)
+                        .build());
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":123}");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
                 .isEqualTo("DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED");
+        assertThat(request.getValue().getMessageBody()).isEqualTo(
+                "{" +
+                        "\"offenderIdDisplay\":\"A1234AA\"," +
+                        "\"referralId\":123," +
+                        "\"offenderIds\":[456]," +
+                        "\"offenderBookIds\":[789]" +
+                "}");
     }
 
     @Test

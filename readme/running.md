@@ -67,7 +67,11 @@ to start up:
 
 - `ELITE2_API_BASE_URL` (URL for the Elite2 API)
 - `OAUTH2_API_BASE_URL` (URL for the OAuth2 server)
+- `PATHFINDER_API_BASE_URL` (URL for the Pathfinder API)
 - `APP_DB_URL` (URL for a database instance to store data compliance data)
+- `OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED` (Flag to use Elite2 API to perform a duplicate ID check)
+- `OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED` (Flag to use Elite2 API to perform a duplicate check using data in the database.)
+- `OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED` (Flag to query Analytical Platform for potential duplicates.)
 
 These are provided already if running with the `dev` Spring profile (see the `application-dev.yml` properties file).
 
