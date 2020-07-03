@@ -69,6 +69,7 @@ to start up:
 - `HMPPS_AUTH_BASE_URL` (URL for the HMPPS Auth server)
 - `PATHFINDER_API_BASE_URL` (URL for the Pathfinder API)
 - `APP_DB_URL` (URL for a database instance to store data compliance data)
+- `OFFENDER_RETENTION_IMAGE_DUPLICATE_CHECK_ENABLED` (Flag to use AWS Rekognition to perform duplicate image check)
 - `OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED` (Flag to use the Prison API to perform a duplicate ID check)
 - `OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED` (Flag to use the Prison API to perform a duplicate check using data in the database)
 - `OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED` (Flag to query Analytical Platform for potential duplicates)
