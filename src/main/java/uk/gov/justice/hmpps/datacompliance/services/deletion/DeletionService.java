@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.Booking;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.OffenderWithBookings;
@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
 import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
@@ -38,7 +39,16 @@ public class DeletionService {
 
         log.info("Granting deletion of offender: '{}'", referral.getOffenderNo());
 
-        deletionGrantedEventPusher.grantDeletion(new OffenderNumber(referral.getOffenderNo()), referral.getReferralId());
+        deletionGrantedEventPusher.grantDeletion(OffenderDeletionGrant.builder()
+                .offenderNumber(referral.getOffenderNumber())
+                .referralId(referral.getReferralId())
+                .offenderIds(referral.getOffenderBookings().stream()
+                        .map(ReferredOffenderBooking::getOffenderId)
+                        .collect(toSet()))
+                .offenderBookIds(referral.getOffenderBookings().stream()
+                        .map(ReferredOffenderBooking::getOffenderBookId)
+                        .collect(toSet()))
+                .build());
     }
 
     public void handleDeletionComplete(final OffenderDeletionComplete event) {

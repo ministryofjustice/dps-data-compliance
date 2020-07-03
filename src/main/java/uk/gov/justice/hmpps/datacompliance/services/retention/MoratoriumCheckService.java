@@ -34,7 +34,7 @@ public class MoratoriumCheckService {
             "faith|" +
             "foster|" +
             "girl|" +
-            "grandson" +
+            "grandson|" +
             "infant|" +
             "juven|" +
             "kid|" +
