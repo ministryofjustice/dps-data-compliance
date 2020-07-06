@@ -139,6 +139,10 @@ public class RetentionService {
 
     private ActionableRetentionCheck imageDuplicateCheck(final OffenderNumber offenderNumber) {
 
+        if (!dataComplianceProperties.isImageDuplicateCheckEnabled()) {
+            return new ActionableRetentionCheck(new RetentionCheckImageDuplicate(DISABLED));
+        }
+
         final var imageDuplicates = imageDuplicationDetectionService.findDuplicatesFor(offenderNumber);
 
         final var check = imageDuplicates.isEmpty() ?

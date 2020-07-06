@@ -32,6 +32,8 @@ env:
 
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://gateway.t3.nomis-api.hmpps.dsd.io/auth/.well-known/jwks.json"
 
+  # No dev image collection to use:
+  OFFENDER_RETENTION_IMAGE_DUPLICATE_CHECK_ENABLED: false
   # No Analytical Platform dev environment to point to:
   OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED: false
   OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED: true

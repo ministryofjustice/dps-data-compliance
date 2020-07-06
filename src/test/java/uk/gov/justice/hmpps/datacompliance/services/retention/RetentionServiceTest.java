@@ -46,6 +46,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDatabaseDataDuplicate.DATA_DUPLICATE_DB;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckFreeTextSearch.FREE_TEXT_SEARCH;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate.DATA_DUPLICATE_ID;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate.IMAGE_DUPLICATE;
 
 @ExtendWith(MockitoExtension.class)
 class RetentionServiceTest {
@@ -94,6 +95,7 @@ class RetentionServiceTest {
                 referralResolutionService,
                 moratoriumCheckService,
                 DataComplianceProperties.builder()
+                        .imageDuplicateCheckEnabled(true)
                         .idDataDuplicateCheckEnabled(true)
                         .databaseDataDuplicateCheckEnabled(true)
                         .analyticalPlatformDataDuplicateCheckEnabled(true)
@@ -145,6 +147,7 @@ class RetentionServiceTest {
                 referralResolutionService,
                 moratoriumCheckService,
                 DataComplianceProperties.builder()
+                        .imageDuplicateCheckEnabled(false)
                         .idDataDuplicateCheckEnabled(false)
                         .databaseDataDuplicateCheckEnabled(false)
                         .analyticalPlatformDataDuplicateCheckEnabled(false)
@@ -152,7 +155,6 @@ class RetentionServiceTest {
 
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(false);
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER)).thenReturn(Optional.empty());
-        when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(emptyList());
 
         final var retentionChecks = service.conductRetentionChecks(OFFENDER_TO_CHECK);
 
@@ -299,7 +301,8 @@ class RetentionServiceTest {
     }
 
     private boolean isDisabledCheck(final RetentionCheck check) {
-        return DATA_DUPLICATE_ID.equals(check.getCheckType())
+        return IMAGE_DUPLICATE.equals(check.getCheckType())
+                || DATA_DUPLICATE_ID.equals(check.getCheckType())
                 || DATA_DUPLICATE_DB.equals(check.getCheckType())
                 || DATA_DUPLICATE_AP.equals(check.getCheckType());
     }

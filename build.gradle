@@ -21,13 +21,13 @@ dependencies {
     implementation 'org.springframework:spring-jms:5.2.7.RELEASE'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.13.46')
+    implementation platform('software.amazon.awssdk:bom:2.13.50')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.812')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.812'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.816')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.816'
     implementation 'com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8'
 
     // Utils
