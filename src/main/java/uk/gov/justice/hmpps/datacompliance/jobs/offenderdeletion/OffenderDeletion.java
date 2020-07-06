@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.PendingDeletionsRequest;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.OffenderDeletionConfig;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
@@ -29,7 +29,7 @@ class OffenderDeletion {
     private final TimeSource timeSource;
     private final OffenderDeletionConfig config;
     private final OffenderDeletionBatchRepository repository;
-    private final Elite2ApiClient elite2ApiClient;
+    private final PrisonApiClient prisonApiClient;
 
     void run() {
 
@@ -43,7 +43,7 @@ class OffenderDeletion {
 
         config.getReferralLimit().ifPresent(request::limit);
 
-        elite2ApiClient.requestPendingDeletions(request.build());
+        prisonApiClient.requestPendingDeletions(request.build());
 
         log.info("Offender deletion request complete");
     }

@@ -1,11 +1,6 @@
-oauth:
-  api.base.url: http://localhost:8081
-
-elite2:
-  api.base.url: http://localhost:8082
-
-pathfinder:
-  api.base.url: http://localhost:8083
+hmpps.auth.base.url: http://localhost:8081
+prison.api.base.url: http://localhost:8082
+pathfinder.api.base.url: http://localhost:8083
 
 app.db.url: jdbc:hsqldb:mem:data-compliance-db;sql.syntax_pgs=true;shutdown=false
 

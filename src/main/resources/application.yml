@@ -8,13 +8,13 @@ spring:
       client:
         registration:
           dps-data-compliance:
-            provider: nomis-oauth2-server
+            provider: hmpps-auth
             client-id: ${dps.data.compliance.client.id}
             client-secret: ${dps.data.compliance.client.secret}
             authorization-grant-type: client_credentials
         provider:
-          nomis-oauth2-server:
-            token-uri: ${oauth.api.base.url}/oauth/token
+          hmpps-auth:
+            token-uri: ${hmpps.auth.base.url}/oauth/token
 
   flyway.locations: classpath:db/migration,classpath:db/quartz
 

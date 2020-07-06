@@ -17,16 +17,16 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ContextConfiguration
 public class IntegrationTest {
 
-    protected static MockWebServer oauthApiMock;
-    protected static MockWebServer elite2ApiMock;
+    protected static MockWebServer hmppsAuthMock;
+    protected static MockWebServer prisonApiMock;
     protected static MockWebServer pathfinderApiMock;
 
     @BeforeAll
     protected static void setUp() throws Exception {
-        oauthApiMock = new MockWebServer();
-        oauthApiMock.start(8999);
-        elite2ApiMock = new MockWebServer();
-        elite2ApiMock.start(8998);
+        hmppsAuthMock = new MockWebServer();
+        hmppsAuthMock.start(8999);
+        prisonApiMock = new MockWebServer();
+        prisonApiMock.start(8998);
         pathfinderApiMock = new MockWebServer();
         pathfinderApiMock.start(8997);
     }
@@ -36,15 +36,15 @@ public class IntegrationTest {
                 .setResponseCode(status)
                 .setBody(status == 200 ? "pong" : "some error");
 
-        elite2ApiMock.enqueue(response);
-        oauthApiMock.enqueue(response);
+        prisonApiMock.enqueue(response);
+        hmppsAuthMock.enqueue(response);
         pathfinderApiMock.enqueue(response);
     }
 
     @AfterAll
     protected static void tearDown() throws Exception {
-        elite2ApiMock.shutdown();
-        oauthApiMock.shutdown();
+        prisonApiMock.shutdown();
+        hmppsAuthMock.shutdown();
         pathfinderApiMock.shutdown();
     }
 

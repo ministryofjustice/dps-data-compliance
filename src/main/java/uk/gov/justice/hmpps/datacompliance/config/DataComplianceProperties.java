@@ -22,41 +22,41 @@ import java.util.Optional;
 @EnableScheduling
 public class DataComplianceProperties {
 
-    private final String elite2ApiBaseUrl;
-    private final int elite2ApiOffenderIdsIterationThreads;
-    private final long elite2ApiOffenderIdsLimit;
-    private final long elite2ApiOffenderIdsInitialOffset;
-    private final Long elite2ApiOffenderIdsTotalPages;
+    private final String prisonApiBaseUrl;
+    private final int prisonApiOffenderIdsIterationThreads;
+    private final long prisonApiOffenderIdsLimit;
+    private final long prisonApiOffenderIdsInitialOffset;
+    private final Long prisonApiOffenderIdsTotalPages;
     private final String pathfinderApiBaseUrl;
     private final Duration pathfinderApiTimeout;
     private final boolean idDataDuplicateCheckEnabled;  // Duplicate check based only on IDs (PNC, CRO, LIDS numbers)
     private final boolean databaseDataDuplicateCheckEnabled;  // Duplicate check based on points based similarity SQL query on NOMIS database
     private final boolean analyticalPlatformDataDuplicateCheckEnabled;  // Duplicate check based on Analytical Platform's Apache Spark deduplication solution (Splink)
 
-    public DataComplianceProperties(@Value("${elite2.api.base.url}") @URL final String elite2ApiBaseUrl,
-                                    @Value("${elite2.api.offender.ids.iteration.threads:1}") final int elite2ApiOffenderIdsIterationThreads,
-                                    @Value("${elite2.api.offender.ids.page.limit:100}") final long elite2ApiOffenderIdsLimit,
-                                    @Value("${elite2.api.offender.ids.initial.offset:0}") final long elite2ApiOffenderIdsInitialOffset,
-                                    @Value("${elite2.api.offender.ids.total.pages:#{null}}") final Long elite2ApiOffenderIdsTotalPages,
+    public DataComplianceProperties(@Value("${prison.api.base.url}") @URL final String prisonApiBaseUrl,
+                                    @Value("${prison.api.offender.ids.iteration.threads:1}") final int prisonApiOffenderIdsIterationThreads,
+                                    @Value("${prison.api.offender.ids.page.limit:100}") final long prisonApiOffenderIdsLimit,
+                                    @Value("${prison.api.offender.ids.initial.offset:0}") final long prisonApiOffenderIdsInitialOffset,
+                                    @Value("${prison.api.offender.ids.total.pages:#{null}}") final Long prisonApiOffenderIdsTotalPages,
                                     @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl,
                                     @Value("${pathfinder.api.timeout:5s}") final Duration pathfinderApiTimeout,
                                     @Value("${offender.retention.data.duplicate.id.check.enabled}") final boolean idDataDuplicateCheckEnabled,
                                     @Value("${offender.retention.data.duplicate.db.check.enabled}") final boolean databaseDataDuplicateCheckEnabled,
                                     @Value("${offender.retention.data.duplicate.ap.check.enabled}") final boolean analyticalPlatformDataDuplicateCheckEnabled) {
 
-        log.info("Image upload - number of threads: {}", elite2ApiOffenderIdsIterationThreads);
-        log.info("Image upload - page limit: {}", elite2ApiOffenderIdsLimit);
-        log.info("Image upload - initial offset: {}", elite2ApiOffenderIdsInitialOffset);
-        log.info("Image upload - total pages: {}", elite2ApiOffenderIdsTotalPages);
+        log.info("Image upload - number of threads: {}", prisonApiOffenderIdsIterationThreads);
+        log.info("Image upload - page limit: {}", prisonApiOffenderIdsLimit);
+        log.info("Image upload - initial offset: {}", prisonApiOffenderIdsInitialOffset);
+        log.info("Image upload - total pages: {}", prisonApiOffenderIdsTotalPages);
         log.info("Data Duplicate - ID check enabled: {}", idDataDuplicateCheckEnabled);
         log.info("Data Duplicate - SQL query check enabled: {}", databaseDataDuplicateCheckEnabled);
         log.info("Data Duplicate - Analytical Platform check enabled: {}", analyticalPlatformDataDuplicateCheckEnabled);
 
-        this.elite2ApiBaseUrl = elite2ApiBaseUrl;
-        this.elite2ApiOffenderIdsIterationThreads = elite2ApiOffenderIdsIterationThreads;
-        this.elite2ApiOffenderIdsLimit = elite2ApiOffenderIdsLimit;
-        this.elite2ApiOffenderIdsInitialOffset = elite2ApiOffenderIdsInitialOffset;
-        this.elite2ApiOffenderIdsTotalPages = elite2ApiOffenderIdsTotalPages;
+        this.prisonApiBaseUrl = prisonApiBaseUrl;
+        this.prisonApiOffenderIdsIterationThreads = prisonApiOffenderIdsIterationThreads;
+        this.prisonApiOffenderIdsLimit = prisonApiOffenderIdsLimit;
+        this.prisonApiOffenderIdsInitialOffset = prisonApiOffenderIdsInitialOffset;
+        this.prisonApiOffenderIdsTotalPages = prisonApiOffenderIdsTotalPages;
         this.pathfinderApiBaseUrl = pathfinderApiBaseUrl;
         this.pathfinderApiTimeout = pathfinderApiTimeout;
         this.idDataDuplicateCheckEnabled = idDataDuplicateCheckEnabled;
@@ -65,7 +65,7 @@ public class DataComplianceProperties {
     }
 
     public Optional<Long> getOffenderIdsTotalPages() {
-        return Optional.ofNullable(elite2ApiOffenderIdsTotalPages);
+        return Optional.ofNullable(prisonApiOffenderIdsTotalPages);
     }
 
     @Bean

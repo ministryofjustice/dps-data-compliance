@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient.OffenderNumbersResponse;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient.OffenderNumbersResponse;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
@@ -36,26 +36,26 @@ class OffenderIterator {
     private static final Duration UPLOAD_RETRY_INITIAL_INTERVAL = Duration.ofMillis(500);
     private static final double UPLOAD_RETRY_MULTIPLIER = 2;
 
-    private final Elite2ApiClient elite2ApiClient;
+    private final PrisonApiClient prisonApiClient;
     private final DataComplianceProperties properties;
     private final ExecutorService executorService;
     private final RetryConfig retryConfig;
 
     @Autowired
-    public OffenderIterator(final Elite2ApiClient elite2ApiClient,
+    public OffenderIterator(final PrisonApiClient prisonApiClient,
                             final DataComplianceProperties properties) {
-        this(elite2ApiClient, properties, custom()
+        this(prisonApiClient, properties, custom()
                 .maxAttempts(UPLOAD_RETRY_MAX_ATTEMPTS)
                 .intervalFunction(ofExponentialBackoff(UPLOAD_RETRY_INITIAL_INTERVAL, UPLOAD_RETRY_MULTIPLIER))
                 .build());
     }
 
     @VisibleForTesting
-    OffenderIterator(final Elite2ApiClient elite2ApiClient,
+    OffenderIterator(final PrisonApiClient prisonApiClient,
                      final DataComplianceProperties properties,
                      final RetryConfig retryConfig) {
-        this.executorService = newFixedThreadPool(properties.getElite2ApiOffenderIdsIterationThreads());
-        this.elite2ApiClient = elite2ApiClient;
+        this.executorService = newFixedThreadPool(properties.getPrisonApiOffenderIdsIterationThreads());
+        this.prisonApiClient = prisonApiClient;
         this.properties = properties;
         this.retryConfig = retryConfig;
     }
@@ -63,7 +63,7 @@ class OffenderIterator {
     void applyForAll(final OffenderAction action) {
 
         log.info("Applying offender action to first batch of up to {} offenders, offset: {}",
-                pageLimit(), properties.getElite2ApiOffenderIdsInitialOffset());
+                pageLimit(), properties.getPrisonApiOffenderIdsInitialOffset());
         final var firstBatchResponse = applyForBatch(action, 0);
 
         log.info("Total number of {} offenders", firstBatchResponse.getTotalCount());
@@ -80,8 +80,8 @@ class OffenderIterator {
 
         log.info("Applying offender action to batch {}", batchIndex);
 
-        final var offset = properties.getElite2ApiOffenderIdsInitialOffset() + (batchIndex * pageLimit());
-        final var response = elite2ApiClient.getOffenderNumbers(offset, pageLimit());
+        final var offset = properties.getPrisonApiOffenderIdsInitialOffset() + (batchIndex * pageLimit());
+        final var response = prisonApiClient.getOffenderNumbers(offset, pageLimit());
         final var tasks = response.getOffenderNumbers().stream()
                 .map(offenderNumber -> applyWithRetry(action, offenderNumber))
                 .collect(toList());
@@ -109,7 +109,7 @@ class OffenderIterator {
     }
 
     private long pageLimit() {
-        return properties.getElite2ApiOffenderIdsLimit();
+        return properties.getPrisonApiOffenderIdsLimit();
     }
 
     interface OffenderAction extends Consumer<OffenderNumber> { }

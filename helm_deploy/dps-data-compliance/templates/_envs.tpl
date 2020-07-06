@@ -10,11 +10,11 @@ env:
   - name: JAVA_OPTS
     value: "{{ .Values.env.JAVA_OPTS }}"
 
-  - name: OAUTH_API_BASE_URL
-    value: "{{ .Values.env.OAUTH_API_BASE_URL }}"
+  - name: HMPPS_AUTH_BASE_URL
+    value: "{{ .Values.env.HMPPS_AUTH_BASE_URL }}"
 
-  - name: ELITE2_API_BASE_URL
-    value: "{{ .Values.env.ELITE2_API_BASE_URL }}"
+  - name: PRISON_API_BASE_URL
+    value: "{{ .Values.env.PRISON_API_BASE_URL }}"
 
   - name: PATHFINDER_API_BASE_URL
     value: "{{ .Values.env.PATHFINDER_API_BASE_URL }}"
@@ -46,19 +46,19 @@ env:
     value: "{{ .Values.env.IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND }}"
   {{- end }}
 
-  {{- if .Values.env.ELITE2_API_OFFENDER_IDS_TOTAL_PAGES }}
-  - name: ELITE2_API_OFFENDER_IDS_TOTAL_PAGES
-    value: "{{ .Values.env.ELITE2_API_OFFENDER_IDS_TOTAL_PAGES }}"
+  {{- if .Values.env.PRISON_API_OFFENDER_IDS_TOTAL_PAGES }}
+  - name: PRISON_API_OFFENDER_IDS_TOTAL_PAGES
+    value: "{{ .Values.env.PRISON_API_OFFENDER_IDS_TOTAL_PAGES }}"
   {{- end }}
 
-  {{- if .Values.env.ELITE2_API_OFFENDER_IDS_INITIAL_OFFSET }}
-  - name: ELITE2_API_OFFENDER_IDS_INITIAL_OFFSET
-    value: "{{ .Values.env.ELITE2_API_OFFENDER_IDS_INITIAL_OFFSET }}"
+  {{- if .Values.env.PRISON_API_OFFENDER_IDS_INITIAL_OFFSET }}
+  - name: PRISON_API_OFFENDER_IDS_INITIAL_OFFSET
+    value: "{{ .Values.env.PRISON_API_OFFENDER_IDS_INITIAL_OFFSET }}"
   {{- end }}
 
-  {{- if .Values.env.ELITE2_API_OFFENDER_IDS_ITERATION_THREADS }}
-  - name: ELITE2_API_OFFENDER_IDS_ITERATION_THREADS
-    value: "{{ .Values.env.ELITE2_API_OFFENDER_IDS_ITERATION_THREADS }}"
+  {{- if .Values.env.PRISON_API_OFFENDER_IDS_ITERATION_THREADS }}
+  - name: PRISON_API_OFFENDER_IDS_ITERATION_THREADS
+    value: "{{ .Values.env.PRISON_API_OFFENDER_IDS_ITERATION_THREADS }}"
   {{- end }}
 
   {{- if .Values.env.SNS_PROVIDER }}

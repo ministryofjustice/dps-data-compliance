@@ -18,26 +18,26 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    private final String oauthApiBaseUrl;
-    private final String elite2ApiBaseUrl;
+    private final String hmppsAuthBaseUrl;
+    private final String prisonApiBaseUrl;
     private final String pathfinderApiBaseUrl;
 
-    public WebClientConfig(@Value("${oauth.api.base.url}") @URL final String oauthApiBaseUrl,
-                           @Value("${elite2.api.base.url}") @URL final String elite2ApiBaseUrl,
+    public WebClientConfig(@Value("${hmpps.auth.base.url}") @URL final String hmppsAuthBaseUrl,
+                           @Value("${prison.api.base.url}") @URL final String prisonApiBaseUrl,
                            @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl) {
-        this.oauthApiBaseUrl = oauthApiBaseUrl;
-        this.elite2ApiBaseUrl = elite2ApiBaseUrl;
+        this.hmppsAuthBaseUrl = hmppsAuthBaseUrl;
+        this.prisonApiBaseUrl = prisonApiBaseUrl;
         this.pathfinderApiBaseUrl = pathfinderApiBaseUrl;
     }
 
-    @Bean(name = "oauthApiHealthWebClient")
-    WebClient oauthApiHealthWebClient() {
-        return WebClient.create(oauthApiBaseUrl);
+    @Bean(name = "hmppsAuthHealthWebClient")
+    WebClient hmppsAuthHealthWebClient() {
+        return WebClient.create(hmppsAuthBaseUrl);
     }
 
-    @Bean(name = "elite2ApiHealthWebClient")
-    WebClient elite2ApiHealthWebClient() {
-        return WebClient.create(elite2ApiBaseUrl);
+    @Bean(name = "prisonApiHealthWebClient")
+    WebClient prisonApiHealthWebClient() {
+        return WebClient.create(prisonApiBaseUrl);
     }
 
     @Bean(name = "pathfinderApiHealthWebClient")

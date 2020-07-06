@@ -3,9 +3,9 @@ package uk.gov.justice.hmpps.datacompliance.jobs.imageupload;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
 import uk.gov.justice.hmpps.datacompliance.jobs.imageupload.OffenderIterator.OffenderAction;
 
@@ -15,7 +15,7 @@ class OffenderImageUploader implements OffenderAction {
 
     private static final String MISSING_IMAGE_DATA = "MISSING_IMAGE_DATA";
 
-    private final Elite2ApiClient elite2ApiClient;
+    private final PrisonApiClient prisonApiClient;
     private final ImageRecognitionClient imageRecognitionClient;
     private final OffenderImageUploadLogger uploadLogger;
     private final RateLimiter rateLimiter;
@@ -25,7 +25,7 @@ class OffenderImageUploader implements OffenderAction {
 
         log.trace("Uploading image data for offender: '{}'", offenderNumber.getOffenderNumber());
 
-        final var faceImages = elite2ApiClient.getOffenderFaceImagesFor(offenderNumber);
+        final var faceImages = prisonApiClient.getOffenderFaceImagesFor(offenderNumber);
 
         if (faceImages.isEmpty()) {
             log.trace("Offender: '{}' has no face images to upload", offenderNumber.getOffenderNumber());
@@ -43,7 +43,7 @@ class OffenderImageUploader implements OffenderAction {
 
         log.trace("Uploading image: '{}' for offender: '{}'", image.getImageId(), offenderNumber.getOffenderNumber());
 
-        final var imageData = elite2ApiClient.getImageData(image.getImageId());
+        final var imageData = prisonApiClient.getImageData(image.getImageId());
 
         imageData.ifPresentOrElse(
 
