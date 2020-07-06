@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.ImageUploadBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
@@ -66,11 +66,11 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
                 .thenReturn(success(new FaceId("face2")))
                 .thenReturn(error(FACE_NOT_FOUND));
 
-        oauthApiMock.enqueue(new MockResponse()
+        hmppsAuthMock.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setBody("{\"access_token\":\"123\",\"token_type\":\"bearer\",\"expires_in\":\"999999\"}")
                 .setHeader("Content-Type", "application/json"));
-        elite2ApiMock.setDispatcher(mockElite2ApiResponses());
+        prisonApiMock.setDispatcher(mockPrisonApiResponses());
 
         migration.run();
 
@@ -83,7 +83,7 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
         assertThat(persistedBatch.getUploadCount()).isEqualTo(2);
     }
 
-    private Dispatcher mockElite2ApiResponses() {
+    private Dispatcher mockPrisonApiResponses() {
 
         return new Dispatcher() {
 

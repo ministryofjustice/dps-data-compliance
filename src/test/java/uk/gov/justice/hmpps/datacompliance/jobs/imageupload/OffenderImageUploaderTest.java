@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
 
@@ -30,7 +30,7 @@ class OffenderImageUploaderTest {
     private static final OffenderImageMetadata IMAGE_METADATA = new OffenderImageMetadata(IMAGE_ID, "FACE");
 
     @Mock
-    private Elite2ApiClient elite2ApiClient;
+    private PrisonApiClient prisonApiClient;
 
     @Mock
     private ImageRecognitionClient imageRecognitionClient;
@@ -45,16 +45,16 @@ class OffenderImageUploaderTest {
 
     @BeforeEach
     void setUp() {
-        imageUploader = new OffenderImageUploader(elite2ApiClient, imageRecognitionClient, logger, rateLimiter);
+        imageUploader = new OffenderImageUploader(prisonApiClient, imageRecognitionClient, logger, rateLimiter);
     }
 
     @Test
     void uploadOffenderImages() {
 
-        when(elite2ApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
+        when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
                 .thenReturn(List.of(IMAGE_METADATA));
 
-        when(elite2ApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.of(IMAGE_DATA));
+        when(prisonApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.of(IMAGE_DATA));
 
         when(imageRecognitionClient.uploadImageToCollection(IMAGE_DATA, OFFENDER_NUMBER, IMAGE_ID))
                 .thenReturn(success(new FaceId("face1")));
@@ -68,7 +68,7 @@ class OffenderImageUploaderTest {
     @Test
     void uploadOffenderImagesHandlesNoImages() {
 
-        when(elite2ApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
+        when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
                 .thenReturn(emptyList());
 
         imageUploader.accept(OFFENDER_NUMBER);
@@ -80,10 +80,10 @@ class OffenderImageUploaderTest {
     @Test
     void uploadOffenderImagesHandlesMissingImageData() {
 
-        when(elite2ApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
+        when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
                 .thenReturn(List.of(IMAGE_METADATA));
 
-        when(elite2ApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.empty());
+        when(prisonApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.empty());
 
         imageUploader.accept(OFFENDER_NUMBER);
 
@@ -94,10 +94,10 @@ class OffenderImageUploaderTest {
     @Test
     void uploadMayResultInNoIndexedFaces() {
 
-        when(elite2ApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
+        when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
                 .thenReturn(List.of(IMAGE_METADATA));
 
-        when(elite2ApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.of(IMAGE_DATA));
+        when(prisonApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.of(IMAGE_DATA));
 
         when(imageRecognitionClient.uploadImageToCollection(IMAGE_DATA, OFFENDER_NUMBER, IMAGE_ID))
                 .thenReturn(error(FACE_NOT_FOUND));

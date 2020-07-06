@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.client.elite2api;
+package uk.gov.justice.hmpps.datacompliance.client.prisonapi;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.OffenderImageMetadata;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.PendingDeletionsRequest;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
@@ -25,7 +25,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.IMAGE_JPEG;
 
 @Service
-public class Elite2ApiClient {
+public class PrisonApiClient {
 
     private static final String OFFENDER_IDS_PATH = "/api/offenders/ids";
     private static final String OFFENDER_IMAGE_METADATA_PATH = "/api/images/offenders/%s";
@@ -35,7 +35,7 @@ public class Elite2ApiClient {
     private final WebClient webClient;
     private final DataComplianceProperties dataComplianceProperties;
 
-    public Elite2ApiClient(@Qualifier("authorizedWebClient") final WebClient webClient,
+    public PrisonApiClient(@Qualifier("authorizedWebClient") final WebClient webClient,
                            final DataComplianceProperties dataComplianceProperties) {
         this.webClient = webClient;
         this.dataComplianceProperties = dataComplianceProperties;
@@ -44,7 +44,7 @@ public class Elite2ApiClient {
     public OffenderNumbersResponse getOffenderNumbers(final long offset, final long limit) {
 
         final var response = webClient.get()
-                .uri(dataComplianceProperties.getElite2ApiBaseUrl() + OFFENDER_IDS_PATH)
+                .uri(dataComplianceProperties.getPrisonApiBaseUrl() + OFFENDER_IDS_PATH)
                 .header("Page-Offset", String.valueOf(offset))
                 .header("Page-Limit", String.valueOf(limit))
                 .retrieve()
@@ -56,7 +56,7 @@ public class Elite2ApiClient {
 
     public List<OffenderImageMetadata> getOffenderFaceImagesFor(final OffenderNumber offenderNumber) {
 
-        final var url = dataComplianceProperties.getElite2ApiBaseUrl() +
+        final var url = dataComplianceProperties.getPrisonApiBaseUrl() +
                 format(OFFENDER_IMAGE_METADATA_PATH, offenderNumber.getOffenderNumber());
 
         return webClient.get()
@@ -70,7 +70,7 @@ public class Elite2ApiClient {
     public Optional<byte[]> getImageData(final long imageId) {
 
         return webClient.get()
-                .uri(dataComplianceProperties.getElite2ApiBaseUrl() + format(IMAGE_DATA_PATH, imageId))
+                .uri(dataComplianceProperties.getPrisonApiBaseUrl() + format(IMAGE_DATA_PATH, imageId))
                 .accept(IMAGE_JPEG)
                 .retrieve()
                 .bodyToMono(byte[].class)
@@ -84,7 +84,7 @@ public class Elite2ApiClient {
 
     public void requestPendingDeletions(final PendingDeletionsRequest request) {
         webClient.post()
-                .uri(dataComplianceProperties.getElite2ApiBaseUrl() + OFFENDER_PENDING_DELETIONS_PATH)
+                .uri(dataComplianceProperties.getPrisonApiBaseUrl() + OFFENDER_PENDING_DELETIONS_PATH)
                 .bodyValue(request)
                 .retrieve()
                 .toBodilessEntity()

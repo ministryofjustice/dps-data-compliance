@@ -7,8 +7,8 @@ services:
     depends_on:
       - localstack
       - dps-data-compliance-db
-      - oauth
-      - elite2-api
+      - hmpps-auth
+      - prison-api
       - pathfinder-api
     networks:
       - hmpps
@@ -18,8 +18,8 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
     environment:
       - SERVER_PORT=8080
-      - OAUTH_API_BASE_URL=http://oauth:8080/auth
-      - ELITE2_API_BASE_URL=http://elite2-api:8080
+      - HMPPS_AUTH_BASE_URL=http://hmpps-auth:8080/auth
+      - PRISON_API_BASE_URL=http://prison-api:8080
       - PATHFINDER_API_BASE_URL=http://pathfinder-api:8080
       - APP_DB_URL=jdbc:postgresql://dps-data-compliance-db:5432/dps-data-compliance-db
       - SPRING_DATASOURCE_USERNAME=admin
@@ -28,11 +28,11 @@ services:
       - AWS_ACCESS_KEY_ID=arbitrary
       - AWS_SECRET_ACCESS_KEY=arbitrary
 
-  oauth:
+  hmpps-auth:
     image: quay.io/hmpps/hmpps-auth:latest
     networks:
       - hmpps
-    container_name: oauth
+    container_name: hmpps-auth
     ports:
       - "8081:8080"
     healthcheck:
@@ -41,9 +41,9 @@ services:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
 
-  elite2-api:
+  prison-api:
     image: quay.io/hmpps/prison-api:latest
-    container_name: elite2-api
+    container_name: prison-api
     depends_on:
       - localstack
     networks:

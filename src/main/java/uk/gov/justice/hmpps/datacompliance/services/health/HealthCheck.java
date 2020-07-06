@@ -36,15 +36,15 @@ abstract class HealthCheck implements HealthIndicator {
     }
 
     @Component
-    static class OAuthApiHealth extends HealthCheck {
-        protected OAuthApiHealth(@Qualifier("oauthApiHealthWebClient") final WebClient client) {
+    static class HmppsAuthHealth extends HealthCheck {
+        protected HmppsAuthHealth(@Qualifier("hmppsAuthHealthWebClient") final WebClient client) {
             super(client);
         }
     }
 
     @Component
-    static class Elite2ApiHealth extends HealthCheck {
-        protected Elite2ApiHealth(@Qualifier("elite2ApiHealthWebClient") final WebClient client) {
+    static class PrisonApiHealth extends HealthCheck {
+        protected PrisonApiHealth(@Qualifier("prisonApiHealthWebClient") final WebClient client) {
             super(client);
         }
     }

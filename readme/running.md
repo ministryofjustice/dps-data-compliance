@@ -38,7 +38,7 @@ To automatically update project dependencies, run:
 ```
 ## Running
 
-The DPS Data Compliance Service, a PostgreSQL database, OAuth API, Elite2 API 
+The DPS Data Compliance Service, a PostgreSQL database, HMPPS Auth, Prison API 
 and Localstack docker containers can be run by:
 ```
 TMPDIR=/private$TMPDIR docker-compose up
@@ -51,7 +51,7 @@ Without Docker, the service can be run locally by:
 ```
 which will run a reduced service with an in-memory hsqldb database and without
 any connection to AWS or Localstack. The `application-dev.yml` properties file
-expects that there is an OAuth API and Elite2 API instance running on `localhost:8081`
+expects that there is an HMPPS Auth and Prison API instance running on `localhost:8081`
 and `localhost:8082` respectively. More details on the required environment variables
 are provided below.
 
@@ -65,13 +65,13 @@ The service can be run in a similar way within IntelliJ by running the main clas
 If running locally, the service has the following minimum environment variables provided 
 to start up:
 
-- `ELITE2_API_BASE_URL` (URL for the Elite2 API)
-- `OAUTH2_API_BASE_URL` (URL for the OAuth2 server)
+- `PRISON_API_BASE_URL` (URL for the Prison API)
+- `HMPPS_AUTH_BASE_URL` (URL for the HMPPS Auth server)
 - `PATHFINDER_API_BASE_URL` (URL for the Pathfinder API)
 - `APP_DB_URL` (URL for a database instance to store data compliance data)
-- `OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED` (Flag to use Elite2 API to perform a duplicate ID check)
-- `OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED` (Flag to use Elite2 API to perform a duplicate check using data in the database.)
-- `OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED` (Flag to query Analytical Platform for potential duplicates.)
+- `OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED` (Flag to use the Prison API to perform a duplicate ID check)
+- `OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED` (Flag to use the Prison API to perform a duplicate check using data in the database)
+- `OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED` (Flag to query Analytical Platform for potential duplicates)
 
 These are provided already if running with the `dev` Spring profile (see the `application-dev.yml` properties file).
 

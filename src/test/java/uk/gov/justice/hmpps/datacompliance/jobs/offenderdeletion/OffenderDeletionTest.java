@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.dto.PendingDeletionsRequest;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.OffenderDeletionConfig;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
@@ -38,7 +38,7 @@ class OffenderDeletionTest {
             .build();
 
     @Mock
-    private Elite2ApiClient elite2ApiClient;
+    private PrisonApiClient prisonApiClient;
 
     @Mock
     private OffenderDeletionBatchRepository batchRepository;
@@ -47,7 +47,7 @@ class OffenderDeletionTest {
 
     @BeforeEach
     void setUp() {
-        offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), CONFIG, batchRepository, elite2ApiClient);
+        offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), CONFIG, batchRepository, prisonApiClient);
     }
 
     @Test
@@ -60,7 +60,7 @@ class OffenderDeletionTest {
 
         offenderDeletion.run();
 
-        verify(elite2ApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
+        verify(prisonApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
                         .dueForDeletionWindowStart(INITIAL_WINDOW_START)
                         .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plus(DURATION))
                         .batchId(BATCH_ID)
@@ -79,7 +79,7 @@ class OffenderDeletionTest {
 
         offenderDeletion.run();
 
-        verify(elite2ApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
+        verify(prisonApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
                 .dueForDeletionWindowStart(INITIAL_WINDOW_START.plusDays(1))
                 .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(2))
                 .batchId(BATCH_ID)
@@ -98,7 +98,7 @@ class OffenderDeletionTest {
 
         offenderDeletion.run();
 
-        verify(elite2ApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
+        verify(prisonApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
                 .dueForDeletionWindowStart(INITIAL_WINDOW_START)
                 .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plus(DURATION))
                 .batchId(BATCH_ID)
@@ -149,7 +149,7 @@ class OffenderDeletionTest {
                 .windowLength(Duration.ofDays(-1))
                 .build();
 
-        offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), badConfig, batchRepository, elite2ApiClient);
+        offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), badConfig, batchRepository, prisonApiClient);
         when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> offenderDeletion.run())

@@ -8,8 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient;
-import uk.gov.justice.hmpps.datacompliance.client.elite2api.Elite2ApiClient.OffenderNumbersResponse;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient.OffenderNumbersResponse;
 import uk.gov.justice.hmpps.datacompliance.jobs.imageupload.OffenderIterator.OffenderAction;
 
 import java.time.Duration;
@@ -36,14 +36,14 @@ class OffenderIteratorTest {
     private static final String OFFENDER_4 = "D1234DD";
     private static final int REQUEST_LIMIT = 2;
     private static final DataComplianceProperties PROPERTIES = DataComplianceProperties.builder()
-            .elite2ApiBaseUrl("some-url")
-            .elite2ApiOffenderIdsIterationThreads(2)
-            .elite2ApiOffenderIdsLimit(REQUEST_LIMIT)
-            .elite2ApiOffenderIdsInitialOffset(0L)
+            .prisonApiBaseUrl("some-url")
+            .prisonApiOffenderIdsIterationThreads(2)
+            .prisonApiOffenderIdsLimit(REQUEST_LIMIT)
+            .prisonApiOffenderIdsInitialOffset(0L)
             .build();
 
     @Mock
-    private Elite2ApiClient client;
+    private PrisonApiClient client;
 
     private OffenderIterator offenderIterator;
 
@@ -115,10 +115,10 @@ class OffenderIteratorTest {
 
         offenderIterator = new OffenderIterator(client,
                 DataComplianceProperties.builder()
-                        .elite2ApiOffenderIdsIterationThreads(2)
-                        .elite2ApiOffenderIdsLimit(REQUEST_LIMIT)
-                        .elite2ApiOffenderIdsInitialOffset(1L)
-                        .elite2ApiOffenderIdsTotalPages(1L)
+                        .prisonApiOffenderIdsIterationThreads(2)
+                        .prisonApiOffenderIdsLimit(REQUEST_LIMIT)
+                        .prisonApiOffenderIdsInitialOffset(1L)
+                        .prisonApiOffenderIdsTotalPages(1L)
                         .build());
 
         mockOffenderNumbersResponseWithOffset(1, OFFENDER_1, OFFENDER_2, OFFENDER_3, OFFENDER_4);

@@ -2,22 +2,22 @@
 ---
 ## Deletion Event Queues
 
-The DPS Data Compliance Service communicates with Elite2 API to retrieve referrals
+The DPS Data Compliance Service communicates with the Prison API to retrieve referrals
 for offender deletion and to send commands to delete offender data.
 
 This is done using two SQS queues, one for outbound requests and one for inbound responses.
 
-The Data Compliance Service requests, via an async API, that Elite2 populates the
+The Data Compliance Service requests, via an async API, that the Prison API populates the
 offender pending deletion queue with a batch of referrals.  The Data Compliance service 
 consumes this queue and if it cannot find any reason why the offender data cannot be
 deleted, it will then publish a new event on the offender deletion granted queue which
-Elite2 will consume and process the deletion.
+the Prison API will consume and process the deletion.
 
 For consistency with other DPS queues, messages have an `eventType` message attribute.
-The messages received from Elite2 API for deletion referral will have an `eventType`
+The messages received from the Prison API for deletion referral will have an `eventType`
 of either `DATA_COMPLIANCE_OFFENDER-PENDING-DELETION` or 
 `DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-COMPLETE`.  The `-COMPLETE` message is sent
-by Elite2 API once it has finished adding messages to the queue for that batch.  This
+by the Prison API once it has finished adding messages to the queue for that batch.  This
 allows the Data Compliance Service to check that the process associated with a given
 async API request has been completed.
 
@@ -37,7 +37,7 @@ are copied into an auto-execution directory in the container.
 
 ### Publishing to the queues
 
-(Warning, if configured, this will prompt Elite2 to delete the Offender provided)
+(Warning, if configured, this will prompt the Prison API to delete the Offender provided)
 
 The following command can be run after the docker containers have started up
 in order to simulate a deletion (replacing `SOME_OFFENDER_ID_DISPLAY` with a
