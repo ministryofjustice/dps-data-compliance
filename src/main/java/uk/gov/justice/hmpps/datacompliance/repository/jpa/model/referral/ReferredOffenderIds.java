@@ -26,8 +26,8 @@ import static javax.persistence.FetchType.LAZY;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"referredOffenderBookingId"})
 @ToString(exclude = "offenderDeletionReferral") // to avoid circular reference
-@Table(name = "REFERRED_OFFENDER_BOOKING")
-public class ReferredOffenderBooking {
+@Table(name = "REFERRED_OFFENDER_IDS")
+public class ReferredOffenderIds {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,6 +43,6 @@ public class ReferredOffenderBooking {
     private Long offenderId;
 
     @NotNull
-    @Column(name = "OFFENDER_BOOK_ID", nullable = false)
+    @Column(name = "OFFENDER_BOOK_ID")
     private Long offenderBookId;
 }

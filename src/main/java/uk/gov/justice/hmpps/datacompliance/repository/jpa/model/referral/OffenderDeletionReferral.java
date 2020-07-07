@@ -91,13 +91,13 @@ public class OffenderDeletionReferral implements OffenderEntity {
     private LocalDateTime receivedDateTime;
 
     @OneToMany(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
-    private final List<ReferredOffenderBooking> offenderBookings = new ArrayList<>();
+    private final List<ReferredOffenderIds> offenderIds = new ArrayList<>();
 
     @OneToOne(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
     private ReferralResolution referralResolution;
 
-    public OffenderDeletionReferral addReferredOffenderBooking(final ReferredOffenderBooking booking) {
-        this.offenderBookings.add(booking);
+    public OffenderDeletionReferral addReferredOffenderIds(final ReferredOffenderIds booking) {
+        this.offenderIds.add(booking);
         booking.setOffenderDeletionReferral(this);
         return this;
     }

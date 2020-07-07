@@ -15,7 +15,7 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceE
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderIds;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
@@ -76,7 +76,7 @@ class DeletionServiceTest {
                         .referralId(REFERRAL_ID)
                         .offenderNo(OFFENDER_NUMBER)
                         .build()
-                        .addReferredOffenderBooking(ReferredOffenderBooking.builder()
+                        .addReferredOffenderIds(ReferredOffenderIds.builder()
                                 .offenderId(OFFENDER_ID)
                                 .offenderBookId(OFFENDER_BOOK_ID)
                                 .build()));
@@ -205,9 +205,9 @@ class DeletionServiceTest {
                 .receivedDateTime(NOW)
                 .build());
 
-        referral.addReferredOffenderBooking(ReferredOffenderBooking.builder().offenderId(1L).offenderBookId(11L).build());
-        referral.addReferredOffenderBooking(ReferredOffenderBooking.builder().offenderId(1L).offenderBookId(12L).build());
-        referral.addReferredOffenderBooking(ReferredOffenderBooking.builder().offenderId(2L).offenderBookId(21L).build());
+        referral.addReferredOffenderIds(ReferredOffenderIds.builder().offenderId(1L).offenderBookId(11L).build());
+        referral.addReferredOffenderIds(ReferredOffenderIds.builder().offenderId(1L).offenderBookId(12L).build());
+        referral.addReferredOffenderIds(ReferredOffenderIds.builder().offenderId(2L).offenderBookId(21L).build());
 
         referral.setReferralResolution(ReferralResolution.builder()
                 .resolutionStatus(DELETION_GRANTED)
