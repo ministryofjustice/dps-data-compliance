@@ -13,7 +13,7 @@ import org.springframework.test.context.transaction.TestTransaction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderIds;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate;
@@ -57,7 +57,7 @@ class OffenderDeletionReferralRepositoryTest {
     @Sql("image_duplicate.sql")
     @Sql("offender_deletion_batch.sql")
     @Sql("offender_deletion_referral.sql")
-    @Sql("referred_offender_ids.sql")
+    @Sql("referred_offender_alias.sql")
     @Sql("referral_resolution.sql")
     @Sql("manual_retention.sql")
     @Sql("retention_check.sql")
@@ -73,7 +73,7 @@ class OffenderDeletionReferralRepositoryTest {
     void getOffenderDeletionReferralWithoutBookingsOrResolution() {
         final var referral = repository.findById(1L).orElseThrow();
 
-        assertThat(referral.getOffenderIds()).isEmpty();
+        assertThat(referral.getOffenderAliases()).isEmpty();
         assertThat(referral.getReferralResolution()).isEmpty();
     }
 
@@ -108,7 +108,7 @@ class OffenderDeletionReferralRepositoryTest {
                 .build();
 
         referral.setReferralResolution(referralResolution());
-        referral.addReferredOffenderIds(ReferredOffenderIds.builder()
+        referral.addReferredOffenderAlias(ReferredOffenderAlias.builder()
                 .offenderId(-1001L)
                 .offenderBookId(-1L)
                 .build());
@@ -137,12 +137,12 @@ class OffenderDeletionReferralRepositoryTest {
         assertThat(referral.getBirthDate()).isEqualTo(LocalDate.of(1969, 1, 1));
         assertThat(referral.getReceivedDateTime()).isEqualTo(LocalDateTime.of(2020, 1, 2, 3, 4, 5));
 
-        assertThat(referral.getOffenderIds()).hasSize(1);
-        assertMatchesExpectedContents(referral.getOffenderIds().get(0));
+        assertThat(referral.getOffenderAliases()).hasSize(1);
+        assertMatchesExpectedContents(referral.getOffenderAliases().get(0));
         assertMatchesExpectedContents(referral.getReferralResolution().orElseThrow());
     }
 
-    private void assertMatchesExpectedContents(final ReferredOffenderIds offenderBooking) {
+    private void assertMatchesExpectedContents(final ReferredOffenderAlias offenderBooking) {
         assertThat(offenderBooking.getOffenderId()).isEqualTo(-1001L);
         assertThat(offenderBooking.getOffenderBookId()).isEqualTo(-1L);
     }

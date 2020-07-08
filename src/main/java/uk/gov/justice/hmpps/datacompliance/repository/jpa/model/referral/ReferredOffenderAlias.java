@@ -24,15 +24,15 @@ import static javax.persistence.FetchType.LAZY;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"referredOffenderBookingId"})
+@EqualsAndHashCode(of = {"referredOffenderAliasId"})
 @ToString(exclude = "offenderDeletionReferral") // to avoid circular reference
-@Table(name = "REFERRED_OFFENDER_IDS")
-public class ReferredOffenderIds {
+@Table(name = "REFERRED_OFFENDER_ALIAS")
+public class ReferredOffenderAlias {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "REFERRED_OFFENDER_BOOKING_ID", nullable = false)
-    private Long referredOffenderBookingId;
+    @Column(name = "REFERRED_OFFENDER_ALIAS_ID", nullable = false)
+    private Long referredOffenderAliasId;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "REFERRAL_ID")
@@ -42,7 +42,6 @@ public class ReferredOffenderIds {
     @Column(name = "OFFENDER_ID", nullable = false)
     private Long offenderId;
 
-    @NotNull
     @Column(name = "OFFENDER_BOOK_ID")
     private Long offenderBookId;
 }

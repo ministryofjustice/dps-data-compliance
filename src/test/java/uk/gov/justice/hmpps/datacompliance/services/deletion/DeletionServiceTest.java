@@ -15,7 +15,7 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceE
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderIds;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
@@ -71,15 +71,17 @@ class DeletionServiceTest {
     @Test
     void grantDeletion() {
 
-        deletionService.grantDeletion(
-                OffenderDeletionReferral.builder()
-                        .referralId(REFERRAL_ID)
-                        .offenderNo(OFFENDER_NUMBER)
-                        .build()
-                        .addReferredOffenderIds(ReferredOffenderIds.builder()
-                                .offenderId(OFFENDER_ID)
-                                .offenderBookId(OFFENDER_BOOK_ID)
-                                .build()));
+        final var referral = OffenderDeletionReferral.builder()
+                .referralId(REFERRAL_ID)
+                .offenderNo(OFFENDER_NUMBER)
+                .build();
+
+        referral.addReferredOffenderAlias(ReferredOffenderAlias.builder()
+                .offenderId(OFFENDER_ID)
+                .offenderBookId(OFFENDER_BOOK_ID)
+                .build());
+
+        deletionService.grantDeletion(referral);
 
         verify(deletionGrantedEventPusher).grantDeletion(
                 OffenderDeletionGrant.builder()
@@ -205,9 +207,9 @@ class DeletionServiceTest {
                 .receivedDateTime(NOW)
                 .build());
 
-        referral.addReferredOffenderIds(ReferredOffenderIds.builder().offenderId(1L).offenderBookId(11L).build());
-        referral.addReferredOffenderIds(ReferredOffenderIds.builder().offenderId(1L).offenderBookId(12L).build());
-        referral.addReferredOffenderIds(ReferredOffenderIds.builder().offenderId(2L).offenderBookId(21L).build());
+        referral.addReferredOffenderAlias(ReferredOffenderAlias.builder().offenderId(1L).offenderBookId(11L).build());
+        referral.addReferredOffenderAlias(ReferredOffenderAlias.builder().offenderId(1L).offenderBookId(12L).build());
+        referral.addReferredOffenderAlias(ReferredOffenderAlias.builder().offenderId(2L).offenderBookId(21L).build());
 
         referral.setReferralResolution(ReferralResolution.builder()
                 .resolutionStatus(DELETION_GRANTED)

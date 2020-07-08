@@ -11,7 +11,7 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletio
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderIds;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
@@ -42,11 +42,11 @@ public class DeletionService {
         deletionGrantedEventPusher.grantDeletion(OffenderDeletionGrant.builder()
                 .offenderNumber(referral.getOffenderNumber())
                 .referralId(referral.getReferralId())
-                .offenderIds(referral.getOffenderIds().stream()
-                        .map(ReferredOffenderIds::getOffenderId)
+                .offenderIds(referral.getOffenderAliases().stream()
+                        .map(ReferredOffenderAlias::getOffenderId)
                         .collect(toSet()))
-                .offenderBookIds(referral.getOffenderIds().stream()
-                        .map(ReferredOffenderIds::getOffenderBookId)
+                .offenderBookIds(referral.getOffenderAliases().stream()
+                        .map(ReferredOffenderAlias::getOffenderBookId)
                         .collect(toSet()))
                 .build());
     }
@@ -86,8 +86,8 @@ public class DeletionService {
                 uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.builder()
                         .offenderIdDisplay(deletionCompletion.getOffenderNo());
 
-        deletionCompletion.getOffenderIds().stream()
-                .collect(groupingBy(ReferredOffenderIds::getOffenderId))
+        deletionCompletion.getOffenderAliases().stream()
+                .collect(groupingBy(ReferredOffenderAlias::getOffenderId))
                 .forEach((offenderId, bookings) -> {
                     final var offenderWithBookings =  OffenderWithBookings.builder().offenderId(offenderId);
                     bookings.forEach(booking -> offenderWithBookings.booking(new Booking(booking.getOffenderBookId())));
