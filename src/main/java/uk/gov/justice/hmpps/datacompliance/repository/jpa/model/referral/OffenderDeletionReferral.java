@@ -91,15 +91,14 @@ public class OffenderDeletionReferral implements OffenderEntity {
     private LocalDateTime receivedDateTime;
 
     @OneToMany(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
-    private final List<ReferredOffenderBooking> offenderBookings = new ArrayList<>();
+    private final List<ReferredOffenderAlias> offenderAliases = new ArrayList<>();
 
     @OneToOne(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
     private ReferralResolution referralResolution;
 
-    public OffenderDeletionReferral addReferredOffenderBooking(final ReferredOffenderBooking booking) {
-        this.offenderBookings.add(booking);
-        booking.setOffenderDeletionReferral(this);
-        return this;
+    public void addReferredOffenderAlias(final ReferredOffenderAlias alias) {
+        this.offenderAliases.add(alias);
+        alias.setOffenderDeletionReferral(this);
     }
 
     public Optional<ReferralResolution> getReferralResolution() {

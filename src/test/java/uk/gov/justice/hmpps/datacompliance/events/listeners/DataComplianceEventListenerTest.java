@@ -13,7 +13,7 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchRe
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderWithBookings;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
@@ -59,7 +59,7 @@ class DataComplianceEventListenerTest {
                         "\"middleName\":\"Middle\"," +
                         "\"lastName\":\"Jones\"," +
                         "\"birthDate\":\"1990-01-02\"," +
-                        "\"offenders\":[{" +
+                        "\"offenderAliases\":[{" +
                             "\"offenderId\":123," +
                             "\"bookings\":[{\"offenderBookId\":321,\"offenceCodes\":[\"offence1\"]}]" +
                         "}]" +
@@ -72,7 +72,7 @@ class DataComplianceEventListenerTest {
                 .middleName("Middle")
                 .lastName("Jones")
                 .birthDate(LocalDate.of(1990, 1, 2))
-                .offender(OffenderWithBookings.builder()
+                .offenderAlias(OffenderAlias.builder()
                         .offenderId(123L)
                         .offenderBooking(OffenderBooking.builder()
                                 .offenderBookId(321L)

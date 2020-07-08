@@ -7,13 +7,17 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderBooking;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
 
 @Slf4j
@@ -68,13 +72,25 @@ public class ReferralService {
                 .birthDate(event.getBirthDate())
                 .build();
 
-        event.getOffenders().forEach(offender ->
-                offender.getOffenderBookings().forEach(booking ->
-                        referral.addReferredOffenderBooking(ReferredOffenderBooking.builder()
-                                .offenderId(offender.getOffenderId())
-                                .offenderBookId(booking.getOffenderBookId())
-                                .build())));
+        event.getOffenderAliases().forEach(alias ->
+                transform(alias).forEach(referral::addReferredOffenderAlias));
 
         return referral;
+    }
+
+    private List<ReferredOffenderAlias> transform(final OffenderAlias alias) {
+
+        if (alias.getOffenderBookings().isEmpty()) {
+            return List.of(ReferredOffenderAlias.builder()
+                    .offenderId(alias.getOffenderId())
+                    .build());
+        }
+
+        return alias.getOffenderBookings().stream()
+                .map(booking -> ReferredOffenderAlias.builder()
+                        .offenderId(alias.getOffenderId())
+                        .offenderBookId(booking.getOffenderBookId())
+                        .build())
+                .collect(toList());
     }
 }

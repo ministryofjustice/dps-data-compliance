@@ -12,7 +12,7 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderWithBookings;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
@@ -115,10 +115,12 @@ class ReferralServiceTest {
                 .middleName("Middle")
                 .lastName("Smith")
                 .birthDate(LocalDate.of(1969, 1, 1))
-                .offender(OffenderWithBookings.builder()
-                        .offenderId(1L)
-                        .offenderBooking(OffenderBooking.builder().offenderBookId(2L).build())
+                .offenderAlias(OffenderAlias.builder()
+                        .offenderId(123L)
+                        .offenderBooking(OffenderBooking.builder().offenderBookId(456L).build())
+                        .offenderBooking(OffenderBooking.builder().offenderBookId(789L).build())
                         .build())
+                .offenderAlias(OffenderAlias.builder().offenderId(321L).build())
                 .build();
     }
 
@@ -137,10 +139,15 @@ class ReferralServiceTest {
 
     private void verifyBooking(final OffenderDeletionReferral referral) {
 
-        assertThat(referral.getOffenderBookings()).hasSize(1);
+        assertThat(referral.getOffenderAliases()).hasSize(3);
 
-        final var offenderBooking = referral.getOffenderBookings().get(0);
-        assertThat(offenderBooking.getOffenderId()).isEqualTo(1L);
-        assertThat(offenderBooking.getOffenderBookId()).isEqualTo(2L);
+        assertThat(referral.getOffenderAliases().get(0).getOffenderId()).isEqualTo(123L);
+        assertThat(referral.getOffenderAliases().get(0).getOffenderBookId()).isEqualTo(456L);
+
+        assertThat(referral.getOffenderAliases().get(1).getOffenderId()).isEqualTo(123L);
+        assertThat(referral.getOffenderAliases().get(1).getOffenderBookId()).isEqualTo(789L);
+
+        assertThat(referral.getOffenderAliases().get(2).getOffenderId()).isEqualTo(321L);
+        assertThat(referral.getOffenderAliases().get(2).getOffenderBookId()).isNull();
     }
 }
