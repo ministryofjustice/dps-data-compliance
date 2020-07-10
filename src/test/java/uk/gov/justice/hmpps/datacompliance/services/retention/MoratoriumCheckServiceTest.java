@@ -60,8 +60,9 @@ class MoratoriumCheckServiceTest {
     @Test
     void retainDueToOffence() {
 
-        assertThat(service.retainDueToOffence(offenderWithOffenceCodes("SX56099")));
-        assertThat(service.retainDueToOffence(offenderWithOffenceCodes("SX56100", "SX56050", "NOT A MATCH")));
+        assertThat(service.retainDueToOffence(offenderWithOffenceCodes("SX56099"))).isTrue();
+        assertThat(service.retainDueToOffence(offenderWithOffenceCodes("SX56100", "SX56050", "NOT A MATCH"))).isTrue();
+        assertThat(service.retainDueToOffence(offenderWithOffenceCodes("PC00000-001N"))).isTrue();
 
         assertThat(service.retainDueToOffence(offenderWithOffenceCodes("NOT A MATCH"))).isFalse();
         assertThat(service.retainDueToOffence(offenderWithNoOffenceCode())).isFalse();
