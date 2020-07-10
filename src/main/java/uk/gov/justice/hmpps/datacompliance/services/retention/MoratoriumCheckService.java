@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.services.retention;
 
+import com.google.common.collect.ImmutableSet;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -96,7 +97,7 @@ public class MoratoriumCheckService {
     public static final String CHILD_ABUSE_REGEX_REVERSED = ".*" + LINKS_TO_ABUSE_OR_RISK + ".*" + LINKS_TO_CHILDREN_OR_PUBLIC_ROLES + ".*";
 
     // TODO GDPR-153 Persist offence codes to the DB:
-    public static final Set<String> OFFENCE_CODES_CAUSING_RETENTION =
+    private static final Set<String> CHILD_ABUSE_LINKED_OFFENCE_CODES =
             Set.of("SX03001-004N", "SX03035-038N", "SX03017-018N", "SX03007-008N", "SX03070-077N", "SX03114-115N",
                     "SX03054-057N", "SX03062-175N", "SX03116-117N", "SX03102-111N", "SX03058-059N", "SX03112-113N",
                     "SX03060-200N", "SX03050-192N", "SX03048-049N", "SX03031-044N", "SX03019-022N", "MH59008-010N",
@@ -146,6 +147,13 @@ public class MoratoriumCheckService {
                     "SX03035A", "SX03036A", "SX03037A", "SX03038A", "SX03039A", "SX03040A", "SX03041A", "SX03042A",
                     "SX03043A", "SX03044A", "SX03161A", "SX03224", "SX03225", "SX03225A", "SX03226", "SX03226A",
                     "SX03227", "SX03227C", "SX03228", "SX03228C", "SX03231", "CJ09001", "SC15003", "PH17001");
+
+    private static final Set<String> SECTION_40_CONVICTION_OFFENCE_CODES = Set.of("PC00000-001N");
+
+    private static final Set<String> OFFENCE_CODES_CAUSING_RETENTION = ImmutableSet.<String>builder()
+            .addAll(CHILD_ABUSE_LINKED_OFFENCE_CODES)
+            .addAll(SECTION_40_CONVICTION_OFFENCE_CODES)
+            .build();
 
     private final DataComplianceEventPusher eventPusher;
 
