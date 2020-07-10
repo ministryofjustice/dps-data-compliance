@@ -3,10 +3,11 @@ package uk.gov.justice.hmpps.datacompliance.jobs.imageupload;
 import com.google.common.util.concurrent.RateLimiter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
-import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
 import uk.gov.justice.hmpps.datacompliance.jobs.imageupload.OffenderIterator.OffenderAction;
 
 @Slf4j
@@ -39,35 +40,32 @@ class OffenderImageUploader implements OffenderAction {
         return uploadLogger.getUploadCount();
     }
 
-    private void getAndUploadImageData(final OffenderImageMetadata image, final OffenderNumber offenderNumber) {
+    private void getAndUploadImageData(final OffenderImageMetadata imageMetadata, final OffenderNumber offenderNumber) {
 
-        log.trace("Uploading image: '{}' for offender: '{}'", image.getImageId(), offenderNumber.getOffenderNumber());
+        log.trace("Uploading image: '{}' for offender: '{}'", imageMetadata.getImageId(), offenderNumber.getOffenderNumber());
 
-        final var imageData = prisonApiClient.getImageData(image.getImageId());
+        final var image = prisonApiClient.getImageData(offenderNumber, imageMetadata.getImageId());
 
-        imageData.ifPresentOrElse(
+        image.ifPresentOrElse(
 
-                data -> uploadAndLogImage(image, offenderNumber, data),
+                this::uploadAndLogImage,
 
-                () -> logMissingImageData(image, offenderNumber));
+                () -> logMissingImageData(offenderNumber, imageMetadata.getImageId()));
     }
 
-    private void uploadAndLogImage(final OffenderImageMetadata image,
-                                   final OffenderNumber offenderNumber,
-                                   final byte[] imageData) {
+    private void uploadAndLogImage(final OffenderImage image) {
 
         rateLimiter.acquire();
 
-        imageRecognitionClient.uploadImageToCollection(imageData, offenderNumber, image.getImageId())
-                .handle(faceId -> uploadLogger.log(offenderNumber, image, faceId),
-                        error -> uploadLogger.logUploadError(offenderNumber, image, error.getReason()));
+        imageRecognitionClient.uploadImageToCollection(image)
+                .handle(faceId -> uploadLogger.log(image, faceId),
+                        error -> uploadLogger.logUploadError(image.getOffenderNumber(), image.getImageId(), error.getReason()));
     }
 
-    private void logMissingImageData(final OffenderImageMetadata image, final OffenderNumber offenderNumber) {
+    private void logMissingImageData(final OffenderNumber offenderNumber, final long imageId) {
 
-        log.warn("Image: '{}' for offender: '{}' has no image data",
-                image.getImageId(), offenderNumber.getOffenderNumber());
+        log.warn("Image: '{}' for offender: '{}' has no image data", imageId, offenderNumber.getOffenderNumber());
 
-        uploadLogger.logUploadError(offenderNumber, image, MISSING_IMAGE_DATA);
+        uploadLogger.logUploadError(offenderNumber, imageId, MISSING_IMAGE_DATA);
     }
 }

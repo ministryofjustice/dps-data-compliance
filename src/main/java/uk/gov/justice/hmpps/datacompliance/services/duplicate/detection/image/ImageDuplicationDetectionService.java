@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceMatch;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload;
@@ -17,6 +18,7 @@ import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -43,6 +45,10 @@ public class ImageDuplicationDetectionService {
                 .filter(OffenderImageUpload::isNoUploadError)
                 .flatMap(this::findDuplicates)
                 .collect(toList());
+    }
+
+    public Optional<Double> getSimilarity(final OffenderImage image1, final OffenderImage image2) {
+        return imageRecognitionClient.getSimilarity(image1, image2);
     }
 
     private Stream<ImageDuplicate> findDuplicates(final OffenderImageUpload referenceImage) {

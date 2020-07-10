@@ -50,7 +50,7 @@ class ReferralResolutionServiceIntegrationTest extends IntegrationTest {
     }
 
     @Transactional
-    private void updateAndProcessCheck(final long retentionCheckId) {
+    void updateAndProcessCheck(final long retentionCheckId) {
 
         // Give the first process a head start:
         if (retentionCheckId == 2) {

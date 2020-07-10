@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
@@ -67,13 +68,18 @@ public class PrisonApiClient {
                 .toStream().collect(toList());
     }
 
-    public Optional<byte[]> getImageData(final long imageId) {
+    public Optional<OffenderImage> getImageData(final OffenderNumber offenderNumber, final long imageId) {
 
         return webClient.get()
                 .uri(dataComplianceProperties.getPrisonApiBaseUrl() + format(IMAGE_DATA_PATH, imageId))
                 .accept(IMAGE_JPEG)
                 .retrieve()
                 .bodyToMono(byte[].class)
+                .map(data -> OffenderImage.builder()
+                        .offenderNumber(offenderNumber)
+                        .imageId(imageId)
+                        .imageData(data)
+                        .build())
 
                 // Handling edge case where image had no image data and a 404 response was returned
                 .onErrorResume(WebClientResponseException.class,

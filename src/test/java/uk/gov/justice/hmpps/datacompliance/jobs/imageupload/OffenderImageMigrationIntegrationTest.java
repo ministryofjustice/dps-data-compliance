@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.ImageUploadBatchRepository;
@@ -61,7 +62,7 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
     @Test
     void runMigration() {
 
-        when(imageRecognitionClient.uploadImageToCollection(any(), any(), anyLong()))
+        when(imageRecognitionClient.uploadImageToCollection(any()))
                 .thenReturn(success(new FaceId("face1")))
                 .thenReturn(success(new FaceId("face2")))
                 .thenReturn(error(FACE_NOT_FOUND));
@@ -74,9 +75,9 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
         migration.run();
 
-        verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x01}, offenderNo(1), 1L);
-        verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x02}, offenderNo(2), 2L);
-        verify(imageRecognitionClient).uploadImageToCollection(new byte[]{0x03}, offenderNo(3), 3L);
+        verify(imageRecognitionClient).uploadImageToCollection(offenderImage(offenderNo(1), 1L, new byte[]{0x01}));
+        verify(imageRecognitionClient).uploadImageToCollection(offenderImage(offenderNo(2), 2L, new byte[]{0x02}));
+        verify(imageRecognitionClient).uploadImageToCollection(offenderImage(offenderNo(3), 3L, new byte[]{0x03}));
         verifyNoMoreInteractions(imageRecognitionClient);
 
         var persistedBatch = repository.findAll().iterator().next();
@@ -130,5 +131,13 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
     private OffenderNumber offenderNo(final int index) {
         return new OffenderNumber(format("A%04dAA", index));
+    }
+
+    private OffenderImage offenderImage(final OffenderNumber offenderNumber, final long imageId, final byte[] data) {
+        return OffenderImage.builder()
+                .offenderNumber(offenderNumber)
+                .imageId(imageId)
+                .imageData(data)
+                .build();
     }
 }
