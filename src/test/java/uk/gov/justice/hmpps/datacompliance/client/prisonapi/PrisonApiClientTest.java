@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
@@ -29,6 +30,8 @@ class PrisonApiClientTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final LocalDateTime TIMESTAMP = LocalDateTime.of(2020, 2, 1, 3, 4, 5, 123456789);
+    private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
+    private static final long IMAGE_ID = 123;
     private static final long PAGE_LIMIT = 2;
 
     private final MockWebServer prisonApiMock = new MockWebServer();
@@ -106,7 +109,7 @@ class PrisonApiClientTest {
                 .setBody(OBJECT_MAPPER.writeValueAsString(offenderImages))
                 .setHeader("Content-Type", "application/json"));
 
-        var result = prisonApiClient.getOffenderFaceImagesFor(new OffenderNumber("A1234AA"));
+        var result = prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER);
 
         assertThat(result).containsOnly(new OffenderImageMetadata(123L, "FACE"));
 
@@ -120,7 +123,7 @@ class PrisonApiClientTest {
 
         prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
 
-        assertThatThrownBy(() -> prisonApiClient.getOffenderFaceImagesFor(new OffenderNumber("A1234AA")))
+        assertThatThrownBy(() -> prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
                 .isInstanceOf(WebClientResponseException.class);
     }
 
@@ -133,9 +136,13 @@ class PrisonApiClientTest {
                 .setBody(new Buffer().write(data))
                 .setHeader("Content-Type", "image/jpeg"));
 
-        var result = prisonApiClient.getImageData(123L);
+        var result = prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID);
 
-        assertThat(result).contains(data);
+        assertThat(result).contains(OffenderImage.builder()
+                .offenderNumber(OFFENDER_NUMBER)
+                .imageId(IMAGE_ID)
+                .imageData(data)
+                .build());
 
         RecordedRequest recordedRequest = prisonApiMock.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("GET");
@@ -150,7 +157,7 @@ class PrisonApiClientTest {
                 .setBody("{\"message\":\"Not Found\"}")
                 .setResponseCode(404));
 
-        assertThat(prisonApiClient.getImageData(123L)).isEmpty();
+        assertThat(prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID)).isEmpty();
     }
 
     @Test
@@ -158,7 +165,7 @@ class PrisonApiClientTest {
 
         prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
 
-        assertThatThrownBy(() -> prisonApiClient.getImageData(123L))
+        assertThatThrownBy(() -> prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID))
                 .isInstanceOf(WebClientResponseException.class);
     }
 

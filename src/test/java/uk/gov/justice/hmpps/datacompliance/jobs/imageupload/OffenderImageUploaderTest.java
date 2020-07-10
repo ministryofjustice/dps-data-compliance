@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
@@ -26,8 +27,12 @@ class OffenderImageUploaderTest {
 
     private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
     private static final long IMAGE_ID = 123L;
-    private static final byte[] IMAGE_DATA = new byte[]{0x12};
     private static final OffenderImageMetadata IMAGE_METADATA = new OffenderImageMetadata(IMAGE_ID, "FACE");
+    private static final OffenderImage OFFENDER_IMAGE = OffenderImage.builder()
+            .offenderNumber(OFFENDER_NUMBER)
+            .imageId(IMAGE_ID)
+            .imageData(new byte[]{0x12})
+            .build();
 
     @Mock
     private PrisonApiClient prisonApiClient;
@@ -54,15 +59,15 @@ class OffenderImageUploaderTest {
         when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
                 .thenReturn(List.of(IMAGE_METADATA));
 
-        when(prisonApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.of(IMAGE_DATA));
+        when(prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID)).thenReturn(Optional.of(OFFENDER_IMAGE));
 
-        when(imageRecognitionClient.uploadImageToCollection(IMAGE_DATA, OFFENDER_NUMBER, IMAGE_ID))
+        when(imageRecognitionClient.uploadImageToCollection(OFFENDER_IMAGE))
                 .thenReturn(success(new FaceId("face1")));
 
         imageUploader.accept(OFFENDER_NUMBER);
 
         verify(rateLimiter).acquire();
-        verify(logger).log(OFFENDER_NUMBER, IMAGE_METADATA, new FaceId("face1"));
+        verify(logger).log(OFFENDER_IMAGE, new FaceId("face1"));
     }
 
     @Test
@@ -83,11 +88,11 @@ class OffenderImageUploaderTest {
         when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
                 .thenReturn(List.of(IMAGE_METADATA));
 
-        when(prisonApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.empty());
+        when(prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID)).thenReturn(Optional.empty());
 
         imageUploader.accept(OFFENDER_NUMBER);
 
-        verify(logger).logUploadError(OFFENDER_NUMBER, IMAGE_METADATA, "MISSING_IMAGE_DATA");
+        verify(logger).logUploadError(OFFENDER_NUMBER, IMAGE_ID, "MISSING_IMAGE_DATA");
         verifyNoInteractions(imageRecognitionClient);
     }
 
@@ -97,14 +102,14 @@ class OffenderImageUploaderTest {
         when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
                 .thenReturn(List.of(IMAGE_METADATA));
 
-        when(prisonApiClient.getImageData(IMAGE_ID)).thenReturn(Optional.of(IMAGE_DATA));
+        when(prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID)).thenReturn(Optional.of(OFFENDER_IMAGE));
 
-        when(imageRecognitionClient.uploadImageToCollection(IMAGE_DATA, OFFENDER_NUMBER, IMAGE_ID))
+        when(imageRecognitionClient.uploadImageToCollection(OFFENDER_IMAGE))
                 .thenReturn(error(FACE_NOT_FOUND));
 
         imageUploader.accept(OFFENDER_NUMBER);
 
-        verify(logger).logUploadError(OFFENDER_NUMBER, IMAGE_METADATA, "FACE_NOT_FOUND");
+        verify(logger).logUploadError(OFFENDER_NUMBER, IMAGE_ID, "FACE_NOT_FOUND");
     }
 
 }

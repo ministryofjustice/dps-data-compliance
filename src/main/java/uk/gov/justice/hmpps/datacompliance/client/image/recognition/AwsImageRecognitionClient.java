@@ -4,7 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
+import software.amazon.awssdk.services.rekognition.model.CompareFacesMatch;
+import software.amazon.awssdk.services.rekognition.model.CompareFacesRequest;
 import software.amazon.awssdk.services.rekognition.model.DeleteFacesRequest;
 import software.amazon.awssdk.services.rekognition.model.Face;
 import software.amazon.awssdk.services.rekognition.model.FaceRecord;
@@ -12,14 +15,15 @@ import software.amazon.awssdk.services.rekognition.model.Image;
 import software.amazon.awssdk.services.rekognition.model.IndexFacesRequest;
 import software.amazon.awssdk.services.rekognition.model.IndexFacesResponse;
 import software.amazon.awssdk.services.rekognition.model.SearchFacesRequest;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.utils.Result;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
+import static java.util.Comparator.comparingDouble;
 import static java.util.stream.Collectors.toSet;
 import static software.amazon.awssdk.core.SdkBytes.fromByteArray;
 import static software.amazon.awssdk.services.rekognition.model.QualityFilter.HIGH;
@@ -50,16 +54,14 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
     }
 
     @Override
-    public Result<FaceId, IndexFacesError> uploadImageToCollection(final byte[] imageData,
-                                                                   final OffenderNumber offenderNumber,
-                                                                   final long imageId) {
+    public Result<FaceId, IndexFacesError> uploadImageToCollection(final OffenderImage image) {
 
-        log.trace("Uploading image data for offender: '{}', image: '{}'", offenderNumber.getOffenderNumber(), imageId);
+        log.trace("Uploading image data for offender: '{}', image: '{}'",
+                image.getOffenderNumberString(), image.getImageData());
 
-        final var result = client.indexFaces(
-                generateIndexFaceRequest(imageData, offenderNumber, imageId));
+        final var result = client.indexFaces(generateIndexFaceRequest(image));
 
-        return ensureOnlyOneFaceIndexed(offenderNumber, imageId, result);
+        return ensureOnlyOneFaceIndexed(image, result);
     }
 
     @Override
@@ -72,8 +74,26 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
         return result.hasFaceMatches() ? transformFaceMatches(result.faceMatches()) : emptySet();
     }
 
-    private Result<FaceId, IndexFacesError> ensureOnlyOneFaceIndexed(final OffenderNumber offenderNumber,
-                                                                     final long imageId,
+    @Override
+    public Optional<Double> getSimilarity(final OffenderImage image1, final OffenderImage image2) {
+
+        final var response = client.compareFaces(CompareFacesRequest.builder()
+                .qualityFilter(HIGH)
+                .sourceImage(Image.builder().bytes(SdkBytes.fromByteArray(image1.getImageData())).build())
+                .targetImage(Image.builder().bytes(SdkBytes.fromByteArray(image2.getImageData())).build())
+                .build());
+
+        if (response.hasFaceMatches()) {
+            return response.faceMatches().stream()
+                    .map(CompareFacesMatch::similarity)
+                    .map(Double::valueOf)
+                    .max(comparingDouble(d -> d));
+        }
+
+        return Optional.empty();
+    }
+
+    private Result<FaceId, IndexFacesError> ensureOnlyOneFaceIndexed(final OffenderImage image,
                                                                      final IndexFacesResponse indexedFacesResponse) {
 
         final var indexedFaces = indexedFacesResponse.faceRecords();
@@ -84,7 +104,7 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
         }
 
         if (indexedFaces.size() > 1) {
-            return handleMultipleFaces(offenderNumber, imageId, indexedFaces);
+            return handleMultipleFaces(image, indexedFaces);
         }
 
         return indexedFaces.stream()
@@ -95,25 +115,23 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
                 .orElse(error(FACE_NOT_FOUND));
     }
 
-    private IndexFacesRequest generateIndexFaceRequest(final byte[] imageData,
-                                                       final OffenderNumber offenderNumber,
-                                                       final long imageId) {
+    private IndexFacesRequest generateIndexFaceRequest(final OffenderImage image) {
+
         // Check for up to two faces in a single image so that we are warned
         // if multiple faces are detected.
         return IndexFacesRequest.builder()
                 .collectionId(collectionId)
                 .maxFaces(2)
                 .qualityFilter(HIGH)
-                .externalImageId(generateExternalImageId(offenderNumber, imageId))
-                .image(Image.builder().bytes(fromByteArray(imageData)).build())
+                .externalImageId(generateExternalImageId(image))
+                .image(Image.builder().bytes(fromByteArray(image.getImageData())).build())
                 .build();
     }
 
-    private Result<FaceId, IndexFacesError> handleMultipleFaces(final OffenderNumber offenderNumber,
-                                                                final long imageId,
+    private Result<FaceId, IndexFacesError> handleMultipleFaces(final OffenderImage image,
                                                                 final List<FaceRecord> multipleFaces) {
         log.warn("Multiple faces (count: '{}') for offender: '{}' and image: '{}'",
-                multipleFaces.size(), offenderNumber.getOffenderNumber(), imageId);
+                multipleFaces.size(), image.getOffenderNumberString(), image.getImageId());
 
         // Need to delete all indexed faces in this image because we cannot tell which one
         // belongs to the offender:
@@ -136,8 +154,8 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
                 .build();
     }
 
-    private String generateExternalImageId(final OffenderNumber offenderNumber, final long imageId) {
-        return format("%s-%s", offenderNumber.getOffenderNumber(), imageId);
+    private String generateExternalImageId(final OffenderImage image) {
+        return format("%s-%s", image.getOffenderNumberString(), image.getImageId());
     }
 
     private Result<FaceId, IndexFacesError> singleFaceId(final String faceId) {

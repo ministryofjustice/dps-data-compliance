@@ -6,12 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageUploadBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.OffenderImageUploadRepository;
-import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.time.LocalDateTime;
@@ -19,7 +19,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OffenderImageUploadLoggerTest {
@@ -48,7 +51,13 @@ class OffenderImageUploadLoggerTest {
         assertThat(logger.getUploadCount()).isZero();
 
         when(repository.findByOffenderNoAndImageId(any(), any())).thenReturn(Optional.empty());
-        logger.log(new OffenderNumber(OFFENDER_NUMBER), new OffenderImageMetadata(IMAGE_ID, "FACE"), FACE_ID);
+
+        logger.log(
+                OffenderImage.builder()
+                        .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
+                        .imageId(IMAGE_ID)
+                        .build(),
+                FACE_ID);
 
         var offenderImageUpload = ArgumentCaptor.forClass(OffenderImageUpload.class);
         verify(repository).save(offenderImageUpload.capture());
@@ -72,7 +81,12 @@ class OffenderImageUploadLoggerTest {
         when(repository.findByOffenderNoAndImageId(OFFENDER_NUMBER, IMAGE_ID))
                 .thenReturn(Optional.of(mock(OffenderImageUpload.class)));
 
-        logger.log(new OffenderNumber(OFFENDER_NUMBER), new OffenderImageMetadata(IMAGE_ID, "FACE"), FACE_ID);
+        logger.log(
+                OffenderImage.builder()
+                        .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
+                        .imageId(IMAGE_ID)
+                        .build(),
+                FACE_ID);
         
         verify(repository, never()).save(any());
         assertThat(logger.getUploadCount()).isZero();
@@ -84,7 +98,7 @@ class OffenderImageUploadLoggerTest {
         assertThat(logger.getUploadCount()).isZero();
 
         when(repository.findByOffenderNoAndImageId(any(), any())).thenReturn(Optional.empty());
-        logger.logUploadError(new OffenderNumber(OFFENDER_NUMBER), new OffenderImageMetadata(IMAGE_ID, "FACE"), "some reason");
+        logger.logUploadError(new OffenderNumber(OFFENDER_NUMBER), IMAGE_ID, "some reason");
 
         var offenderImageUpload = ArgumentCaptor.forClass(OffenderImageUpload.class);
         verify(repository).save(offenderImageUpload.capture());
@@ -99,5 +113,4 @@ class OffenderImageUploadLoggerTest {
 
         assertThat(logger.getUploadCount()).isZero();
     }
-
 }

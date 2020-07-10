@@ -23,12 +23,18 @@ import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.Index
 @ExtendWith(MockitoExtension.class)
 class AwsImageRecognitionClientTest {
 
-    private static final byte[] DATA = new byte[] { (byte) 0x01 };
+    private static final byte[] DATA_1 = new byte[] { (byte) 0x01 };
+    private static final byte[] DATA_2 = new byte[] { (byte) 0x02 };
     private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
     private static final long OFFENDER_IMAGE_ID = 1L;
     private static final String EXPECTED_FACE_ID = "face1";
     private static final String COLLECTION_NAME = "collection_name";
     private static final float SIMILARITY_THRESHOLD = 99.9f;
+    private static final OffenderImage OFFENDER_IMAGE = OffenderImage.builder()
+            .offenderNumber(OFFENDER_NUMBER)
+            .imageId(OFFENDER_IMAGE_ID)
+            .imageData(DATA_1)
+            .build();
 
     @Mock
     private RekognitionClient awsClient;
@@ -47,14 +53,14 @@ class AwsImageRecognitionClientTest {
 
         when(awsClient.indexFaces(request.capture())).thenReturn(indexedFaces(EXPECTED_FACE_ID));
 
-        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID).get().getFaceId())
+        assertThat(client.uploadImageToCollection(OFFENDER_IMAGE).get().getFaceId())
                 .isEqualTo(EXPECTED_FACE_ID);
 
         assertThat(request.getValue().maxFaces()).isEqualTo(2);
         assertThat(request.getValue().qualityFilter()).isEqualTo(HIGH);
         assertThat(request.getValue().collectionId()).isEqualTo(COLLECTION_NAME);
         assertThat(request.getValue().externalImageId()).isEqualTo(OFFENDER_NUMBER.getOffenderNumber() + "-" + OFFENDER_IMAGE_ID);
-        assertThat(request.getValue().image().bytes().asByteArray()).isEqualTo(DATA);
+        assertThat(request.getValue().image().bytes().asByteArray()).isEqualTo(DATA_1);
     }
 
     @Test
@@ -63,7 +69,7 @@ class AwsImageRecognitionClientTest {
         when(awsClient.indexFaces(any(IndexFacesRequest.class)))
                 .thenReturn(indexedFaces(EXPECTED_FACE_ID, "another-face-in-the-image"));
 
-        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID).getError())
+        assertThat(client.uploadImageToCollection(OFFENDER_IMAGE).getError())
                 .isEqualTo(MULTIPLE_FACES_FOUND);
 
         verify(awsClient).deleteFaces(DeleteFacesRequest.builder()
@@ -82,7 +88,7 @@ class AwsImageRecognitionClientTest {
         when(awsClient.indexFaces(any(IndexFacesRequest.class)))
                 .thenReturn(indexedFaces(/* NONE */));
 
-        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID).getError())
+        assertThat(client.uploadImageToCollection(OFFENDER_IMAGE).getError())
                 .isEqualTo(FACE_NOT_FOUND);
     }
 
@@ -94,7 +100,7 @@ class AwsImageRecognitionClientTest {
                         .unindexedFaces(UnindexedFace.builder().build())
                         .build());
 
-        assertThat(client.uploadImageToCollection(DATA, OFFENDER_NUMBER, OFFENDER_IMAGE_ID).getError())
+        assertThat(client.uploadImageToCollection(OFFENDER_IMAGE).getError())
                 .isEqualTo(FACE_POOR_QUALITY);
     }
 
@@ -121,6 +127,42 @@ class AwsImageRecognitionClientTest {
         when(awsClient.searchFaces(any(SearchFacesRequest.class))).thenReturn(noMatchingFace());
 
         assertThat(client.findMatchesFor(new FaceId("someFace"))).isEmpty();
+    }
+
+    @Test
+    void getSimilarity() {
+
+        final var image1 = OffenderImage.builder().imageData(DATA_1).build();
+        final var image2 = OffenderImage.builder().imageData(DATA_2).build();
+
+        final var request = ArgumentCaptor.forClass(CompareFacesRequest.class);
+
+        when(awsClient.compareFaces(request.capture())).thenReturn(compareFacesResponse(2.0f, 3.0f, 1.0f));
+
+        assertThat(client.getSimilarity(image1, image2)).contains(3.0);
+
+        assertThat(request.getValue().qualityFilter()).isEqualTo(HIGH);
+        assertThat(request.getValue().sourceImage().bytes().asByteArray()).isEqualTo(DATA_1);
+        assertThat(request.getValue().targetImage().bytes().asByteArray()).isEqualTo(DATA_2);
+    }
+
+    @Test
+    void getSimilarityReturnsEmptyIfNoMatches() {
+
+        final var image1 = OffenderImage.builder().imageData(DATA_1).build();
+        final var image2 = OffenderImage.builder().imageData(DATA_2).build();
+
+        when(awsClient.compareFaces(any(CompareFacesRequest.class))).thenReturn(compareFacesResponse());
+
+        assertThat(client.getSimilarity(image1, image2)).isEmpty();
+    }
+
+    private CompareFacesResponse compareFacesResponse(final Float... similarities) {
+        return CompareFacesResponse.builder()
+                .faceMatches(stream(similarities)
+                        .map(similarity -> CompareFacesMatch.builder().similarity(similarity).build())
+                        .collect(toList()))
+                .build();
     }
 
     private IndexFacesResponse indexedFaces(final String ... faceIds) {
