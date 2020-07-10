@@ -2,12 +2,12 @@ package uk.gov.justice.hmpps.datacompliance.jobs.imageupload;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageUploadBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.OffenderImageUploadRepository;
-import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -22,48 +22,50 @@ class OffenderImageUploadLogger {
     private final TimeSource timeSource;
     private final AtomicLong uploadCount = new AtomicLong();
 
-    void log(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final FaceId faceId) {
+    void log(final OffenderImage image, final FaceId faceId) {
 
-        log.trace("Uploaded image: '{}' for offender: '{}'", image.getImageId(), offenderNumber.getOffenderNumber());
+        final var offenderNumber = image.getOffenderNumber().getOffenderNumber();
 
-        repository.findByOffenderNoAndImageId(offenderNumber.getOffenderNumber(), image.getImageId())
+        log.trace("Uploaded image: '{}' for offender: '{}'", image.getImageId(), offenderNumber);
+
+        repository.findByOffenderNoAndImageId(offenderNumber, image.getImageId())
                 .ifPresentOrElse(
-                        logAlreadyExists(image, offenderNumber),
-                        save(offenderNumber, image, faceId));
+                        logAlreadyExists(image.getImageId(), image.getOffenderNumber()),
+                        save(image, faceId));
     }
 
-    void logUploadError(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final String reason) {
+    void logUploadError(final OffenderNumber offenderNumber, final long imageId, final String reason) {
 
         log.debug("Upload for image: '{}' and offender: '{}' failed due to: '{}'",
-                image.getImageId(), offenderNumber.getOffenderNumber(), reason);
+                imageId, offenderNumber.getOffenderNumber(), reason);
 
-        repository.findByOffenderNoAndImageId(offenderNumber.getOffenderNumber(), image.getImageId())
+        repository.findByOffenderNoAndImageId(offenderNumber.getOffenderNumber(), imageId)
                 .ifPresentOrElse(
-                        logAlreadyExists(image, offenderNumber),
-                        saveUploadError(offenderNumber, image, reason));
+                        logAlreadyExists(imageId, offenderNumber),
+                        saveUploadError(offenderNumber, imageId, reason));
     }
 
     long getUploadCount() {
         return uploadCount.get();
     }
 
-    private Consumer<OffenderImageUpload> logAlreadyExists(final OffenderImageMetadata image,
+    private Consumer<OffenderImageUpload> logAlreadyExists(final long imageId,
                                                            final OffenderNumber offenderNumber) {
         return existingUpload -> log.warn("Image: '{}' for offender: '{}' has already been uploaded.",
-                image.getImageId(), offenderNumber.getOffenderNumber());
+                imageId, offenderNumber.getOffenderNumber());
     }
 
-    private Runnable saveUploadError(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final String reason) {
+    private Runnable saveUploadError(final OffenderNumber offenderNumber, final long imageId, final String reason) {
         return () -> repository.save(
-                offenderImageUploadBuilder(offenderNumber, image)
+                offenderImageUploadBuilder(offenderNumber, imageId)
                         .uploadErrorReason(reason)
                         .build());
     }
 
-    private Runnable save(final OffenderNumber offenderNumber, final OffenderImageMetadata image, final FaceId faceId) {
+    private Runnable save(final OffenderImage image, final FaceId faceId) {
         return () -> {
             repository.save(
-                    offenderImageUploadBuilder(offenderNumber, image)
+                    offenderImageUploadBuilder(image.getOffenderNumber(), image.getImageId())
                             .faceId(faceId.getFaceId())
                             .build());
             uploadCount.incrementAndGet();
@@ -71,11 +73,11 @@ class OffenderImageUploadLogger {
     }
 
     private OffenderImageUpload.OffenderImageUploadBuilder offenderImageUploadBuilder(final OffenderNumber offenderNumber,
-                                                                                      final OffenderImageMetadata image) {
+                                                                                      final long imageId) {
         return OffenderImageUpload.builder()
                 .imageUploadBatch(uploadBatch)
                 .uploadDateTime(timeSource.nowAsLocalDateTime())
                 .offenderNo(offenderNumber.getOffenderNumber())
-                .imageId(image.getImageId());
+                .imageId(imageId);
     }
 }

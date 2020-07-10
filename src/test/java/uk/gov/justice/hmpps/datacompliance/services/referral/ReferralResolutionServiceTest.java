@@ -13,12 +13,15 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Referra
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckAnalyticalPlatformDataDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDatabaseDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.ReferralResolutionRepository;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ActionableRetentionCheck;
+import uk.gov.justice.hmpps.datacompliance.services.retention.FalsePositiveCheckService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.time.LocalDateTime;
@@ -35,11 +38,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.DISABLED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.FALSE_POSITIVE;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
 
@@ -57,6 +62,9 @@ class ReferralResolutionServiceTest {
     @Mock
     private DeletionService deletionService;
 
+    @Mock
+    private FalsePositiveCheckService falsePositiveCheckService;
+
     private ReferralResolutionService referralResolutionService;
 
     @BeforeEach
@@ -65,7 +73,8 @@ class ReferralResolutionServiceTest {
                 TimeSource.of(NOW),
                 deletionService,
                 referralRepository,
-                referralResolutionRepository);
+                referralResolutionRepository,
+                falsePositiveCheckService);
     }
 
     @Test
@@ -176,6 +185,33 @@ class ReferralResolutionServiceTest {
 
         verify(referralResolutionRepository).save(resolution);
         verify(deletionService).grantDeletion(resolution.getOffenderDeletionReferral());
+    }
+
+    @Test
+    void falsePositiveRetentionCheckIdentified() {
+
+        final var falsePositiveCheck = new RetentionCheckDatabaseDataDuplicate(RETENTION_REQUIRED);
+
+        when(falsePositiveCheckService.isFalsePositive(falsePositiveCheck)).thenReturn(true);
+
+        final var resolution = referralResolutionService.findResolution(List.of(
+                checkWithStatus(RETENTION_NOT_REQUIRED),
+                falsePositiveCheck));
+
+        assertThat(resolution).isEqualTo(DELETION_GRANTED);
+        assertThat(falsePositiveCheck.getCheckStatus()).isEqualTo(FALSE_POSITIVE);
+    }
+
+    @Test
+    void multipleRetentionChecksNotFlaggedAsPotentialFalsePositive() {
+
+        final var resolution = referralResolutionService.findResolution(List.of(
+                checkWithStatus(RETENTION_NOT_REQUIRED),
+                new RetentionCheckDatabaseDataDuplicate(RETENTION_REQUIRED),
+                new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_REQUIRED)));
+
+        assertThat(resolution).isEqualTo(RETAINED);
+        verifyNoInteractions(falsePositiveCheckService);
     }
 
     private ReferralResolution pendingResolution(final RetentionCheck... checks) {

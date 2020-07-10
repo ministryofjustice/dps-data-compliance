@@ -33,6 +33,9 @@ public class DataComplianceProperties {
     private final boolean idDataDuplicateCheckEnabled;  // Duplicate check based only on IDs (PNC, CRO, LIDS numbers)
     private final boolean databaseDataDuplicateCheckEnabled;  // Duplicate check based on points based similarity SQL query on NOMIS database
     private final boolean analyticalPlatformDataDuplicateCheckEnabled;  // Duplicate check based on Analytical Platform's Apache Spark deduplication solution (Splink)
+    private final boolean falsePositiveDuplicateCheckEnabled; // Enable to run verification when only one check method flags up a duplicate
+    private final double falsePositiveDuplicateImageSimilarityThreshold;
+    private final int falsePositiveDuplicateRequiredImageCount;
 
     public DataComplianceProperties(@Value("${prison.api.base.url}") @URL final String prisonApiBaseUrl,
                                     @Value("${prison.api.offender.ids.iteration.threads:1}") final int prisonApiOffenderIdsIterationThreads,
@@ -44,7 +47,10 @@ public class DataComplianceProperties {
                                     @Value("${offender.retention.image.duplicate.check.enabled}") final boolean imageDuplicateCheckEnabled,
                                     @Value("${offender.retention.data.duplicate.id.check.enabled}") final boolean idDataDuplicateCheckEnabled,
                                     @Value("${offender.retention.data.duplicate.db.check.enabled}") final boolean databaseDataDuplicateCheckEnabled,
-                                    @Value("${offender.retention.data.duplicate.ap.check.enabled}") final boolean analyticalPlatformDataDuplicateCheckEnabled) {
+                                    @Value("${offender.retention.data.duplicate.ap.check.enabled}") final boolean analyticalPlatformDataDuplicateCheckEnabled,
+                                    @Value("${offender.retention.false.positive.duplicate.check.enabled}") final boolean falsePositiveDuplicateCheckEnabled,
+                                    @Value("${offender.retention.false.positive.duplicate.image.similarity.threshold:90}") final double falsePositiveDuplicateImageSimilarityThreshold,
+                                    @Value("${offender.retention.false.positive.duplicate.required.image.count:2}") final int falsePositiveDuplicateRequiredImageCount) {
 
         log.info("Image upload - number of threads: {}", prisonApiOffenderIdsIterationThreads);
         log.info("Image upload - page limit: {}", prisonApiOffenderIdsLimit);
@@ -54,6 +60,7 @@ public class DataComplianceProperties {
         log.info("Data Duplicate - ID check enabled: {}", idDataDuplicateCheckEnabled);
         log.info("Data Duplicate - SQL query check enabled: {}", databaseDataDuplicateCheckEnabled);
         log.info("Data Duplicate - Analytical Platform check enabled: {}", analyticalPlatformDataDuplicateCheckEnabled);
+        log.info("Data Duplicate - False positive check enabled: {}", falsePositiveDuplicateCheckEnabled);
 
         this.prisonApiBaseUrl = prisonApiBaseUrl;
         this.prisonApiOffenderIdsIterationThreads = prisonApiOffenderIdsIterationThreads;
@@ -66,6 +73,9 @@ public class DataComplianceProperties {
         this.idDataDuplicateCheckEnabled = idDataDuplicateCheckEnabled;
         this.databaseDataDuplicateCheckEnabled = databaseDataDuplicateCheckEnabled;
         this.analyticalPlatformDataDuplicateCheckEnabled = analyticalPlatformDataDuplicateCheckEnabled;
+        this.falsePositiveDuplicateCheckEnabled = falsePositiveDuplicateCheckEnabled;
+        this.falsePositiveDuplicateImageSimilarityThreshold = falsePositiveDuplicateImageSimilarityThreshold;
+        this.falsePositiveDuplicateRequiredImageCount = falsePositiveDuplicateRequiredImageCount;
     }
 
     public Optional<Long> getOffenderIdsTotalPages() {

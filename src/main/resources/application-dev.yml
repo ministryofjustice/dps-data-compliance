@@ -9,6 +9,7 @@ spring:
   security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
 
 offender.retention:
+  false.positive.duplicate.check.enabled: false
   image.duplicate.check.enabled: false
   data.duplicate:
     id.check.enabled: false

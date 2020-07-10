@@ -9,13 +9,16 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Offende
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.ReferralResolutionRepository;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ActionableRetentionCheck;
+import uk.gov.justice.hmpps.datacompliance.services.retention.FalsePositiveCheckService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
@@ -24,7 +27,11 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.DISABLED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.FALSE_POSITIVE;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckAnalyticalPlatformDataDuplicate.DATA_DUPLICATE_AP;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDatabaseDataDuplicate.DATA_DUPLICATE_DB;
 
 @Slf4j
 @Service
@@ -36,6 +43,7 @@ public class ReferralResolutionService {
     private final DeletionService deletionService;
     private final OffenderDeletionReferralRepository referralRepository;
     private final ReferralResolutionRepository referralResolutionRepository;
+    private final FalsePositiveCheckService falsePositiveCheckService;
 
     public void processReferral(final OffenderDeletionReferral referral,
                                 final List<ActionableRetentionCheck> actionableRetentionChecks) {
@@ -91,6 +99,10 @@ public class ReferralResolutionService {
             return PENDING;
         }
 
+        findPotentialFalsePositiveRetention(retentionChecks)
+                .filter(falsePositiveCheckService::isFalsePositive)
+                .ifPresent(this::markAsFalsePositive);
+
         if (canGrantDeletion(retentionChecks)) {
             return DELETION_GRANTED;
         }
@@ -102,9 +114,27 @@ public class ReferralResolutionService {
         return retentionChecks.stream().anyMatch(RetentionCheck::isPending);
     }
 
+    private Optional<RetentionCheckDataDuplicate> findPotentialFalsePositiveRetention(final List<RetentionCheck> retentionChecks) {
+
+        final var dataDuplicateRetentions = retentionChecks.stream()
+                .filter(check -> check.isStatus(RETENTION_REQUIRED))
+                .filter(check -> check.isType(DATA_DUPLICATE_DB) || check.isType(DATA_DUPLICATE_AP))
+                .map(RetentionCheckDataDuplicate.class::cast)
+                .collect(toList());
+
+        return dataDuplicateRetentions.size() == 1 ? dataDuplicateRetentions.stream().findFirst() : Optional.empty();
+    }
+
+    private void markAsFalsePositive(final RetentionCheck check) {
+        log.debug("Check causing retention: '{}' has been found to be a false positive", check.getRetentionCheckId());
+        check.setCheckStatus(FALSE_POSITIVE);
+    }
+
     private boolean canGrantDeletion(final List<RetentionCheck> retentionChecks) {
         return retentionChecks.stream().allMatch(check ->
-                check.isStatus(RETENTION_NOT_REQUIRED) || check.isStatus(DISABLED));
+                check.isStatus(RETENTION_NOT_REQUIRED)
+                        || check.isStatus(FALSE_POSITIVE)
+                        || check.isStatus(DISABLED));
     }
 
     private void persistRetentionChecks(final OffenderDeletionReferral referral,

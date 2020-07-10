@@ -41,6 +41,7 @@ public abstract class RetentionCheck implements OffenderEntity {
         PENDING,
         RETENTION_REQUIRED,
         RETENTION_NOT_REQUIRED,
+        FALSE_POSITIVE,
         DISABLED
     }
 
@@ -74,5 +75,9 @@ public abstract class RetentionCheck implements OffenderEntity {
 
     public boolean isStatus(final Status value) {
         return checkStatus == value;
+    }
+
+    public boolean isType(final String value) {
+        return value.equalsIgnoreCase(checkType);
     }
 }
