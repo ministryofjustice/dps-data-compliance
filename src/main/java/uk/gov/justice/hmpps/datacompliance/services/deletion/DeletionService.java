@@ -47,6 +47,7 @@ public class DeletionService {
                         .collect(toSet()))
                 .offenderBookIds(referral.getOffenderAliases().stream()
                         .map(ReferredOffenderAlias::getOffenderBookId)
+                        .filter(Objects::nonNull)
                         .collect(toSet()))
                 .build());
     }
