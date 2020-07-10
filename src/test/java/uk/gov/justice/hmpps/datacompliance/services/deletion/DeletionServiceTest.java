@@ -93,6 +93,26 @@ class DeletionServiceTest {
     }
 
     @Test
+    void grantDeletionWithNoBooking() {
+
+        final var referral = OffenderDeletionReferral.builder()
+                .referralId(REFERRAL_ID)
+                .offenderNo(OFFENDER_NUMBER)
+                .build();
+
+        referral.addReferredOffenderAlias(ReferredOffenderAlias.builder().offenderId(OFFENDER_ID).build());
+
+        deletionService.grantDeletion(referral);
+
+        verify(deletionGrantedEventPusher).grantDeletion(
+                OffenderDeletionGrant.builder()
+                        .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
+                        .referralId(REFERRAL_ID)
+                        .offenderId(OFFENDER_ID)
+                        .build());
+    }
+
+    @Test
     void handleDeletionComplete() {
 
         final var existingReferral = generateOffenderDeletionReferral();
