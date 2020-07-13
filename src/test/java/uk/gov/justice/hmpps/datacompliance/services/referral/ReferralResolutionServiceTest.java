@@ -205,12 +205,16 @@ class ReferralResolutionServiceTest {
     @Test
     void multipleRetentionChecksNotFlaggedAsPotentialFalsePositive() {
 
-        final var resolution = referralResolutionService.findResolution(List.of(
-                checkWithStatus(RETENTION_NOT_REQUIRED),
-                new RetentionCheckDatabaseDataDuplicate(RETENTION_REQUIRED),
-                new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_REQUIRED)));
+        assertThat(referralResolutionService.findResolution(List.of(
+                checkWithStatus(RETENTION_REQUIRED),
+                new RetentionCheckDatabaseDataDuplicate(RETENTION_REQUIRED))))
+                .isEqualTo(RETAINED);
 
-        assertThat(resolution).isEqualTo(RETAINED);
+        assertThat(referralResolutionService.findResolution(List.of(
+                checkWithStatus(RETENTION_REQUIRED),
+                new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_REQUIRED))))
+                .isEqualTo(RETAINED);
+
         verifyNoInteractions(falsePositiveCheckService);
     }
 

@@ -116,13 +116,16 @@ public class ReferralResolutionService {
 
     private Optional<RetentionCheckDataDuplicate> findPotentialFalsePositiveRetention(final List<RetentionCheck> retentionChecks) {
 
-        final var dataDuplicateRetentions = retentionChecks.stream()
+        final var checksCausingRetention = retentionChecks.stream()
                 .filter(check -> check.isStatus(RETENTION_REQUIRED))
+                .collect(toList());
+
+        final var dataDuplicateRetentions = checksCausingRetention.stream()
                 .filter(check -> check.isType(DATA_DUPLICATE_DB) || check.isType(DATA_DUPLICATE_AP))
                 .map(RetentionCheckDataDuplicate.class::cast)
                 .collect(toList());
 
-        return dataDuplicateRetentions.size() == 1 ? dataDuplicateRetentions.stream().findFirst() : Optional.empty();
+        return checksCausingRetention.size() == 1 ? dataDuplicateRetentions.stream().findFirst() : Optional.empty();
     }
 
     private void markAsFalsePositive(final RetentionCheck check) {

@@ -51,7 +51,8 @@ public class FalsePositiveCheckService {
         final var duplicateOffenderImages = getImagesFor(new OffenderNumber(duplicate.getDuplicateOffenderNo()));
 
         if (referenceOffenderImages.size() < requiredImageCount || duplicateOffenderImages.size() < requiredImageCount) {
-            log.debug("Number of images is not sufficient to check duplicate: '{}'", duplicate.getDataDuplicateId());
+            log.debug("Number of images ({}/{}) is not sufficient to check duplicate: '{}'",
+                    referenceOffenderImages.size(), duplicateOffenderImages.size(), duplicate.getDataDuplicateId());
             return false;
         }
 

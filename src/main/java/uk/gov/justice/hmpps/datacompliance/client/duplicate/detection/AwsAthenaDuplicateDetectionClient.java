@@ -113,6 +113,12 @@ public class AwsAthenaDuplicateDetectionClient implements DuplicateDetectionClie
         return  resultPage.resultSet().rows().stream()
                 .map(DuplicateOffenderRow::new)
                 .filter(not(DuplicateOffenderRow::isHeaderRow))
-                .map(row -> new DuplicateResult(row.getComplementOf(referenceOffender), row.getMatchScore()));
+                .map(row -> new DuplicateResult(
+                        row.getComplementOf(referenceOffender),
+                        matchScoreToPercentageConfidence(row.getMatchScore())));
+    }
+
+    private double matchScoreToPercentageConfidence(final double matchScore) {
+        return matchScore * 100;
     }
 }
