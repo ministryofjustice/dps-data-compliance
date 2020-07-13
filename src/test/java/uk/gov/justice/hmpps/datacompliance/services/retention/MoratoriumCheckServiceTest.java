@@ -58,6 +58,18 @@ class MoratoriumCheckServiceTest {
     }
 
     @Test
+    void avoidFalseRegexMatchOnTheWordSon() {
+        assertThat("Some text containing words risk and son within it".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text with different placement of words risk and son".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text with words surrounded by non-alphabetic characters:risk... and ...son!".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text with risk or reason of accidentally flagging".matches(CHILD_ABUSE_REGEX_REVERSED)).isFalse();
+
+        assertThat("Some text containing words son and risk".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text with words surrounded by non-alphabetic characters:son... and ...risk!".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text with reasonable risk of accidentally flagging".matches(CHILD_ABUSE_REGEX)).isFalse();
+    }
+
+    @Test
     void retainDueToOffence() {
 
         assertThat(service.retainDueToOffence(offenderWithOffenceCodes("SX56099"))).isTrue();
