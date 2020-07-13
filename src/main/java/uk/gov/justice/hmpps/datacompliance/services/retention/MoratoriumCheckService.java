@@ -46,7 +46,7 @@ public class MoratoriumCheckService {
             "public|" +
             "religi|" +
             "school|" +
-            "[^a-z]*son[^a-z]*|" +
+            "[^a-z]+son([^a-z]+|$)|" +
             "teach|" +
             "teen|" +
             "toddler|" +
