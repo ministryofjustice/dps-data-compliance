@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
@@ -30,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.OffenderWithBookings.builder;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETED;
@@ -65,7 +67,8 @@ class DeletionServiceTest {
                 TimeSource.of(NOW),
                 referralRepository,
                 deletionCompleteEventPusher,
-                deletionGrantedEventPusher);
+                deletionGrantedEventPusher,
+                DataComplianceProperties.builder().deletionGrantEnabled(true).build());
     }
 
     @Test
@@ -110,6 +113,23 @@ class DeletionServiceTest {
                         .referralId(REFERRAL_ID)
                         .offenderId(OFFENDER_ID)
                         .build());
+    }
+
+    @Test
+    void grantDeletionDisabled() {
+        deletionService = new DeletionService(
+                TimeSource.of(NOW),
+                referralRepository,
+                deletionCompleteEventPusher,
+                deletionGrantedEventPusher,
+                DataComplianceProperties.builder().deletionGrantEnabled(false).build());
+
+        deletionService.grantDeletion(OffenderDeletionReferral.builder()
+                .referralId(REFERRAL_ID)
+                .offenderNo(OFFENDER_NUMBER)
+                .build());
+
+        verifyNoInteractions(deletionGrantedEventPusher);
     }
 
     @Test
