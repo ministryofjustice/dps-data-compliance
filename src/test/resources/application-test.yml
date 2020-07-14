@@ -28,3 +28,5 @@ offender.retention:
     id.check.enabled: true
     db.check.enabled: true
     ap.check.enabled: true
+
+deletion.grant.enabled: true

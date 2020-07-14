@@ -16,4 +16,6 @@ offender.retention:
     db.check.enabled: false
     ap.check.enabled: false
 
+deletion.grant.enabled: true
+
 server.shutdown: immediate

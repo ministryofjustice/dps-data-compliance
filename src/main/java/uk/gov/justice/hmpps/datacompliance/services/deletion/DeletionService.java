@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.Booking;
@@ -34,8 +35,14 @@ public class DeletionService {
     private final OffenderDeletionReferralRepository referralRepository;
     private final OffenderDeletionCompleteEventPusher deletionCompleteEventPusher;
     private final DataComplianceEventPusher deletionGrantedEventPusher;
+    private final DataComplianceProperties properties;
 
     public void grantDeletion(final OffenderDeletionReferral referral) {
+
+        if (!properties.isDeletionGrantEnabled()) {
+            log.info("Deletion grant is disabled for: '{}'", referral.getOffenderNo());
+            return;
+        }
 
         log.info("Granting deletion of offender: '{}'", referral.getOffenderNo());
 
