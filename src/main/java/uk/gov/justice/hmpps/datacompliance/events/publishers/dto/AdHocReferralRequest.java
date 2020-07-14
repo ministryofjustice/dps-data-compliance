@@ -18,5 +18,5 @@ public class AdHocReferralRequest {
     private String offenderIdDisplay;
 
     @JsonProperty("batchId")
-    private Long retentionCheckId;
+    private Long batchId;
 }

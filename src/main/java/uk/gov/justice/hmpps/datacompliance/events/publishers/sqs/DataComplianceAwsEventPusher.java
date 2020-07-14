@@ -93,7 +93,7 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     @Override
     public void requestAdHocReferral(final OffenderNumber offenderNo, final Long batchId) {
 
-        log.debug("Requesting deletion referral for offender: '{}' and batch: '{}'",
+        log.debug("Requesting ad hoc deletion referral for offender: '{}' and batch: '{}'",
                 offenderNo.getOffenderNumber(), batchId);
 
         sqsClient.sendMessage(generateRequest(AD_HOC_REFERRAL,
