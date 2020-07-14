@@ -67,6 +67,9 @@ public class FalsePositiveCheckService {
                 .flatMap(Optional::stream)
                 .collect(toList());
 
+        log.debug("Image comparisons for offender: '{}' had similarities: {}",
+                referenceImage.getOffenderNumberString(), successfulComparisons);
+
         return successfulComparisons.size() == comparisonImages.size() &&
                 successfulComparisons.stream().allMatch(similarity ->
                         similarity < properties.getFalsePositiveDuplicateImageSimilarityThreshold());

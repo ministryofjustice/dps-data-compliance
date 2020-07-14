@@ -78,6 +78,7 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
     public Optional<Double> getSimilarity(final OffenderImage image1, final OffenderImage image2) {
 
         final var response = client.compareFaces(CompareFacesRequest.builder()
+                .similarityThreshold(0f) // Set no threshold so similarity is always provided
                 .qualityFilter(HIGH)
                 .sourceImage(Image.builder().bytes(SdkBytes.fromByteArray(image1.getImageData())).build())
                 .targetImage(Image.builder().bytes(SdkBytes.fromByteArray(image2.getImageData())).build())
