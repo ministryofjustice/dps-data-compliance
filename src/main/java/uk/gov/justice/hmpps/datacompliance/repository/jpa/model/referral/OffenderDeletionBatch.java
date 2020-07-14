@@ -9,6 +9,8 @@ import lombok.With;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,6 +27,11 @@ import java.time.LocalDateTime;
 @Table(name = "OFFENDER_DELETION_BATCH")
 public class OffenderDeletionBatch {
 
+    public enum BatchType {
+        SCHEDULED,
+        AD_HOC
+    }
+
     @Id
     @With
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,16 +45,22 @@ public class OffenderDeletionBatch {
     @Column(name = "REFERRAL_COMPLETION_DATE_TIME")
     private LocalDateTime referralCompletionDateTime;
 
-    @NotNull
-    @Column(name = "WINDOW_START_DATE_TIME", nullable = false)
+    @Column(name = "WINDOW_START_DATE_TIME")
     private LocalDateTime windowStartDateTime;
 
-    @NotNull
-    @Column(name = "WINDOW_END_DATE_TIME", nullable = false)
+    @Column(name = "WINDOW_END_DATE_TIME")
     private LocalDateTime windowEndDateTime;
 
     @Column(name = "REMAINING_IN_WINDOW")
     private Integer remainingInWindow;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "BATCH_TYPE", nullable = false)
+    private BatchType batchType;
+
+    @Column(name = "COMMENT_TEXT")
+    private String commentText;
 
     public boolean hasRemainingInWindow() {
         return remainingInWindow != null && remainingInWindow != 0;

@@ -18,6 +18,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch.BatchType.SCHEDULED;
 
 @Slf4j
 @Service
@@ -60,17 +61,18 @@ class OffenderDeletion {
                 .requestDateTime(timeSource.nowAsLocalDateTime())
                 .windowStartDateTime(windowStart)
                 .windowEndDateTime(windowEnd)
+                .batchType(SCHEDULED)
                 .build());
     }
 
     private LocalDateTime windowStart() {
-        return getLastBatch()
+        return getLastScheduledBatch()
                 .map(this::getNextWindowStart)
                 .orElse(config.getInitialWindowStart());
     }
 
-    private Optional<OffenderDeletionBatch> getLastBatch() {
-        return repository.findFirstByOrderByRequestDateTimeDesc();
+    private Optional<OffenderDeletionBatch> getLastScheduledBatch() {
+        return repository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED);
     }
 
     private LocalDateTime getNextWindowStart(final OffenderDeletionBatch lastBatch) {

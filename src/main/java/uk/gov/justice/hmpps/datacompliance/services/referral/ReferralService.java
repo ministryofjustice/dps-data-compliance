@@ -6,9 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.AdHocOffenderDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
@@ -18,6 +21,7 @@ import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch.BatchType.AD_HOC;
 import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
 
 @Slf4j
@@ -30,6 +34,19 @@ public class ReferralService {
     private final OffenderDeletionBatchRepository batchRepository;
     private final RetentionService retentionService;
     private final ReferralResolutionService referralResolutionService;
+    private final DataComplianceEventPusher deletionGrantedEventPusher;
+
+    public void handleAdHocDeletion(final AdHocOffenderDeletion event) {
+
+        final var batch = batchRepository.save(OffenderDeletionBatch.builder()
+                .requestDateTime(timeSource.nowAsLocalDateTime())
+                .commentText(event.getReason())
+                .batchType(AD_HOC)
+                .build());
+
+        deletionGrantedEventPusher.requestAdHocReferral(
+                new OffenderNumber(event.getOffenderIdDisplay()), batch.getBatchId());
+    }
 
     public void handlePendingDeletionReferral(final OffenderPendingDeletion event) {
 

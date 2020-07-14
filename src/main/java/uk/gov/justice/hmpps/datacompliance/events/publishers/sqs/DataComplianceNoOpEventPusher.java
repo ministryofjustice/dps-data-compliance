@@ -42,4 +42,10 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
         log.warn("Pretending to push free text moratorium check '{}/{}' to queue",
                 offenderNo.getOffenderNumber(), retentionCheckId);
     }
+
+    @Override
+    public void requestAdHocReferral(OffenderNumber offenderNo, Long batchId) {
+        log.warn("Pretending to request referral for offender: '{}' and batch: '{}'",
+                offenderNo.getOffenderNumber(), batchId);
+    }
 }

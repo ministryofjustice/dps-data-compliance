@@ -114,4 +114,20 @@ class DataComplianceAwsEventPusherTest {
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
                 .isEqualTo("DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK");
     }
+
+    @Test
+    void requestAdHocReferral() {
+
+        final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
+
+        when(client.sendMessage(request.capture()))
+                .thenReturn(new SendMessageResult().withMessageId("message1"));
+
+        eventPusher.requestAdHocReferral(OFFENDER_NUMBER, 123L);
+
+        assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
+        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"batchId\":123}");
+        assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
+                .isEqualTo("DATA_COMPLIANCE_AD-HOC-REFERRAL");
+    }
 }

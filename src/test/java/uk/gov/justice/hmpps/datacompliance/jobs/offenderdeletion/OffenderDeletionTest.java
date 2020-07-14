@@ -19,6 +19,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch.BatchType.SCHEDULED;
 
 @ExtendWith(MockitoExtension.class)
 class OffenderDeletionTest {
@@ -55,7 +56,7 @@ class OffenderDeletionTest {
 
         final var expectedBatch = batchWith(INITIAL_WINDOW_START);
 
-        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.empty());
+        when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.empty());
         when(batchRepository.save(expectedBatch)).thenReturn(expectedBatch.withBatchId(BATCH_ID));
 
         offenderDeletion.run();
@@ -73,7 +74,7 @@ class OffenderDeletionTest {
 
         final var expectedBatch = batchWith(INITIAL_WINDOW_START.plus(DURATION));
 
-        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
+        when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(
                 completedBatchWith(INITIAL_WINDOW_START, NONE_REMAINING_IN_WINDOW)));
         when(batchRepository.save(expectedBatch)).thenReturn(expectedBatch.withBatchId(BATCH_ID));
 
@@ -92,7 +93,7 @@ class OffenderDeletionTest {
 
         final var expectedBatch = batchWith(INITIAL_WINDOW_START);
 
-        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
+        when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(
                 completedBatchWith(INITIAL_WINDOW_START, SOME_REMAINING_IN_WINDOW)));
         when(batchRepository.save(expectedBatch)).thenReturn(expectedBatch.withBatchId(BATCH_ID));
 
@@ -112,7 +113,7 @@ class OffenderDeletionTest {
         final var incompleteBatch = batchWith(INITIAL_WINDOW_START);
         incompleteBatch.setBatchId(BATCH_ID);
 
-        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(incompleteBatch));
+        when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(incompleteBatch));
 
         assertThatThrownBy(() -> offenderDeletion.run())
                 .isInstanceOf(NullPointerException.class)
@@ -122,7 +123,7 @@ class OffenderDeletionTest {
     @Test
     void offenderDeletionRequestFailsIfStartDateInFuture() {
 
-        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
+        when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(
                 completedBatchWith(NOW.plusSeconds(1), NONE_REMAINING_IN_WINDOW)));
 
         assertThatThrownBy(() -> offenderDeletion.run())
@@ -133,7 +134,7 @@ class OffenderDeletionTest {
     @Test
     void offenderDeletionRequestFailsIfEndDateInFuture() {
 
-        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.of(
+        when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(
                 completedBatchWith(NOW.minusDays(2).plusSeconds(1), NONE_REMAINING_IN_WINDOW)));
 
         assertThatThrownBy(() -> offenderDeletion.run())
@@ -150,7 +151,7 @@ class OffenderDeletionTest {
                 .build();
 
         offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), badConfig, batchRepository, prisonApiClient);
-        when(batchRepository.findFirstByOrderByRequestDateTimeDesc()).thenReturn(Optional.empty());
+        when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> offenderDeletion.run())
                 .isInstanceOf(IllegalStateException.class)
@@ -162,6 +163,7 @@ class OffenderDeletionTest {
                 .requestDateTime(NOW)
                 .windowStartDateTime(windowStart)
                 .windowEndDateTime(windowStart.plus(DURATION))
+                .batchType(SCHEDULED)
                 .build();
     }
 

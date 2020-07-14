@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.AdHocOffenderDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
@@ -48,6 +49,14 @@ class DataComplianceEventListenerTest {
     @BeforeEach
     void setUp() {
         listener = new DataComplianceEventListener(new ObjectMapper(), referralService, retentionService, deletionService);
+    }
+
+    @Test
+    void handleAdHocOffenderDeletionEvent() {
+        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"reason\":\"Some reason\"}",
+                Map.of("eventType", "DATA_COMPLIANCE_AD-HOC-OFFENDER-DELETION"));
+
+        verify(referralService).handleAdHocDeletion(new AdHocOffenderDeletion("A1234AA", "Some reason"));
     }
 
     @Test

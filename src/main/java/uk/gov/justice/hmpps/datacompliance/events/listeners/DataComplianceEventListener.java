@@ -7,6 +7,7 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.AdHocOffenderDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
@@ -29,6 +30,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplicati
 @ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.response.sqs.provider}')")
 public class DataComplianceEventListener {
 
+    private static final String ADHOC_OFFENDER_DELETION_EVENT = "DATA_COMPLIANCE_AD-HOC-OFFENDER-DELETION";
     private static final String OFFENDER_PENDING_DELETION_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION";
     private static final String OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE";
     private static final String OFFENDER_DELETION_COMPLETE_EVENT = "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE";
@@ -37,6 +39,7 @@ public class DataComplianceEventListener {
     private static final String FREE_TEXT_MORATORIUM_RESULT = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT";
 
     private final Map<String, MessageHandler> messageHandlers = Map.of(
+            ADHOC_OFFENDER_DELETION_EVENT, this::handleAdHocDeletion,
             OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral,
             OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete,
             OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
@@ -96,6 +99,11 @@ public class DataComplianceEventListener {
     private void handlePendingDeletionReferral(final Message<String> message) {
         referralService.handlePendingDeletionReferral(
                 parseEvent(message.getPayload(), OffenderPendingDeletion.class));
+    }
+
+    private void handleAdHocDeletion(final Message<String> message) {
+        referralService.handleAdHocDeletion(
+                parseEvent(message.getPayload(), AdHocOffenderDeletion.class));
     }
 
     private void handleDataDuplicateIdResult(final Message<String> message) {
