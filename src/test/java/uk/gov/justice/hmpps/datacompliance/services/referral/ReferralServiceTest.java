@@ -10,10 +10,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.AdHocOffenderDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
@@ -35,6 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch.BatchType.AD_HOC;
 
 @ExtendWith(MockitoExtension.class)
 class ReferralServiceTest {
@@ -55,6 +58,9 @@ class ReferralServiceTest {
     @Mock
     private ReferralResolutionService referralResolutionService;
 
+    @Mock
+    private DataComplianceEventPusher eventPusher;
+
     private ReferralService referralService;
 
     @BeforeEach
@@ -63,7 +69,25 @@ class ReferralServiceTest {
                 TimeSource.of(NOW),
                 batchRepository,
                 retentionService,
-                referralResolutionService);
+                referralResolutionService,
+                eventPusher);
+    }
+
+    @Test
+    void handleAdHocDeletion() {
+
+        final var batch = ArgumentCaptor.forClass(OffenderDeletionBatch.class);
+
+        when(batchRepository.save(batch.capture()))
+                .thenReturn(OffenderDeletionBatch.builder().batchId(BATCH_ID).build());
+
+        referralService.handleAdHocDeletion(new AdHocOffenderDeletion(OFFENDER_NUMBER, "Some reason"));
+
+        assertThat(batch.getValue().getRequestDateTime()).isEqualTo(NOW);
+        assertThat(batch.getValue().getCommentText()).isEqualTo("Some reason");
+        assertThat(batch.getValue().getBatchType()).isEqualTo(AD_HOC);
+
+        verify(eventPusher).requestAdHocReferral(new OffenderNumber(OFFENDER_NUMBER), BATCH_ID);
     }
 
     @Test
