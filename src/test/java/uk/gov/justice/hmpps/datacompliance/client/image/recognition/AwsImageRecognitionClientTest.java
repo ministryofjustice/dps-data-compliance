@@ -141,6 +141,7 @@ class AwsImageRecognitionClientTest {
 
         assertThat(client.getSimilarity(image1, image2)).contains(3.0);
 
+        assertThat(request.getValue().similarityThreshold()).isZero();
         assertThat(request.getValue().qualityFilter()).isEqualTo(HIGH);
         assertThat(request.getValue().sourceImage().bytes().asByteArray()).isEqualTo(DATA_1);
         assertThat(request.getValue().targetImage().bytes().asByteArray()).isEqualTo(DATA_2);

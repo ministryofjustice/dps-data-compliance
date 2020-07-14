@@ -72,6 +72,17 @@ class FalsePositiveCheckServiceTest {
     }
 
     @Test
+    void notFalsePositiveIfImagesCannotBeCompared() {
+
+        mockImagesFor(REFERENCE_OFFENDER_NO, REFERENCE_OFFENDER_IMAGE_ID_1, REFERENCE_OFFENDER_IMAGE_ID_2);
+        mockImagesFor(DUPLICATE_OFFENDER_NO, DUPLICATE_OFFENDER_IMAGE_ID_1, DUPLICATE_OFFENDER_IMAGE_ID_2);
+
+        when(imageDuplicationDetectionService.getSimilarity(any(), any())).thenReturn(Optional.empty());
+
+        assertThat(service.isFalsePositive(generateDataDuplicateCheck())).isFalse();
+    }
+
+    @Test
     void notFalsePositiveIfSimilarityEqualsThreshold() {
 
         mockImagesFor(REFERENCE_OFFENDER_NO, REFERENCE_OFFENDER_IMAGE_ID_1, REFERENCE_OFFENDER_IMAGE_ID_2);
