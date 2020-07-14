@@ -45,7 +45,7 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
 
     @Override
     public void requestAdHocReferral(OffenderNumber offenderNo, Long batchId) {
-        log.warn("Pretending to request referral for offender: '{}' and batch: '{}'",
+        log.warn("Pretending to request ad hoc referral for offender: '{}' and batch: '{}'",
                 offenderNo.getOffenderNumber(), batchId);
     }
 }
