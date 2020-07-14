@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch.BatchType.SCHEDULED;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -36,6 +37,7 @@ class OffenderDeletionBatchRepositoryTest {
                 .referralCompletionDateTime(NOW.plusSeconds(1))
                 .windowStartDateTime(NOW.plusSeconds(2))
                 .windowEndDateTime(NOW.plusSeconds(3))
+                .batchType(SCHEDULED)
                 .build());
 
         TestTransaction.flagForCommit();
@@ -48,13 +50,14 @@ class OffenderDeletionBatchRepositoryTest {
         assertThat(retrievedEntity.getReferralCompletionDateTime()).isEqualTo(NOW.plusSeconds(1));
         assertThat(retrievedEntity.getWindowStartDateTime()).isEqualTo(NOW.plusSeconds(2));
         assertThat(retrievedEntity.getWindowEndDateTime()).isEqualTo(NOW.plusSeconds(3));
+        assertThat(retrievedEntity.getBatchType()).isEqualTo(SCHEDULED);
     }
 
     @Test
     @Sql("offender_deletion_batch.sql")
-    void findLatestBatch() {
+    void findLatestScheduledBatch() {
 
-        final var latestBatch = repository.findFirstByOrderByRequestDateTimeDesc().orElseThrow();
+        final var latestBatch = repository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED).orElseThrow();
 
         assertThat(latestBatch.getBatchId()).isEqualTo(2);
     }

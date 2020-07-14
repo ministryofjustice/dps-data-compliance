@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.AdHocReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DataDuplicateCheck;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.FreeTextSearchRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGranted;
@@ -28,6 +29,7 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     private static final String DATA_DUPLICATE_ID_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-CHECK";
     private static final String DATA_DUPLICATE_DB_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK";
     private static final String FREE_TEXT_MORATORIUM_CHECK = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK";
+    private static final String AD_HOC_REFERRAL = "DATA_COMPLIANCE_AD-HOC-REFERRAL";
 
     private final ObjectMapper objectMapper;
     private final AmazonSQS sqsClient;
@@ -86,6 +88,16 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
 
         sqsClient.sendMessage(generateRequest(FREE_TEXT_MORATORIUM_CHECK,
                 new FreeTextSearchRequest(offenderNo.getOffenderNumber(), retentionCheckId, regex)));
+    }
+
+    @Override
+    public void requestAdHocReferral(final OffenderNumber offenderNo, final Long batchId) {
+
+        log.debug("Requesting ad hoc deletion referral for offender: '{}' and batch: '{}'",
+                offenderNo.getOffenderNumber(), batchId);
+
+        sqsClient.sendMessage(generateRequest(AD_HOC_REFERRAL,
+                new AdHocReferralRequest(offenderNo.getOffenderNumber(), batchId)));
     }
 
     private SendMessageRequest generateRequest(final String eventType, final Object messageBody) {

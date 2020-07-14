@@ -41,7 +41,9 @@ class AwsAthenaDuplicateDetectionClientTest {
     private static final OffenderNumber DUPLICATE_OFFENDER_2 = new OffenderNumber("C1234CC");
     private static final String QUERY_EXECUTION_ID = "query1";
     private static final double MATCH_SCORE_1 = 0.8;
+    private static final double CONFIDENCE_1 = MATCH_SCORE_1 * 100;
     private static final double MATCH_SCORE_2 = 0.9;
+    private static final double CONFIDENCE_2 = MATCH_SCORE_2 * 100;
 
     @Mock
     private DuplicateDetectionQueryFactory queryFactory;
@@ -70,8 +72,8 @@ class AwsAthenaDuplicateDetectionClientTest {
 
         assertThat(client.findDuplicatesFor(REFERENCE_OFFENDER))
                 .containsExactlyInAnyOrder(
-                        new DuplicateResult(DUPLICATE_OFFENDER_1, MATCH_SCORE_1),
-                        new DuplicateResult(DUPLICATE_OFFENDER_2, MATCH_SCORE_2));
+                        new DuplicateResult(DUPLICATE_OFFENDER_1, CONFIDENCE_1),
+                        new DuplicateResult(DUPLICATE_OFFENDER_2, CONFIDENCE_2));
     }
 
     @Test

@@ -35,7 +35,7 @@ public class DuplicateDetectionQueryFactory {
     public DuplicateDetectionQueryFactory(@Value("${duplicate.detection.athena.database}") final String database,
                                           @Value("${duplicate.detection.athena.table}") final String table,
                                           @Value("${duplicate.detection.athena.output.location}") final String outputLocation,
-                                          @Value("${duplicate.detection.match.score.threshold:0.2}") final double matchScoreThreshold) {
+                                          @Value("${duplicate.detection.match.score.threshold:0.75}") final double matchScoreThreshold) {
         this.database = database;
         this.table = table;
         this.outputLocation = outputLocation;

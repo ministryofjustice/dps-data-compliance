@@ -51,8 +51,8 @@ public class DataComplianceProperties {
                                     @Value("${offender.retention.data.duplicate.db.check.enabled}") final boolean databaseDataDuplicateCheckEnabled,
                                     @Value("${offender.retention.data.duplicate.ap.check.enabled}") final boolean analyticalPlatformDataDuplicateCheckEnabled,
                                     @Value("${offender.retention.false.positive.duplicate.check.enabled}") final boolean falsePositiveDuplicateCheckEnabled,
-                                    @Value("${offender.retention.false.positive.duplicate.image.similarity.threshold:90}") final double falsePositiveDuplicateImageSimilarityThreshold,
-                                    @Value("${offender.retention.false.positive.duplicate.required.image.count:2}") final int falsePositiveDuplicateRequiredImageCount) {
+                                    @Value("${offender.retention.false.positive.duplicate.image.similarity.threshold:95}") final double falsePositiveDuplicateImageSimilarityThreshold,
+                                    @Value("${offender.retention.false.positive.duplicate.required.image.count:1}") final int falsePositiveDuplicateRequiredImageCount) {
 
         log.info("Image upload - number of threads: {}", prisonApiOffenderIdsIterationThreads);
         log.info("Image upload - page limit: {}", prisonApiOffenderIdsLimit);

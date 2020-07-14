@@ -25,9 +25,15 @@ The permissions are added to the user as follows:
                 "rekognition:IndexFaces",
                 "rekognition:DeleteFaces",
                 "rekognition:SearchFaces",
-                "rekognition:SearchFacesByImage"
+                "rekognition:SearchFacesByImage",
+                "rekognition:CompareFaces"
             ],
             "Resource": "<REKOGNITION RESOURCE>"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "rekognition:CompareFaces",
+            "Resource": "*"
         }
     ]
 }
