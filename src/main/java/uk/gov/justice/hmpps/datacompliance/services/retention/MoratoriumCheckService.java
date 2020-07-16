@@ -18,10 +18,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class MoratoriumCheckService {
 
-    private static final String LINKS_TO_CHILDREN_OR_PUBLIC_ROLES = "(" +
+    private static final String LINKS_TO_CHILDREN = "(" +
             "adopt|" +
             "baby|" +
-            "borstal|" +
             "boy([^f]|$)|" +
             "child|" +
             "chidl|" +
@@ -29,36 +28,36 @@ public class MoratoriumCheckService {
             "chid|" +
             "cild|" +
             "hild|" +
-            "college|" +
             "daughter|" +
             "early age|" +
-            "faith|" +
-            "foster|" +
             "girl([^f]|$)|" +
-            "grandson|" +
             "infant|" +
             "juven|" +
             "kid|" +
             "minor(\\W|$)|" +
             "niece|" +
-            "neice|" +
             "nephew|" +
-            "nurser|" +
-            "public appointment|" +
-            "religi|" +
-            "school([^ie]|$)|" +
-            "(^|\\W)son(\\W|$)|" +
-            "teach|" +
+            "(^|\\W)(grand)?son(\\W|$)|" +
             "(^|\\W)teen|" +
             "toddler|" +
-            "underage|" +
-            "under age|" +
-            "under the age|" +
+            "under( (the )?)?age|" +
+            "youth|" +
+            "young" +
+            ")";
+
+    private static final String LINKS_TO_PUBLIC_ROLES = "(" +
+            "borstal|" +
+            "college|" +
+            "faith|" +
+            "foster|" +
+            "nurser|" +
+            "public app|" +
+            "religi|" +
+            "school([^ie]|$)|" +
+            "teach|" +
             "uniformed|" +
             "voluntary|" +
-            "youth|" +
-            "yoi|" +
-            "young" +
+            "yoi" +
             ")";
 
     private static final String LINKS_TO_ABUSE_OR_RISK = "(" +
@@ -69,7 +68,6 @@ public class MoratoriumCheckService {
             "expose|" +
             "exploit|" +
             "explicit|" +
-            "groom|" +
             "inappropriate|" +
             "indecent|" +
             "internet|" +
@@ -88,15 +86,15 @@ public class MoratoriumCheckService {
             "safe|" +
             "sex|" +
             "sodom|" +
-            "sopo|" +
-            "shpo|" +
-            "shopo|" +
+            "s(h)?(o)?po|" +
             "(^.{0,3}|([^i][^n].)|[^i]n.)touch" +
             ")";
 
     public static final String RED_FLAGS = ".*(groom|nonce|paedo|pedo|peedo|paeda|peeda|pedaph|pedaf).*";
-    public static final String CHILD_ABUSE_REGEX = ".*" + LINKS_TO_CHILDREN_OR_PUBLIC_ROLES + ".*" + LINKS_TO_ABUSE_OR_RISK + ".*";
-    public static final String CHILD_ABUSE_REGEX_REVERSED = ".*" + LINKS_TO_ABUSE_OR_RISK + ".*" + LINKS_TO_CHILDREN_OR_PUBLIC_ROLES + ".*";
+    public static final String PUBLIC_ROLE_ABUSE_REGEX = ".*" + LINKS_TO_PUBLIC_ROLES + ".*" + LINKS_TO_ABUSE_OR_RISK + ".*";
+    public static final String PUBLIC_ROLE_ABUSE_REGEX_REVERSED = ".*" + LINKS_TO_ABUSE_OR_RISK + ".*" + LINKS_TO_PUBLIC_ROLES + ".*";
+    public static final String CHILD_ABUSE_REGEX = ".*" + LINKS_TO_CHILDREN + ".*" + LINKS_TO_ABUSE_OR_RISK + ".*";
+    public static final String CHILD_ABUSE_REGEX_REVERSED = ".*" + LINKS_TO_ABUSE_OR_RISK + ".*" + LINKS_TO_CHILDREN + ".*";
 
     // TODO GDPR-153 Persist offence codes to the DB:
     private static final Set<String> CHILD_ABUSE_LINKED_OFFENCE_CODES =
@@ -167,7 +165,12 @@ public class MoratoriumCheckService {
         eventPusher.requestFreeTextMoratoriumCheck(
                 offenderNumber,
                 retentionCheckId,
-                List.of(RED_FLAGS, CHILD_ABUSE_REGEX, CHILD_ABUSE_REGEX_REVERSED));
+                List.of(
+                        RED_FLAGS,
+                        CHILD_ABUSE_REGEX,
+                        CHILD_ABUSE_REGEX_REVERSED,
+                        PUBLIC_ROLE_ABUSE_REGEX,
+                        PUBLIC_ROLE_ABUSE_REGEX_REVERSED));
     }
 
     public boolean retainDueToOffence(final OffenderToCheck offenderToCheck) {
