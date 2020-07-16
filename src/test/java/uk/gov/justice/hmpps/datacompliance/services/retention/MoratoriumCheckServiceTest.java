@@ -16,6 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.hmpps.datacompliance.services.retention.MoratoriumCheckService.CHILD_ABUSE_REGEX;
 import static uk.gov.justice.hmpps.datacompliance.services.retention.MoratoriumCheckService.CHILD_ABUSE_REGEX_REVERSED;
+import static uk.gov.justice.hmpps.datacompliance.services.retention.MoratoriumCheckService.PUBLIC_ROLE_ABUSE_REGEX;
+import static uk.gov.justice.hmpps.datacompliance.services.retention.MoratoriumCheckService.PUBLIC_ROLE_ABUSE_REGEX_REVERSED;
 import static uk.gov.justice.hmpps.datacompliance.services.retention.MoratoriumCheckService.RED_FLAGS;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,6 +25,7 @@ class MoratoriumCheckServiceTest {
 
     private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
     private static final long RETENTION_CHECK_ID = 1;
+    private static final int MAX_REGEX_LENGTH = 512;
 
     @Mock
     private DataComplianceEventPusher eventPusher;
@@ -42,7 +45,20 @@ class MoratoriumCheckServiceTest {
         verify(eventPusher).requestFreeTextMoratoriumCheck(
                 OFFENDER_NUMBER,
                 RETENTION_CHECK_ID,
-                List.of(RED_FLAGS, CHILD_ABUSE_REGEX, CHILD_ABUSE_REGEX_REVERSED));
+                List.of(RED_FLAGS,
+                        CHILD_ABUSE_REGEX,
+                        CHILD_ABUSE_REGEX_REVERSED,
+                        PUBLIC_ROLE_ABUSE_REGEX,
+                        PUBLIC_ROLE_ABUSE_REGEX_REVERSED));
+    }
+
+    @Test
+    void regexLengthBelowMaximum() {
+        assertThat(RED_FLAGS.length()).isLessThan(MAX_REGEX_LENGTH);
+        assertThat(CHILD_ABUSE_REGEX.length()).isLessThan(MAX_REGEX_LENGTH);
+        assertThat(CHILD_ABUSE_REGEX_REVERSED.length()).isLessThan(MAX_REGEX_LENGTH);
+        assertThat(PUBLIC_ROLE_ABUSE_REGEX.length()).isLessThan(MAX_REGEX_LENGTH);
+        assertThat(PUBLIC_ROLE_ABUSE_REGEX_REVERSED.length()).isLessThan(MAX_REGEX_LENGTH);
     }
 
     @Test
@@ -55,6 +71,12 @@ class MoratoriumCheckServiceTest {
 
         assertThat("Some text mentioning abuse of children.".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
         assertThat("Some text containing unrelated comments.".matches(CHILD_ABUSE_REGEX_REVERSED)).isFalse();
+
+        assertThat("Some text mentioning schools and abuse.".matches(PUBLIC_ROLE_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing unrelated comments.".matches(PUBLIC_ROLE_ABUSE_REGEX)).isFalse();
+
+        assertThat("Some text mentioning abuse in schools.".matches(PUBLIC_ROLE_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing unrelated comments.".matches(PUBLIC_ROLE_ABUSE_REGEX_REVERSED)).isFalse();
     }
 
     @Test
@@ -101,13 +123,13 @@ class MoratoriumCheckServiceTest {
 
     @Test
     void avoidFalseRegexMatchOnSchool() {
-        assertThat("Some text containing words risk and school within it".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
-        assertThat("Some text containing words risk and school".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
-        assertThat("Some text containing words risk and ...school;".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
-        assertThat("Some text containing words risk and schooling".matches(CHILD_ABUSE_REGEX_REVERSED)).isFalse();
+        assertThat("Some text containing words risk and school within it".matches(PUBLIC_ROLE_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and school".matches(PUBLIC_ROLE_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and ...school;".matches(PUBLIC_ROLE_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and schooling".matches(PUBLIC_ROLE_ABUSE_REGEX_REVERSED)).isFalse();
 
-        assertThat("Some text containing words school and risk".matches(CHILD_ABUSE_REGEX)).isTrue();
-        assertThat("Some text containing words schooling and risk".matches(CHILD_ABUSE_REGEX)).isFalse();
+        assertThat("Some text containing words school and risk".matches(PUBLIC_ROLE_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing words schooling and risk".matches(PUBLIC_ROLE_ABUSE_REGEX)).isFalse();
     }
 
     @Test
