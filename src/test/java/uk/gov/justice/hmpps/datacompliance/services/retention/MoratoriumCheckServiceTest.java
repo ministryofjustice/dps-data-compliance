@@ -70,8 +70,72 @@ class MoratoriumCheckServiceTest {
     }
 
     @Test
-    void retainDueToOffence() {
+    void avoidFalseRegexMatchOnBoyAndGirl() {
+        assertThat("Some text containing words risk and girl within it".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and girl".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and ...girl;".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and girlfriend".matches(CHILD_ABUSE_REGEX_REVERSED)).isFalse();
 
+        assertThat("Some text containing words risk and boy within it".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and boy".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and ...boy;".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and boyfriend".matches(CHILD_ABUSE_REGEX_REVERSED)).isFalse();
+
+        assertThat("Some text containing words girl and risk".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing words girlfriend risk".matches(CHILD_ABUSE_REGEX)).isFalse();
+
+        assertThat("Some text containing words boy and risk".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing words boyfriend risk".matches(CHILD_ABUSE_REGEX)).isFalse();
+    }
+
+    @Test
+    void avoidFalseRegexMatchOnMinor() {
+        assertThat("Some text containing words risk and minor within it".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and minor".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and ...minor;".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and minority".matches(CHILD_ABUSE_REGEX_REVERSED)).isFalse();
+
+        assertThat("Some text containing words minor and risk".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing words minority and risk".matches(CHILD_ABUSE_REGEX)).isFalse();
+    }
+
+    @Test
+    void avoidFalseRegexMatchOnSchool() {
+        assertThat("Some text containing words risk and school within it".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and school".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and ...school;".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and schooling".matches(CHILD_ABUSE_REGEX_REVERSED)).isFalse();
+
+        assertThat("Some text containing words school and risk".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing words schooling and risk".matches(CHILD_ABUSE_REGEX)).isFalse();
+    }
+
+    @Test
+    void avoidFalseRegexMatchOnTeen() {
+        assertThat("Some text containing words risk and teenager within it".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and teen".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and ...teen;".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words risk and canteen".matches(CHILD_ABUSE_REGEX_REVERSED)).isFalse();
+
+        assertThat("Some text containing words teen and risk".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing words teenager and risk".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing words canteen and risk".matches(CHILD_ABUSE_REGEX)).isFalse();
+    }
+
+    @Test
+    void avoidFalseRegexMatchOnTouch() {
+        assertThat("Some text containing words touch and child within it".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing words touching and child within it".matches(CHILD_ABUSE_REGEX_REVERSED)).isTrue();
+        assertThat("Some text containing phrases in touch and child".matches(CHILD_ABUSE_REGEX_REVERSED)).isFalse();
+
+        assertThat("Some text containing words child and touching within it".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing words child and touch".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing words child and ...touch;".matches(CHILD_ABUSE_REGEX)).isTrue();
+        assertThat("Some text containing phrases child and in touch".matches(CHILD_ABUSE_REGEX)).isFalse();
+    }
+
+    @Test
+    void retainDueToOffence() {
         assertThat(service.retainDueToOffence(offenderWithOffenceCodes("SX56099"))).isTrue();
         assertThat(service.retainDueToOffence(offenderWithOffenceCodes("SX56100", "SX56050", "NOT A MATCH"))).isTrue();
         assertThat(service.retainDueToOffence(offenderWithOffenceCodes("PC00000-001N"))).isTrue();

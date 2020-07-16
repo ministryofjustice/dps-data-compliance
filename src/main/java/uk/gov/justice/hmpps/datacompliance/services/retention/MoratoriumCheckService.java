@@ -22,7 +22,7 @@ public class MoratoriumCheckService {
             "adopt|" +
             "baby|" +
             "borstal|" +
-            "boy|" +
+            "boy([^f]|$)|" +
             "child|" +
             "chidl|" +
             "chlid|" +
@@ -34,21 +34,22 @@ public class MoratoriumCheckService {
             "early age|" +
             "faith|" +
             "foster|" +
-            "girl|" +
+            "girl([^f]|$)|" +
             "grandson|" +
             "infant|" +
             "juven|" +
             "kid|" +
-            "minor|" +
+            "minor(\\W|$)|" +
             "niece|" +
+            "neice|" +
             "nephew|" +
             "nurser|" +
-            "public|" +
+            "public appointment|" +
             "religi|" +
-            "school|" +
-            "[^a-z]+son([^a-z]+|$)|" +
+            "school([^ie]|$)|" +
+            "(^|\\W)son(\\W|$)|" +
             "teach|" +
-            "teen|" +
+            "(^|\\W)teen|" +
             "toddler|" +
             "underage|" +
             "under age|" +
@@ -64,6 +65,7 @@ public class MoratoriumCheckService {
             "abduct|" +
             "abuse|" +
             "bugger|" +
+            "danger|" +
             "expose|" +
             "exploit|" +
             "explicit|" +
@@ -89,10 +91,10 @@ public class MoratoriumCheckService {
             "sopo|" +
             "shpo|" +
             "shopo|" +
-            "touch" +
+            "(^.{0,3}|([^i][^n].)|[^i]n.)touch" +
             ")";
 
-    public static final String RED_FLAGS = ".*(nonce|paedo|pedo|peedo|paeda|peeda|pedaph|pedaf).*";
+    public static final String RED_FLAGS = ".*(groom|nonce|paedo|pedo|peedo|paeda|peeda|pedaph|pedaf).*";
     public static final String CHILD_ABUSE_REGEX = ".*" + LINKS_TO_CHILDREN_OR_PUBLIC_ROLES + ".*" + LINKS_TO_ABUSE_OR_RISK + ".*";
     public static final String CHILD_ABUSE_REGEX_REVERSED = ".*" + LINKS_TO_ABUSE_OR_RISK + ".*" + LINKS_TO_CHILDREN_OR_PUBLIC_ROLES + ".*";
 
