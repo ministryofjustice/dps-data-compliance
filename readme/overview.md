@@ -17,3 +17,7 @@ for retention by prison staff.
 records in the database.
 4. Automatically retain records where the data must be legally
 retained due to moratoria.
+
+The architecture diagram is as follows:
+
+![Architecture Diagram](./architecture.drawio.svg "Diagram of Database Tables")
