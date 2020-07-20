@@ -17,3 +17,8 @@ for retention by prison staff.
 records in the database.
 4. Automatically retain records where the data must be legally
 retained due to moratoria.
+
+The following architecture diagram shows how the service fits
+within the wider HMPPS ecosystem:
+
+![Architecture Diagram](./architecture.drawio.svg "Diagram of Database Tables")
