@@ -119,6 +119,17 @@ class PrisonApiClientTest {
     }
 
     @Test
+    void getOffenderFaceImagesHandlesNotFound() {
+
+        prisonApiMock.enqueue(new MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"message\":\"Not Found\"}")
+                .setResponseCode(404));
+
+        assertThat(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER)).isEmpty();
+    }
+
+    @Test
     void getOffenderFaceThrowsOnNonSuccessResponse() {
 
         prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
