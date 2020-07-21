@@ -64,6 +64,8 @@ public class PrisonApiClient {
                 .uri(url)
                 .retrieve()
                 .bodyToFlux(OffenderImageMetadata.class)
+                .onErrorResume(WebClientResponseException.class,
+                        ex -> NOT_FOUND.equals(ex.getStatusCode()) ? Mono.empty() : Mono.error(ex))
                 .filter(OffenderImageMetadata::isOffenderFaceImage)
                 .toStream().collect(toList());
     }
