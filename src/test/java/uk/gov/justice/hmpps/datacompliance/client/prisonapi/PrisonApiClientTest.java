@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffendersWithImagesResponse;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
@@ -209,6 +210,39 @@ class PrisonApiClientTest {
         prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
 
         assertThatThrownBy(() -> prisonApiClient.requestPendingDeletions(PendingDeletionsRequest.builder().build()))
+                .isInstanceOf(WebClientResponseException.class);
+    }
+
+    @Test
+    void getOffendersWithNewImages() throws Exception {
+
+        prisonApiMock.enqueue(new MockResponse()
+                .setBody(OBJECT_MAPPER.writeValueAsString(
+                        OffendersWithImagesResponse.builder()
+                                .offenderNumber(new OffenderNumber("A1234AA"))
+                                .offenderNumber(new OffenderNumber("B1234BB"))
+                                .totalElements(123L)
+                                .build()))
+                .setHeader("Content-Type", "application/json"));
+
+        var response = prisonApiClient.getOffendersWithNewImages(TIMESTAMP.toLocalDate(), 0, PAGE_LIMIT);
+
+        assertThat(response.getOffenderNumbers()).extracting(OffenderNumber::getOffenderNumber)
+                .containsExactlyInAnyOrder("A1234AA", "B1234BB");
+        assertThat(response.getTotalCount()).isEqualTo(123);
+
+        RecordedRequest recordedRequest = prisonApiMock.takeRequest();
+        assertThat(recordedRequest.getMethod()).isEqualTo("GET");
+        assertThat(recordedRequest.getPath())
+                .isEqualTo("/api/data-compliance/offenders-with-images?fromDateTime=2020-02-01T00:00&paged=true&size=2&page=0");
+    }
+
+    @Test
+    void getOffendersWithNewImagesThrowsOnNonSuccessResponse() {
+
+        prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
+
+        assertThatThrownBy(() -> prisonApiClient.getOffendersWithNewImages(TIMESTAMP.toLocalDate(), 0, PAGE_LIMIT))
                 .isInstanceOf(WebClientResponseException.class);
     }
 }

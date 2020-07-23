@@ -11,13 +11,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
-import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.ImageUploadBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffendersWithImagesResponse;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.ImageUploadBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.List;
@@ -28,11 +31,16 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.regex.Pattern.compile;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.FACE_NOT_FOUND;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.error;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.success;
 
+@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -84,6 +92,32 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
         assertThat(persistedBatch.getUploadCount()).isEqualTo(2);
     }
 
+    @Test
+    @Sql("image_upload_batch.sql")
+    void runMigrationAsAnUpdate() {
+
+        when(imageRecognitionClient.uploadImageToCollection(any()))
+                .thenReturn(success(new FaceId("face1")))
+                .thenReturn(success(new FaceId("face2")))
+                .thenReturn(error(FACE_NOT_FOUND));
+
+        hmppsAuthMock.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setBody("{\"access_token\":\"123\",\"token_type\":\"bearer\",\"expires_in\":\"999999\"}")
+                .setHeader("Content-Type", "application/json"));
+        prisonApiMock.setDispatcher(mockPrisonApiResponses());
+
+        migration.run();
+
+        verify(imageRecognitionClient).uploadImageToCollection(offenderImage(offenderNo(4), 4L, new byte[]{0x04}));
+        verify(imageRecognitionClient).uploadImageToCollection(offenderImage(offenderNo(5), 5L, new byte[]{0x05}));
+        verify(imageRecognitionClient).uploadImageToCollection(offenderImage(offenderNo(6), 6L, new byte[]{0x06}));
+        verifyNoMoreInteractions(imageRecognitionClient);
+
+        var persistedBatch = repository.findFirstByBatchIdNotOrderByUploadStartDateTimeDesc(1).get();
+        assertThat(persistedBatch.getUploadCount()).isEqualTo(2);
+    }
+
     private Dispatcher mockPrisonApiResponses() {
 
         return new Dispatcher() {
@@ -95,6 +129,7 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
                 var path = requireNonNull(request.getPath());
                 var offenderIdsMatch = compile("^/api/offenders/ids$").matcher(path);
+                var offendersWithImagesMatch = compile("^/api/data-compliance/offenders-with-images.*$").matcher(path);
                 var imageMetaDataMatch = compile("^/api/images/offenders/A([0-9]){4}AA$").matcher(path);
                 var imageDataMatch = compile("^/api/images/([1-9]+)/data$").matcher(path);
 
@@ -107,6 +142,17 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
                                     offenderNo(3))))
                             .setHeader("Content-Type", "application/json")
                             .setHeader("Total-Records", "3");
+
+                } else if (offendersWithImagesMatch.find()) {
+
+                    return new MockResponse()
+                            .setBody(OBJECT_MAPPER.writeValueAsString(OffendersWithImagesResponse.builder()
+                                            .offenderNumber(offenderNo(4))
+                                            .offenderNumber(offenderNo(5))
+                                            .offenderNumber(offenderNo(6))
+                                            .totalElements(3L)
+                                            .build()))
+                            .setHeader("Content-Type", "application/json");
 
                 } else if (imageMetaDataMatch.find()) {
 

@@ -10,7 +10,9 @@ pathfinder.api.base.url: http://localhost:8997
 app.db.url: jdbc:hsqldb:mem:data-compliance-db;sql.syntax_pgs=true;shutdown=false
 
 spring:
-  jpa.hibernate.ddl-auto: create-drop
+  jpa:
+    show-sql: true
+    hibernate.ddl-auto: create-drop
   flyway.locations: classpath:db/migration
   security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
   lifecycle.timeout-per-shutdown-phase: 0s
