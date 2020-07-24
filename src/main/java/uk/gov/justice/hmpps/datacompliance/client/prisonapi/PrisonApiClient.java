@@ -7,13 +7,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffendersWithImagesResponse;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +32,7 @@ import static org.springframework.http.MediaType.IMAGE_JPEG;
 public class PrisonApiClient {
 
     private static final String OFFENDER_IDS_PATH = "/api/offenders/ids";
+    private static final String OFFENDERS_WITH_IMAGES_PATH = "/api/data-compliance/offenders-with-images";
     private static final String OFFENDER_IMAGE_METADATA_PATH = "/api/images/offenders/%s";
     private static final String IMAGE_DATA_PATH = "/api/images/%s/data";
     private static final String OFFENDER_PENDING_DELETIONS_PATH = "/api/data-compliance/offenders/pending-deletions";
@@ -53,6 +57,29 @@ public class PrisonApiClient {
                 .block();
 
         return offenderNumbersResponse(response);
+    }
+
+    public OffenderNumbersResponse getOffendersWithNewImages(final LocalDate lastRunDate,
+                                                             final long offset,
+                                                             final long limit) {
+
+        final var uri = UriComponentsBuilder.fromUriString(dataComplianceProperties.getPrisonApiBaseUrl())
+                .path(OFFENDERS_WITH_IMAGES_PATH)
+                .queryParam("fromDateTime", lastRunDate.atStartOfDay())
+                .queryParam("paged", true)
+                .queryParam("size", limit)
+                .queryParam("page", offset)
+                .build().encode().toUri();
+
+        return webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(OffendersWithImagesResponse.class)
+                .map(response -> OffenderNumbersResponse.builder()
+                        .totalCount(response.getTotalElements())
+                        .offenderNumbers(new HashSet<>(response.getOffenderNumbers()))
+                        .build())
+                .block();
     }
 
     public List<OffenderImageMetadata> getOffenderFaceImagesFor(final OffenderNumber offenderNumber) {

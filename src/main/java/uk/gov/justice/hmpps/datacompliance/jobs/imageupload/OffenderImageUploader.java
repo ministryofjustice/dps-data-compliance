@@ -33,14 +33,16 @@ class OffenderImageUploader implements OffenderAction {
             return;
         }
 
-        faceImages.forEach(image -> getAndUploadImageData(image, offenderNumber));
+        faceImages.stream()
+                .filter(image -> !uploadLogger.isAlreadyUploaded(offenderNumber, image.getImageId()))
+                .forEach(image -> getAndUploadImageData(offenderNumber, image));
     }
 
     long getUploadCount() {
         return uploadLogger.getUploadCount();
     }
 
-    private void getAndUploadImageData(final OffenderImageMetadata imageMetadata, final OffenderNumber offenderNumber) {
+    private void getAndUploadImageData(final OffenderNumber offenderNumber, final OffenderImageMetadata imageMetadata) {
 
         log.trace("Uploading image: '{}' for offender: '{}'", imageMetadata.getImageId(), offenderNumber.getOffenderNumber());
 

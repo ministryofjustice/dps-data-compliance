@@ -15,14 +15,9 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OffenderImageUploadLoggerTest {
@@ -50,8 +45,6 @@ class OffenderImageUploadLoggerTest {
 
         assertThat(logger.getUploadCount()).isZero();
 
-        when(repository.findByOffenderNoAndImageId(any(), any())).thenReturn(Optional.empty());
-
         logger.log(
                 OffenderImage.builder()
                         .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
@@ -74,30 +67,10 @@ class OffenderImageUploadLoggerTest {
     }
 
     @Test
-    void doesNotPersistUploadIfAlreadyExists() {
-
-        assertThat(logger.getUploadCount()).isZero();
-
-        when(repository.findByOffenderNoAndImageId(OFFENDER_NUMBER, IMAGE_ID))
-                .thenReturn(Optional.of(mock(OffenderImageUpload.class)));
-
-        logger.log(
-                OffenderImage.builder()
-                        .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
-                        .imageId(IMAGE_ID)
-                        .build(),
-                FACE_ID);
-        
-        verify(repository, never()).save(any());
-        assertThat(logger.getUploadCount()).isZero();
-    }
-
-    @Test
     void logUploadError() {
 
         assertThat(logger.getUploadCount()).isZero();
 
-        when(repository.findByOffenderNoAndImageId(any(), any())).thenReturn(Optional.empty());
         logger.logUploadError(new OffenderNumber(OFFENDER_NUMBER), IMAGE_ID, "some reason");
 
         var offenderImageUpload = ArgumentCaptor.forClass(OffenderImageUpload.class);

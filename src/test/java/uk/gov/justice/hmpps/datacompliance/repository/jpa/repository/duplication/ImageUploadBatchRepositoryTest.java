@@ -70,4 +70,10 @@ class ImageUploadBatchRepositoryTest {
         assertThat(retrievedEntity.getUploadCount()).isEqualTo(123L);
         assertThat(retrievedEntity.getUploadEndDateTime()).isEqualTo(DATE_TIME.plusSeconds(1));
     }
+
+    @Test
+    @Sql(value = "image_upload_batch.sql")
+    void findLatestUploadBatch() {
+        assertThat(repository.findFirstByBatchIdNotOrderByUploadStartDateTimeDesc(3).get().getBatchId()).isEqualTo(2);
+    }
 }

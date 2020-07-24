@@ -6,16 +6,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient.OffenderNumbersResponse;
+import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.jobs.imageupload.OffenderIterator.OffenderAction;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageUploadBatch;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.ImageUploadBatchRepository;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,10 +30,14 @@ import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OffenderIteratorTest {
 
+    private static final LocalDateTime TIMESTAMP = LocalDateTime.now();
+    private static final long BATCH_ID = 1;
+    private static final ImageUploadBatch BATCH = ImageUploadBatch.builder().batchId(BATCH_ID).build();
     private static final String OFFENDER_1 = "A1234AA";
     private static final String OFFENDER_2 = "B1234BB";
     private static final String OFFENDER_3 = "C1234CC";
@@ -45,11 +53,14 @@ class OffenderIteratorTest {
     @Mock
     private PrisonApiClient client;
 
+    @Mock
+    private ImageUploadBatchRepository repository;
+
     private OffenderIterator offenderIterator;
 
     @BeforeEach
     void setUp() {
-        offenderIterator = new OffenderIterator(client, PROPERTIES);
+        offenderIterator = new OffenderIterator(repository, client, PROPERTIES);
     }
 
     @Test
@@ -79,7 +90,7 @@ class OffenderIteratorTest {
     @Test
     void applyForAllWithRetry() {
 
-        offenderIterator = new OffenderIterator(client, PROPERTIES,
+        offenderIterator = new OffenderIterator(repository, client, PROPERTIES,
                 RetryConfig.custom().maxAttempts(2)
                         .waitDuration(Duration.ZERO)
                         .build());
@@ -88,8 +99,8 @@ class OffenderIteratorTest {
 
         final var processedOffenderNumbers = new ArrayList<String>();
 
-        offenderIterator.applyForAll(throwOnFirstAttempt(
-                offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber())));
+        offenderIterator.applyForAll(BATCH,
+                throwOnFirstAttempt(offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber())));
 
         assertThat(processedOffenderNumbers).containsExactlyInAnyOrder(OFFENDER_1, OFFENDER_2, OFFENDER_3);
     }
@@ -97,14 +108,14 @@ class OffenderIteratorTest {
     @Test
     void exhaustedRetriesThrowsAndPreventsFurtherBatchesProcessing() {
 
-        offenderIterator = new OffenderIterator(client, PROPERTIES,
+        offenderIterator = new OffenderIterator(repository, client, PROPERTIES,
                 RetryConfig.custom().maxAttempts(1).build());
 
         mockOffenderNumbersResponse(OFFENDER_1, OFFENDER_2, OFFENDER_3);
 
         final var processedOffenderNumbers = new ArrayList<String>();
-        assertThatThrownBy(() -> offenderIterator.applyForAll(throwOnFirstAttempt(
-                offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber()))))
+        assertThatThrownBy(() -> offenderIterator.applyForAll(BATCH,
+                throwOnFirstAttempt(offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber()))))
                 .hasMessageContaining("Failed!");
 
         assertThat(processedOffenderNumbers).doesNotContain(OFFENDER_3);
@@ -113,7 +124,7 @@ class OffenderIteratorTest {
     @Test
     void canLimitIterationOverAConfigurableSubset() {
 
-        offenderIterator = new OffenderIterator(client,
+        offenderIterator = new OffenderIterator(repository, client,
                 DataComplianceProperties.builder()
                         .prisonApiOffenderIdsIterationThreads(2)
                         .prisonApiOffenderIdsLimit(REQUEST_LIMIT)
@@ -127,10 +138,21 @@ class OffenderIteratorTest {
 
     }
 
+    @Test
+    void applyForAllUsesAlternativeApiForUpdate() {
+
+        when(repository.findFirstByBatchIdNotOrderByUploadStartDateTimeDesc(BATCH_ID))
+                .thenReturn(Optional.of(ImageUploadBatch.builder().uploadStartDateTime(TIMESTAMP).build()));
+
+        when(client.getOffendersWithNewImages(TIMESTAMP.toLocalDate(), 0, REQUEST_LIMIT)).thenReturn(
+                response(1, List.of(OFFENDER_1)));
+
+        assertThat(processedOffenderNumbers()).containsExactlyInAnyOrder(OFFENDER_1);
+    }
+
     private List<String> processedOffenderNumbers() {
         final var processedOffenderNumbers = synchronizedList(new ArrayList<String>());
-        offenderIterator.applyForAll(offenderNumber ->
-                processedOffenderNumbers.add(offenderNumber.getOffenderNumber()));
+        offenderIterator.applyForAll(BATCH, offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber()));
         return processedOffenderNumbers;
     }
 
@@ -142,6 +164,8 @@ class OffenderIteratorTest {
 
         final var list = asList(offenderNumbers);
         final var count = new AtomicInteger(offset);
+
+        when(repository.findFirstByBatchIdNotOrderByUploadStartDateTimeDesc(BATCH_ID)).thenReturn(Optional.empty());
 
         do {
             lenient().when(client.getOffenderNumbers(count.get(), REQUEST_LIMIT)).thenReturn(

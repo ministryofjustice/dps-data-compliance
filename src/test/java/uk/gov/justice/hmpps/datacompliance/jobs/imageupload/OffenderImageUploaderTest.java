@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
@@ -27,6 +28,7 @@ class OffenderImageUploaderTest {
 
     private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
     private static final long IMAGE_ID = 123L;
+    private static final FaceId FACE_ID = new FaceId("face1");
     private static final OffenderImageMetadata IMAGE_METADATA = new OffenderImageMetadata(IMAGE_ID, "FACE");
     private static final OffenderImage OFFENDER_IMAGE = OffenderImage.builder()
             .offenderNumber(OFFENDER_NUMBER)
@@ -56,25 +58,33 @@ class OffenderImageUploaderTest {
     @Test
     void uploadOffenderImages() {
 
-        when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
-                .thenReturn(List.of(IMAGE_METADATA));
-
-        when(prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID)).thenReturn(Optional.of(OFFENDER_IMAGE));
-
-        when(imageRecognitionClient.uploadImageToCollection(OFFENDER_IMAGE))
-                .thenReturn(success(new FaceId("face1")));
+        givenFaceImageExistsForOffender(true)
+                .andImageAlreadyUploaded(false)
+                .andImageDataExists(true)
+                .andImageUploadsSuccessfully();
 
         imageUploader.accept(OFFENDER_NUMBER);
 
         verify(rateLimiter).acquire();
-        verify(logger).log(OFFENDER_IMAGE, new FaceId("face1"));
+        verify(logger).log(OFFENDER_IMAGE, FACE_ID);
+    }
+
+    @Test
+    void uploadOffenderImagesSkipsUploadIfAlreadyUploaded() {
+
+        givenFaceImageExistsForOffender(true)
+                .andImageAlreadyUploaded(true);
+
+        imageUploader.accept(OFFENDER_NUMBER);
+
+        verifyNoInteractions(imageRecognitionClient);
+        verify(logger, never()).log(any(), any());
     }
 
     @Test
     void uploadOffenderImagesHandlesNoImages() {
 
-        when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
-                .thenReturn(emptyList());
+        givenFaceImageExistsForOffender(false);
 
         imageUploader.accept(OFFENDER_NUMBER);
 
@@ -85,10 +95,9 @@ class OffenderImageUploaderTest {
     @Test
     void uploadOffenderImagesHandlesMissingImageData() {
 
-        when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
-                .thenReturn(List.of(IMAGE_METADATA));
-
-        when(prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID)).thenReturn(Optional.empty());
+        givenFaceImageExistsForOffender(true)
+                .andImageAlreadyUploaded(false)
+                .andImageDataExists(false);
 
         imageUploader.accept(OFFENDER_NUMBER);
 
@@ -99,17 +108,40 @@ class OffenderImageUploaderTest {
     @Test
     void uploadMayResultInNoIndexedFaces() {
 
-        when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
-                .thenReturn(List.of(IMAGE_METADATA));
-
-        when(prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID)).thenReturn(Optional.of(OFFENDER_IMAGE));
-
-        when(imageRecognitionClient.uploadImageToCollection(OFFENDER_IMAGE))
-                .thenReturn(error(FACE_NOT_FOUND));
+        givenFaceImageExistsForOffender(true)
+                .andImageAlreadyUploaded(false)
+                .andImageDataExists(true)
+                .andImageUploadFailsWith(FACE_NOT_FOUND);
 
         imageUploader.accept(OFFENDER_NUMBER);
 
         verify(logger).logUploadError(OFFENDER_NUMBER, IMAGE_ID, "FACE_NOT_FOUND");
     }
 
+    private OffenderImageUploaderTest givenFaceImageExistsForOffender(final boolean exists) {
+        when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
+                .thenReturn(exists ? List.of(IMAGE_METADATA) : emptyList());
+        return this;
+    }
+
+    private OffenderImageUploaderTest andImageAlreadyUploaded(final boolean uploaded) {
+        when(logger.isAlreadyUploaded(OFFENDER_NUMBER, IMAGE_ID)).thenReturn(uploaded);
+        return this;
+    }
+
+    private OffenderImageUploaderTest andImageDataExists(final boolean exists) {
+        when(prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID))
+                .thenReturn(exists ? Optional.of(OFFENDER_IMAGE) : Optional.empty());
+        return this;
+    }
+
+    private void andImageUploadsSuccessfully() {
+        when(imageRecognitionClient.uploadImageToCollection(OFFENDER_IMAGE))
+                .thenReturn(success(FACE_ID));
+    }
+
+    private void andImageUploadFailsWith(final IndexFacesError error) {
+        when(imageRecognitionClient.uploadImageToCollection(OFFENDER_IMAGE))
+                .thenReturn(error(error));
+    }
 }

@@ -26,7 +26,7 @@ class OffenderImageMigration {
         final var batch = repository.save(newUploadBatch());
         final var imageUploader = uploaderFactory.generateUploaderFor(batch);
 
-        offenderIterator.applyForAll(imageUploader);
+        offenderIterator.applyForAll(batch, imageUploader);
 
         batch.setUploadEndDateTime(timeSource.nowAsLocalDateTime());
         batch.setUploadCount(imageUploader.getUploadCount());
