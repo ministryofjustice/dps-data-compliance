@@ -60,7 +60,7 @@ public class PrisonApiClient {
     }
 
     public OffenderNumbersResponse getOffendersWithNewImages(final LocalDate lastRunDate,
-                                                             final long offset,
+                                                             final long pageNumber,
                                                              final long limit) {
 
         final var uri = UriComponentsBuilder.fromUriString(dataComplianceProperties.getPrisonApiBaseUrl())
@@ -68,7 +68,7 @@ public class PrisonApiClient {
                 .queryParam("fromDateTime", lastRunDate.atStartOfDay())
                 .queryParam("paged", true)
                 .queryParam("size", limit)
-                .queryParam("page", offset)
+                .queryParam("page", pageNumber)
                 .build().encode().toUri();
 
         return webClient.get()
