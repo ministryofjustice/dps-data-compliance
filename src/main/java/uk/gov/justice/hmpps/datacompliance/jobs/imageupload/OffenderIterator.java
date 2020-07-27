@@ -115,7 +115,7 @@ class OffenderIterator {
 
         return repository.findFirstByBatchIdNotOrderByUploadStartDateTimeDesc(batch.getBatchId())
                 .map(lastUpload -> prisonApiClient.getOffendersWithNewImages(
-                        lastUpload.getUploadStartDateTime().toLocalDate(), offset, limit))
+                        lastUpload.getUploadStartDateTime().toLocalDate(), offset / limit, limit))
                 .orElseGet(() -> prisonApiClient.getOffenderNumbers(offset, limit));
     }
 

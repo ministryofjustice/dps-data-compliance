@@ -144,10 +144,10 @@ class OffenderIteratorTest {
         when(repository.findFirstByBatchIdNotOrderByUploadStartDateTimeDesc(BATCH_ID))
                 .thenReturn(Optional.of(ImageUploadBatch.builder().uploadStartDateTime(TIMESTAMP).build()));
 
-        when(client.getOffendersWithNewImages(TIMESTAMP.toLocalDate(), 0, REQUEST_LIMIT)).thenReturn(
-                response(1, List.of(OFFENDER_1)));
+        when(client.getOffendersWithNewImages(TIMESTAMP.toLocalDate(), 0, REQUEST_LIMIT)).thenReturn(response(3, List.of(OFFENDER_1, OFFENDER_2)));
+        when(client.getOffendersWithNewImages(TIMESTAMP.toLocalDate(), 1, REQUEST_LIMIT)).thenReturn(response(3, List.of(OFFENDER_3)));
 
-        assertThat(processedOffenderNumbers()).containsExactlyInAnyOrder(OFFENDER_1);
+        assertThat(processedOffenderNumbers()).containsExactlyInAnyOrder(OFFENDER_1, OFFENDER_2, OFFENDER_3);
     }
 
     private List<String> processedOffenderNumbers() {
