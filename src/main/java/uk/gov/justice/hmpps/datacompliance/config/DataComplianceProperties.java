@@ -30,6 +30,7 @@ public class DataComplianceProperties {
     private final String pathfinderApiBaseUrl;
     private final Duration pathfinderApiTimeout;
     private final boolean deletionGrantEnabled;
+    private final boolean imageRecognitionDeletionEnabled;
     private final boolean imageDuplicateCheckEnabled;
     private final boolean idDataDuplicateCheckEnabled;  // Duplicate check based only on IDs (PNC, CRO, LIDS numbers)
     private final boolean databaseDataDuplicateCheckEnabled;  // Duplicate check based on points based similarity SQL query on NOMIS database
@@ -46,6 +47,7 @@ public class DataComplianceProperties {
                                     @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl,
                                     @Value("${pathfinder.api.timeout:5s}") final Duration pathfinderApiTimeout,
                                     @Value("${deletion.grant.enabled}") final boolean deletionGrantEnabled,
+                                    @Value("${image.recognition.deletion.enabled}") final boolean imageRecognitionDeletionEnabled,
                                     @Value("${offender.retention.image.duplicate.check.enabled}") final boolean imageDuplicateCheckEnabled,
                                     @Value("${offender.retention.data.duplicate.id.check.enabled}") final boolean idDataDuplicateCheckEnabled,
                                     @Value("${offender.retention.data.duplicate.db.check.enabled}") final boolean databaseDataDuplicateCheckEnabled,
@@ -59,6 +61,7 @@ public class DataComplianceProperties {
         log.info("Image upload - initial offset: {}", prisonApiOffenderIdsInitialOffset);
         log.info("Image upload - total pages: {}", prisonApiOffenderIdsTotalPages);
         log.info("Deletion grant enabled: {}", deletionGrantEnabled);
+        log.info("Image Recognition deletion enabled: {}", imageRecognitionDeletionEnabled);
         log.info("Image Duplicate check enabled: {}", imageDuplicateCheckEnabled);
         log.info("Data Duplicate - ID check enabled: {}", idDataDuplicateCheckEnabled);
         log.info("Data Duplicate - SQL query check enabled: {}", databaseDataDuplicateCheckEnabled);
@@ -73,6 +76,7 @@ public class DataComplianceProperties {
         this.pathfinderApiBaseUrl = pathfinderApiBaseUrl;
         this.pathfinderApiTimeout = pathfinderApiTimeout;
         this.deletionGrantEnabled = deletionGrantEnabled;
+        this.imageRecognitionDeletionEnabled = imageRecognitionDeletionEnabled;
         this.imageDuplicateCheckEnabled = imageDuplicateCheckEnabled;
         this.idDataDuplicateCheckEnabled = idDataDuplicateCheckEnabled;
         this.databaseDataDuplicateCheckEnabled = databaseDataDuplicateCheckEnabled;

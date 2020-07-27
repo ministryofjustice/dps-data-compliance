@@ -94,6 +94,14 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
         return Optional.empty();
     }
 
+    @Override
+    public void removeFaceFromCollection(final FaceId faceId) {
+
+        log.debug("Removing face: '{}' from collection", faceId);
+
+        client.deleteFaces(generateDeleteFaceRequest(faceId.getFaceId()));
+    }
+
     private Result<FaceId, IndexFacesError> ensureOnlyOneFaceIndexed(final OffenderImage image,
                                                                      final IndexFacesResponse indexedFacesResponse) {
 
@@ -136,17 +144,11 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
 
         // Need to delete all indexed faces in this image because we cannot tell which one
         // belongs to the offender:
-        multipleFaces.forEach(face -> removeFaceFromCollection(face.face().faceId()));
+        multipleFaces.forEach(face -> removeFaceFromCollection(new FaceId(face.face().faceId())));
 
         return error(MULTIPLE_FACES_FOUND);
     }
 
-    private void removeFaceFromCollection(String faceId) {
-
-        log.debug("Removing face: '{}' from collection", faceId);
-
-        client.deleteFaces(generateDeleteFaceRequest(faceId));
-    }
 
     private DeleteFacesRequest generateDeleteFaceRequest(final String faceId) {
         return DeleteFacesRequest.builder()

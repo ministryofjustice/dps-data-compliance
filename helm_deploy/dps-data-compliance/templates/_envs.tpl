@@ -40,6 +40,9 @@ env:
   - name: DELETION_GRANT_ENABLED
     value: "{{ .Values.env.DELETION_GRANT_ENABLED }}"
 
+  - name: IMAGE_RECOGNITION_DELETION_ENABLED
+    value: "{{ .Values.env.IMAGE_RECOGNITION_DELETION_ENABLED }}"
+
   {{- if .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}
   - name: IMAGE_RECOGNITION_MIGRATION_CRON
     value: "{{ .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}"
@@ -53,6 +56,11 @@ env:
   {{- if .Values.env.IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND }}
   - name: IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND
     value: "{{ .Values.env.IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND }}"
+  {{- end }}
+
+  {{- if .Values.env.PRISON_API_OFFENDER_IDS_PAGE_LIMIT }}
+  - name: PRISON_API_OFFENDER_IDS_PAGE_LIMIT
+    value: "{{ .Values.env.PRISON_API_OFFENDER_IDS_PAGE_LIMIT }}"
   {{- end }}
 
   {{- if .Values.env.PRISON_API_OFFENDER_IDS_TOTAL_PAGES }}

@@ -22,8 +22,8 @@ env:
 
   JAVA_OPTS: "Xmx512m"
 
-  HMPPS_AUTH_BASE_URL: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth"
-  PRISON_API_BASE_URL: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api"
+  HMPPS_AUTH_BASE_URL: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
+  PRISON_API_BASE_URL: "https://api-preprod.prison.service.justice.gov.uk"
   PATHFINDER_API_BASE_URL: "https://preprod-api.pathfinder.service.justice.gov.uk"
 
   SNS_PROVIDER: aws
@@ -31,7 +31,7 @@ env:
   DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
   DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: aws
 
-  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth/.well-known/jwks.json"
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
 
   # Materialized View not available :
   OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED: false
@@ -40,6 +40,7 @@ env:
   OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED: true
   OFFENDER_RETENTION_FALSE_POSITIVE_DUPLICATE_CHECK_ENABLED: true
   DELETION_GRANT_ENABLED: true
+  IMAGE_RECOGNITION_DELETION_ENABLED: false
 
   OFFENDER_DELETION_CRON: "0 0 14 ? * MON-FRI *"
   OFFENDER_DELETION_INITIAL_WINDOW_START: "2020-01-01T00:00:00"
@@ -49,9 +50,10 @@ env:
   IMAGE_RECOGNITION_PROVIDER: "AWS"
   DUPLICATE_DETECTION_PROVIDER: "AWS"
 
-  PRISON_API_OFFENDER_IDS_ITERATION_THREADS: 14
-  IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND: 14
-  IMAGE_RECOGNITION_MIGRATION_CRON: "0 30 12 27 7 ? 2020"
+  # Switching off in preprod so that it doesn't affect production collection
+  #PRISON_API_OFFENDER_IDS_ITERATION_THREADS: 2
+  #IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND: 14
+  #IMAGE_RECOGNITION_MIGRATION_CRON: "0 30 12 27 7 ? 2020"
 
 whitelist:
   office: "217.33.148.210/32"

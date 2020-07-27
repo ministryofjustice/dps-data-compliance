@@ -39,4 +39,9 @@ public class NoOpImageRecognitionClient implements ImageRecognitionClient {
         log.warn("Pretending to compare images: '{}' and '{}'", image1.getImageId(), image2.getImageId());
         return Optional.empty();
     }
+
+    @Override
+    public void removeFaceFromCollection(final FaceId faceId) {
+        log.warn("Pretending to remove face: '{}'", faceId.getFaceId());
+    }
 }
