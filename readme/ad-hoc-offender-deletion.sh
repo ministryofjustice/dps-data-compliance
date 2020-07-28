@@ -27,7 +27,7 @@ Request a single offender to be referred to the Data Compliance Service to be
 deleted.\n\n
 Requirements: aws-cli, kubectl (with access to the MoJ live-1 cluster as dps-shared or dps-tech)\n\n
 Usage: ./ad-hoc-offender-deletion.sh [-hv] <ENVIRONMENT> <OFFENDER_NO> \"<REASON>\"\n\n
-ENVIRONMENT must be one of 'dev' or 'preprod'\n\n
+ENVIRONMENT must be one of 'dev', 'preprod' or 'prod'\n\n
 Example: ./ad-hoc-offender-deletion.sh dev Z9999ZZ \"Deletion required for some reason\""
 
 # --- Options processing -------------------------------------------
@@ -60,8 +60,8 @@ ENVIRONMENT=$1
 OFFENDER_NO=$2
 REASON=$3
 
-if ! [[ "$ENVIRONMENT" =~ ^(dev|preprod)$ ]]; then
-    echo "ENVIRONMENT must be one of 'dev' or 'preprod'"
+if ! [[ "$ENVIRONMENT" =~ ^(dev|preprod|prod)$ ]]; then
+    echo "ENVIRONMENT must be one of 'dev', 'preprod' or 'prod'"
     exit 1;
 fi
 
