@@ -1,2 +1,0 @@
-ALTER TABLE DATA_DUPLICATE ADD CONFIDENCE DECIMAL(4,2);
-COMMENT ON COLUMN DATA_DUPLICATE.CONFIDENCE IS 'Percentage confidence that the duplicate match is valid';
