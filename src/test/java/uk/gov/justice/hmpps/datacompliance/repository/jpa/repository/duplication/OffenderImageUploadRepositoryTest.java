@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload.ImageUploadStatus.ERROR;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -50,6 +51,8 @@ class OffenderImageUploadRepositoryTest {
         assertThat(retrievedEntity.getFaceId()).isEqualTo("321");
         assertThat(retrievedEntity.getUploadDateTime()).isEqualTo(DATE_TIME);
         assertThat(retrievedEntity.getImageUploadBatch().getBatchId()).isEqualTo(1L);
+        assertThat(retrievedEntity.getUploadStatus()).isEqualTo(ERROR);
+        assertThat(retrievedEntity.getUploadErrorReason()).isEqualTo("Some error reason");
     }
 
     @Test
@@ -99,6 +102,8 @@ class OffenderImageUploadRepositoryTest {
                 .faceId("321")
                 .uploadDateTime(DATE_TIME)
                 .imageUploadBatch(batchRepository.findById(1L).orElseThrow())
+                .uploadStatus(ERROR)
+                .uploadErrorReason("Some error reason")
                 .build();
     }
 }

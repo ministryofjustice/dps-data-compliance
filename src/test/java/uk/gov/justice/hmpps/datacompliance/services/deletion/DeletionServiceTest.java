@@ -19,6 +19,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Referra
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
+import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.image.ImageDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.time.LocalDate;
@@ -57,7 +58,11 @@ class DeletionServiceTest {
     private OffenderDeletionCompleteEventPusher deletionCompleteEventPusher;
 
     @Mock
+    private ImageDuplicationDetectionService imageDuplicationDetectionService;
+
+    @Mock
     private OffenderDeletionBatch batch;
+
 
     private DeletionService deletionService;
 
@@ -68,7 +73,11 @@ class DeletionServiceTest {
                 referralRepository,
                 deletionCompleteEventPusher,
                 deletionGrantedEventPusher,
-                DataComplianceProperties.builder().deletionGrantEnabled(true).build());
+                DataComplianceProperties.builder()
+                        .deletionGrantEnabled(true)
+                        .imageRecognitionDeletionEnabled(true)
+                        .build(),
+                imageDuplicationDetectionService);
     }
 
     @Test
@@ -122,7 +131,10 @@ class DeletionServiceTest {
                 referralRepository,
                 deletionCompleteEventPusher,
                 deletionGrantedEventPusher,
-                DataComplianceProperties.builder().deletionGrantEnabled(false).build());
+                DataComplianceProperties.builder()
+                        .deletionGrantEnabled(false)
+                        .build(),
+                imageDuplicationDetectionService);
 
         deletionService.grantDeletion(OffenderDeletionReferral.builder()
                 .referralId(REFERRAL_ID)
@@ -149,6 +161,7 @@ class DeletionServiceTest {
         assertThat(resolution.getResolutionStatus()).isEqualTo(DELETED);
         assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
 
+        verify(imageDuplicationDetectionService).deleteOffenderImages(new OffenderNumber(OFFENDER_NUMBER));
         verify(deletionCompleteEventPusher).sendEvent(
                 uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.builder()
                         .offenderIdDisplay(OFFENDER_NUMBER)
@@ -162,6 +175,31 @@ class DeletionServiceTest {
                                 .booking(new Booking(21L))
                                 .build())
                         .build());
+    }
+
+    @Test
+    void handleDeletionCompleteDoesNotDeleteFromImageRecognitionCollectionWhenDisabled() {
+
+        deletionService = new DeletionService(
+                TimeSource.of(NOW),
+                referralRepository,
+                deletionCompleteEventPusher,
+                deletionGrantedEventPusher,
+                DataComplianceProperties.builder()
+                        .imageRecognitionDeletionEnabled(false)
+                        .build(),
+                imageDuplicationDetectionService);
+
+        final var existingReferral = generateOffenderDeletionReferral();
+        when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.of(existingReferral));
+        when(referralRepository.save(existingReferral)).thenReturn(existingReferral);
+
+        deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
+                .offenderIdDisplay(OFFENDER_NUMBER)
+                .referralId(REFERRAL_ID)
+                .build());
+
+        verifyNoInteractions(imageDuplicationDetectionService);
     }
 
     @Test

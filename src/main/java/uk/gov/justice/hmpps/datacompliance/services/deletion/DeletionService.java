@@ -14,6 +14,7 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceE
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
+import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.image.ImageDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.Objects;
@@ -36,6 +37,7 @@ public class DeletionService {
     private final OffenderDeletionCompleteEventPusher deletionCompleteEventPusher;
     private final DataComplianceEventPusher deletionGrantedEventPusher;
     private final DataComplianceProperties properties;
+    private final ImageDuplicationDetectionService imageDuplicationDetectionService;
 
     public void grantDeletion(final OffenderDeletionReferral referral) {
 
@@ -67,6 +69,10 @@ public class DeletionService {
         checkState(Objects.equals(event.getOffenderIdDisplay(), referral.getOffenderNo()),
                 "Offender number '%s' of referral '%s' does not match '%s'",
                 referral.getOffenderNo(), referral.getReferralId(), event.getOffenderIdDisplay());
+
+        if (properties.isImageRecognitionDeletionEnabled()) {
+            imageDuplicationDetectionService.deleteOffenderImages(referral.getOffenderNumber());
+        }
 
         recordDeletionCompletion(referral);
         publishDeletionCompleteEvent(referral);

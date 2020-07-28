@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload.ImageUploadStatus.DELETED;
 import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
 
 @Slf4j
@@ -42,13 +43,25 @@ public class ImageDuplicationDetectionService {
         final var imageUploads = imageUploadRepository.findByOffenderNo(offenderNumber.getOffenderNumber());
 
         return imageUploads.stream()
-                .filter(OffenderImageUpload::isNoUploadError)
+                .filter(OffenderImageUpload::isSuccess)
                 .flatMap(this::findDuplicates)
                 .collect(toList());
     }
 
     public Optional<Double> getSimilarity(final OffenderImage image1, final OffenderImage image2) {
         return imageRecognitionClient.getSimilarity(image1, image2);
+    }
+
+    public void deleteOffenderImages(final OffenderNumber offenderNumber) {
+
+        log.info("Deleting offender's image recognition uploads for: '{}'", offenderNumber.getOffenderNumber());
+
+        imageUploadRepository.findByOffenderNo(offenderNumber.getOffenderNumber())
+                .forEach(upload -> {
+                    imageRecognitionClient.removeFaceFromCollection(new FaceId(upload.getFaceId()));
+                    upload.setUploadStatus(DELETED);
+                    imageUploadRepository.save(upload);
+                });
     }
 
     private Stream<ImageDuplicate> findDuplicates(final OffenderImageUpload referenceImage) {

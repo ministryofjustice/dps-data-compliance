@@ -32,3 +32,4 @@ offender.retention:
     ap.check.enabled: true
 
 deletion.grant.enabled: true
+image.recognition.deletion.enabled: true

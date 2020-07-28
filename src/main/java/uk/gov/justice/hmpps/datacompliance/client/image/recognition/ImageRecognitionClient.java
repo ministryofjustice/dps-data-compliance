@@ -24,4 +24,6 @@ public interface ImageRecognitionClient {
      * in those images (value 0.0 - 100.0).
      */
     Optional<Double> getSimilarity(OffenderImage image1, OffenderImage image2);
+
+    void removeFaceFromCollection(final FaceId faceId);
 }

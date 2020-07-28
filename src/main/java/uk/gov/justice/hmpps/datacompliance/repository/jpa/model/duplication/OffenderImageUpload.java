@@ -9,6 +9,8 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,6 +21,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 import static javax.persistence.FetchType.LAZY;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload.ImageUploadStatus.SUCCESS;
 
 @Data
 @Entity
@@ -28,6 +31,12 @@ import static javax.persistence.FetchType.LAZY;
 @EqualsAndHashCode(of = {"uploadId"})
 @Table(name = "OFFENDER_IMAGE_UPLOAD")
 public class OffenderImageUpload {
+
+    public enum ImageUploadStatus {
+        SUCCESS,
+        ERROR,
+        DELETED
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,11 +65,16 @@ public class OffenderImageUpload {
     @JoinColumn(name = "BATCH_ID", nullable = false)
     private ImageUploadBatch imageUploadBatch;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "UPLOAD_STATUS", nullable = false)
+    private ImageUploadStatus uploadStatus;
+
     @Length(max = 255)
     @Column(name = "UPLOAD_ERROR_REASON")
     private String uploadErrorReason;
 
-    public boolean isNoUploadError() {
-        return uploadErrorReason == null;
+    public boolean isSuccess() {
+        return SUCCESS == uploadStatus;
     }
 }

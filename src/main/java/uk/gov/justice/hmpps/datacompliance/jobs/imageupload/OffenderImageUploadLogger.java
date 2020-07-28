@@ -12,6 +12,9 @@ import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload.ImageUploadStatus.ERROR;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload.ImageUploadStatus.SUCCESS;
+
 @Slf4j
 @AllArgsConstructor
 class OffenderImageUploadLogger {
@@ -48,6 +51,7 @@ class OffenderImageUploadLogger {
 
     private void saveUploadError(final OffenderNumber offenderNumber, final long imageId, final String reason) {
         repository.save(offenderImageUploadBuilder(offenderNumber, imageId)
+                .uploadStatus(ERROR)
                 .uploadErrorReason(reason)
                 .build());
     }
@@ -55,6 +59,7 @@ class OffenderImageUploadLogger {
     private void save(final OffenderImage image, final FaceId faceId) {
 
         repository.save(offenderImageUploadBuilder(image.getOffenderNumber(), image.getImageId())
+                .uploadStatus(SUCCESS)
                 .faceId(faceId.getFaceId())
                 .build());
 

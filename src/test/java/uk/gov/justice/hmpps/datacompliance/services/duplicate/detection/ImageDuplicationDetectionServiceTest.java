@@ -29,9 +29,13 @@ import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload.ImageUploadStatus.DELETED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload.ImageUploadStatus.SUCCESS;
 
 @ExtendWith(MockitoExtension.class)
 class ImageDuplicationDetectionServiceTest {
@@ -119,6 +123,21 @@ class ImageDuplicationDetectionServiceTest {
         verifyNoInteractions(imageDuplicateRepository);
     }
 
+    @Test
+    void deleteOffenderImages() {
+
+        final var imageUpload = mock(OffenderImageUpload.class);
+        when(imageUpload.getFaceId()).thenReturn("face1");
+        when(offenderImageUploadRepository.findByOffenderNo("A1234AA")).thenReturn(List.of(imageUpload));
+
+        service.deleteOffenderImages(new OffenderNumber("A1234AA"));
+
+        final var inOrder = inOrder(imageRecognitionClient, imageUpload, offenderImageUploadRepository);
+        inOrder.verify(imageRecognitionClient).removeFaceFromCollection(new FaceId("face1"));
+        inOrder.verify(imageUpload).setUploadStatus(DELETED);
+        inOrder.verify(offenderImageUploadRepository).save(imageUpload);
+    }
+
     private ImageDuplicationDetectionServiceTest givenOffenderHasAnUploaded(final OffenderImageUpload image) {
         when(offenderImageUploadRepository.findByOffenderNo(offenderNo(REFERENCE_ID).getOffenderNumber()))
                 .thenReturn(List.of(image));
@@ -183,6 +202,7 @@ class ImageDuplicationDetectionServiceTest {
 
     private OffenderImageUploadBuilder imageWith(final long id) {
         return OffenderImageUpload.builder()
+                .uploadStatus(SUCCESS)
                 .imageId(id)
                 .uploadId(id)
                 .faceId(faceId(id).getFaceId())
