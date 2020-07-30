@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.OffenderDeletionConfig;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
@@ -30,21 +30,22 @@ class OffenderDeletion {
     private final TimeSource timeSource;
     private final OffenderDeletionConfig config;
     private final OffenderDeletionBatchRepository repository;
-    private final PrisonApiClient prisonApiClient;
+    private final DataComplianceEventPusher eventPusher;
 
     void run() {
 
         log.info("Running offender deletion");
 
         final var newBatch = persistNewBatch();
-        final var request = PendingDeletionsRequest.builder()
-                .dueForDeletionWindowStart(newBatch.getWindowStartDateTime())
-                .dueForDeletionWindowEnd(newBatch.getWindowEndDateTime())
-                .batchId(newBatch.getBatchId());
+
+        final var request = OffenderDeletionReferralRequest.builder()
+                .batchId(newBatch.getBatchId())
+                .dueForDeletionWindowStart(newBatch.getWindowStartDateTime().toLocalDate())
+                .dueForDeletionWindowEnd(newBatch.getWindowEndDateTime().toLocalDate());
 
         config.getReferralLimit().ifPresent(request::limit);
 
-        prisonApiClient.requestPendingDeletions(request.build());
+        eventPusher.requestReferral(request.build());
 
         log.info("Offender deletion request complete");
     }

@@ -12,7 +12,6 @@ import reactor.core.publisher.Mono;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffendersWithImagesResponse;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
@@ -115,15 +114,6 @@ public class PrisonApiClient {
                         ex -> NOT_FOUND.equals(ex.getStatusCode()) ? Mono.empty() : Mono.error(ex))
 
                 .blockOptional();
-    }
-
-    public void requestPendingDeletions(final PendingDeletionsRequest request) {
-        webClient.post()
-                .uri(dataComplianceProperties.getPrisonApiBaseUrl() + OFFENDER_PENDING_DELETIONS_PATH)
-                .bodyValue(request)
-                .retrieve()
-                .toBodilessEntity()
-                .block();
     }
 
     private OffenderNumbersResponse offenderNumbersResponse(final ResponseEntity<List<OffenderNumber>> response) {

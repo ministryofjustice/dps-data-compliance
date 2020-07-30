@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 import java.util.List;
@@ -18,9 +19,14 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
     }
 
     @Override
-    public void grantDeletion(final OffenderDeletionGrant offenderDeletionGrant) {
-        log.warn("Pretending to push offender deletion granted events for '{}/{}' to queue",
-                offenderDeletionGrant.getOffenderNumber().getOffenderNumber(), offenderDeletionGrant.getReferralId());
+    public void requestReferral(final OffenderDeletionReferralRequest request) {
+        log.warn("Pretending to request referral: {}", request);
+    }
+
+    @Override
+    public void requestAdHocReferral(OffenderNumber offenderNo, Long batchId) {
+        log.warn("Pretending to request ad hoc referral for offender: '{}' and batch: '{}'",
+                offenderNo.getOffenderNumber(), batchId);
     }
 
     @Override
@@ -44,8 +50,8 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
     }
 
     @Override
-    public void requestAdHocReferral(OffenderNumber offenderNo, Long batchId) {
-        log.warn("Pretending to request ad hoc referral for offender: '{}' and batch: '{}'",
-                offenderNo.getOffenderNumber(), batchId);
+    public void grantDeletion(final OffenderDeletionGrant offenderDeletionGrant) {
+        log.warn("Pretending to push offender deletion granted events for '{}/{}' to queue",
+                offenderDeletionGrant.getOffenderNumber().getOffenderNumber(), offenderDeletionGrant.getReferralId());
     }
 }

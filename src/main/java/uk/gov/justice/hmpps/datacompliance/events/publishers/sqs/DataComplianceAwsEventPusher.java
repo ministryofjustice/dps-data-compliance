@@ -11,11 +11,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.AdHocReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DataDuplicateCheck;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.FreeTextSearchRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGranted;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.ReferralRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -25,11 +27,12 @@ import java.util.Map;
 @ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.request.sqs.provider}')")
 public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
 
+    private static final String REFERRAL_REQUEST = "DATA_COMPLIANCE_REFERRAL-REQUEST";
+    private static final String AD_HOC_REFERRAL_REQUEST = "DATA_COMPLIANCE_AD-HOC-REFERRAL-REQUEST";
     private static final String OFFENDER_DELETION_GRANTED = "DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED";
     private static final String DATA_DUPLICATE_ID_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-CHECK";
     private static final String DATA_DUPLICATE_DB_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK";
     private static final String FREE_TEXT_MORATORIUM_CHECK = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK";
-    private static final String AD_HOC_REFERRAL = "DATA_COMPLIANCE_AD-HOC-REFERRAL";
 
     private final ObjectMapper objectMapper;
     private final AmazonSQS sqsClient;
@@ -48,17 +51,27 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     }
 
     @Override
-    public void grantDeletion(final OffenderDeletionGrant offenderDeletionGrant) {
+    public void requestReferral(final OffenderDeletionReferralRequest request) {
 
-        log.debug("Sending grant deletion event for: '{}/{}'",
-                offenderDeletionGrant.getOffenderNumber().getOffenderNumber(), offenderDeletionGrant.getReferralId());
+        log.debug("Requesting deletion referral: {}", request);
 
-        sqsClient.sendMessage(generateRequest(OFFENDER_DELETION_GRANTED, OffenderDeletionGranted.builder()
-                .offenderIdDisplay(offenderDeletionGrant.getOffenderNumber().getOffenderNumber())
-                .referralId(offenderDeletionGrant.getReferralId())
-                .offenderIds(offenderDeletionGrant.getOffenderIds())
-                .offenderBookIds(offenderDeletionGrant.getOffenderBookIds())
-                .build()));
+        sqsClient.sendMessage(generateRequest(REFERRAL_REQUEST,
+                ReferralRequest.builder()
+                        .batchId(request.getBatchId())
+                        .dueForDeletionWindowStart(request.getDueForDeletionWindowStart())
+                        .dueForDeletionWindowEnd(request.getDueForDeletionWindowEnd())
+                        .limit(request.getLimit())
+                        .build()));
+    }
+
+    @Override
+    public void requestAdHocReferral(final OffenderNumber offenderNo, final Long batchId) {
+
+        log.debug("Requesting ad hoc deletion referral for offender: '{}' and batch: '{}'",
+                offenderNo.getOffenderNumber(), batchId);
+
+        sqsClient.sendMessage(generateRequest(AD_HOC_REFERRAL_REQUEST,
+                new AdHocReferralRequest(offenderNo.getOffenderNumber(), batchId)));
     }
 
     @Override
@@ -91,13 +104,17 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     }
 
     @Override
-    public void requestAdHocReferral(final OffenderNumber offenderNo, final Long batchId) {
+    public void grantDeletion(final OffenderDeletionGrant offenderDeletionGrant) {
 
-        log.debug("Requesting ad hoc deletion referral for offender: '{}' and batch: '{}'",
-                offenderNo.getOffenderNumber(), batchId);
+        log.debug("Sending grant deletion event for: '{}/{}'",
+                offenderDeletionGrant.getOffenderNumber().getOffenderNumber(), offenderDeletionGrant.getReferralId());
 
-        sqsClient.sendMessage(generateRequest(AD_HOC_REFERRAL,
-                new AdHocReferralRequest(offenderNo.getOffenderNumber(), batchId)));
+        sqsClient.sendMessage(generateRequest(OFFENDER_DELETION_GRANTED, OffenderDeletionGranted.builder()
+                .offenderIdDisplay(offenderDeletionGrant.getOffenderNumber().getOffenderNumber())
+                .referralId(offenderDeletionGrant.getReferralId())
+                .offenderIds(offenderDeletionGrant.getOffenderIds())
+                .offenderBookIds(offenderDeletionGrant.getOffenderBookIds())
+                .build()));
     }
 
     private SendMessageRequest generateRequest(final String eventType, final Object messageBody) {
