@@ -166,9 +166,24 @@ class MoratoriumCheckServiceTest {
         assertThat(service.retainDueToOffence(offenderWithNoOffenceCode())).isFalse();
     }
 
+    @Test
+    void retainDueToAlert() {
+        assertThat(service.retainDueToAlert(offenderWithAlertCodes("C1"))).isTrue();
+        assertThat(service.retainDueToAlert(offenderWithAlertCodes("XCSEA", "XTACT", "NOT A MATCH"))).isTrue();
+
+        assertThat(service.retainDueToAlert(offenderWithAlertCodes("NOT A MATCH"))).isFalse();
+        assertThat(service.retainDueToAlert(offenderWithAlertCodes())).isFalse();
+    }
+
     private OffenderToCheck offenderWithOffenceCodes(final String... offenceCodes) {
         final var offender = OffenderToCheck.builder().offenderNumber(OFFENDER_NUMBER);
         stream(offenceCodes).forEach(offender::offenceCode);
+        return offender.build();
+    }
+
+    private OffenderToCheck offenderWithAlertCodes(final String... alertCodes) {
+        final var offender = OffenderToCheck.builder().offenderNumber(OFFENDER_NUMBER);
+        stream(alertCodes).forEach(offender::alertCode);
         return offender.build();
     }
 

@@ -15,4 +15,5 @@ import java.util.List;
 public class OffenderToCheck {
     private final OffenderNumber offenderNumber;
     @Singular private final List<String> offenceCodes;
+    @Singular private final List<String> alertCodes;
 }

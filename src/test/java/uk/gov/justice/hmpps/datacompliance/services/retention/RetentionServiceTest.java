@@ -248,14 +248,16 @@ class RetentionServiceTest {
         when(dataDuplicationDetectionService.searchForAnalyticalPlatformDuplicates(OFFENDER_NUMBER))
                 .thenReturn(List.of(dataDuplicate));
         when(moratoriumCheckService.retainDueToOffence(OFFENDER_TO_CHECK)).thenReturn(true);
+        when(moratoriumCheckService.retainDueToAlert(OFFENDER_TO_CHECK)).thenReturn(true);
     }
 
     private void givenRetentionNotRequired() {
-        when(moratoriumCheckService.retainDueToOffence(OFFENDER_TO_CHECK)).thenReturn(false);
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(false);
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER)).thenReturn(Optional.empty());
         when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(emptyList());
         when(dataDuplicationDetectionService.searchForAnalyticalPlatformDuplicates(OFFENDER_NUMBER)).thenReturn(emptyList());
+        when(moratoriumCheckService.retainDueToOffence(OFFENDER_TO_CHECK)).thenReturn(false);
+        when(moratoriumCheckService.retainDueToAlert(OFFENDER_TO_CHECK)).thenReturn(false);
     }
 
     private RetentionCheckDataDuplicate persistedDataDuplicateCheck() {

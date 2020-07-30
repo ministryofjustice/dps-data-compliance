@@ -155,6 +155,12 @@ public class MoratoriumCheckService {
             .addAll(SECTION_40_CONVICTION_OFFENCE_CODES)
             .build();
 
+    // TODO GDPR-197 Persist alert codes to DB
+    private static final Set<String> ALERT_CODES_CAUSING_RETENTION = Set.of(
+            "C1", "C2", "C3", "C4", "CC1", "CC2", "CC3", "CC4", "CPC", "CPRC", "HPI", "OCYP", "P0", "P1", "P2", "P3",
+            "PC1", "PC2", "PC3", "PL1", "PL2", "PL3", "PVN", "RCC", "RCP", "RCS", "RDO", "RVR", "RYP", "SC", "XCC",
+            "XCSEA", "XTACT");
+
     private final DataComplianceEventPusher eventPusher;
 
     public void requestFreeTextSearch(final OffenderNumber offenderNumber, final Long retentionCheckId) {
@@ -180,5 +186,14 @@ public class MoratoriumCheckService {
 
         return offenderToCheck.getOffenceCodes().stream()
                 .anyMatch(OFFENCE_CODES_CAUSING_RETENTION::contains);
+    }
+
+    public boolean retainDueToAlert(final OffenderToCheck offenderToCheck) {
+
+        log.debug("Checking if offender '{}' must be retained due to alerts",
+                offenderToCheck.getOffenderNumber().getOffenderNumber());
+
+        return offenderToCheck.getAlertCodes().stream()
+                .anyMatch(ALERT_CODES_CAUSING_RETENTION::contains);
     }
 }

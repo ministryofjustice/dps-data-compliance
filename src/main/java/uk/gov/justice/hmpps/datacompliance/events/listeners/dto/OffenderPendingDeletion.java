@@ -64,6 +64,16 @@ public class OffenderPendingDeletion {
                 .collect(toList());
     }
 
+    @JsonIgnore
+    public List<String> getAlertCodes() {
+        return offenderAliases.stream()
+                .map(OffenderAlias::getOffenderBookings)
+                .flatMap(Collection::stream)
+                .map(OffenderBooking::getAlertCodes)
+                .flatMap(Collection::stream)
+                .collect(toList());
+    }
+
     @Getter
     @Builder
     @ToString
@@ -94,5 +104,9 @@ public class OffenderPendingDeletion {
         @Singular
         @JsonProperty("offenceCodes")
         private Set<String> offenceCodes;
+
+        @Singular
+        @JsonProperty("alertCodes")
+        private Set<String> alertCodes;
     }
 }
