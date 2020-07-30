@@ -15,7 +15,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
 import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffendersWithImagesResponse;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
@@ -178,38 +177,6 @@ class PrisonApiClientTest {
         prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
 
         assertThatThrownBy(() -> prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID))
-                .isInstanceOf(WebClientResponseException.class);
-    }
-
-    @Test
-    void requestPendingDeletions() throws Exception {
-
-        prisonApiMock.enqueue(new MockResponse().setResponseCode(202));
-
-        prisonApiClient.requestPendingDeletions(PendingDeletionsRequest.builder()
-                .dueForDeletionWindowStart(TIMESTAMP)
-                .dueForDeletionWindowEnd(TIMESTAMP.plusSeconds(1))
-                .batchId(123L)
-                .limit(1)
-                .build());
-
-        RecordedRequest recordedRequest = prisonApiMock.takeRequest();
-        assertThat(recordedRequest.getMethod()).isEqualTo("POST");
-        assertThat(recordedRequest.getPath()).isEqualTo("/api/data-compliance/offenders/pending-deletions");
-        assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("{" +
-                "\"dueForDeletionWindowStart\":\"2020-02-01T03:04:05.123456\"," +
-                "\"dueForDeletionWindowEnd\":\"2020-02-01T03:04:06.123456\"," +
-                "\"batchId\":123," +
-                "\"limit\":1" +
-                "}");
-    }
-
-    @Test
-    void requestPendingDeletionsThrowsOnNonSuccessResponse() {
-
-        prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
-
-        assertThatThrownBy(() -> prisonApiClient.requestPendingDeletions(PendingDeletionsRequest.builder().build()))
                 .isInstanceOf(WebClientResponseException.class);
     }
 

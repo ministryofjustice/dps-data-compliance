@@ -5,14 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.PendingDeletionsRequest;
 import uk.gov.justice.hmpps.datacompliance.config.OffenderDeletionConfig;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -26,20 +27,20 @@ class OffenderDeletionTest {
 
     private static final long BATCH_ID = 123L;
     private static final LocalDateTime NOW = LocalDateTime.now();
-    private static final LocalDateTime INITIAL_WINDOW_START = LocalDateTime.of(2020, 1, 2, 3, 4, 5);
+    private static final LocalDate INITIAL_WINDOW_START = LocalDate.of(2020, 1, 2);
     private static final Duration DURATION = Duration.ofDays(1);
     private static final int NONE_REMAINING_IN_WINDOW = 0;
     private static final int SOME_REMAINING_IN_WINDOW = 1;
     private static final int REFERRAL_LIMIT = 1;
 
     private static final OffenderDeletionConfig CONFIG = OffenderDeletionConfig.builder()
-            .initialWindowStart(INITIAL_WINDOW_START)
+            .initialWindowStart(INITIAL_WINDOW_START.atStartOfDay())
             .windowLength(DURATION)
             .referralLimit(REFERRAL_LIMIT)
             .build();
 
     @Mock
-    private PrisonApiClient prisonApiClient;
+    private DataComplianceEventPusher eventPusher;
 
     @Mock
     private OffenderDeletionBatchRepository batchRepository;
@@ -48,22 +49,22 @@ class OffenderDeletionTest {
 
     @BeforeEach
     void setUp() {
-        offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), CONFIG, batchRepository, prisonApiClient);
+        offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), CONFIG, batchRepository, eventPusher);
     }
 
     @Test
     void sendInitialDeletionRequest() {
 
-        final var expectedBatch = batchWith(INITIAL_WINDOW_START);
+        final var expectedBatch = batchWith(INITIAL_WINDOW_START.atStartOfDay());
 
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.empty());
         when(batchRepository.save(expectedBatch)).thenReturn(expectedBatch.withBatchId(BATCH_ID));
 
         offenderDeletion.run();
 
-        verify(prisonApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
+        verify(eventPusher).requestReferral(OffenderDeletionReferralRequest.builder()
                         .dueForDeletionWindowStart(INITIAL_WINDOW_START)
-                        .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plus(DURATION))
+                        .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(DURATION.toDays()))
                         .batchId(BATCH_ID)
                         .limit(REFERRAL_LIMIT)
                         .build());
@@ -72,15 +73,15 @@ class OffenderDeletionTest {
     @Test
     void sendSubsequentDeletionRequest() {
 
-        final var expectedBatch = batchWith(INITIAL_WINDOW_START.plus(DURATION));
+        final var expectedBatch = batchWith(INITIAL_WINDOW_START.plusDays(DURATION.toDays()).atStartOfDay());
 
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(
-                completedBatchWith(INITIAL_WINDOW_START, NONE_REMAINING_IN_WINDOW)));
+                completedBatchWith(INITIAL_WINDOW_START.atStartOfDay(), NONE_REMAINING_IN_WINDOW)));
         when(batchRepository.save(expectedBatch)).thenReturn(expectedBatch.withBatchId(BATCH_ID));
 
         offenderDeletion.run();
 
-        verify(prisonApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
+        verify(eventPusher).requestReferral(OffenderDeletionReferralRequest.builder()
                 .dueForDeletionWindowStart(INITIAL_WINDOW_START.plusDays(1))
                 .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(2))
                 .batchId(BATCH_ID)
@@ -91,17 +92,17 @@ class OffenderDeletionTest {
     @Test
     void useSameWindowForNextBatchIfRemainingOffendersInWindow() {
 
-        final var expectedBatch = batchWith(INITIAL_WINDOW_START);
+        final var expectedBatch = batchWith(INITIAL_WINDOW_START.atStartOfDay());
 
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(
-                completedBatchWith(INITIAL_WINDOW_START, SOME_REMAINING_IN_WINDOW)));
+                completedBatchWith(INITIAL_WINDOW_START.atStartOfDay(), SOME_REMAINING_IN_WINDOW)));
         when(batchRepository.save(expectedBatch)).thenReturn(expectedBatch.withBatchId(BATCH_ID));
 
         offenderDeletion.run();
 
-        verify(prisonApiClient).requestPendingDeletions(PendingDeletionsRequest.builder()
+        verify(eventPusher).requestReferral(OffenderDeletionReferralRequest.builder()
                 .dueForDeletionWindowStart(INITIAL_WINDOW_START)
-                .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plus(DURATION))
+                .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(DURATION.toDays()))
                 .batchId(BATCH_ID)
                 .limit(REFERRAL_LIMIT)
                 .build());
@@ -110,7 +111,7 @@ class OffenderDeletionTest {
     @Test
     void offenderDeletionRequestFailsIfLastBatchDidNotComplete() {
 
-        final var incompleteBatch = batchWith(INITIAL_WINDOW_START);
+        final var incompleteBatch = batchWith(INITIAL_WINDOW_START.atStartOfDay());
         incompleteBatch.setBatchId(BATCH_ID);
 
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(incompleteBatch));
@@ -146,11 +147,11 @@ class OffenderDeletionTest {
     void offenderDeletionRequestFailsIfWindowDatesIllogical() {
 
         final var badConfig = OffenderDeletionConfig.builder()
-                .initialWindowStart(INITIAL_WINDOW_START)
+                .initialWindowStart(INITIAL_WINDOW_START.atStartOfDay())
                 .windowLength(Duration.ofDays(-1))
                 .build();
 
-        offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), badConfig, batchRepository, prisonApiClient);
+        offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), badConfig, batchRepository, eventPusher);
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> offenderDeletion.run())
