@@ -56,6 +56,7 @@ public class ReferralService {
                 OffenderToCheck.builder()
                         .offenderNumber(new OffenderNumber(event.getOffenderIdDisplay()))
                         .offenceCodes(event.getOffenceCodes())
+                        .alertCodes(event.getAlertCodes())
                         .build());
 
         referralResolutionService.processReferral(referral, retentionChecks);

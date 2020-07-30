@@ -12,6 +12,7 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateRes
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckAlert;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckAnalyticalPlatformDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDatabaseDataDuplicate;
@@ -19,7 +20,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckOffenceCode;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckOffence;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.RetentionCheckRepository;
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.data.DataDuplicationDetectionService;
@@ -68,7 +69,8 @@ public class RetentionService {
                 databaseDataDuplicateCheck(offenderNumber),
                 analyticalPlatformDataDuplicateCheck(offenderNumber),
                 freeTextSearch(offenderNumber),
-                offenceCodeCheck(offenderToCheck));
+                offenceCodeCheck(offenderToCheck),
+                alertCheck(offenderToCheck));
     }
 
     public void handleDataDuplicateResult(final DataDuplicateResult result, final Method method) {
@@ -198,7 +200,12 @@ public class RetentionService {
     }
 
     private ActionableRetentionCheck offenceCodeCheck(final OffenderToCheck offenderToCheck) {
-        return new ActionableRetentionCheck(new RetentionCheckOffenceCode(
+        return new ActionableRetentionCheck(new RetentionCheckOffence(
                 moratoriumCheckService.retainDueToOffence(offenderToCheck) ? RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
+    }
+
+    private ActionableRetentionCheck alertCheck(final OffenderToCheck offenderToCheck) {
+        return new ActionableRetentionCheck(new RetentionCheckAlert(
+                moratoriumCheckService.retainDueToAlert(offenderToCheck) ? RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
     }
 }
