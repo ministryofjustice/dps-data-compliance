@@ -13,3 +13,4 @@ A Spring Boot app to manage data compliance for the Digital Prison Services
 4. [Deletion Event Queues](readme/deletion_events.md)
 5. [Image Recognition](readme/image_recognition.md)
 6. [Ad Hoc Offender Deletion](readme/ad_hoc_deletion.md)
+7. [Destruction Log](readme/destruction_log.md)
