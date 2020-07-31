@@ -34,7 +34,7 @@ env:
 
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
 
-  # Materialized View not available :
+  # Materialized View not available:
   OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED: false
   OFFENDER_RETENTION_IMAGE_DUPLICATE_CHECK_ENABLED: true
   OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED: true
@@ -42,6 +42,13 @@ env:
   OFFENDER_RETENTION_FALSE_POSITIVE_DUPLICATE_CHECK_ENABLED: true
   IMAGE_RECOGNITION_DELETION_ENABLED: true
   DELETION_GRANT_ENABLED: false
+
+  # Run image recognition collection update every weekday.
+  # Note: the AWS Rekognition service currently rate limits
+  # us to 15 API calls per second.
+  IMAGE_RECOGNITION_MIGRATION_CRON: "0 0 13 ? * MON-FRI *"
+  PRISON_API_OFFENDER_IDS_ITERATION_THREADS: 2
+  IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND: 14
 
 whitelist:
   office: "217.33.148.210/32"
