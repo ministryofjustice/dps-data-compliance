@@ -73,15 +73,15 @@ management:
       base-path: /
       exposure:
         include: 'info, health'
-  health:
-    probes:
-      enabled: true
+
   endpoint:
     health:
       cache:
         time-to-live: 2000ms
       show-components: always
       show-details: always
+      probes:
+        enabled: true
     info:
       cache:
         time-to-live: 2000ms

@@ -54,4 +54,23 @@ public class HealthCheckIntegrationTest extends IntegrationTest {
                 .jsonPath("$.components['healthCheck.PathfinderApiHealth'].details.error").value(containsString("404 Not Found"));
     }
 
+    @Test
+    void healthLivenessPageIsAccessible() {
+        webTestClient.get().uri("/health/liveness")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("UP");
+    }
+
+    @Test
+    void healthReadinessPageIsAccessible() {
+        webTestClient.get().uri("/health/readiness")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("UP");
+    }
 }
