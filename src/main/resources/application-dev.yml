@@ -17,6 +17,7 @@ offender.retention:
     db.check.enabled: false
     ap.check.enabled: false
 
+image.recognition.deletion.enabled: false
 deletion.grant.enabled: true
 
 server.shutdown: immediate
