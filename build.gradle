@@ -1,5 +1,5 @@
 plugins {
-    id("uk.gov.justice.hmpps.gradle-spring-boot") version "1.0.2"
+    id("uk.gov.justice.hmpps.gradle-spring-boot") version "1.0.6"
 }
 
 dependencies {
@@ -15,32 +15,29 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
-    implementation 'org.springframework:spring-webflux:5.2.8.RELEASE'
-    implementation 'org.springframework:spring-jms:5.2.8.RELEASE'
+    implementation 'org.springframework:spring-webflux:5.2.9.RELEASE'
+    implementation 'org.springframework:spring-jms:5.2.9.RELEASE'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.14.11')
+    implementation platform('software.amazon.awssdk:bom:2.15.0')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.855')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.855'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.873')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.873'
     implementation 'com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8'
 
     // Utils
     implementation 'io.github.resilience4j:resilience4j-retry:1.5.0'
     implementation 'org.apache.commons:commons-lang3:3.11'
-    implementation 'commons-io:commons-io:2.7'
+    implementation 'commons-io:commons-io:2.8.0'
     implementation ('org.quartz-scheduler:quartz:2.3.2') {
         exclude group: 'com.zaxxer'
     }
 
-    // Database
-    implementation 'org.hibernate:hibernate-core:5.4.21.Final'
-
-    runtimeOnly 'org.hsqldb:hsqldb:2.5.0'
-    runtimeOnly 'org.flywaydb:flyway-core:6.5.5'
+    runtimeOnly 'org.hsqldb:hsqldb:2.5.1'
+    runtimeOnly 'org.flywaydb:flyway-core:6.5.6'
     runtimeOnly 'org.postgresql:postgresql:42.2.16'
 
     // Swagger
@@ -50,8 +47,8 @@ dependencies {
     // Test
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
     testCompileOnly 'org.projectlombok:lombok:1.18.12'
-    testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.18.1'
-    testImplementation 'com.squareup.okhttp3:okhttp:4.8.1'
-    testImplementation 'com.squareup.okhttp3:mockwebserver:4.8.1'
+    testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.19.0'
+    testImplementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.0'
     testImplementation 'io.jsonwebtoken:jjwt:0.9.1'
 }
