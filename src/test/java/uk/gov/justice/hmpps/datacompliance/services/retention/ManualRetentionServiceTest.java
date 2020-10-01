@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +39,7 @@ import static uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonC
 @ExtendWith(MockitoExtension.class)
 class ManualRetentionServiceTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
     private static final String OFFENDER_NO = "A1234BC";
     private static final String USERNAME = "user1";
     private static final String REASON_DETAILS = "Some reason";

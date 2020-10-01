@@ -15,6 +15,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.Offende
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch.BatchType.SCHEDULED;
 
@@ -25,7 +26,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 class OffenderDeletionBatchRepositoryTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
 
     @Autowired
     private OffenderDeletionBatchRepository repository;

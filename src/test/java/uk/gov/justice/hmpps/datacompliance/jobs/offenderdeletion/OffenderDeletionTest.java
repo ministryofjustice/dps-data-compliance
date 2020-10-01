@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,7 +27,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 class OffenderDeletionTest {
 
     private static final long BATCH_ID = 123L;
-    private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
     private static final LocalDate INITIAL_WINDOW_START = LocalDate.of(2020, 1, 2);
     private static final Duration DURATION = Duration.ofDays(1);
     private static final int NONE_REMAINING_IN_WINDOW = 0;
