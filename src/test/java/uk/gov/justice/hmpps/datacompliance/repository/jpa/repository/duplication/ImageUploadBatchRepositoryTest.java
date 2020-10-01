@@ -15,6 +15,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.Imag
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class ImageUploadBatchRepositoryTest {
 
-    private static final LocalDateTime DATE_TIME = LocalDateTime.now();
+    private static final LocalDateTime DATE_TIME = LocalDateTime.now().truncatedTo(MILLIS);
     private static final long BATCH_ID = 1L;
 
     @Autowired

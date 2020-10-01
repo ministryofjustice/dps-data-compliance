@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.String.format;
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
@@ -45,7 +46,7 @@ class ImageDuplicationDetectionServiceTest {
     private static final long DUPLICATE_2 = 2L;
     private static final long DUPLICATE_3 = 3L;
     private static final double SIMILARITY = 97.89;
-    private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
 
     @Mock
     private ImageRecognitionClient imageRecognitionClient;

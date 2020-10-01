@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.min;
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.synchronizedList;
 import static java.util.stream.Collectors.toSet;
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OffenderIteratorTest {
 
-    private static final LocalDateTime TIMESTAMP = LocalDateTime.now();
+    private static final LocalDateTime TIMESTAMP = LocalDateTime.now().truncatedTo(MILLIS);
     private static final long BATCH_ID = 1;
     private static final ImageUploadBatch BATCH = ImageUploadBatch.builder().batchId(BATCH_ID).build();
     private static final String OFFENDER_1 = "A1234AA";

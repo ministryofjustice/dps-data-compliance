@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,7 +43,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 @ExtendWith(MockitoExtension.class)
 class ReferralServiceTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
     private static final long BATCH_ID = 123L;
     private static final String OFFENDER_NUMBER = "A1234AA";
 

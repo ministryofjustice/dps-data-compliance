@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -30,7 +31,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplicati
 @ExtendWith(MockitoExtension.class)
 class DataDuplicationDetectionServiceTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
     private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
     private static final OffenderNumber DUPLICATE_OFFENDER_NUMBER_1 = new OffenderNumber("B1234BB");
     private static final OffenderNumber DUPLICATE_OFFENDER_NUMBER_2 = new OffenderNumber("C1234CC");

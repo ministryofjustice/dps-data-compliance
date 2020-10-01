@@ -16,13 +16,14 @@ import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.time.LocalDateTime;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class OffenderImageUploadLoggerTest {
 
-    private static final LocalDateTime DATE_TIME = LocalDateTime.now();
+    private static final LocalDateTime DATE_TIME = LocalDateTime.now().truncatedTo(MILLIS);
     private static final String OFFENDER_NUMBER = "A1234AA";
     private static final FaceId FACE_ID = new FaceId("face1");
     private static final long IMAGE_ID = 123L;

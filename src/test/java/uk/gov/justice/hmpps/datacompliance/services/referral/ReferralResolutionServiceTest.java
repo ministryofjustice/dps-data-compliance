@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,7 +52,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 @ExtendWith(MockitoExtension.class)
 class ReferralResolutionServiceTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.now();
+    private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
 
     @Mock
     private OffenderDeletionReferralRepository referralRepository;
