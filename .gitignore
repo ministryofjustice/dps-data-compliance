@@ -11,3 +11,4 @@ dps-gradle-spring-boot-suppressions.xml
 *.iml
 *.ipr
 out/
+.editorconfig
