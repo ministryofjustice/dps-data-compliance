@@ -1,5 +1,5 @@
 plugins {
-    id("uk.gov.justice.hmpps.gradle-spring-boot") version "2.1.1"
+    id("uk.gov.justice.hmpps.gradle-spring-boot") version "2.1.2"
 }
 
 dependencies {
@@ -19,13 +19,13 @@ dependencies {
     implementation 'org.springframework:spring-jms:5.3.2'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.15.45')
+    implementation platform('software.amazon.awssdk:bom:2.15.57')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.918')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.918'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.930')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.11.930'
     implementation 'com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8'
 
     // Utils
@@ -37,7 +37,7 @@ dependencies {
     }
 
     runtimeOnly 'org.hsqldb:hsqldb:2.5.1'
-    runtimeOnly 'org.flywaydb:flyway-core:7.3.1'
+    runtimeOnly 'org.flywaydb:flyway-core:7.3.2'
     runtimeOnly 'org.postgresql:postgresql:42.2.18'
 
     // Swagger
