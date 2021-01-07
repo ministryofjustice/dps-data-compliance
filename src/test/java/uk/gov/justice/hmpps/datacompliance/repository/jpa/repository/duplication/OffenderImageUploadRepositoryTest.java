@@ -4,12 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.transaction.TestTransaction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload;
 
 import javax.transaction.Transactional;
@@ -23,9 +20,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplicati
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional
-@Sql(value = "image_upload_batch.sql")
-@Sql(value = "offender_image_upload.sql")
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@Sql(scripts = {"classpath:seed.data/reset.sql", "classpath:seed.data/image_upload_batch.sql", "classpath:seed.data/offender_image_upload.sql"})
 class OffenderImageUploadRepositoryTest {
 
     private static final LocalDateTime DATE_TIME = LocalDateTime.now().truncatedTo(MILLIS);
@@ -41,10 +36,6 @@ class OffenderImageUploadRepositoryTest {
 
         final var offenderImageUpload = uploadRepository.save(buildOffenderImageUpload());
         assertThat(offenderImageUpload.getUploadId()).isNotNull();
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
 
         final var retrievedEntity = uploadRepository.findById(offenderImageUpload.getUploadId()).orElseThrow();
         assertThat(retrievedEntity.getOffenderNo()).isEqualTo("A1234AA");

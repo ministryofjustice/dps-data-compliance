@@ -4,11 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.transaction.TestTransaction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate;
 
 import javax.transaction.Transactional;
@@ -22,7 +19,6 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplicati
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class DataDuplicateRepositoryTest {
 
     private static final LocalDateTime DATE_TIME = LocalDateTime.now().truncatedTo(MILLIS);
@@ -43,10 +39,6 @@ class DataDuplicateRepositoryTest {
 
         repository.save(dataDuplicate);
         assertThat(dataDuplicate.getDataDuplicateId()).isNotNull();
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
 
         final var retrievedEntity = repository.findById(dataDuplicate.getDataDuplicateId()).orElseThrow();
         assertThat(retrievedEntity.getReferenceOffenderNo()).isEqualTo("A1234AA");
@@ -69,10 +61,6 @@ class DataDuplicateRepositoryTest {
 
         repository.save(dataDuplicate);
         assertThat(dataDuplicate.getDataDuplicateId()).isNotNull();
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
 
         final var retrievedEntity = repository.findById(dataDuplicate.getDataDuplicateId()).orElseThrow();
         assertThat(retrievedEntity.getConfidence()).isEqualTo(100.00);
