@@ -4,12 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.transaction.TestTransaction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
@@ -36,7 +33,6 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class OffenderDeletionReferralRepositoryTest {
 
     @Autowired
@@ -52,24 +48,24 @@ class OffenderDeletionReferralRepositoryTest {
     private OffenderDeletionReferralRepository repository;
 
     @Test
-    @Sql("image_upload_batch.sql")
-    @Sql("offender_image_upload.sql")
-    @Sql("image_duplicate.sql")
-    @Sql("offender_deletion_batch.sql")
-    @Sql("offender_deletion_referral.sql")
-    @Sql("referred_offender_alias.sql")
-    @Sql("referral_resolution.sql")
-    @Sql("manual_retention.sql")
-    @Sql("retention_check.sql")
-    @Sql("retention_reason_manual.sql")
-    @Sql("retention_reason_image_duplicate.sql")
+    @Sql("classpath:seed.data/image_upload_batch.sql")
+    @Sql("classpath:seed.data/offender_image_upload.sql")
+    @Sql("classpath:seed.data/image_duplicate.sql")
+    @Sql("classpath:seed.data/offender_deletion_batch.sql")
+    @Sql("classpath:seed.data/offender_deletion_referral.sql")
+    @Sql("classpath:seed.data/referred_offender_alias.sql")
+    @Sql("classpath:seed.data/referral_resolution.sql")
+    @Sql("classpath:seed.data/manual_retention.sql")
+    @Sql("classpath:seed.data/retention_check.sql")
+    @Sql("classpath:seed.data/retention_reason_manual.sql")
+    @Sql("classpath:seed.data/retention_reason_image_duplicate.sql")
     void getOffenderDeletionReferral() {
         assertMatchesExpectedContents(repository.findById(1L).orElseThrow());
     }
 
     @Test
-    @Sql("offender_deletion_batch.sql")
-    @Sql("offender_deletion_referral.sql")
+    @Sql("classpath:seed.data/offender_deletion_batch.sql")
+    @Sql("classpath:seed.data/offender_deletion_referral.sql")
     void getOffenderDeletionReferralWithoutBookingsOrResolution() {
         final var referral = repository.findById(1L).orElseThrow();
 
@@ -78,20 +74,16 @@ class OffenderDeletionReferralRepositoryTest {
     }
 
     @Test
-    @Sql("image_upload_batch.sql")
-    @Sql("offender_image_upload.sql")
-    @Sql("image_duplicate.sql")
-    @Sql("offender_deletion_batch.sql")
-    @Sql("manual_retention.sql")
+    @Sql("classpath:seed.data/image_upload_batch.sql")
+    @Sql("classpath:seed.data/offender_image_upload.sql")
+    @Sql("classpath:seed.data/image_duplicate.sql")
+    @Sql("classpath:seed.data/offender_deletion_batch.sql")
+    @Sql("classpath:seed.data/manual_retention.sql")
     void saveOffenderDeletionReferral() {
 
         final var referral = offenderDeletionReferral();
 
         repository.save(referral);
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
 
         assertMatchesExpectedContents(repository.findById(referral.getReferralId()).orElseThrow());
     }

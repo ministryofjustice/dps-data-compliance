@@ -4,12 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.transaction.TestTransaction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetentionReason;
 
@@ -24,7 +21,6 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class ManualRetentionRepositoryTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
@@ -36,7 +32,7 @@ class ManualRetentionRepositoryTest {
     private RetentionReasonCodeRepository reasonCodeRepository;
 
     @Test
-    @Sql("retention_reason_code.sql")
+    @Sql("classpath:seed.data/retention_reason_code.sql")
     void persistManualRetentionAndRetrieveById() {
 
         final var manualRetention = ManualRetention.builder()
@@ -52,10 +48,6 @@ class ManualRetentionRepositoryTest {
                 .build());
 
         manualRetentionRepository.save(manualRetention);
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
 
         final var retrievedEntity = manualRetentionRepository.findById(manualRetention.getManualRetentionId()).orElseThrow();
 
@@ -73,9 +65,9 @@ class ManualRetentionRepositoryTest {
     }
 
     @Test
-    @Sql("retention_reason_code.sql")
-    @Sql("manual_retention.sql")
-    @Sql("manual_retention_reason.sql")
+    @Sql("classpath:seed.data/retention_reason_code.sql")
+    @Sql("classpath:seed.data/manual_retention.sql")
+    @Sql("classpath:seed.data/manual_retention_reason.sql")
     void findLatestManualRetentionRecordForOffenderNo() {
 
         final var latestManualRetention = manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc("A1234BC").orElseThrow();

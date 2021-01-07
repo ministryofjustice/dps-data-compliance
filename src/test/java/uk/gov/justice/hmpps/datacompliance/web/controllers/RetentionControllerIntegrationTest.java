@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
@@ -20,7 +18,6 @@ import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.when;
 
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class RetentionControllerIntegrationTest extends IntegrationTest {
 
     private static final LocalDateTime TIMESTAMP = LocalDateTime.of(2020, 1, 2, 3, 4, 5);

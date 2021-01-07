@@ -4,12 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.transaction.TestTransaction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.DataDuplicateRepository;
@@ -27,7 +24,6 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class RetentionCheckRepositoryTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
@@ -39,11 +35,11 @@ class RetentionCheckRepositoryTest {
     private RetentionCheckRepository retentionCheckRepository;
 
     @Test
-    @Sql("data_duplicate.sql")
-    @Sql("offender_deletion_batch.sql")
-    @Sql("offender_deletion_referral.sql")
-    @Sql("referral_resolution.sql")
-    @Sql("retention_check.sql")
+    @Sql("classpath:seed.data/data_duplicate.sql")
+    @Sql("classpath:seed.data/offender_deletion_batch.sql")
+    @Sql("classpath:seed.data/offender_deletion_referral.sql")
+    @Sql("classpath:seed.data/referral_resolution.sql")
+    @Sql("classpath:seed.data/retention_check_2.sql")
     void retrieveByIdAndUpdate() {
 
         final var retentionCheck = getRetentionCheck();
@@ -54,10 +50,6 @@ class RetentionCheckRepositoryTest {
         retentionCheck.setCheckStatus(RETENTION_REQUIRED);
         retentionCheck.addDataDuplicates(List.of(dataDuplicateRepository.findById(1L).orElseThrow()));
         retentionCheckRepository.save(retentionCheck);
-
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
 
         final var persistedCheck = getRetentionCheck();
         assertThat(persistedCheck.getCheckStatus()).isEqualTo(RETENTION_REQUIRED);

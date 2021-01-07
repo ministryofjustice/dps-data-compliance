@@ -35,12 +35,10 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.FACE_NOT_FOUND;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.error;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.success;
 
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

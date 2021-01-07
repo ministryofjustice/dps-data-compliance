@@ -32,10 +32,10 @@ class ReferralResolutionServiceIntegrationTest extends IntegrationTest {
     private ReferralResolutionService referralResolutionService;
 
     @Test
-    @Sql("offender_deletion_batch.sql")
-    @Sql("offender_deletion_referral.sql")
-    @Sql("referral_resolution.sql")
-    @Sql("retention_check.sql")
+    @Sql("classpath:seed.data/offender_deletion_batch.sql")
+    @Sql("classpath:seed.data/offender_deletion_referral.sql")
+    @Sql("classpath:seed.data/referral_resolution.sql")
+    @Sql("classpath:seed.data/retention_check.sql")
     void processUpdatedRetentionCheckResultsInRetention() {
 
         assertThat(referralResolutionRepository.findById(1L).orElseThrow().getResolutionStatus()).isEqualTo(PENDING);

@@ -1,1 +1,0 @@
-INSERT INTO manual_retention(manual_retention_id, offender_no, retention_date_time, user_id, retention_version) VALUES (1, 'A1234BC', to_timestamp('2020-01-02 03:04:05', 'YYYY-MM-DD HH:MI:SS'), 'user1', 0);

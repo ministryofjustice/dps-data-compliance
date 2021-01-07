@@ -4,12 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.transaction.TestTransaction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 
 import javax.transaction.Transactional;
@@ -23,7 +20,6 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional
-@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 class OffenderDeletionBatchRepositoryTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
@@ -41,10 +37,6 @@ class OffenderDeletionBatchRepositoryTest {
                 .batchType(SCHEDULED)
                 .build());
 
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
-
         final var retrievedEntity = repository.findById(batch.getBatchId()).orElseThrow();
 
         assertThat(retrievedEntity.getRequestDateTime()).isEqualTo(NOW);
@@ -55,7 +47,7 @@ class OffenderDeletionBatchRepositoryTest {
     }
 
     @Test
-    @Sql("offender_deletion_batch.sql")
+    @Sql("classpath:seed.data/offender_deletion_batch.sql")
     void findLatestScheduledBatch() {
 
         final var latestBatch = repository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED).orElseThrow();
@@ -64,7 +56,7 @@ class OffenderDeletionBatchRepositoryTest {
     }
 
     @Test
-    @Sql("offender_deletion_batch.sql")
+    @Sql("classpath:seed.data/offender_deletion_batch.sql")
     void findBatchesWithNoReferralCompletionDate() {
         assertThat(repository.findByReferralCompletionDateTimeIsNull())
                 .extracting(OffenderDeletionBatch::getBatchId)
