@@ -37,6 +37,7 @@ public class AwsAthenaConfig {
                                                                   final String secretKey,
                                                                   final String region,
                                                                   final String roleArn) {
+        
 
         final var credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
