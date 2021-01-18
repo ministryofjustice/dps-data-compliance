@@ -4,6 +4,7 @@ target
 build
 **/out
 dps-gradle-spring-boot-suppressions.xml
+.DS_Store
 
 ### IntelliJ IDEA ###
 .idea
