@@ -46,7 +46,7 @@ all the offender's offender ids and booking ids):
 
 ```bash
 aws --endpoint-url=http://localhost:4576 sqs send-message \
-    --queue-url http://localstack:4576/queue/data_compliance_request_queue \
+    --queue-url http://localhost:4576/queue/data_compliance_request_queue \
     --message-body '{"offenderIdDisplay":"SOME_OFFENDER_ID_DISPLAY","referralId":1,"offenderIds":[123],"offenderBookIds":[456]}' \
     --message-attributes "eventType={StringValue=DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED,DataType=String}"
 ```
@@ -56,7 +56,7 @@ the offender for deletion eligibility:
 
 ```bash
 aws --endpoint-url=http://localhost:4576 sqs send-message \
-    --queue-url http://localstack:4576/queue/data_compliance_response_queue \
+    --queue-url http://localhost:4576/queue/data_compliance_response_queue \
     --message-body '{"offenderIdDisplay":"SOME_OFFENDER_ID_DISPLAY"}' \
     --message-attributes "eventType={StringValue=DATA_COMPLIANCE_OFFENDER-PENDING-DELETION,DataType=String}"
 ```

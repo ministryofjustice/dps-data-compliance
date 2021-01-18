@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.datacompliance.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.AnonymousAWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.sqs.AmazonSQS;
@@ -63,6 +64,7 @@ public class DataComplianceRequestQueueConfig {
 
         return AmazonSQSAsyncClientBuilder.standard()
                 .withEndpointConfiguration(new EndpointConfiguration(serviceEndpoint, region))
+                .withCredentials(new AWSStaticCredentialsProvider(new AnonymousAWSCredentials()))
                 .build();
     }
 
@@ -76,6 +78,7 @@ public class DataComplianceRequestQueueConfig {
 
         return AmazonSQSAsyncClientBuilder.standard()
                 .withEndpointConfiguration(new EndpointConfiguration(serviceEndpoint, region))
+                .withCredentials(new AWSStaticCredentialsProvider(new AnonymousAWSCredentials()))
                 .build();
     }
 }

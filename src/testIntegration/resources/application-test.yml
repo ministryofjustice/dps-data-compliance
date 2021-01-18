@@ -9,7 +9,32 @@ pathfinder.api.base.url: http://localhost:8997
 
 app.db.url: jdbc:hsqldb:mem:data-compliance-db;sql.syntax_pgs=true;shutdown=false
 
+
+data.compliance.request:
+  sqs:
+    provider: embedded-localstack
+    queue.name: data_compliance_request_queue
+    queue.url: http://localhost:4576/queue/data_compliance_request_queue
+    dlq.name: data_compliance_request_dead_letter_queue
+    endpoint.url: http://localhost:4576
+
+data.compliance.response:
+  sqs:
+    provider: localstack
+    queue.name: data_compliance_response_queue
+    dlq.name: data_compliance_response_dead_letter_queue
+    endpoint.url: http://localhost:4576
+
+sns:
+  provider: localstack
+  topic.name: offender_events
+  topic.arn: arn:aws:sns:eu-west-2:000000000000:offender_events
+  endpoint.url: http://localhost:4575
+  region: eu-west-2
+
 spring:
+  main:
+    allow-bean-definition-overriding: true
   jpa:
     show-sql: true
     hibernate.ddl-auto: create-drop
@@ -25,11 +50,13 @@ jwt:
 
 offender.retention:
   false.positive.duplicate.check.enabled: false
-  image.duplicate.check.enabled: true
+  image.duplicate.check.enabled: false
   data.duplicate:
-    id.check.enabled: true
-    db.check.enabled: true
-    ap.check.enabled: true
+    id.check.enabled: false
+    db.check.enabled: false
+    ap.check.enabled: false
 
 deletion.grant.enabled: true
 image.recognition.deletion.enabled: true
+
+server.shutdown: immediate
