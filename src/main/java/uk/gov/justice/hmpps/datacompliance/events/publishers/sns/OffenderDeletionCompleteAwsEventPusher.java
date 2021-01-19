@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('${sns.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('${sns.provider}')")
 public class OffenderDeletionCompleteAwsEventPusher implements OffenderDeletionCompleteEventPusher {
 
     private final AmazonSNS amazonSns;

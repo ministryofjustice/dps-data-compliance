@@ -7,17 +7,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 
 import javax.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.RetentionReasonCode.Code.HIGH_PROFILE;
 
-@ExtendWith(SpringExtension.class)
-@ActiveProfiles("test")
-@SpringBootTest
 @Transactional
-class RetentionReasonCodeRepositoryTest {
+class RetentionReasonCodeRepositoryTest extends IntegrationTest {
 
     @Autowired
     private RetentionReasonCodeRepository repository;

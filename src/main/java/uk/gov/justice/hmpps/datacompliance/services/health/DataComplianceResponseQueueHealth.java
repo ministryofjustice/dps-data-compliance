@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.response.sqs.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('${data.compliance.response.sqs.provider}')")
 public class DataComplianceResponseQueueHealth extends QueueHealth {
 
     public DataComplianceResponseQueueHealth(

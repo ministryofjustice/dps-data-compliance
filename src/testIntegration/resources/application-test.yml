@@ -20,13 +20,13 @@ data.compliance.request:
 
 data.compliance.response:
   sqs:
-    provider: localstack
+    provider: embedded-localstack
     queue.name: data_compliance_response_queue
     dlq.name: data_compliance_response_dead_letter_queue
     endpoint.url: http://localhost:4576
 
 sns:
-  provider: localstack
+  provider: embedded-localstack
   topic.name: offender_events
   topic.arn: arn:aws:sns:eu-west-2:000000000000:offender_events
   endpoint.url: http://localhost:4575
