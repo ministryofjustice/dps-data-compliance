@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 
 import javax.transaction.Transactional;
@@ -15,11 +16,8 @@ import java.time.LocalDateTime;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(SpringExtension.class)
-@ActiveProfiles("test")
-@SpringBootTest
 @Transactional
-class ImageDuplicateRepositoryTest {
+class ImageDuplicateRepositoryTest extends IntegrationTest {
 
     private static final LocalDateTime DATE_TIME = LocalDateTime.now().truncatedTo(MILLIS);
 

@@ -7,7 +7,7 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletio
 
 @Slf4j
 @Component
-@ConditionalOnExpression("!{'aws', 'localstack'}.contains('${sns.provider}')")
+@ConditionalOnExpression("!{'aws', 'localstack', 'embedded-localstack'}.contains('${sns.provider}')")
 public class OffenderDeletionCompleteNoOpEventPusher implements OffenderDeletionCompleteEventPusher {
 
     public OffenderDeletionCompleteNoOpEventPusher() {

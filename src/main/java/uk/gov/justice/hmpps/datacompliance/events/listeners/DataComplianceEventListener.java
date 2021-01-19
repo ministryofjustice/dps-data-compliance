@@ -27,7 +27,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplicati
 
 @Slf4j
 @Service
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.response.sqs.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('${data.compliance.response.sqs.provider}')")
 public class DataComplianceEventListener {
 
     private static final String ADHOC_OFFENDER_DELETION_EVENT = "DATA_COMPLIANCE_AD-HOC-OFFENDER-DELETION";

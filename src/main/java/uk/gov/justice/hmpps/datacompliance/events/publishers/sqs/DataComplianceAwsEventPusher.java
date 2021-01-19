@@ -24,7 +24,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.request.sqs.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('${data.compliance.request.sqs.provider}')")
 public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
 
     private static final String REFERRAL_REQUEST = "DATA_COMPLIANCE_REFERRAL-REQUEST";
