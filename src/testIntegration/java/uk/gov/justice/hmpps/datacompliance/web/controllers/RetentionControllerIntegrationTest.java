@@ -1,11 +1,14 @@
 package uk.gov.justice.hmpps.datacompliance.web.controllers;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ManualRetentionService;
@@ -21,6 +24,11 @@ import static org.mockito.Mockito.when;
 class RetentionControllerIntegrationTest extends IntegrationTest {
 
     private static final LocalDateTime TIMESTAMP = LocalDateTime.of(2020, 1, 2, 3, 4, 5);
+
+    @BeforeEach
+    public void setup(@LocalServerPort int localServerPort){
+        this.webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + localServerPort).build();
+    }
 
     @MockBean
     private TimeSource timeSource;

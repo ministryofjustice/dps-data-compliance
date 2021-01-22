@@ -1,12 +1,21 @@
 package uk.gov.justice.hmpps.datacompliance.services.health;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 
 import static org.hamcrest.core.StringContains.containsString;
 
 public class HealthCheckIntegrationTest extends IntegrationTest {
+
+
+    @BeforeEach
+    public void setup(@LocalServerPort int localServerPort){
+       this.webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + localServerPort).build();
+    }
 
    // @Test
     //FIXME: UNDO THIS COMMENT

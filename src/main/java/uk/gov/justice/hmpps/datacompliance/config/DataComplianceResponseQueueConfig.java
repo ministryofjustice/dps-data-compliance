@@ -24,7 +24,7 @@ import javax.jms.Session;
 @Slf4j
 @EnableJms
 @Configuration
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.response.sqs.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('${data.compliance.response.sqs.provider}')")
 public class DataComplianceResponseQueueConfig {
 
     @Bean

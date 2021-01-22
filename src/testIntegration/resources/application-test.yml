@@ -52,7 +52,7 @@ offender.retention:
   false.positive.duplicate.check.enabled: false
   image.duplicate.check.enabled: false
   data.duplicate:
-    id.check.enabled: false
+    id.check.enabled: true
     db.check.enabled: false
     ap.check.enabled: false
 
