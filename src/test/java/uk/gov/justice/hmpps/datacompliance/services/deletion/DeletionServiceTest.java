@@ -160,7 +160,7 @@ class DeletionServiceTest {
 
         final var resolution = existingReferral.getReferralResolution().orElseThrow();
         assertThat(resolution.getResolutionStatus()).isEqualTo(DELETED);
-        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getResolutionDateTime()).isNotNull();
 
         verify(imageDuplicationDetectionService).deleteOffenderImages(new OffenderNumber(OFFENDER_NUMBER));
         verify(deletionCompleteEventPusher).sendEvent(

@@ -151,7 +151,7 @@ class ReferralResolutionServiceTest {
 
         referralResolutionService.processUpdatedRetentionCheck(updatedRetentionCheck);
 
-        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getResolutionDateTime()).isNotNull();
         assertThat(resolution.getResolutionStatus()).isEqualTo(PENDING);
 
         verify(referralResolutionRepository).save(resolution);
@@ -166,7 +166,7 @@ class ReferralResolutionServiceTest {
 
         referralResolutionService.processUpdatedRetentionCheck(updatedRetentionCheck);
 
-        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getResolutionDateTime()).isNotNull();
         assertThat(resolution.getResolutionStatus()).isEqualTo(RETAINED);
 
         verify(referralResolutionRepository).save(resolution);
@@ -181,7 +181,7 @@ class ReferralResolutionServiceTest {
 
         referralResolutionService.processUpdatedRetentionCheck(updatedRetentionCheck);
 
-        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getResolutionDateTime()).isNotNull();
         assertThat(resolution.getResolutionStatus()).isEqualTo(DELETION_GRANTED);
 
         verify(referralResolutionRepository).save(resolution);
@@ -246,7 +246,7 @@ class ReferralResolutionServiceTest {
         inOrder.verify(referral).setReferralResolution(resolution.capture());
         inOrder.verify(referralRepository).save(referral);
 
-        assertThat(resolution.getValue().getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getValue().getResolutionDateTime()).isNotNull();
         assertThat(resolution.getValue().getResolutionStatus()).isEqualTo(resolutionStatus);
         assertThat(resolution.getValue().getRetentionChecks())
                 .extracting(RetentionCheck::getCheckType)

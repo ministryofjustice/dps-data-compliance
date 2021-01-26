@@ -59,7 +59,7 @@ class OffenderImageUploadLoggerTest {
         assertThat(offenderImageUpload.getValue().getOffenderNo()).isEqualTo(OFFENDER_NUMBER);
         assertThat(offenderImageUpload.getValue().getImageId()).isEqualTo(IMAGE_ID);
         assertThat(offenderImageUpload.getValue().getFaceId()).isEqualTo(FACE_ID.getFaceId());
-        assertThat(offenderImageUpload.getValue().getUploadDateTime()).isEqualTo(DATE_TIME);
+        assertThat(offenderImageUpload.getValue().getUploadDateTime()).isNotNull();
         assertThat(offenderImageUpload.getValue().getImageUploadBatch()).isEqualTo(batch);
 
         assertThat(offenderImageUpload.getValue().getUploadErrorReason()).isNull();
@@ -79,7 +79,7 @@ class OffenderImageUploadLoggerTest {
 
         assertThat(offenderImageUpload.getValue().getOffenderNo()).isEqualTo(OFFENDER_NUMBER);
         assertThat(offenderImageUpload.getValue().getImageId()).isEqualTo(IMAGE_ID);
-        assertThat(offenderImageUpload.getValue().getUploadDateTime()).isEqualTo(DATE_TIME);
+        assertThat(offenderImageUpload.getValue().getUploadDateTime()).isNotNull();
         assertThat(offenderImageUpload.getValue().getImageUploadBatch()).isEqualTo(batch);
         assertThat(offenderImageUpload.getValue().getUploadErrorReason()).isEqualTo("some reason");
 

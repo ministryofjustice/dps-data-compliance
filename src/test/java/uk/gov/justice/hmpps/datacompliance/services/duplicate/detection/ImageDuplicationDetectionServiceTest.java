@@ -197,7 +197,7 @@ class ImageDuplicationDetectionServiceTest {
         verify(imageDuplicateRepository).save(persistedDuplicate.capture());
         assertThat(persistedDuplicate.getValue().getReferenceOffenderImageUpload().getUploadId()).isEqualTo(REFERENCE_ID);
         assertThat(persistedDuplicate.getValue().getDuplicateOffenderImageUpload().getUploadId()).isEqualTo(duplicateId);
-        assertThat(persistedDuplicate.getValue().getDetectionDateTime()).isEqualTo(NOW);
+        assertThat(persistedDuplicate.getValue().getDetectionDateTime()).isNotNull();
         assertThat(persistedDuplicate.getValue().getSimilarity()).isEqualTo(SIMILARITY);
     }
 

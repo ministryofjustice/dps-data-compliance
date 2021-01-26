@@ -25,7 +25,7 @@ public interface TimeSource {
     Instant now();
 
     default LocalDateTime nowAsLocalDateTime() {
-        return LocalDateTime.ofInstant(now(), UTC);
+        return LocalDateTime.now();
     }
 
     default LocalDate nowAsLocalDate() {

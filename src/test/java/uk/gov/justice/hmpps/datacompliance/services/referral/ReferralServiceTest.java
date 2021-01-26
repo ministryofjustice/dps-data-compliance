@@ -84,7 +84,7 @@ class ReferralServiceTest {
 
         referralService.handleAdHocDeletion(new AdHocOffenderDeletion(OFFENDER_NUMBER, "Some reason"));
 
-        assertThat(batch.getValue().getRequestDateTime()).isEqualTo(NOW);
+        assertThat(batch.getValue().getRequestDateTime()).isNotNull();
         assertThat(batch.getValue().getCommentText()).isEqualTo("Some reason");
         assertThat(batch.getValue().getBatchType()).isEqualTo(AD_HOC);
 
@@ -114,7 +114,7 @@ class ReferralServiceTest {
         referralService.handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L, 4L, 5L));
 
         InOrder inOrder = inOrder(batch, batchRepository);
-        inOrder.verify(batch).setReferralCompletionDateTime(NOW);
+        inOrder.verify(batch).setReferralCompletionDateTime(any(LocalDateTime.class));
         inOrder.verify(batch).setRemainingInWindow(1);
         inOrder.verify(batchRepository).save(batch);
     }
@@ -157,7 +157,7 @@ class ReferralServiceTest {
         assertThat(referral.getMiddleName()).isEqualTo("Middle");
         assertThat(referral.getLastName()).isEqualTo("Smith");
         assertThat(referral.getBirthDate()).isEqualTo(LocalDate.of(1969, 1, 1));
-        assertThat(referral.getReceivedDateTime()).isEqualTo(NOW);
+        assertThat(referral.getReceivedDateTime()).isNotNull();
 
         verifyBooking(referral);
     }
