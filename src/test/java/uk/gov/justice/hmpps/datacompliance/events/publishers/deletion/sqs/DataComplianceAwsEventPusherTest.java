@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.datacompliance.events.publishers.deletion.sqs;
 
 import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.model.GetQueueUrlResult;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,11 +40,17 @@ class DataComplianceAwsEventPusherTest {
     @Mock
     private AmazonSQS client;
 
+    @Mock
+    private GetQueueUrlResult getQueueUrlResult;
+
     private DataComplianceEventPusher eventPusher;
 
     @BeforeEach
     void setUp() {
-        eventPusher = new DataComplianceAwsEventPusher(client, "queue.url", OBJECT_MAPPER);
+        when(getQueueUrlResult.getQueueUrl()).thenReturn("queue.url");
+        when(client.getQueueUrl(anyString())).thenReturn(getQueueUrlResult);
+        eventPusher = new DataComplianceAwsEventPusher(client, "queue.name", OBJECT_MAPPER);
+
     }
 
     @Test

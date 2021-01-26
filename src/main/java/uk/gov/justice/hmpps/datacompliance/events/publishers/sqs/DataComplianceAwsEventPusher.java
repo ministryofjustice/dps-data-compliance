@@ -40,14 +40,14 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
 
     public DataComplianceAwsEventPusher(
             @Autowired @Qualifier("dataComplianceRequestSqsClient") final AmazonSQS sqsClient,
-            @Value("${data.compliance.request.sqs.queue.url}") final String queueUrl,
+            @Value("${data.compliance.request.sqs.queue.name}") final String name,
             final ObjectMapper objectMapper) {
-
-        log.info("Configured to push offender deletion granted events to SQS queue: {}", queueUrl);
 
         this.objectMapper = objectMapper;
         this.sqsClient = sqsClient;
-        this.queueUrl = queueUrl;
+        this.queueUrl = sqsClient.getQueueUrl(name).getQueueUrl();
+
+        log.info("Configured to push offender deletion granted events to SQS queue: {}", queueUrl);
     }
 
     @Override
