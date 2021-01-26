@@ -52,8 +52,8 @@ offender.retention:
   false.positive.duplicate.check.enabled: false
   image.duplicate.check.enabled: false
   data.duplicate:
-    id.check.enabled: false
-    db.check.enabled: false
+    id.check.enabled: true
+    db.check.enabled: true
     ap.check.enabled: false
 
 deletion.grant.enabled: true
