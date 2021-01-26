@@ -18,6 +18,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.Of
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -82,7 +83,7 @@ public class ReferralService {
 
         final var referral = OffenderDeletionReferral.builder()
                 .offenderDeletionBatch(batch)
-                .receivedDateTime(timeSource.nowAsLocalDateTime())
+                .receivedDateTime(LocalDateTime.now())
                 .offenderNo(event.getOffenderIdDisplay())
                 .firstName(event.getFirstName())
                 .middleName(event.getMiddleName())
