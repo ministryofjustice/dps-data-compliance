@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.web.controllers;
+package uk.gov.justice.hmpps.datacompliance.utils.web;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
