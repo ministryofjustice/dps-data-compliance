@@ -24,7 +24,7 @@ import javax.jms.Session;
 @Slf4j
 @EnableJms
 @Configuration
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('${data.compliance.response.sqs.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('${data.compliance.response.sqs.provider}')")
 public class DataComplianceResponseQueueConfig {
 
     @Bean
@@ -104,5 +104,16 @@ public class DataComplianceResponseQueueConfig {
                 .withEndpointConfiguration(new EndpointConfiguration(serviceEndpoint, region))
                 .withCredentials(new AWSStaticCredentialsProvider(new AnonymousAWSCredentials()))
                 .build();
+    }
+
+
+    @Bean("sqsResponseQueueUrl")
+    public String sqsResponseQueueUrl(@Qualifier("dataComplianceResponseSqsClient") AmazonSQS awsSqsClient, @Value("${data.compliance.response.sqs.queue.name}") final String queueName){
+        return awsSqsClient.getQueueUrl(queueName).getQueueUrl();
+    }
+
+    @Bean("sqsResponseDlqQueueUrl")
+    public String sqsResponseDlqQueueUrl(@Qualifier("dataComplianceResponseSqsDlqClient") AmazonSQS awsSqsDlqClient, @Value("${data.compliance.response.sqs.dlq.name}") final String dlqQueueName){
+        return awsSqsDlqClient.getQueueUrl(dlqQueueName).getQueueUrl();
     }
 }

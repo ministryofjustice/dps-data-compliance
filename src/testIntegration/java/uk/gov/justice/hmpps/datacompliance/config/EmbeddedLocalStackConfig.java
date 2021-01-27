@@ -15,7 +15,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @Configuration
 @ConditionalOnProperty(name = "data.compliance.request.sqs.provider", havingValue = "embedded-localstack")
-public class LocalStackConfig {
+public class EmbeddedLocalStackConfig {
 
     private Logger log = LoggerFactory.getLogger(ClassName.class);
 
