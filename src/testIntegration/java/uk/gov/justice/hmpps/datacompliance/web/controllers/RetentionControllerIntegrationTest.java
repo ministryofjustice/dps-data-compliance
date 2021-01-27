@@ -10,6 +10,7 @@ import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ManualRetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
+import uk.gov.justice.hmpps.datacompliance.utils.web.JwtAuthenticationHelper;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReason;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReasonCode;
 import uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionRequest;

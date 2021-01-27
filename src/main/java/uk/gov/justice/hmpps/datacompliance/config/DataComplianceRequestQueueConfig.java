@@ -7,6 +7,7 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -81,4 +82,15 @@ public class DataComplianceRequestQueueConfig {
                 .withCredentials(new AWSStaticCredentialsProvider(new AnonymousAWSCredentials()))
                 .build();
     }
+
+    @Bean("sqsRequestQueueUrl")
+    public String sqsRequestQueueUrl(@Qualifier("dataComplianceRequestSqsClient") AmazonSQS awsSqsClient, @Value("${data.compliance.request.sqs.queue.name}") final String queueName){
+        return awsSqsClient.getQueueUrl(queueName).getQueueUrl();
+    }
+
+    @Bean("sqsRequestDlqQueueUrl")
+    public String sqsRequestDlqQueueUrl(@Qualifier("dataComplianceRequestSqsDlqClient") AmazonSQS awsSqsDlqClient, @Value("${data.compliance.request.sqs.dlq.name}") final String dlqQueueName){
+        return awsSqsDlqClient.getQueueUrl(dlqQueueName).getQueueUrl();
+    }
+
 }
