@@ -36,7 +36,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   jpa:
-    show-sql: true
+    show-sql: false
     hibernate.ddl-auto: create-drop
   flyway.locations: classpath:db/migration
   security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
@@ -52,8 +52,8 @@ offender.retention:
   false.positive.duplicate.check.enabled: false
   image.duplicate.check.enabled: false
   data.duplicate:
-    id.check.enabled: false
-    db.check.enabled: false
+    id.check.enabled: true
+    db.check.enabled: true
     ap.check.enabled: false
 
 deletion.grant.enabled: true
