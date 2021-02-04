@@ -13,6 +13,7 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchRe
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderRestrictionResult;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
@@ -37,6 +38,8 @@ public class DataComplianceEventListener {
     private static final String DATA_DUPLICATE_ID_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-RESULT";
     private static final String DATA_DUPLICATE_DB_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-RESULT";
     private static final String FREE_TEXT_MORATORIUM_RESULT = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT";
+    private static final String OFFENDER_RESTRICTION_RESULT= "DATA_COMPLIANCE_OFFENDER-RESTRICTION-RESULT";
+
 
     private final Map<String, MessageHandler> messageHandlers = Map.of(
             ADHOC_OFFENDER_DELETION_EVENT, this::handleAdHocDeletion,
@@ -45,7 +48,9 @@ public class DataComplianceEventListener {
             OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
             DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult,
             DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult,
-            FREE_TEXT_MORATORIUM_RESULT, this::handleFreeTextSearchResult);
+            FREE_TEXT_MORATORIUM_RESULT, this::handleFreeTextSearchResult,
+            OFFENDER_RESTRICTION_RESULT, this::handleOffenderRestrictionResult
+        );
 
     private final ObjectMapper objectMapper;
     private final ReferralService referralService;
@@ -119,6 +124,11 @@ public class DataComplianceEventListener {
     private void handleFreeTextSearchResult(final Message<String> message) {
         retentionService.handleFreeTextSearchResult(
                 parseEvent(message.getPayload(), FreeTextSearchResult.class));
+    }
+
+    private void handleOffenderRestrictionResult(final Message<String> message) {
+        retentionService.handleOffenderRestrictionResult(
+            parseEvent(message.getPayload(), OffenderRestrictionResult.class));
     }
 
     private <T> T parseEvent(final String requestJson, final Class<T> eventType) {

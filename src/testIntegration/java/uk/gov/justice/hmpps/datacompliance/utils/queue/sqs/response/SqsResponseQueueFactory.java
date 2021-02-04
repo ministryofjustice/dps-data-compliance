@@ -65,6 +65,20 @@ public class SqsResponseQueueFactory extends QueueFactory {
                 .build()));
     }
 
+
+    public static SendMessageRequest forOffenderRestrictionResult(String queueUrl, String offenderIdDisplay, Long checkId, boolean isRestricted) {
+        return new SendMessageRequest()
+            .withQueueUrl(queueUrl)
+            .withMessageAttributes(Map.of(
+                EVENT_TYPE, stringAttribute(Response.OFFENDER_RESTRICTION_RESULT),
+                CONTENT_TYPE, stringAttribute(APPLICATION_JSON_VALUE)))
+            .withMessageBody(asJson(OffenderRestrictionResult.builder()
+                .offenderIdDisplay(offenderIdDisplay)
+                .retentionCheckId(checkId)
+                .restricted(isRestricted)
+                .build()));
+    }
+
     public static SendMessageRequest forPendingDeletionReferralComplete(String queueUrl, Long batchId, Long numOfReferred, Long totalInWindow) {
         return new SendMessageRequest()
             .withQueueUrl(queueUrl)

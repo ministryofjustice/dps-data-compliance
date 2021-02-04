@@ -7,20 +7,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.AdHocReferralRequest;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DataDuplicateCheck;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.FreeTextSearchRequest;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGranted;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.ReferralRequest;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -33,15 +29,16 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     private static final String DATA_DUPLICATE_ID_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-CHECK";
     private static final String DATA_DUPLICATE_DB_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK";
     private static final String FREE_TEXT_MORATORIUM_CHECK = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK";
+    private static final String OFFENDER_RESTRICTION_CHECK = "DATA_COMPLIANCE_OFFENDER-RESTRICTION-CHECK";
 
     private final ObjectMapper objectMapper;
     private final AmazonSQS sqsClient;
     private final String queueUrl;
 
     public DataComplianceAwsEventPusher(
-            @Autowired @Qualifier("dataComplianceRequestSqsClient") final AmazonSQS sqsClient,
-            @Autowired @Qualifier("sqsRequestQueueUrl") final String queueUrl,
-            final ObjectMapper objectMapper) {
+        @Autowired @Qualifier("dataComplianceRequestSqsClient") final AmazonSQS sqsClient,
+        @Autowired @Qualifier("sqsRequestQueueUrl") final String queueUrl,
+        final ObjectMapper objectMapper) {
 
         log.info("Configured to push offender deletion granted events to SQS queue: {}", queueUrl);
 
@@ -89,7 +86,7 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
         log.debug("Requesting data duplicate database check for: '{}/{}'", offenderNo.getOffenderNumber(), retentionCheckId);
 
         sqsClient.sendMessage(generateRequest(DATA_DUPLICATE_DB_CHECK,
-                new DataDuplicateCheck(offenderNo.getOffenderNumber(), retentionCheckId)));
+            new DataDuplicateCheck(offenderNo.getOffenderNumber(), retentionCheckId)));
     }
 
     @Override
@@ -101,6 +98,16 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
 
         sqsClient.sendMessage(generateRequest(FREE_TEXT_MORATORIUM_CHECK,
                 new FreeTextSearchRequest(offenderNo.getOffenderNumber(), retentionCheckId, regex)));
+    }
+
+
+    @Override
+    public void requestOffenderRestrictionCheck(final OffenderNumber offenderNumber, final Long retentionCheckId, final Set<OffenderRestrictionCode> offenderRestrictionCodes, final String regex) {
+
+        log.debug("Requesting offender restriction check for: '{}/{}'", offenderNumber.getOffenderNumber(), retentionCheckId);
+
+        sqsClient.sendMessage(generateRequest(OFFENDER_RESTRICTION_CHECK,
+            new OffenderRestrictionRequest(offenderNumber.getOffenderNumber(), retentionCheckId, offenderRestrictionCodes, regex)));
     }
 
     @Override
