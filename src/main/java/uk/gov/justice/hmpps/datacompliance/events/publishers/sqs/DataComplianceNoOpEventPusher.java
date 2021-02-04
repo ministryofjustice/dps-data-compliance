@@ -6,8 +6,10 @@ import org.springframework.stereotype.Component;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderRestrictionCode;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -47,6 +49,12 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
                                                final List<String> regex) {
         log.warn("Pretending to push free text moratorium check '{}/{}' to queue",
                 offenderNo.getOffenderNumber(), retentionCheckId);
+    }
+
+    @Override
+    public void requestOffenderRestrictionCheck(final OffenderNumber offenderNumber, final Long retentionCheckId, final Set<OffenderRestrictionCode> offenderRestrictionCode, final String regex) {
+
+        log.debug("Pretending to push restriction check for: '{}/{}'", offenderNumber.getOffenderNumber(), retentionCheckId);
     }
 
     @Override

@@ -10,6 +10,7 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderRestrictionResult;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckAlert;
@@ -21,6 +22,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckOffence;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckOffenderRestriction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.RetentionCheckRepository;
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.data.DataDuplicationDetectionService;
@@ -55,6 +57,7 @@ public class RetentionService {
     private final RetentionCheckRepository retentionCheckRepository;
     private final ReferralResolutionService referralResolutionService;
     private final MoratoriumCheckService moratoriumCheckService;
+    private final OffenderRestrictionCheckService offenderRestrictionCheckService;
     private final DataComplianceProperties dataComplianceProperties;
 
     public List<ActionableRetentionCheck> conductRetentionChecks(final OffenderToCheck offenderToCheck) {
@@ -69,6 +72,7 @@ public class RetentionService {
                 databaseDataDuplicateCheck(offenderNumber),
                 analyticalPlatformDataDuplicateCheck(offenderNumber),
                 freeTextSearch(offenderNumber),
+                offenderRestrictionCheck(offenderNumber),
                 offenceCodeCheck(offenderToCheck),
                 alertCheck(offenderToCheck));
     }
@@ -110,6 +114,25 @@ public class RetentionService {
         }
 
         retentionCheck.setCheckStatus(result.getMatchingTables().isEmpty() ? RETENTION_NOT_REQUIRED : RETENTION_REQUIRED);
+
+        retentionCheckRepository.save(retentionCheck);
+        referralResolutionService.processUpdatedRetentionCheck(retentionCheck);
+    }
+
+    public void handleOffenderRestrictionResult(final OffenderRestrictionResult result) {
+
+        final var retentionCheck = findRetentionCheck(result.getRetentionCheckId(), RetentionCheckOffenderRestriction.class);
+        final var referredOffenderNo = retentionCheck.getOffenderNumber();
+
+        checkState(Objects.equals(result.getOffenderIdDisplay(), referredOffenderNo.getOffenderNumber()),
+            "Offender number '%s' of result '%s' does not match '%s'",
+            result.getOffenderIdDisplay(), result.getRetentionCheckId(), referredOffenderNo);
+
+        if (result.isRestricted()) {
+            log.info("Offender: '{}' matched for a restriction}", referredOffenderNo.getOffenderNumber());
+        }
+
+        retentionCheck.setCheckStatus(result.isRestricted() ? RETENTION_REQUIRED : RETENTION_NOT_REQUIRED);
 
         retentionCheckRepository.save(retentionCheck);
         referralResolutionService.processUpdatedRetentionCheck(retentionCheck);
@@ -197,6 +220,13 @@ public class RetentionService {
         return new ActionableRetentionCheck(new RetentionCheckFreeTextSearch(PENDING))
                 .setPendingCheck(retentionCheck -> moratoriumCheckService.requestFreeTextSearch(
                         offenderNumber, retentionCheck.getRetentionCheckId()));
+    }
+
+    private ActionableRetentionCheck offenderRestrictionCheck(final OffenderNumber offenderNumber) {
+
+        return new ActionableRetentionCheck(new RetentionCheckOffenderRestriction(PENDING))
+            .setPendingCheck(retentionCheck -> offenderRestrictionCheckService.requestOffenderRestrictionCheck(
+                offenderNumber, retentionCheck.getRetentionCheckId()));
     }
 
     private ActionableRetentionCheck offenceCodeCheck(final OffenderToCheck offenderToCheck) {

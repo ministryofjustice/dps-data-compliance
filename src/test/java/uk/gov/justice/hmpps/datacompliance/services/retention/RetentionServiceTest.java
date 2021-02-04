@@ -47,6 +47,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckFreeTextSearch.FREE_TEXT_SEARCH;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate.DATA_DUPLICATE_ID;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate.IMAGE_DUPLICATE;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckOffenderRestriction.OFFENDER_RESTRICTION;
 
 @ExtendWith(MockitoExtension.class)
 class RetentionServiceTest {
@@ -82,6 +83,9 @@ class RetentionServiceTest {
     @Mock
     private MoratoriumCheckService moratoriumCheckService;
 
+    @Mock
+    private OffenderRestrictionCheckService offenderRestrictionCheckService;
+
     private RetentionService service;
 
     @BeforeEach
@@ -94,6 +98,7 @@ class RetentionServiceTest {
                 retentionCheckRepository,
                 referralResolutionService,
                 moratoriumCheckService,
+                offenderRestrictionCheckService,
                 DataComplianceProperties.builder()
                         .imageDuplicateCheckEnabled(true)
                         .idDataDuplicateCheckEnabled(true)
@@ -116,6 +121,7 @@ class RetentionServiceTest {
         verify(dataDuplicationDetectionService).searchForIdDuplicates(eq(OFFENDER_NUMBER), any());
         verify(dataDuplicationDetectionService).searchForDatabaseDuplicates(eq(OFFENDER_NUMBER), any());
         verify(moratoriumCheckService).requestFreeTextSearch(eq(OFFENDER_NUMBER), any());
+        verify(offenderRestrictionCheckService).requestOffenderRestrictionCheck(eq(OFFENDER_NUMBER), any());
     }
 
 
@@ -133,6 +139,7 @@ class RetentionServiceTest {
         verify(dataDuplicationDetectionService).searchForIdDuplicates(eq(OFFENDER_NUMBER), any());
         verify(dataDuplicationDetectionService).searchForDatabaseDuplicates(eq(OFFENDER_NUMBER), any());
         verify(moratoriumCheckService).requestFreeTextSearch(eq(OFFENDER_NUMBER), any());
+        verify(offenderRestrictionCheckService).requestOffenderRestrictionCheck(eq(OFFENDER_NUMBER), any());
     }
 
     @Test
@@ -146,6 +153,7 @@ class RetentionServiceTest {
                 retentionCheckRepository,
                 referralResolutionService,
                 moratoriumCheckService,
+                offenderRestrictionCheckService,
                 DataComplianceProperties.builder()
                         .imageDuplicateCheckEnabled(false)
                         .idDataDuplicateCheckEnabled(false)
@@ -163,6 +171,7 @@ class RetentionServiceTest {
 
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
         verify(moratoriumCheckService).requestFreeTextSearch(eq(OFFENDER_NUMBER), any());
+        verify(offenderRestrictionCheckService).requestOffenderRestrictionCheck(eq(OFFENDER_NUMBER), any());
         verifyNoInteractions(dataDuplicationDetectionService);
     }
 
@@ -299,7 +308,8 @@ class RetentionServiceTest {
     private boolean isPendingCheck(final RetentionCheck check) {
         return DATA_DUPLICATE_ID.equals(check.getCheckType())
                 || DATA_DUPLICATE_DB.equals(check.getCheckType())
-                || FREE_TEXT_SEARCH.equals(check.getCheckType());
+                || FREE_TEXT_SEARCH.equals(check.getCheckType())
+                || OFFENDER_RESTRICTION.equals(check.getCheckType());
     }
 
     private boolean isDisabledCheck(final RetentionCheck check) {
