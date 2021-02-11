@@ -1,12 +1,8 @@
 package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
@@ -62,6 +58,22 @@ class OffenderDeletionReferralRepositoryTest extends IntegrationTest {
     }
 
     @Test
+    @Sql("classpath:seed.data/image_upload_batch.sql")
+    @Sql("classpath:seed.data/offender_image_upload.sql")
+    @Sql("classpath:seed.data/image_duplicate.sql")
+    @Sql("classpath:seed.data/offender_deletion_batch.sql")
+    @Sql("classpath:seed.data/offender_deletion_referral.sql")
+    @Sql("classpath:seed.data/referred_offender_alias.sql")
+    @Sql("classpath:seed.data/referral_resolution.sql")
+    @Sql("classpath:seed.data/manual_retention.sql")
+    @Sql("classpath:seed.data/retention_check.sql")
+    @Sql("classpath:seed.data/retention_reason_manual.sql")
+    @Sql("classpath:seed.data/retention_reason_image_duplicate.sql")
+    void getOffenderDeletionReferralSByAgencyLocationId() {
+        assertMatchesExpectedContents(repository.findByAgencyLocationId("LEI").get(0));
+    }
+
+    @Test
     @Sql("classpath:seed.data/offender_deletion_batch.sql")
     @Sql("classpath:seed.data/offender_deletion_referral.sql")
     void getOffenderDeletionReferralWithoutBookingsOrResolution() {
@@ -94,6 +106,7 @@ class OffenderDeletionReferralRepositoryTest extends IntegrationTest {
                 .firstName("John")
                 .middleName("Middle")
                 .lastName("Smith")
+                .agencyLocationId("LEI")
                 .birthDate(LocalDate.of(1969, 1, 1))
                 .build();
 
@@ -124,6 +137,7 @@ class OffenderDeletionReferralRepositoryTest extends IntegrationTest {
         assertThat(referral.getFirstName()).isEqualTo("John");
         assertThat(referral.getMiddleName()).isEqualTo("Middle");
         assertThat(referral.getLastName()).isEqualTo("Smith");
+        assertThat(referral.getAgencyLocationId()).isEqualTo("LEI");
         assertThat(referral.getBirthDate()).isEqualTo(LocalDate.of(1969, 1, 1));
         assertThat(referral.getReceivedDateTime()).isEqualTo(LocalDateTime.of(2020, 1, 2, 3, 4, 5));
 

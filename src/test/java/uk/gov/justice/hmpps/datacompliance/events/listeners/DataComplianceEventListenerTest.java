@@ -72,7 +72,7 @@ class DataComplianceEventListenerTest {
                         "\"offenderAliases\":[{" +
                             "\"offenderId\":123," +
                             "\"bookings\":[" +
-                                "{\"offenderBookId\":321,\"offenceCodes\":[\"offence1\"],\"alertCodes\":[\"alert1\"]}" +
+                                "{\"offenderBookId\":321,\"offenceCodes\":[\"offence1\"],\"alertCodes\":[\"alert1\"], \"agencyLocationId\":\"LEI\"}" +
                             "]" +
                         "}]" +
                 "}",
@@ -90,6 +90,7 @@ class DataComplianceEventListenerTest {
                                 .offenderBookId(321L)
                                 .offenceCode("offence1")
                                 .alertCode("alert1")
+                                .agencyLocationId("LEI")
                                 .build())
                         .build())
                 .build());

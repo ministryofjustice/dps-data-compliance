@@ -44,6 +44,7 @@ public class OffenderDeletionReferral implements OffenderEntity {
                                     final String middleName,
                                     final String lastName,
                                     final LocalDate birthDate,
+                                    final String agencyLocationId,
                                     final LocalDateTime receivedDateTime) {
         this.referralId = referralId;
         this.offenderDeletionBatch = offenderDeletionBatch;
@@ -52,6 +53,7 @@ public class OffenderDeletionReferral implements OffenderEntity {
         this.middleName = middleName;
         this.lastName = lastName;
         this.birthDate = birthDate;
+        this.agencyLocationId = agencyLocationId;
         this.receivedDateTime = receivedDateTime;
     }
 
@@ -85,6 +87,9 @@ public class OffenderDeletionReferral implements OffenderEntity {
 
     @Column(name = "BIRTH_DATE")
     private LocalDate birthDate;
+
+    @Column(name = "AGENCY_LOCATION_ID")
+    private String agencyLocationId;
 
     @NotNull
     @Column(name = "RECEIVED_DATE_TIME", nullable = false)

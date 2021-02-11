@@ -11,4 +11,5 @@ public interface OffenderDeletionReferralRepository extends CrudRepository<Offen
 
 
     List<OffenderDeletionReferral> findByOffenderNo(final String offenderNo);
+    List<OffenderDeletionReferral> findByAgencyLocationId(final String agencyLocationId);
 }
