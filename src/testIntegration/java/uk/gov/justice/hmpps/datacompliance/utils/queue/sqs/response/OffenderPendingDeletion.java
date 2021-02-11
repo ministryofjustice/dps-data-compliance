@@ -72,6 +72,8 @@ public class OffenderPendingDeletion {
 
         private Long offenderBookId;
 
+        private String agencyLocationId;
+
         @Singular
         private Set<String> offenceCodes;
 
