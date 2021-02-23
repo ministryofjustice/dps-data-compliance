@@ -88,6 +88,7 @@ public class ReferralService {
                 .middleName(event.getMiddleName())
                 .lastName(event.getLastName())
                 .birthDate(event.getBirthDate())
+                .agencyLocationId(event.getAgencyLocationId())
                 .build();
 
         event.getOffenderAliases().forEach(alias ->
