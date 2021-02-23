@@ -69,10 +69,11 @@ class DataComplianceEventListenerTest {
                         "\"middleName\":\"Middle\"," +
                         "\"lastName\":\"Jones\"," +
                         "\"birthDate\":\"1990-01-02\"," +
+                        "\"agencyLocationId\":\"LEI\"," +
                         "\"offenderAliases\":[{" +
                             "\"offenderId\":123," +
                             "\"bookings\":[" +
-                                "{\"offenderBookId\":321,\"offenceCodes\":[\"offence1\"],\"alertCodes\":[\"alert1\"], \"agencyLocationId\":\"LEI\"}" +
+                                "{\"offenderBookId\":321,\"offenceCodes\":[\"offence1\"],\"alertCodes\":[\"alert1\"]}" +
                             "]" +
                         "}]" +
                 "}",
@@ -84,13 +85,13 @@ class DataComplianceEventListenerTest {
                 .middleName("Middle")
                 .lastName("Jones")
                 .birthDate(LocalDate.of(1990, 1, 2))
+                .agencyLocationId("LEI")
                 .offenderAlias(OffenderAlias.builder()
                         .offenderId(123L)
                         .offenderBooking(OffenderBooking.builder()
                                 .offenderBookId(321L)
                                 .offenceCode("offence1")
                                 .alertCode("alert1")
-                                .agencyLocationId("LEI")
                                 .build())
                         .build())
                 .build());

@@ -23,6 +23,7 @@ public class SqsResponseQueueFactory extends QueueFactory {
                 .firstName("someFirstName")
                 .middleName("someMiddleName")
                 .lastName("someLastName")
+                .agencyLocationId("someAgencyLocationId")
                 .build()));
     }
 

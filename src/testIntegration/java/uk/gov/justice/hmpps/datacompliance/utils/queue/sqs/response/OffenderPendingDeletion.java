@@ -29,6 +29,8 @@ public class OffenderPendingDeletion {
 
     private String lastName;
 
+    private String agencyLocationId;
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate birthDate;
@@ -71,8 +73,6 @@ public class OffenderPendingDeletion {
     public static class OffenderBooking {
 
         private Long offenderBookId;
-
-        private String agencyLocationId;
 
         @Singular
         private Set<String> offenceCodes;
