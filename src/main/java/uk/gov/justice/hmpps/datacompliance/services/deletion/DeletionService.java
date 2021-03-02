@@ -75,7 +75,7 @@ public class DeletionService {
         }
 
         recordDeletionCompletion(referral);
-        publishDeletionCompleteEvent(referral);
+     //   publishDeletionCompleteEvent(referral);
     }
 
     private void recordDeletionCompletion(final OffenderDeletionReferral referral) {

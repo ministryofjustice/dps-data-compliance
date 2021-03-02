@@ -47,7 +47,7 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
-    //@Test
+    @Test
     public void shouldGrantDeletionWhenAllChecksComeBackNegative() {
 
         final var offenderIdDisplay = "A1234AA";
@@ -170,7 +170,7 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
         waitUntilResolutionStatusIsPersisted(offenderIdDisplay, "RETAINED");
     }
 
-    //@Test
+    @Test
     public void shouldAllowAdHocDeletion() {
 
         final var offenderIdDisplay = "A1234AD";
