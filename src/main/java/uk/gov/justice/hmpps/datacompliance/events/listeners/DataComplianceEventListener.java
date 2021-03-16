@@ -14,6 +14,7 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletion
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderRestrictionResult;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.ProvisionalDeletionReferralResult;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
@@ -33,6 +34,7 @@ public class DataComplianceEventListener {
 
     private static final String ADHOC_OFFENDER_DELETION_EVENT = "DATA_COMPLIANCE_AD-HOC-OFFENDER-DELETION";
     private static final String OFFENDER_PENDING_DELETION_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION";
+    private static final String OFFENDER_PROVISIONAL_DELETION_REFERRAL_EVENT = "DATA_COMPLIANCE_OFFENDER_PROVISIONAL_DELETION_REFERRAL";
     private static final String OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT = "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE";
     private static final String OFFENDER_DELETION_COMPLETE_EVENT = "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE";
     private static final String DATA_DUPLICATE_ID_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-RESULT";
@@ -44,6 +46,7 @@ public class DataComplianceEventListener {
     private final Map<String, MessageHandler> messageHandlers = Map.of(
             ADHOC_OFFENDER_DELETION_EVENT, this::handleAdHocDeletion,
             OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral,
+            OFFENDER_PROVISIONAL_DELETION_REFERRAL_EVENT, this::handleProvisionalDeletionReferralResult,
             OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete,
             OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
             DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult,
@@ -104,6 +107,11 @@ public class DataComplianceEventListener {
     private void handlePendingDeletionReferral(final Message<String> message) {
         referralService.handlePendingDeletionReferral(
                 parseEvent(message.getPayload(), OffenderPendingDeletion.class));
+    }
+
+    private void handleProvisionalDeletionReferralResult(final Message<String> message) {
+        referralService.handleProvisionalDeletionReferralResult(
+            parseEvent(message.getPayload(), ProvisionalDeletionReferralResult.class));
     }
 
     private void handleAdHocDeletion(final Message<String> message) {

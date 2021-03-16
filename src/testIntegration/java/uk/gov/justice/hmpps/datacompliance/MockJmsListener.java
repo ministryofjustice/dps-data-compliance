@@ -12,6 +12,7 @@ import org.awaitility.Awaitility;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -57,9 +58,8 @@ public class MockJmsListener {
         awsSqsResponseClient.sendMessage(sendMessageRequest);
     }
 
-    public void respondToCheckRequestWith(Set<SendMessageRequest> sendMessageRequests) {
+    public void respondToRequestWith(Set<SendMessageRequest> sendMessageRequests) {
         sendMessageRequests.forEach(awsSqsResponseClient::sendMessage);
-        System.out.println("");
     }
 
     private boolean isMatch(String eventType, Message message) {
@@ -84,6 +84,7 @@ public class MockJmsListener {
     }
 
     public void clearMessages() {
+        this.awsSqsRequestClient.receiveMessage(sqsRequestQueueUrl).setMessages(Collections.emptyList());
         this.messages.clear();
     }
 }

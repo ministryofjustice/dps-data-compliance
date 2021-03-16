@@ -113,6 +113,21 @@ env:
     value: "{{ .Values.env.OFFENDER_DELETION_REFERRAL_LIMIT }}"
   {{- end }}
 
+  {{- if .Values.env.OFFENDER_DELETION_REVIEW_REQUIRED }}
+  - name: OFFENDER_DELETION_REVIEW_REQUIRED
+    value: "{{ .Values.env.OFFENDER_DELETION_REVIEW_REQUIRED }}"
+  {{- end }}
+
+  {{- if .Values.env.OFFENDER_DELETION_REVIEW_DURATION }}
+  - name: OFFENDER_DELETION_REVIEW_DURATION
+    value: "{{ .Values.env.OFFENDER_DELETION_REVIEW_DURATION }}"
+  {{- end }}
+
+  {{- if .Values.env.OFFENDER_DELETION_LIMIT }}
+  - name: OFFENDER_DELETION_LIMIT
+    value: "{{ .Values.env.OFFENDER_DELETION_LIMIT }}"
+  {{- end }}
+
   - name: SPRING_DATASOURCE_USERNAME
     valueFrom:
       secretKeyRef:

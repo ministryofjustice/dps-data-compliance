@@ -10,16 +10,19 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.AdHocOffenderDel
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.ProvisionalDeletionReferralResult;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch.BatchType.AD_HOC;
 import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
@@ -35,6 +38,7 @@ public class ReferralService {
     private final RetentionService retentionService;
     private final ReferralResolutionService referralResolutionService;
     private final DataComplianceEventPusher deletionGrantedEventPusher;
+    private final OffenderDeletionReferralRepository offenderDeletionReferralRepository;
 
     public void handleAdHocDeletion(final AdHocOffenderDeletion event) {
 
@@ -60,6 +64,29 @@ public class ReferralService {
                         .build());
 
         referralResolutionService.processReferral(referral, retentionChecks);
+    }
+
+    public void handleProvisionalDeletionReferralResult(final ProvisionalDeletionReferralResult event) {
+
+        final var referralId = event.getReferralId();
+        final var offenderNumber = new OffenderNumber(event.getOffenderIdDisplay());
+
+        checkNotNull(referralId, "Invalid referral id received: '%s'", referralId);
+        var referral = offenderDeletionReferralRepository.findById(referralId)
+            .orElseThrow(illegalState("Referral '%s' does not exist", referralId));
+
+        if (event.haveSubsequentChangesOccurred(referral.getAgencyLocationId())) {
+            referralResolutionService.updateReferralChangesIdentified(referral);
+        } else {
+            final var retentionChecks = retentionService.conductRetentionChecks(OffenderToCheck.builder()
+                .offenderNumber(offenderNumber)
+                .offenceCodes(event.getOffenceCodes())
+                .alertCodes(event.getAlertCodes())
+                .build());
+
+            referralResolutionService.processProvisionalDeletionReferral(referral, retentionChecks);
+        }
+
     }
 
     public void handleReferralComplete(final OffenderPendingDeletionReferralComplete event) {

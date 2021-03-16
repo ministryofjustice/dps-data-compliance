@@ -32,6 +32,12 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
     }
 
     @Override
+    public void requestProvisionalDeletionReferral(OffenderNumber offenderNo, Long referralId) {
+        log.debug("Pretending to request provisional deletion for referral: '{}' for offender:" +
+            " '{}'", referralId, offenderNo.getOffenderNumber());
+    }
+
+    @Override
     public void requestIdDataDuplicateCheck(final OffenderNumber offenderNo, final Long retentionCheckId) {
         log.warn("Pretending to push ID data duplicate check '{}/{}' to queue",
                 offenderNo.getOffenderNumber(), retentionCheckId);

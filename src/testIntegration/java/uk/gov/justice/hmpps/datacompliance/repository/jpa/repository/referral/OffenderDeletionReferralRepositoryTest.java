@@ -98,6 +98,26 @@ class OffenderDeletionReferralRepositoryTest extends IntegrationTest {
         assertMatchesExpectedContents(repository.findById(referral.getReferralId()).orElseThrow());
     }
 
+    @Test
+    @Sql("classpath:seed.data/image_upload_batch.sql")
+    @Sql("classpath:seed.data/offender_image_upload.sql")
+    @Sql("classpath:seed.data/image_duplicate.sql")
+    @Sql("classpath:seed.data/offender_deletion_batch.sql")
+    @Sql("classpath:seed.data/offender_deletion_referral.sql")
+    @Sql("classpath:seed.data/referred_offender_alias.sql")
+    @Sql("classpath:seed.data/referral_resolution.sql")
+    @Sql("classpath:seed.data/manual_retention.sql")
+    @Sql("classpath:seed.data/retention_check.sql")
+    @Sql("classpath:seed.data/retention_reason_manual.sql")
+    @Sql("classpath:seed.data/retention_reason_image_duplicate.sql")
+    void getByReferralResolutionStatus() {
+        final var beforeReferralResolution = LocalDateTime.of(2021, 02, 03, 04, 05, 05);
+        assertThat(repository.findByReferralResolutionStatus("PENDING", false, beforeReferralResolution, 1L)).isEmpty();
+
+        final var afterReferralResolution = LocalDateTime.of(2021, 02, 03, 05, 05, 04);
+        assertMatchesExpectedContents(repository.findByReferralResolutionStatus("PENDING", false, afterReferralResolution, 1L).get(0));
+    }
+
     private OffenderDeletionReferral offenderDeletionReferral() {
         final var referral = OffenderDeletionReferral.builder()
                 .receivedDateTime(LocalDateTime.of(2020, 1, 2, 3, 4, 5))
@@ -123,6 +143,7 @@ class OffenderDeletionReferralRepositoryTest extends IntegrationTest {
         return ReferralResolution.builder()
                 .resolutionStatus(PENDING)
                 .resolutionDateTime(LocalDateTime.of(2021, 2, 3, 4, 5, 6))
+                .provisionalDeletionPreviouslyGranted(false)
                 .build()
 
                 .addRetentionCheck(new RetentionCheckManual(Status.PENDING)

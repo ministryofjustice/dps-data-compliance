@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
@@ -95,10 +95,10 @@ public class OffenderDeletionReferral implements OffenderEntity {
     @Column(name = "RECEIVED_DATE_TIME", nullable = false)
     private LocalDateTime receivedDateTime;
 
-    @OneToMany(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
+    @OneToMany(mappedBy = "offenderDeletionReferral", cascade = ALL, fetch = LAZY)
     private final List<ReferredOffenderAlias> offenderAliases = new ArrayList<>();
 
-    @OneToOne(mappedBy = "offenderDeletionReferral", cascade = PERSIST, fetch = LAZY)
+    @OneToOne(mappedBy = "offenderDeletionReferral", cascade = ALL, fetch = LAZY)
     private ReferralResolution referralResolution;
 
     public void addReferredOffenderAlias(final ReferredOffenderAlias alias) {

@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
@@ -41,9 +42,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.*;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.DISABLED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.FALSE_POSITIVE;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
@@ -66,6 +65,9 @@ class ReferralResolutionServiceTest {
     @Mock
     private FalsePositiveCheckService falsePositiveCheckService;
 
+    @Mock
+    private DataComplianceProperties config;
+
     private ReferralResolutionService referralResolutionService;
 
     @BeforeEach
@@ -75,7 +77,8 @@ class ReferralResolutionServiceTest {
                 deletionService,
                 referralRepository,
                 referralResolutionRepository,
-                falsePositiveCheckService);
+                falsePositiveCheckService,
+                config);
     }
 
     @Test
@@ -174,6 +177,21 @@ class ReferralResolutionServiceTest {
     }
 
     @Test
+    void processUpdatedRetentionCheckResultsInProvisionalDeletionGranted() {
+
+        final var updatedRetentionCheck = checkWithStatus(RETENTION_NOT_REQUIRED);
+        final var resolution = pendingResolution(updatedRetentionCheck, checkWithStatus(RETENTION_NOT_REQUIRED));
+        when(config.isReviewRequired()).thenReturn(true);
+
+        referralResolutionService.processUpdatedRetentionCheck(updatedRetentionCheck);
+
+        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getResolutionStatus()).isEqualTo(PROVISIONAL_DELETION_GRANTED);
+
+        verify(referralResolutionRepository).save(resolution);
+    }
+
+    @Test
     void processUpdatedRetentionCheckResultsInDeletionGranted() {
 
         final var updatedRetentionCheck = checkWithStatus(RETENTION_NOT_REQUIRED);
@@ -189,6 +207,28 @@ class ReferralResolutionServiceTest {
     }
 
     @Test
+    void processUpdatedRetentionCheckResultsInProvisionalDeletionGrantedToDeletionGranted() {
+
+        final var updatedRetentionCheck = checkWithStatus(RETENTION_NOT_REQUIRED);
+        final var resolution = pendingResolution(updatedRetentionCheck, checkWithStatus(RETENTION_NOT_REQUIRED));
+        when(config.isReviewRequired()).thenReturn(true);
+
+        referralResolutionService.processUpdatedRetentionCheck(updatedRetentionCheck);
+
+        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getResolutionStatus()).isEqualTo(PROVISIONAL_DELETION_GRANTED);
+
+        verify(referralResolutionRepository).save(resolution);
+
+        referralResolutionService.processUpdatedRetentionCheck(updatedRetentionCheck);
+
+        assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
+        assertThat(resolution.getResolutionStatus()).isEqualTo(DELETION_GRANTED);
+
+        verify(deletionService).grantDeletion(resolution.getOffenderDeletionReferral());
+    }
+
+    @Test
     void falsePositiveRetentionCheckIdentified() {
 
         final var falsePositiveCheck = new RetentionCheckDatabaseDataDuplicate(RETENTION_REQUIRED);
@@ -197,7 +237,7 @@ class ReferralResolutionServiceTest {
 
         final var resolution = referralResolutionService.findResolution(List.of(
                 checkWithStatus(RETENTION_NOT_REQUIRED),
-                falsePositiveCheck));
+                falsePositiveCheck), false);
 
         assertThat(resolution).isEqualTo(DELETION_GRANTED);
         assertThat(falsePositiveCheck.getCheckStatus()).isEqualTo(FALSE_POSITIVE);
@@ -208,12 +248,12 @@ class ReferralResolutionServiceTest {
 
         assertThat(referralResolutionService.findResolution(List.of(
                 checkWithStatus(RETENTION_REQUIRED),
-                new RetentionCheckDatabaseDataDuplicate(RETENTION_REQUIRED))))
+                new RetentionCheckDatabaseDataDuplicate(RETENTION_REQUIRED)), false))
                 .isEqualTo(RETAINED);
 
         assertThat(referralResolutionService.findResolution(List.of(
                 checkWithStatus(RETENTION_REQUIRED),
-                new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_REQUIRED))))
+                new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_REQUIRED)), false))
                 .isEqualTo(RETAINED);
 
         verifyNoInteractions(falsePositiveCheckService);
@@ -223,6 +263,7 @@ class ReferralResolutionServiceTest {
         final var resolution = ReferralResolution.builder()
                 .resolutionStatus(ResolutionStatus.PENDING)
                 .offenderDeletionReferral(OffenderDeletionReferral.builder().offenderNo("A1234AA").build())
+                .provisionalDeletionPreviouslyGranted(false)
                 .build();
 
         stream(checks).forEach(resolution::addRetentionCheck);

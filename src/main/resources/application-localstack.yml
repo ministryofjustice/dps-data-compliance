@@ -33,5 +33,6 @@ offender.retention:
     ap.check.enabled: false
 
 deletion.grant.enabled: true
+offender.deletion.review.required: false
 
 server.shutdown: immediate

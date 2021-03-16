@@ -25,6 +25,7 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
 
     private static final String REFERRAL_REQUEST = "DATA_COMPLIANCE_REFERRAL-REQUEST";
     private static final String AD_HOC_REFERRAL_REQUEST = "DATA_COMPLIANCE_AD-HOC-REFERRAL-REQUEST";
+    private static final String PROVISIONAL_DELETION_REFERRAL_REQUEST = "PROVISIONAL_DELETION_REFERRAL_REQUEST";
     private static final String OFFENDER_DELETION_GRANTED = "DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED";
     private static final String DATA_DUPLICATE_ID_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-CHECK";
     private static final String DATA_DUPLICATE_DB_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK";
@@ -69,6 +70,14 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
 
         sqsClient.sendMessage(generateRequest(AD_HOC_REFERRAL_REQUEST,
                 new AdHocReferralRequest(offenderNo.getOffenderNumber(), batchId)));
+    }
+
+    @Override
+    public void requestProvisionalDeletionReferral(final OffenderNumber offenderNo, final Long referralId) {
+
+        log.debug("Requesting provisional deletion for referral: '{}' for offender: '{}'", referralId, offenderNo.getOffenderNumber());
+
+        sqsClient.sendMessage(generateRequest(PROVISIONAL_DELETION_REFERRAL_REQUEST, new ProvisionalDeletionReferralRequest(offenderNo.getOffenderNumber(), referralId)));
     }
 
     @Override
