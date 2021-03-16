@@ -30,6 +30,7 @@ public class DataComplianceProperties {
     private final String pathfinderApiBaseUrl;
     private final Duration pathfinderApiTimeout;
     private final boolean deletionGrantEnabled;
+    private final boolean reviewRequired;
     private final boolean imageRecognitionDeletionEnabled;
     private final boolean imageDuplicateCheckEnabled;
     private final boolean idDataDuplicateCheckEnabled;  // Duplicate check based only on IDs (PNC, CRO, LIDS numbers)
@@ -47,6 +48,7 @@ public class DataComplianceProperties {
                                     @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl,
                                     @Value("${pathfinder.api.timeout:5s}") final Duration pathfinderApiTimeout,
                                     @Value("${deletion.grant.enabled}") final boolean deletionGrantEnabled,
+                                    @Value("${offender.deletion.review.required}") final boolean reviewRequired,
                                     @Value("${image.recognition.deletion.enabled}") final boolean imageRecognitionDeletionEnabled,
                                     @Value("${offender.retention.image.duplicate.check.enabled}") final boolean imageDuplicateCheckEnabled,
                                     @Value("${offender.retention.data.duplicate.id.check.enabled}") final boolean idDataDuplicateCheckEnabled,
@@ -61,6 +63,7 @@ public class DataComplianceProperties {
         log.info("Image upload - initial offset: {}", prisonApiOffenderIdsInitialOffset);
         log.info("Image upload - total pages: {}", prisonApiOffenderIdsTotalPages);
         log.info("Deletion grant enabled: {}", deletionGrantEnabled);
+        log.info("Deletion review required: {}", reviewRequired);
         log.info("Image Recognition deletion enabled: {}", imageRecognitionDeletionEnabled);
         log.info("Image Duplicate check enabled: {}", imageDuplicateCheckEnabled);
         log.info("Data Duplicate - ID check enabled: {}", idDataDuplicateCheckEnabled);
@@ -76,6 +79,7 @@ public class DataComplianceProperties {
         this.pathfinderApiBaseUrl = pathfinderApiBaseUrl;
         this.pathfinderApiTimeout = pathfinderApiTimeout;
         this.deletionGrantEnabled = deletionGrantEnabled;
+        this.reviewRequired = reviewRequired;
         this.imageRecognitionDeletionEnabled = imageRecognitionDeletionEnabled;
         this.imageDuplicateCheckEnabled = imageDuplicateCheckEnabled;
         this.idDataDuplicateCheckEnabled = idDataDuplicateCheckEnabled;

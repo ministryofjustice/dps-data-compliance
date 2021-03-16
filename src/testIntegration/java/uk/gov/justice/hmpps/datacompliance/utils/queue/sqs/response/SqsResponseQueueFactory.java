@@ -27,6 +27,21 @@ public class SqsResponseQueueFactory extends QueueFactory {
                 .build()));
     }
 
+    public static SendMessageRequest forProvisionalDeletionReferral(String queueUrl, Long referralId, String offenderIdDisplay) {
+        return new SendMessageRequest()
+            .withQueueUrl(queueUrl)
+            .withMessageAttributes(Map.of(
+                EVENT_TYPE, stringAttribute(Response.OFFENDER_PROVISIONAL_DELETION_REFERRAL_EVENT),
+                CONTENT_TYPE, stringAttribute(APPLICATION_JSON_VALUE)))
+            .withMessageBody(asJson(ProvisionalDeletionReferralResult.builder()
+                .referralId(referralId)
+                .offenderIdDisplay(offenderIdDisplay)
+                .alertCode("someAlertCode")
+                .offenceCode("someOffenseCode")
+                .agencyLocationId("someAgencyLocationId")
+                .build()));
+    }
+
 
     public static SendMessageRequest forDataDuplicateIdResult(String queueUrl, String offenderIdDisplay, Long checkId) {
         return new SendMessageRequest()

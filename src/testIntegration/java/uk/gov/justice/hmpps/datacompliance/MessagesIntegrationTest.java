@@ -1,51 +1,33 @@
 package uk.gov.justice.hmpps.datacompliance;
 
 import okhttp3.mockwebserver.MockResponse;
-import org.awaitility.Awaitility;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
-import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
-import uk.gov.justice.hmpps.datacompliance.utils.web.JwtAuthenticationHelper;
 import uk.gov.justice.hmpps.datacompliance.utils.web.request.ManualRetentionReasonCode;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
-import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch.BatchType.SCHEDULED;
-import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.*;
-import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.*;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.AD_HOC_REFERRAL_REQUEST;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.DATA_DUPLICATE_DB_CHECK;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.DATA_DUPLICATE_ID_CHECK;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.FREE_TEXT_MORATORIUM_CHECK;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.OFFENDER_DELETION_GRANTED;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.OFFENDER_RESTRICTION_CHECK;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forAdHocDeletionEvent;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forDataDuplicateDbResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forDataDuplicateIdResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forFreeTextSearchResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forOffenderDeletionCompleteResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forOffenderPendingDeletion;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forOffenderRestrictionResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forPendingDeletionReferralComplete;
 import static uk.gov.justice.hmpps.datacompliance.utils.web.request.RequestFactory.forManualRetentionRequest;
 
 
 public class MessagesIntegrationTest extends QueueIntegrationTest {
 
-    private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
-
-    @BeforeEach
-    public void clearMockJmsListener(){
-        mockJmsListener.clearMessages();
-    }
-
-    @Autowired
-    private OffenderDeletionBatchRepository repository;
-
-    @Autowired
-    OffenderDeletionReferralRepository offenderDeletionReferralRepository;
-
-    @Autowired
-    private JwtAuthenticationHelper jwtAuthenticationHelper;
-
-    @Autowired
-    private PlatformTransactionManager transactionManager;
 
     //@Test
     public void shouldGrantDeletionWhenAllChecksComeBackNegative() {
@@ -59,29 +41,29 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
         hmppsAuthMock.enqueue(mockTokenAuthenticationResponse());
         pathfinderApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
 
-        mockJmsListener.respondToCheckRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
+        mockJmsListener.respondToRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
 
         waitForPathFinderApiRequestTo("/pathfinder/offender/A1234AA");
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_ID_CHECK);
         final var dataDuplicateIdRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_ID_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forDataDuplicateIdResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateIdRetentionCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forDataDuplicateIdResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateIdRetentionCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_DB_CHECK);
         final var dataDuplicateDbRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_DB_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forDataDuplicateDbResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateDbRetentionCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forDataDuplicateDbResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateDbRetentionCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(FREE_TEXT_MORATORIUM_CHECK);
         final var freeTextMoratoriumCheckId = mockJmsListener.getCheckId(FREE_TEXT_MORATORIUM_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forFreeTextSearchResult(sqsResponseClientQueueUrl, offenderIdDisplay, freeTextMoratoriumCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forFreeTextSearchResult(sqsResponseClientQueueUrl, offenderIdDisplay, freeTextMoratoriumCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(OFFENDER_RESTRICTION_CHECK);
         final var offenderRestrictionCheckId = mockJmsListener.getCheckId(OFFENDER_RESTRICTION_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forOffenderRestrictionResult(sqsResponseClientQueueUrl, offenderIdDisplay, offenderRestrictionCheckId, false)));
+        mockJmsListener.respondToRequestWith(Set.of(forOffenderRestrictionResult(sqsResponseClientQueueUrl, offenderIdDisplay, offenderRestrictionCheckId, false)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(OFFENDER_DELETION_GRANTED);
         final var referralId = mockJmsListener.getIdFromPayload(OFFENDER_DELETION_GRANTED, "referralId");
-        mockJmsListener.respondToCheckRequestWith(Set.of(forOffenderDeletionCompleteResult(sqsResponseClientQueueUrl, referralId, offenderIdDisplay)));
+        mockJmsListener.respondToRequestWith(Set.of(forOffenderDeletionCompleteResult(sqsResponseClientQueueUrl, referralId, offenderIdDisplay)));
 
         waitUntilResponseQueueMessagesAreConsumed();
         waitUntilResolutionStatusIsPersisted(referralId, "DELETED");
@@ -110,25 +92,25 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
         hmppsAuthMock.enqueue(mockTokenAuthenticationResponse());
         pathfinderApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
 
-        mockJmsListener.respondToCheckRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
+        mockJmsListener.respondToRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
 
         waitForPathFinderApiRequestTo("/pathfinder/offender/A1234AB");
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_ID_CHECK);
         final var dataDuplicateIdRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_ID_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forDataDuplicateIdResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateIdRetentionCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forDataDuplicateIdResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateIdRetentionCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_DB_CHECK);
         final var dataDuplicateDbRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_DB_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forDataDuplicateDbResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateDbRetentionCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forDataDuplicateDbResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateDbRetentionCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(FREE_TEXT_MORATORIUM_CHECK);
         final var freeTextMoratoriumCheckId = mockJmsListener.getCheckId(FREE_TEXT_MORATORIUM_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forFreeTextSearchResult(sqsResponseClientQueueUrl, offenderIdDisplay, freeTextMoratoriumCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forFreeTextSearchResult(sqsResponseClientQueueUrl, offenderIdDisplay, freeTextMoratoriumCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(OFFENDER_RESTRICTION_CHECK);
         final var offenderRestrictionCheckId = mockJmsListener.getCheckId(OFFENDER_RESTRICTION_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forOffenderRestrictionResult(sqsResponseClientQueueUrl, offenderIdDisplay, offenderRestrictionCheckId, false)));
+        mockJmsListener.respondToRequestWith(Set.of(forOffenderRestrictionResult(sqsResponseClientQueueUrl, offenderIdDisplay, offenderRestrictionCheckId, false)));
 
         mockJmsListener.verifyNoMessageReceivedOfEventType(OFFENDER_DELETION_GRANTED);
         waitUntilResolutionStatusIsPersisted(offenderIdDisplay, "RETAINED");
@@ -146,25 +128,25 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
         hmppsAuthMock.enqueue(mockTokenAuthenticationResponse());
         pathfinderApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.OK.value()));
 
-        mockJmsListener.respondToCheckRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
+        mockJmsListener.respondToRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
 
         waitForPathFinderApiRequestTo("/pathfinder/offender/A1234AC");
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_ID_CHECK);
         final var dataDuplicateIdRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_ID_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forDataDuplicateIdResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateIdRetentionCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forDataDuplicateIdResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateIdRetentionCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_DB_CHECK);
         final var dataDuplicateDbRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_DB_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forDataDuplicateDbResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateDbRetentionCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forDataDuplicateDbResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateDbRetentionCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(FREE_TEXT_MORATORIUM_CHECK);
         final var freeTextMoratoriumCheckId = mockJmsListener.getCheckId(FREE_TEXT_MORATORIUM_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forFreeTextSearchResult(sqsResponseClientQueueUrl, offenderIdDisplay, freeTextMoratoriumCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forFreeTextSearchResult(sqsResponseClientQueueUrl, offenderIdDisplay, freeTextMoratoriumCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(OFFENDER_RESTRICTION_CHECK);
         final var offenderRestrictionCheckId = mockJmsListener.getCheckId(OFFENDER_RESTRICTION_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forOffenderRestrictionResult(sqsResponseClientQueueUrl, offenderIdDisplay, offenderRestrictionCheckId, false)));
+        mockJmsListener.respondToRequestWith(Set.of(forOffenderRestrictionResult(sqsResponseClientQueueUrl, offenderIdDisplay, offenderRestrictionCheckId, false)));
 
         mockJmsListener.verifyNoMessageReceivedOfEventType(OFFENDER_DELETION_GRANTED);
         waitUntilResolutionStatusIsPersisted(offenderIdDisplay, "RETAINED");
@@ -188,65 +170,32 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
         hmppsAuthMock.enqueue(mockTokenAuthenticationResponse());
         pathfinderApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
 
-        mockJmsListener.respondToCheckRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
+        mockJmsListener.respondToRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
 
         waitForPathFinderApiRequestTo("/pathfinder/offender/A1234AD");
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_ID_CHECK);
         final var dataDuplicateIdRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_ID_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forDataDuplicateIdResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateIdRetentionCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forDataDuplicateIdResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateIdRetentionCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_DB_CHECK);
         final var dataDuplicateDbRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_DB_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forDataDuplicateDbResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateDbRetentionCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forDataDuplicateDbResult(sqsResponseClientQueueUrl, offenderIdDisplay, dataDuplicateDbRetentionCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(FREE_TEXT_MORATORIUM_CHECK);
         final var freeTextMoratoriumCheckId = mockJmsListener.getCheckId(FREE_TEXT_MORATORIUM_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forFreeTextSearchResult(sqsResponseClientQueueUrl, offenderIdDisplay, freeTextMoratoriumCheckId)));
+        mockJmsListener.respondToRequestWith(Set.of(forFreeTextSearchResult(sqsResponseClientQueueUrl, offenderIdDisplay, freeTextMoratoriumCheckId)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(OFFENDER_RESTRICTION_CHECK);
         final var offenderRestrictionCheckId = mockJmsListener.getCheckId(OFFENDER_RESTRICTION_CHECK);
-        mockJmsListener.respondToCheckRequestWith(Set.of(forOffenderRestrictionResult(sqsResponseClientQueueUrl, offenderIdDisplay, offenderRestrictionCheckId, false)));
+        mockJmsListener.respondToRequestWith(Set.of(forOffenderRestrictionResult(sqsResponseClientQueueUrl, offenderIdDisplay, offenderRestrictionCheckId, false)));
 
         mockJmsListener.verifyMessageReceivedOfEventType(OFFENDER_DELETION_GRANTED);
         final var referralId = mockJmsListener.getIdFromPayload(OFFENDER_DELETION_GRANTED, "referralId");
-        mockJmsListener.respondToCheckRequestWith(Set.of(forOffenderDeletionCompleteResult(sqsResponseClientQueueUrl, referralId, offenderIdDisplay)));
+        mockJmsListener.respondToRequestWith(Set.of(forOffenderDeletionCompleteResult(sqsResponseClientQueueUrl, referralId, offenderIdDisplay)));
 
         waitUntilResponseQueueMessagesAreConsumed();
         waitUntilResolutionStatusIsPersisted(referralId, "DELETED");
     }
-
-
-    private MockResponse mockTokenAuthenticationResponse() {
-        return new MockResponse()
-            .setResponseCode(200)
-            .setBody("{\"access_token\":\"123\",\"token_type\":\"bearer\",\"expires_in\":\"999999\"}")
-            .setHeader("Content-Type", "application/json");
-    }
-
-    private OffenderDeletionBatch persistNewBatch() {
-        return repository.save(OffenderDeletionBatch.builder()
-            .requestDateTime(NOW)
-            .referralCompletionDateTime(NOW.plusSeconds(1))
-            .windowStartDateTime(NOW.plusSeconds(2))
-            .windowEndDateTime(NOW.plusSeconds(3))
-            .batchType(SCHEDULED)
-            .build());
-    }
-
-    private String waitUntilResolutionStatusIsPersisted(Long referralId, String status) {
-        return new TransactionTemplate(transactionManager).execute(f -> {
-            Awaitility.await().until(() -> offenderDeletionReferralRepository.findById(referralId).get().getReferralResolution().get().getResolutionStatus().name().equals(status));
-            return null;
-        });
-    }
-
-    private String waitUntilResolutionStatusIsPersisted(String offenderId, String status) {
-        return new TransactionTemplate(transactionManager).execute(f -> {
-            Awaitility.await().until(() -> offenderDeletionReferralRepository.findByOffenderNo(offenderId).get(0).getReferralResolution().get().getResolutionStatus().name().equals(status));
-            return null;
-        });
-    }
-
 
 }

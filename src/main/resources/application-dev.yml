@@ -19,5 +19,6 @@ offender.retention:
 
 image.recognition.deletion.enabled: false
 deletion.grant.enabled: true
+offender.deletion.review.required: true
 
 server.shutdown: immediate

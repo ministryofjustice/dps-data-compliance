@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
@@ -43,6 +43,8 @@ public class ReferralResolution implements OffenderEntity {
     public enum ResolutionStatus {
         PENDING,
         RETAINED,
+        PROVISIONAL_DELETION_GRANTED,
+        CHANGES_OCCURRED_IN_REVIEW_PERIOD,
         DELETION_GRANTED,
         DELETED
     }
@@ -66,7 +68,11 @@ public class ReferralResolution implements OffenderEntity {
     @Column(name = "RESOLUTION_DATE_TIME")
     private LocalDateTime resolutionDateTime;
 
-    @OneToMany(mappedBy = "referralResolution", cascade = PERSIST, fetch = LAZY)
+    @NotNull
+    @Column(name = "PROVISIONAL_DELETION_PREVIOUSLY_GRANTED", nullable = false)
+    private boolean provisionalDeletionPreviouslyGranted;
+
+    @OneToMany(mappedBy = "referralResolution", cascade = ALL, fetch = LAZY)
     private final List<RetentionCheck> retentionChecks = new ArrayList<>();
 
     public ReferralResolution addRetentionCheck(final RetentionCheck reason) {

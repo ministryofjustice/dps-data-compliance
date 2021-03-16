@@ -1,0 +1,2 @@
+ALTER TABLE REFERRAL_RESOLUTION
+  ADD COLUMN "provisional_deletion_previously_granted" BOOLEAN NOT NULL DEFAULT FALSE;

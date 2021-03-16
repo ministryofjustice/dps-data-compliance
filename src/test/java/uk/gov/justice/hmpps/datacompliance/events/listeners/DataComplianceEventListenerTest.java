@@ -17,6 +17,7 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingD
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderRestrictionResult;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.ProvisionalDeletionReferralResult;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
@@ -95,6 +96,27 @@ class DataComplianceEventListenerTest {
                                 .build())
                         .build())
                 .build());
+    }
+
+    @Test
+    void handleProvisionalDeletionReferralResult() {
+        handleMessage(
+            "{\"referralId\":123," +
+                "\"offenderIdDisplay\":\"offender\"," +
+                "\"subsequentChangesIdentified\":false," +
+                "\"agencyLocationId\":\"someAgencyLocId\"," +
+                "\"offenceCodes\":[\"someOffenceCode1\",\"someOffenceCode2\"]," +
+                "\"alertCodes\":[\"someAlertCode1\",\"someAlertCode2\"]}",
+            Map.of("eventType", "DATA_COMPLIANCE_OFFENDER_PROVISIONAL_DELETION_REFERRAL"));
+
+        verify(referralService).handleProvisionalDeletionReferralResult(ProvisionalDeletionReferralResult.builder()
+            .referralId(123L)
+            .offenderIdDisplay("offender")
+            .subsequentChangesIdentified(false)
+            .agencyLocationId("someAgencyLocId")
+            .offenceCodes(List.of("someOffenceCode1", "someOffenceCode2"))
+            .alertCodes(List.of("someAlertCode1", "someAlertCode2"))
+            .build());
     }
 
     @Test

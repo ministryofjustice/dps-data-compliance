@@ -116,6 +116,22 @@ class DataComplianceAwsEventPusherTest {
     }
 
     @Test
+    void requestProvisionalDeletionReferral() {
+
+        final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
+
+        when(client.sendMessage(request.capture()))
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
+
+        eventPusher.requestProvisionalDeletionReferral(OFFENDER_NUMBER, 123L);
+
+        assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
+        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":123}");
+        assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
+            .isEqualTo("PROVISIONAL_DELETION_REFERRAL_REQUEST");
+    }
+
+    @Test
     void requestIdDataDuplicateCheck() {
 
         final var request = ArgumentCaptor.forClass(SendMessageRequest.class);

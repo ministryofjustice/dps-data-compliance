@@ -48,6 +48,12 @@ public class OffenderDeletionConfig {
     @Value("${offender.deletion.referral.limit:#{null}}")
     private Integer referralLimit;
 
+    @Value("${offender.deletion.review.duration:P1D}")
+    private Duration reviewDuration;
+
+    @Value("${offender.deletion.limit:100}")
+    private Integer deletionLimit;
+
     @Autowired
     private SchedulerFactoryBean schedulerFactoryBean;
 

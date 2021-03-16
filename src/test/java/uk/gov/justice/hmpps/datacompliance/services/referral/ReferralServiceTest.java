@@ -12,13 +12,15 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.AdHocOffenderDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.ProvisionalDeletionReferralResult;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.services.retention.ActionableRetentionCheck;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +49,10 @@ class ReferralServiceTest {
     private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
     private static final long BATCH_ID = 123L;
     private static final String OFFENDER_NUMBER = "A1234AA";
+    private static final long REFERRAL_ID = 123L;
+    private static final String AGENCY_LOCATION_ID = "LEI";
+    private static final Set<String> OFFENCE_CODES = Set.of("offenceCode");
+    private static final Set<String> ALERT_CODES = Set.of("alertCode");
 
     @Mock
     private OffenderDeletionBatchRepository batchRepository;
@@ -62,6 +69,9 @@ class ReferralServiceTest {
     @Mock
     private DataComplianceEventPusher eventPusher;
 
+    @Mock
+    private OffenderDeletionReferralRepository offenderDeletionReferralRepository;
+
     private ReferralService referralService;
 
     @BeforeEach
@@ -71,7 +81,8 @@ class ReferralServiceTest {
                 batchRepository,
                 retentionService,
                 referralResolutionService,
-                eventPusher);
+                eventPusher,
+                offenderDeletionReferralRepository);
     }
 
     @Test
@@ -132,6 +143,114 @@ class ReferralServiceTest {
         verify(batchRepository, never()).save(any());
     }
 
+    @Test
+    void handleProvisionalDeletionReferralResult() {
+
+        final var referral = buildOffenderDeletionReferral();
+        final var retentionCheck = mock(ActionableRetentionCheck.class);
+
+        when(retentionService.conductRetentionChecks(offenderToCheck()))
+            .thenReturn(List.of(retentionCheck));
+
+        when(offenderDeletionReferralRepository.findById(REFERRAL_ID))
+            .thenReturn(Optional.of(referral));
+
+        referralService.handleProvisionalDeletionReferralResult(new ProvisionalDeletionReferralResult(referral.getReferralId(), OFFENDER_NUMBER,
+            false, AGENCY_LOCATION_ID, OFFENCE_CODES, ALERT_CODES));
+
+        verify(referralResolutionService).processProvisionalDeletionReferral(referral, List.of(retentionCheck));
+    }
+
+    @Test
+    void handleProvisionalDeletionReferralResultWhenNoPreviousAgencyLocationIdentified() {
+
+        final var referral =OffenderDeletionReferral.builder()
+            .referralId(REFERRAL_ID)
+            .offenderNo(OFFENDER_NUMBER)
+            .build();
+
+        final var retentionCheck = mock(ActionableRetentionCheck.class);
+
+        when(retentionService.conductRetentionChecks(offenderToCheck()))
+            .thenReturn(List.of(retentionCheck));
+
+        when(offenderDeletionReferralRepository.findById(REFERRAL_ID))
+            .thenReturn(Optional.of(referral));
+
+        referralService.handleProvisionalDeletionReferralResult(new ProvisionalDeletionReferralResult(referral.getReferralId(), OFFENDER_NUMBER,
+            false, null, OFFENCE_CODES, ALERT_CODES));
+
+        verify(referralResolutionService).processProvisionalDeletionReferral(referral, List.of(retentionCheck));
+    }
+
+    @Test
+    void handleProvisionalDeletionReferralResultRetainsIfLastKnownLocationDoesNotMatch() {
+
+        final var referral = OffenderDeletionReferral.builder()
+            .referralId(REFERRAL_ID)
+            .offenderNo(OFFENDER_NUMBER)
+            .agencyLocationId("some_different_agency_loc")
+            .build();
+
+        when(offenderDeletionReferralRepository.findById(REFERRAL_ID))
+            .thenReturn(Optional.of(referral));
+
+
+        referralService.handleProvisionalDeletionReferralResult(new ProvisionalDeletionReferralResult(referral.getReferralId(), OFFENDER_NUMBER,
+            false, AGENCY_LOCATION_ID, OFFENCE_CODES, ALERT_CODES));
+
+        verify(referralResolutionService).updateReferralChangesIdentified(referral);
+    }
+
+
+    @Test
+    void handleProvisionalDeletionReferralResultRetainsIfSubsequentChangeIdentified() {
+
+        final var referral = OffenderDeletionReferral.builder()
+            .referralId(REFERRAL_ID)
+            .offenderNo(OFFENDER_NUMBER)
+            .agencyLocationId(AGENCY_LOCATION_ID)
+            .build();
+
+        when(offenderDeletionReferralRepository.findById(REFERRAL_ID))
+            .thenReturn(Optional.of(referral));
+
+        referralService.handleProvisionalDeletionReferralResult(new ProvisionalDeletionReferralResult(referral.getReferralId(), OFFENDER_NUMBER,
+            true, AGENCY_LOCATION_ID, OFFENCE_CODES, ALERT_CODES));
+
+
+        verify(referralResolutionService).updateReferralChangesIdentified(referral);
+    }
+
+    @Test
+    void handleProvisionalDeletionReferralResultThrowsIfOffenderNumberIsNull() {
+
+        assertThatThrownBy(() ->
+            referralService.handleProvisionalDeletionReferralResult(new ProvisionalDeletionReferralResult(REFERRAL_ID, null,
+                false, AGENCY_LOCATION_ID, OFFENCE_CODES, ALERT_CODES)))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessageContaining("Null offender number");
+    }
+
+    @Test
+    void handleProvisionalDeletionReferralResultThrowsIfReferralIdIsNull() {
+
+        assertThatThrownBy(() ->
+            referralService.handleProvisionalDeletionReferralResult(new ProvisionalDeletionReferralResult(null, OFFENDER_NUMBER,
+                false, AGENCY_LOCATION_ID, OFFENCE_CODES, ALERT_CODES)))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessageContaining("Invalid referral id received: 'null'");
+    }
+
+
+    private OffenderToCheck offenderToCheck() {
+        return OffenderToCheck.builder()
+            .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
+            .offenceCodes(OFFENCE_CODES)
+            .alertCodes(ALERT_CODES)
+            .build();
+    }
+
     private OffenderPendingDeletion generatePendingDeletionEvent() {
         return OffenderPendingDeletion.builder()
                 .batchId(BATCH_ID)
@@ -174,5 +293,13 @@ class ReferralServiceTest {
 
         assertThat(referral.getOffenderAliases().get(2).getOffenderId()).isEqualTo(321L);
         assertThat(referral.getOffenderAliases().get(2).getOffenderBookId()).isNull();
+    }
+
+    private OffenderDeletionReferral buildOffenderDeletionReferral() {
+        return OffenderDeletionReferral.builder()
+            .referralId(REFERRAL_ID)
+            .offenderNo(OFFENDER_NUMBER)
+            .agencyLocationId(AGENCY_LOCATION_ID)
+            .build();
     }
 }

@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.config.OffenderDeletionConfig;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import javax.transaction.Transactional;
@@ -25,17 +28,22 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 @Transactional
 @AllArgsConstructor
 @ConditionalOnProperty(name = "offender.deletion.cron")
-class OffenderDeletion {
+public class OffenderDeletion {
 
     private final TimeSource timeSource;
     private final OffenderDeletionConfig config;
     private final OffenderDeletionBatchRepository repository;
     private final DataComplianceEventPusher eventPusher;
+    private final DataComplianceProperties properties;
+    private final OffenderDeletionReferralRepository offenderDeletionReferralRepository;
 
     void run() {
+        requestBatchReferral();
+        deletePreviouslyIdentifiedOffenderData();
+    }
 
-        log.info("Running offender deletion");
-
+    public void requestBatchReferral() {
+        log.info("Running a new offender deletion batch");
         final var newBatch = persistNewBatch();
 
         final var request = OffenderDeletionReferralRequest.builder()
@@ -48,6 +56,19 @@ class OffenderDeletion {
         eventPusher.requestReferral(request.build());
 
         log.info("Offender deletion request complete");
+    }
+
+    public void deletePreviouslyIdentifiedOffenderData() {
+        if (properties.isDeletionGrantEnabled() && properties.isReviewRequired()) {
+            log.info("Running an offender deletion review");
+
+            final var deletionReviewDelay = config.getReviewDuration();
+
+            final var deleteAfter = timeSource.nowAsLocalDateTime().minus(deletionReviewDelay);
+            final var prospectiveDeletionReferrals = offenderDeletionReferralRepository.findByReferralResolutionStatus(ResolutionStatus.PROVISIONAL_DELETION_GRANTED.name(), true, deleteAfter, config.getDeletionLimit());
+
+            prospectiveDeletionReferrals.forEach(referral -> eventPusher.requestProvisionalDeletionReferral(referral.getOffenderNumber(), referral.getReferralId()));
+        }
     }
 
     private OffenderDeletionBatch persistNewBatch() {
