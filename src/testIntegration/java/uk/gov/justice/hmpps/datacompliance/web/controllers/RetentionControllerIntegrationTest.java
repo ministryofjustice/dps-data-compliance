@@ -49,7 +49,8 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
                                 "{\"reasonCode\":\"LOOKED_AFTER_CHILDREN\",\"displayName\":\"Looked after children\",\"allowReasonDetails\":false,\"displayOrder\":3}," +
                                 "{\"reasonCode\":\"MAPPA\",\"displayName\":\"MAPPA (Multi-Agency Public Protection Agreement)\",\"allowReasonDetails\":false,\"displayOrder\":4}," +
                                 "{\"reasonCode\":\"FOI_SAR\",\"displayName\":\"Subject to FOI/SARs\",\"allowReasonDetails\":false,\"displayOrder\":5}," +
-                                "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\",\"allowReasonDetails\":true,\"displayOrder\":6}" +
+                                "{\"reasonCode\":\"UAL\",\"displayName\":\"UAL Recall on Licence\",\"allowReasonDetails\":false,\"displayOrder\":6}," +
+                                "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\",\"allowReasonDetails\":true,\"displayOrder\":7}" +
                         "]");
     }
 
