@@ -23,6 +23,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.R
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.data.DataDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.image.ImageDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralResolutionService;
+import uk.gov.justice.hmpps.datacompliance.services.ual.UalService;
 
 import java.util.List;
 import java.util.Optional;
@@ -86,6 +87,9 @@ class RetentionServiceTest {
     @Mock
     private OffenderRestrictionCheckService offenderRestrictionCheckService;
 
+    @Mock
+    private UalService ualService;
+
     private RetentionService service;
 
     @BeforeEach
@@ -99,6 +103,7 @@ class RetentionServiceTest {
                 referralResolutionService,
                 moratoriumCheckService,
                 offenderRestrictionCheckService,
+                ualService,
                 DataComplianceProperties.builder()
                         .imageDuplicateCheckEnabled(true)
                         .idDataDuplicateCheckEnabled(true)
@@ -154,6 +159,7 @@ class RetentionServiceTest {
                 referralResolutionService,
                 moratoriumCheckService,
                 offenderRestrictionCheckService,
+                ualService,
                 DataComplianceProperties.builder()
                         .imageDuplicateCheckEnabled(false)
                         .idDataDuplicateCheckEnabled(false)
@@ -172,6 +178,7 @@ class RetentionServiceTest {
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
         verify(moratoriumCheckService).requestFreeTextSearch(eq(OFFENDER_NUMBER), any());
         verify(offenderRestrictionCheckService).requestOffenderRestrictionCheck(eq(OFFENDER_NUMBER), any());
+        verify(ualService).isUnlawfullyAtLarge(eq(OFFENDER_NUMBER));
         verifyNoInteractions(dataDuplicationDetectionService);
     }
 
@@ -258,6 +265,7 @@ class RetentionServiceTest {
                 .thenReturn(List.of(dataDuplicate));
         when(moratoriumCheckService.retainDueToOffence(OFFENDER_TO_CHECK)).thenReturn(true);
         when(moratoriumCheckService.retainDueToAlert(OFFENDER_TO_CHECK)).thenReturn(true);
+        when(ualService.isUnlawfullyAtLarge(OFFENDER_NUMBER)).thenReturn(true);
     }
 
     private void givenRetentionNotRequired() {
@@ -267,6 +275,7 @@ class RetentionServiceTest {
         when(dataDuplicationDetectionService.searchForAnalyticalPlatformDuplicates(OFFENDER_NUMBER)).thenReturn(emptyList());
         when(moratoriumCheckService.retainDueToOffence(OFFENDER_TO_CHECK)).thenReturn(false);
         when(moratoriumCheckService.retainDueToAlert(OFFENDER_TO_CHECK)).thenReturn(false);
+        when(ualService.isUnlawfullyAtLarge(OFFENDER_NUMBER)).thenReturn(false);
     }
 
     private RetentionCheckDataDuplicate persistedDataDuplicateCheck() {

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ual.OffenderUalEntity;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ual.OffenderUalRepository;
 import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
@@ -52,6 +53,10 @@ public class UalService {
         return Optional.of(updatedReportIds);
     }
 
+
+    public boolean isUnlawfullyAtLarge(OffenderNumber offenderNumber) {
+        return offenderUalRepository.findOneByOffenderNo(offenderNumber.getOffenderNumber()).isPresent();
+    }
 
     private OffenderUalEntity update(final OffenderUalEntity offenderUalEntity) {
 
