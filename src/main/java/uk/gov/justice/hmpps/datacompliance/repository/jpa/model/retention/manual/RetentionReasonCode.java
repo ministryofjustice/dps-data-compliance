@@ -30,6 +30,7 @@ public class RetentionReasonCode {
         LOOKED_AFTER_CHILDREN,
         MAPPA,
         FOI_SAR,
+        UAL,
         OTHER
     }
 
