@@ -41,6 +41,9 @@ dependencies {
         exclude group: 'com.zaxxer'
     }
 
+    //Jackson (spring versioned)
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
+
     runtimeOnly 'org.hsqldb:hsqldb:2.5.1'
     runtimeOnly 'org.flywaydb:flyway-core:7.5.4'
     runtimeOnly 'org.postgresql:postgresql:42.2.19'
