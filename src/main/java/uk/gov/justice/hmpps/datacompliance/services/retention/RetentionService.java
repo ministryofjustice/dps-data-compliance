@@ -24,10 +24,12 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckOffence;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckOffenderRestriction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckUal;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.RetentionCheckRepository;
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.data.DataDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.services.duplicate.detection.image.ImageDuplicationDetectionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralResolutionService;
+import uk.gov.justice.hmpps.datacompliance.services.ual.UalService;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -58,6 +60,7 @@ public class RetentionService {
     private final ReferralResolutionService referralResolutionService;
     private final MoratoriumCheckService moratoriumCheckService;
     private final OffenderRestrictionCheckService offenderRestrictionCheckService;
+    private final UalService ualService;
     private final DataComplianceProperties dataComplianceProperties;
 
     public List<ActionableRetentionCheck> conductRetentionChecks(final OffenderToCheck offenderToCheck) {
@@ -74,7 +77,8 @@ public class RetentionService {
                 freeTextSearch(offenderNumber),
                 offenderRestrictionCheck(offenderNumber),
                 offenceCodeCheck(offenderToCheck),
-                alertCheck(offenderToCheck));
+                alertCheck(offenderToCheck),
+                ualOffenderCheck(offenderNumber));
     }
 
     public void handleDataDuplicateResult(final DataDuplicateResult result, final Method method) {
@@ -237,5 +241,10 @@ public class RetentionService {
     private ActionableRetentionCheck alertCheck(final OffenderToCheck offenderToCheck) {
         return new ActionableRetentionCheck(new RetentionCheckAlert(
                 moratoriumCheckService.retainDueToAlert(offenderToCheck) ? RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
+    }
+
+    private ActionableRetentionCheck ualOffenderCheck(final OffenderNumber offenderNumber) {
+         return new ActionableRetentionCheck(new RetentionCheckUal(ualService.isUnlawfullyAtLarge(offenderNumber) ?
+            RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
     }
 }
