@@ -21,13 +21,16 @@ public class WebClientConfig {
     private final String hmppsAuthBaseUrl;
     private final String prisonApiBaseUrl;
     private final String pathfinderApiBaseUrl;
+    private final String communityApiBaseUrl;
 
     public WebClientConfig(@Value("${hmpps.auth.base.url}") @URL final String hmppsAuthBaseUrl,
                            @Value("${prison.api.base.url}") @URL final String prisonApiBaseUrl,
-                           @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl) {
+                           @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl,
+                           @Value("${community.api.base.url}") @URL final String communityApiBaseUrl) {
         this.hmppsAuthBaseUrl = hmppsAuthBaseUrl;
         this.prisonApiBaseUrl = prisonApiBaseUrl;
         this.pathfinderApiBaseUrl = pathfinderApiBaseUrl;
+        this.communityApiBaseUrl = communityApiBaseUrl;
     }
 
     @Bean(name = "hmppsAuthHealthWebClient")
@@ -43,6 +46,11 @@ public class WebClientConfig {
     @Bean(name = "pathfinderApiHealthWebClient")
     WebClient pathfinderApiHealthWebClient() {
         return WebClient.create(pathfinderApiBaseUrl);
+    }
+
+    @Bean(name = "communityApiHealthWebClient")
+    WebClient CommunityApiApiHealthWebClient() {
+        return WebClient.create(communityApiBaseUrl);
     }
 
     @Bean(name = "authorizedWebClient")

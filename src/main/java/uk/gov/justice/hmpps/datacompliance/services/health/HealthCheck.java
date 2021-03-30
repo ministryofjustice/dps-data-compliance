@@ -55,4 +55,11 @@ abstract class HealthCheck implements HealthIndicator {
             super(client);
         }
     }
+
+    @Component
+    static class CommunityApiHealth extends HealthCheck {
+        protected CommunityApiHealth(@Qualifier("communityApiHealthWebClient") final WebClient client) {
+            super(client);
+        }
+    }
 }

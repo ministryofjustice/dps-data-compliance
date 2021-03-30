@@ -40,6 +40,7 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
 
         hmppsAuthMock.enqueue(mockTokenAuthenticationResponse());
         pathfinderApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
+        communityApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
 
         mockJmsListener.respondToRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
 
@@ -91,6 +92,7 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
 
         hmppsAuthMock.enqueue(mockTokenAuthenticationResponse());
         pathfinderApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
+        communityApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
 
         mockJmsListener.respondToRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
 
@@ -127,6 +129,7 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
 
         hmppsAuthMock.enqueue(mockTokenAuthenticationResponse());
         pathfinderApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.OK.value()));
+        communityApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.OK.value()));
 
         mockJmsListener.respondToRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
 
@@ -169,6 +172,7 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
 
         hmppsAuthMock.enqueue(mockTokenAuthenticationResponse());
         pathfinderApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
+        communityApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
 
         mockJmsListener.respondToRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
 

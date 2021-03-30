@@ -26,6 +26,7 @@ public abstract class IntegrationTest {
     protected MockWebServer hmppsAuthMock;
     protected MockWebServer prisonApiMock;
     protected MockWebServer pathfinderApiMock;
+    protected MockWebServer communityApiMock;
 
     @Autowired
     protected WebTestClient webTestClient;
@@ -45,6 +46,9 @@ public abstract class IntegrationTest {
         prisonApiMock.start(8998);
         pathfinderApiMock = new MockWebServer();
         pathfinderApiMock.start(8997);
+        communityApiMock = new MockWebServer();
+        communityApiMock.start(8996);
+
     }
 
     protected void mockExternalServiceResponseCode(final int status) {
@@ -55,6 +59,7 @@ public abstract class IntegrationTest {
         prisonApiMock.enqueue(response);
         hmppsAuthMock.enqueue(response);
         pathfinderApiMock.enqueue(response);
+        communityApiMock.enqueue(response);
     }
 
     @AfterEach
@@ -62,6 +67,7 @@ public abstract class IntegrationTest {
         prisonApiMock.shutdown();
         hmppsAuthMock.shutdown();
         pathfinderApiMock.shutdown();
+        communityApiMock.shutdown();
     }
 
 }

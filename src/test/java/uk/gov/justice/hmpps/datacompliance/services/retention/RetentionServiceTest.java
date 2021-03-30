@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.client.communityapi.CommunityApiClient;
 import uk.gov.justice.hmpps.datacompliance.client.pathfinder.PathfinderApiClient;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.DuplicateResult;
@@ -90,12 +91,16 @@ class RetentionServiceTest {
     @Mock
     private UalService ualService;
 
+    @Mock
+    private CommunityApiClient communityApiClient;
+
     private RetentionService service;
 
     @BeforeEach
     void setUp() {
         service = new RetentionService(
                 pathfinderApiClient,
+                communityApiClient,
                 manualRetentionService,
                 imageDuplicationDetectionService,
                 dataDuplicationDetectionService,
@@ -152,6 +157,7 @@ class RetentionServiceTest {
 
         service = new RetentionService(
                 pathfinderApiClient,
+                communityApiClient,
                 manualRetentionService,
                 imageDuplicationDetectionService,
                 dataDuplicationDetectionService,
@@ -179,6 +185,7 @@ class RetentionServiceTest {
         verify(moratoriumCheckService).requestFreeTextSearch(eq(OFFENDER_NUMBER), any());
         verify(offenderRestrictionCheckService).requestOffenderRestrictionCheck(eq(OFFENDER_NUMBER), any());
         verify(ualService).isUnlawfullyAtLarge(eq(OFFENDER_NUMBER));
+        verify(communityApiClient).isReferredForMappa(eq(OFFENDER_NUMBER));
         verifyNoInteractions(dataDuplicationDetectionService);
     }
 
@@ -266,6 +273,7 @@ class RetentionServiceTest {
         when(moratoriumCheckService.retainDueToOffence(OFFENDER_TO_CHECK)).thenReturn(true);
         when(moratoriumCheckService.retainDueToAlert(OFFENDER_TO_CHECK)).thenReturn(true);
         when(ualService.isUnlawfullyAtLarge(OFFENDER_NUMBER)).thenReturn(true);
+        when(communityApiClient.isReferredForMappa(OFFENDER_NUMBER)).thenReturn(true);
     }
 
     private void givenRetentionNotRequired() {
@@ -276,6 +284,7 @@ class RetentionServiceTest {
         when(moratoriumCheckService.retainDueToOffence(OFFENDER_TO_CHECK)).thenReturn(false);
         when(moratoriumCheckService.retainDueToAlert(OFFENDER_TO_CHECK)).thenReturn(false);
         when(ualService.isUnlawfullyAtLarge(OFFENDER_NUMBER)).thenReturn(false);
+        when(communityApiClient.isReferredForMappa(OFFENDER_NUMBER)).thenReturn(false);
     }
 
     private RetentionCheckDataDuplicate persistedDataDuplicateCheck() {
