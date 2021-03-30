@@ -3,6 +3,7 @@ package uk.gov.justice.hmpps.datacompliance.services.retention;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.justice.hmpps.datacompliance.client.communityapi.CommunityApiClient;
 import uk.gov.justice.hmpps.datacompliance.client.pathfinder.PathfinderApiClient;
 import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.DuplicateResult;
@@ -21,6 +22,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckMappa;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckOffence;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckOffenderRestriction;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder;
@@ -53,6 +55,7 @@ public class RetentionService {
     private static final double MAXIMUM_CONFIDENCE = 100.0;
 
     private final PathfinderApiClient pathfinderApiClient;
+    private final CommunityApiClient communityApiClient;
     private final ManualRetentionService manualRetentionService;
     private final ImageDuplicationDetectionService imageDuplicationDetectionService;
     private final DataDuplicationDetectionService dataDuplicationDetectionService;
@@ -78,7 +81,8 @@ public class RetentionService {
                 offenderRestrictionCheck(offenderNumber),
                 offenceCodeCheck(offenderToCheck),
                 alertCheck(offenderToCheck),
-                ualOffenderCheck(offenderNumber));
+                ualOffenderCheck(offenderNumber),
+                mappaReferralCheck(offenderNumber));
     }
 
     public void handleDataDuplicateResult(final DataDuplicateResult result, final Method method) {
@@ -246,5 +250,13 @@ public class RetentionService {
     private ActionableRetentionCheck ualOffenderCheck(final OffenderNumber offenderNumber) {
          return new ActionableRetentionCheck(new RetentionCheckUal(ualService.isUnlawfullyAtLarge(offenderNumber) ?
             RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
+    }
+
+    private ActionableRetentionCheck mappaReferralCheck(final OffenderNumber offenderNumber) {
+
+        final var check = new RetentionCheckMappa(communityApiClient.isReferredForMappa(offenderNumber) ?
+            RETENTION_REQUIRED : RETENTION_NOT_REQUIRED);
+
+        return new ActionableRetentionCheck(check);
     }
 }

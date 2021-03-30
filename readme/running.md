@@ -51,8 +51,14 @@ Without Docker, the service can be run locally by:
 ```
 which will run a reduced service with an in-memory hsqldb database and without
 any connection to AWS or Localstack. The `application-dev.yml` properties file
-expects that there is an HMPPS Auth and Prison API instance running on `localhost:8081`
-and `localhost:8082` respectively. More details on the required environment variables
+expects that the following instances are running:
+
+- HMPPS Auth : `localhost:8081`
+- Prison API : `localhost:8082`
+- Path Finder API : `localhost:8083`
+- Community API : `localhost:8084`
+
+More details on the required environment variables
 are provided below.
 
 The service can be run in a similar way within IntelliJ by running the main class with the following VM options:
@@ -68,6 +74,7 @@ to start up:
 - `PRISON_API_BASE_URL` (URL for the Prison API)
 - `HMPPS_AUTH_BASE_URL` (URL for the HMPPS Auth server)
 - `PATHFINDER_API_BASE_URL` (URL for the Pathfinder API)
+- `COMMUNITY_API_BASE_URL` (URL for the Community API)  
 - `APP_DB_URL` (URL for a database instance to store data compliance data)
 - `OFFENDER_RETENTION_IMAGE_DUPLICATE_CHECK_ENABLED` (Flag to use AWS Rekognition to perform duplicate image check)
 - `OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED` (Flag to use the Prison API to perform a duplicate ID check)

@@ -29,6 +29,8 @@ public class DataComplianceProperties {
     private final Long prisonApiOffenderIdsTotalPages;
     private final String pathfinderApiBaseUrl;
     private final Duration pathfinderApiTimeout;
+    private final String communityApiBaseUrl;
+    private final Duration communityApiTimeout;
     private final boolean deletionGrantEnabled;
     private final boolean reviewRequired;
     private final boolean imageRecognitionDeletionEnabled;
@@ -47,6 +49,8 @@ public class DataComplianceProperties {
                                     @Value("${prison.api.offender.ids.total.pages:#{null}}") final Long prisonApiOffenderIdsTotalPages,
                                     @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl,
                                     @Value("${pathfinder.api.timeout:5s}") final Duration pathfinderApiTimeout,
+                                    @Value("${community.api.base.url}") @URL final String communityApiBaseUrl,
+                                    @Value("${community.api.timeout:5s}") final Duration communityApiTimeout,
                                     @Value("${deletion.grant.enabled}") final boolean deletionGrantEnabled,
                                     @Value("${offender.deletion.review.required}") final boolean reviewRequired,
                                     @Value("${image.recognition.deletion.enabled}") final boolean imageRecognitionDeletionEnabled,
@@ -78,6 +82,8 @@ public class DataComplianceProperties {
         this.prisonApiOffenderIdsTotalPages = prisonApiOffenderIdsTotalPages;
         this.pathfinderApiBaseUrl = pathfinderApiBaseUrl;
         this.pathfinderApiTimeout = pathfinderApiTimeout;
+        this.communityApiBaseUrl = communityApiBaseUrl;
+        this.communityApiTimeout = communityApiTimeout;
         this.deletionGrantEnabled = deletionGrantEnabled;
         this.reviewRequired = reviewRequired;
         this.imageRecognitionDeletionEnabled = imageRecognitionDeletionEnabled;

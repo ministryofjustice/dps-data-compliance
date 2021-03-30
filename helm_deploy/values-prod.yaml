@@ -25,6 +25,7 @@ env:
   HMPPS_AUTH_BASE_URL: "https://sign-in.hmpps.service.justice.gov.uk/auth"
   PRISON_API_BASE_URL: "https://api.prison.service.justice.gov.uk"
   PATHFINDER_API_BASE_URL: "https://api.pathfinder.service.justice.gov.uk"
+  COMMUNITY_API_BASE_URL: "https://community-api-secure.probation.service.justice.gov.uk"
 
   SNS_PROVIDER: aws
   DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
