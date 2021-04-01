@@ -23,7 +23,8 @@ public class HealthCheckIntegrationTest extends IntegrationTest {
                 .jsonPath("$.components['healthCheck.HmppsAuthHealth'].status").isEqualTo("UP")
                 .jsonPath("$.components['healthCheck.PrisonApiHealth'].status").isEqualTo("UP")
                 .jsonPath("$.components['healthCheck.PathfinderApiHealth'].status").isEqualTo("UP")
-                .jsonPath("$.components['healthCheck.CommunityApiHealth'].status").isEqualTo("UP");
+                .jsonPath("$.components['healthCheck.CommunityApiHealth'].status").isEqualTo("UP")
+                .jsonPath("$.components['healthCheck.CommunityApiHealth'].status").isEqualTo("UP")
     }
 
     @Test
