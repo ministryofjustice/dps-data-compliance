@@ -6,6 +6,7 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -27,6 +28,7 @@ public abstract class IntegrationTest {
     protected MockWebServer prisonApiMock;
     protected MockWebServer pathfinderApiMock;
     protected MockWebServer communityApiMock;
+    protected MockWebServer prisonRegisterMock;
 
     @Autowired
     protected WebTestClient webTestClient;
@@ -48,7 +50,8 @@ public abstract class IntegrationTest {
         pathfinderApiMock.start(8997);
         communityApiMock = new MockWebServer();
         communityApiMock.start(8996);
-
+        prisonRegisterMock = new MockWebServer();
+        prisonRegisterMock.start(8995);
     }
 
     protected void mockExternalServiceResponseCode(final int status) {
@@ -60,6 +63,7 @@ public abstract class IntegrationTest {
         hmppsAuthMock.enqueue(response);
         pathfinderApiMock.enqueue(response);
         communityApiMock.enqueue(response);
+        prisonRegisterMock.enqueue(response);
     }
 
     @AfterEach
@@ -68,6 +72,7 @@ public abstract class IntegrationTest {
         hmppsAuthMock.shutdown();
         pathfinderApiMock.shutdown();
         communityApiMock.shutdown();
+        prisonRegisterMock.shutdown();
     }
 
 }

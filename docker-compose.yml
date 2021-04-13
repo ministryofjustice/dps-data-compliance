@@ -11,6 +11,7 @@ services:
       - prison-api
       - pathfinder-api
       - community-api
+      - prison-register
     networks:
       - hmpps
     ports:
@@ -23,6 +24,7 @@ services:
       - PRISON_API_BASE_URL=http://prison-api:8080
       - COMMUNITY_API_BASE_URL=http://community-api:8080
       - PATHFINDER_API_BASE_URL=http://pathfinder-api:8080
+      - PRISON_REGISTER_BASE_URL=http://prison-register:8080
       - APP_DB_URL=jdbc:postgresql://dps-data-compliance-db:5432/dps-data-compliance-db
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=admin_password
@@ -83,6 +85,19 @@ services:
       - "8084:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+
+  prison-register:
+    image: quay.io/hmpps/prison-register:latest
+    networks:
+      - hmpps
+    container_name: prison-register
+    ports:
+      - "8085:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
     environment:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
