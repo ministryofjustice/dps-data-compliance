@@ -22,6 +22,9 @@ env:
   - name: COMMUNITY_API_BASE_URL
     value: "{{ .Values.env.COMMUNITY_API_BASE_URL }}"
 
+  - name: PRISON_REGISTER_BASE_URL
+    value: "{{ .Values.env.PRISON_REGISTER_BASE_URL }}"
+
   - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
     value: "{{ .Values.env.SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI }}"
 

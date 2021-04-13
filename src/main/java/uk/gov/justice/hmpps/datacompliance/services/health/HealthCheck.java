@@ -7,6 +7,7 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import uk.gov.justice.hmpps.datacompliance.client.prisonregister.PrisonRegisterClient;
 
 import static java.util.Objects.requireNonNull;
 import static lombok.AccessLevel.PROTECTED;
@@ -59,6 +60,13 @@ abstract class HealthCheck implements HealthIndicator {
     @Component
     static class CommunityApiHealth extends HealthCheck {
         protected CommunityApiHealth(@Qualifier("communityApiHealthWebClient") final WebClient client) {
+            super(client);
+        }
+    }
+
+    @Component
+    static class PrisonRegisterHealth extends HealthCheck {
+        protected PrisonRegisterHealth(@Qualifier("prisonRegisterHealthWebClient") final WebClient client) {
             super(client);
         }
     }

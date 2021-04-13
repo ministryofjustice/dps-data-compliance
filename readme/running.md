@@ -57,6 +57,7 @@ expects that the following instances are running:
 - Prison API : `localhost:8082`
 - Path Finder API : `localhost:8083`
 - Community API : `localhost:8084`
+- Prison-Register API: `localhost:8085`
 
 More details on the required environment variables
 are provided below.
@@ -74,7 +75,8 @@ to start up:
 - `PRISON_API_BASE_URL` (URL for the Prison API)
 - `HMPPS_AUTH_BASE_URL` (URL for the HMPPS Auth server)
 - `PATHFINDER_API_BASE_URL` (URL for the Pathfinder API)
-- `COMMUNITY_API_BASE_URL` (URL for the Community API)  
+- `COMMUNITY_API_BASE_URL` (URL for the Community API)
+- `PRISON_REGISTER_BASE_URL` (URL for the Prison-Register API)
 - `APP_DB_URL` (URL for a database instance to store data compliance data)
 - `OFFENDER_RETENTION_IMAGE_DUPLICATE_CHECK_ENABLED` (Flag to use AWS Rekognition to perform duplicate image check)
 - `OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED` (Flag to use the Prison API to perform a duplicate ID check)

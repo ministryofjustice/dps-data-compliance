@@ -22,15 +22,18 @@ public class WebClientConfig {
     private final String prisonApiBaseUrl;
     private final String pathfinderApiBaseUrl;
     private final String communityApiBaseUrl;
+    private final String prisonRegisterBaseUrl;
 
     public WebClientConfig(@Value("${hmpps.auth.base.url}") @URL final String hmppsAuthBaseUrl,
                            @Value("${prison.api.base.url}") @URL final String prisonApiBaseUrl,
                            @Value("${pathfinder.api.base.url}") @URL final String pathfinderApiBaseUrl,
-                           @Value("${community.api.base.url}") @URL final String communityApiBaseUrl) {
+                           @Value("${community.api.base.url}") @URL final String communityApiBaseUrl,
+                           @Value("${prison.register.base.url}") @URL final String prisonRegisterBaseUrl) {
         this.hmppsAuthBaseUrl = hmppsAuthBaseUrl;
         this.prisonApiBaseUrl = prisonApiBaseUrl;
         this.pathfinderApiBaseUrl = pathfinderApiBaseUrl;
         this.communityApiBaseUrl = communityApiBaseUrl;
+        this.prisonRegisterBaseUrl = prisonRegisterBaseUrl;
     }
 
     @Bean(name = "hmppsAuthHealthWebClient")
@@ -51,6 +54,11 @@ public class WebClientConfig {
     @Bean(name = "communityApiHealthWebClient")
     WebClient CommunityApiApiHealthWebClient() {
         return WebClient.create(communityApiBaseUrl);
+    }
+
+    @Bean(name = "prisonRegisterHealthWebClient")
+    WebClient PrisonRegisterHealthWebClient() {
+        return WebClient.create(prisonRegisterBaseUrl);
     }
 
     @Bean(name = "authorizedWebClient")

@@ -23,7 +23,8 @@ public class HealthCheckIntegrationTest extends IntegrationTest {
                 .jsonPath("$.components['healthCheck.HmppsAuthHealth'].status").isEqualTo("UP")
                 .jsonPath("$.components['healthCheck.PrisonApiHealth'].status").isEqualTo("UP")
                 .jsonPath("$.components['healthCheck.PathfinderApiHealth'].status").isEqualTo("UP")
-                .jsonPath("$.components['healthCheck.CommunityApiHealth'].status").isEqualTo("UP");
+                .jsonPath("$.components['healthCheck.CommunityApiHealth'].status").isEqualTo("UP")
+                .jsonPath("$.components['healthCheck.PrisonRegisterHealth'].status").isEqualTo("UP");
     }
 
     @Test
@@ -55,7 +56,9 @@ public class HealthCheckIntegrationTest extends IntegrationTest {
                 .jsonPath("$.components['healthCheck.PathfinderApiHealth'].status").isEqualTo("DOWN")
                 .jsonPath("$.components['healthCheck.PathfinderApiHealth'].details.error").value(containsString("404 Not Found"))
                 .jsonPath("$.components['healthCheck.CommunityApiHealth'].status").isEqualTo("DOWN")
-                .jsonPath("$.components['healthCheck.CommunityApiHealth'].details.error").value(containsString("404 Not Found"));
+                .jsonPath("$.components['healthCheck.CommunityApiHealth'].details.error").value(containsString("404 Not Found"))
+                .jsonPath("$.components['healthCheck.PrisonRegisterHealth'].status").isEqualTo("DOWN")
+                .jsonPath("$.components['healthCheck.PrisonRegisterHealth'].details.error").value(containsString("404 Not Found"));
     }
 
     @Test
