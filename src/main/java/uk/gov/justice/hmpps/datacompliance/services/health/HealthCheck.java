@@ -22,7 +22,7 @@ abstract class HealthCheck implements HealthIndicator {
         try {
 
             ResponseEntity<String> response = client.get()
-                    .uri("/ping")
+                    .uri("/health/ping")
                     .retrieve()
                     .toEntity(String.class)
                     .block();

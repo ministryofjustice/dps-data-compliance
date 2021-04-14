@@ -57,7 +57,7 @@ public abstract class IntegrationTest {
     protected void mockExternalServiceResponseCode(final int status) {
         var response = new MockResponse()
             .setResponseCode(status)
-            .setBody(status == 200 ? "pong" : "some error");
+            .setBody(status == 200 ? "{\"status\": \"UP\"}" : "some error");
 
         prisonApiMock.enqueue(response);
         hmppsAuthMock.enqueue(response);
