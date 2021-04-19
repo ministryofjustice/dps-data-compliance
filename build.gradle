@@ -5,6 +5,8 @@ plugins {
 
 testSets {
     testIntegration
+    testMessageIntegration
+    testMessageIntegrationWithReviewPeriod
 }
 
 dependencies {

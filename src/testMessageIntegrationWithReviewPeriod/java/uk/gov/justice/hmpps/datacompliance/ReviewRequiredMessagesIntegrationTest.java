@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.datacompliance;
 
 import okhttp3.mockwebserver.MockResponse;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
@@ -21,13 +22,12 @@ import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsRe
 import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forPendingDeletionReferralComplete;
 import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forProvisionalDeletionReferral;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {"offender.deletion.review.required: true"})
 public class ReviewRequiredMessagesIntegrationTest extends QueueIntegrationTest {
 
-    // @Test
+    @Test
     public void shouldAllowReviewPeriodWhenReviewIsRequired() {
 
-        final var offenderIdDisplay = "A7894GG";
+        final var offenderIdDisplay = "A1234PO";
         final var batch = persistNewBatch();
 
         final var pendingDeletionReferralComplete = forPendingDeletionReferralComplete(sqsResponseClientQueueUrl, batch.getBatchId(), 1L, 1L);
@@ -35,10 +35,11 @@ public class ReviewRequiredMessagesIntegrationTest extends QueueIntegrationTest 
 
         hmppsAuthMock.enqueue(mockTokenAuthenticationResponse());
         pathfinderApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
+        communityApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
 
         mockJmsListener.respondToRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
 
-        waitForPathFinderApiRequestTo("/pathfinder/offender/A7894GG");
+        waitForPathFinderApiRequestTo("/pathfinder/offender/A1234PO");
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_ID_CHECK);
         final var dataDuplicateIdRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_ID_CHECK);
@@ -65,13 +66,14 @@ public class ReviewRequiredMessagesIntegrationTest extends QueueIntegrationTest 
 
         hmppsAuthMock.enqueue(mockTokenAuthenticationResponse());
         pathfinderApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
+        communityApiMock.enqueue(new MockResponse().setResponseCode(HttpStatus.NOT_FOUND.value()));
 
         final var referralId = offenderDeletionReferralRepository.findByOffenderNo(offenderIdDisplay).stream().findFirst().get().getReferralId();
         final var provisionalDeletionReferral = forProvisionalDeletionReferral(sqsResponseClientQueueUrl, referralId, offenderIdDisplay);
 
         mockJmsListener.respondToRequestWith(Set.of(provisionalDeletionReferral));
 
-        waitForPathFinderApiRequestTo("/pathfinder/offender/A7894GG");
+        waitForPathFinderApiRequestTo("/pathfinder/offender/A1234PO");
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_ID_CHECK);
         final var secondDataDuplicateIdRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_ID_CHECK);

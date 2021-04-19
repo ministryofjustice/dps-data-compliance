@@ -82,6 +82,70 @@ jobs:
           path: build/test-results
       - store_artifacts:
           path: build/reports/tests
+  test-message-integration:
+    executor: validator-integration
+    steps:
+      - checkout
+      - hmpps/install_aws_cli
+      - run:
+          name: Wait for SQS to be ready
+          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4576
+      - run:
+          name: Wait for SNS to be ready
+          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4575
+      - run:
+          name: Set up queues
+          command: src/testMessageIntegration/resources/localstack/setup-queues.sh
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle" }}
+            - gradle-
+      - run:
+          environment:
+            DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: localstack
+            DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: localstack
+            SNS_PROVIDER: localstack
+          command: ./gradlew testMessageIntegration
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: gradle-{{ checksum "build.gradle" }}
+      - store_test_results:
+          path: build/test-results
+      - store_artifacts:
+          path: build/reports/tests
+  test-message-integration-with-review-period:
+    executor: validator-integration
+    steps:
+      - checkout
+      - hmpps/install_aws_cli
+      - run:
+          name: Wait for SQS to be ready
+          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4576
+      - run:
+          name: Wait for SNS to be ready
+          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4575
+      - run:
+          name: Set up queues
+          command: src/testMessageIntegrationWithReviewPeriod/resources/localstack/setup-queues.sh
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle" }}
+            - gradle-
+      - run:
+          environment:
+            DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: localstack
+            DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: localstack
+            SNS_PROVIDER: localstack
+          command: ./gradlew testMessageIntegrationWithReviewPeriod
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: gradle-{{ checksum "build.gradle" }}
+      - store_test_results:
+          path: build/test-results
+      - store_artifacts:
+          path: build/reports/tests
 
 workflows:
   build-test-and-deploy:
@@ -91,6 +155,14 @@ workflows:
             tags:
               ignore: /.*/
       - test-integration:
+          filters:
+            tags:
+              ignore: /.*/
+      - test-message-integration:
+          filters:
+            tags:
+              ignore: /.*/
+      - test-message-integration-with-review-period:
           filters:
             tags:
               ignore: /.*/
@@ -112,6 +184,8 @@ workflows:
           requires:
             - validate
             - test-integration
+            - test-message-integration
+            - test-message-integration-with-review-period
             - helm_lint
             - build_docker
       - request-preprod-approval:

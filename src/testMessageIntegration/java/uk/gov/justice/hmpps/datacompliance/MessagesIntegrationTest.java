@@ -29,7 +29,7 @@ import static uk.gov.justice.hmpps.datacompliance.utils.web.request.RequestFacto
 public class MessagesIntegrationTest extends QueueIntegrationTest {
 
 
-    //@Test
+    @Test
     public void shouldGrantDeletionWhenAllChecksComeBackNegative() {
 
         final var offenderIdDisplay = "A1234AA";
@@ -155,7 +155,7 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
         waitUntilResolutionStatusIsPersisted(offenderIdDisplay, "RETAINED");
     }
 
-    //@Test
+    @Test
     public void shouldAllowAdHocDeletion() {
 
         final var offenderIdDisplay = "A1234AD";
