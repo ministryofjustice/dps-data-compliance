@@ -67,6 +67,24 @@ The service can be run in a similar way within IntelliJ by running the main clas
 -Dspring.profiles.active=dev
 ```
 
+## Testing
+
+Running Integration Tests
+
+```./gradlew testIntegration```
+
+Running Message Integration Tests
+
+```./gradlew testMessageIntegration```
+
+Running Message Integration Tests with review period
+
+```./gradlew testMessageIntegrationWithReviewPeriod```
+
+Running OWASP seucrity checks & All tests
+
+```bash local_checks.sh```
+
 ### Environment Variables
 
 If running locally, the service has the following minimum environment variables provided 
