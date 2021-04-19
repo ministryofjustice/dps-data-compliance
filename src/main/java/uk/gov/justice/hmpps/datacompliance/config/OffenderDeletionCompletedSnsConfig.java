@@ -43,7 +43,7 @@ public class OffenderDeletionCompletedSnsConfig {
 
         return AmazonSNSAsyncClientBuilder.standard()
                 .withEndpointConfiguration(new EndpointConfiguration(serviceEndpoint, region))
-                .withCredentials(new AWSStaticCredentialsProvider(new AnonymousAWSCredentials()))
+                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("anykey", "anysecret")))
                 .build();
     }
 }
