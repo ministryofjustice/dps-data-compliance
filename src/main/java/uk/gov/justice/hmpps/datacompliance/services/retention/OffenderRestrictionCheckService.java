@@ -49,7 +49,7 @@ public class OffenderRestrictionCheckService {
 
     public void requestOffenderRestrictionCheck(final OffenderNumber offenderNumber, final Long retentionCheckId) {
 
-        log.debug("Submitting a request to perform free text search for offender: '{}/{}'",
+        log.debug("Submitting a request to perform an offender Restriction check: '{}/{}'",
             offenderNumber.getOffenderNumber(), retentionCheckId);
 
         eventPusher.requestOffenderRestrictionCheck(
