@@ -54,6 +54,9 @@ dependencies {
     implementation 'io.springfox:springfox-swagger2:3.0.0'
     implementation 'io.springfox:springfox-swagger-ui:3.0.0'
 
+    // GOVUK Notify:
+    implementation("uk.gov.service.notify:notifications-java-client:3.17.0-RELEASE")
+
     // Test
     testAnnotationProcessor "org.projectlombok:lombok:1.18.20"
     testCompileOnly 'org.projectlombok:lombok:1.18.20'

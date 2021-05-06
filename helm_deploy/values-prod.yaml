@@ -27,6 +27,7 @@ env:
   PATHFINDER_API_BASE_URL: "https://api.pathfinder.service.justice.gov.uk"
   COMMUNITY_API_BASE_URL: "https://community-api-secure.probation.service.justice.gov.uk"
   PRISON_REGISTER_BASE_URL: "https://prison-register.hmpps.service.justice.gov.uk"
+  DIGITAL_PRISON_SERVICE_URL: "https://digital.prison.service.justice.gov.uk"
 
   SNS_PROVIDER: aws
   DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
@@ -43,6 +44,7 @@ env:
   OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED: true
   OFFENDER_RETENTION_FALSE_POSITIVE_DUPLICATE_CHECK_ENABLED: true
   IMAGE_RECOGNITION_DELETION_ENABLED: true
+  NOTIFY_ENABLED: false
   DELETION_GRANT_ENABLED: false
 
   # Run image recognition collection update every weekday.
