@@ -27,6 +27,7 @@ env:
   PATHFINDER_API_BASE_URL: "https://preprod-api.pathfinder.service.justice.gov.uk"
   COMMUNITY_API_BASE_URL: "https://community-api-secure.pre-prod.delius.probation.hmpps.dsd.io"
   PRISON_REGISTER_BASE_URL: "https://prison-register-preprod.hmpps.service.justice.gov.uk"
+  DIGITAL_PRISON_SERVICE_URL: "https://digital-preprod.prison.service.justice.gov.uk"
 
   SNS_PROVIDER: aws
   DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
@@ -45,6 +46,9 @@ env:
   DELETION_GRANT_ENABLED: true
   # Prevent preprod from editing the image collection:
   IMAGE_RECOGNITION_DELETION_ENABLED: false
+
+  # Prevent preprod from sending email notifications
+  NOTIFY_ENABLED: false
 
   OFFENDER_DELETION_CRON: "0 0 14 14 JAN ? 2029"
   OFFENDER_DELETION_INITIAL_WINDOW_START: "2000-04-20T00:00:00"

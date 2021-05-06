@@ -26,6 +26,7 @@ env:
   PATHFINDER_API_BASE_URL: "https://dev-api.pathfinder.service.justice.gov.uk"
   COMMUNITY_API_BASE_URL: "https://community-api-secure.test.delius.probation.hmpps.dsd.io"
   PRISON_REGISTER_BASE_URL: "https://prison-register-dev.hmpps.service.justice.gov.uk"
+  DIGITAL_PRISON_SERVICE_URL: "https://digital-dev.prison.service.justice.gov.uk"
 
   SNS_PROVIDER: aws
   DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
@@ -44,6 +45,7 @@ env:
   # Testing deletion kill switch:
   DELETION_GRANT_ENABLED: false
   IMAGE_RECOGNITION_DELETION_ENABLED: false
+  NOTIFY_ENABLED: true
 
   OFFENDER_DELETION_CRON: "0 30 11 ? * MON-FRI *"
   OFFENDER_DELETION_INITIAL_WINDOW_START: "2000-05-10T00:00:00"

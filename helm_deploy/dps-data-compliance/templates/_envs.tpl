@@ -25,6 +25,9 @@ env:
   - name: PRISON_REGISTER_BASE_URL
     value: "{{ .Values.env.PRISON_REGISTER_BASE_URL }}"
 
+  - name: DIGITAL_PRISON_SERVICE_URL
+    value: "{{ .Values.env.DIGITAL_PRISON_SERVICE_URL }}"
+
   - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
     value: "{{ .Values.env.SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI }}"
 
@@ -193,6 +196,12 @@ env:
       secretKeyRef:
         name: {{ template "app.name" . }}
         key: IMAGE_RECOGNITION_AWS_SECRET_ACCESS_KEY
+
+  - name: NOTIFY_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "app.name" . }}
+        key: NOTIFY_API_KEY
 
   - name: SNS_AWS_ACCESS_KEY_ID
     valueFrom:

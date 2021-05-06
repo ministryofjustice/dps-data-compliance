@@ -86,4 +86,9 @@ management:
       cache:
         time-to-live: 2000ms
 
+notify:
+  templates:
+    intention-to-delete: 7387f596-0a10-4a63-834c-7c5b34a5a934
+    offender-data-cleansed: 9c8e7ce8-9429-48f5-9660-fbfa20473119
+
 server.shutdown: graceful
