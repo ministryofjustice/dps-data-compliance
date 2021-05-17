@@ -3,55 +3,11 @@ version: 2.1
 orbs:
   hmpps: ministryofjustice/hmpps@3.2
 
-executors:
-  validator-integration:
-    docker:
-      - image: circleci/openjdk:11-jdk
-      - image: localstack/localstack:0.11.2
-        environment:
-          - SERVICES=sqs,sns
-          - DEBUG=${DEBUG- }
-          - DATA_DIR=/tmp/localstack/data
-          - DOCKER_HOST=unix:///var/run/docker.sock
-          - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
-          - AWS_EXECUTION_ENV=True
-          - DEFAULT_REGION=eu-west-2
-          - TMPDIR=/private
-    environment:
-      _JAVA_OPTIONS: -Xmx384m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2
-    working_directory: ~/app
-  validator:
-    docker:
-      - image: circleci/openjdk:11-jdk
-    environment:
-      _JAVA_OPTIONS: -Xmx384m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2
-    working_directory: ~/app
-
-jobs:
-  validate:
-    executor: validator
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - gradle-{{ checksum "build.gradle" }}
-            - gradle-
-      - run: ./gradlew test
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: gradle-{{ checksum "build.gradle" }}
-      - store_test_results:
-          path: build/test-results
-      - store_artifacts:
-          path: build/reports/tests
-      - persist_to_workspace:
-          root: .
-          paths:
-            - build/libs
-            - build.gradle
-  test-integration:
-    executor: validator-integration
+commands:
+  run-tests:
+    parameters:
+      gradle-task:
+        type: string
     steps:
       - checkout
       - hmpps/install_aws_cli
@@ -73,71 +29,7 @@ jobs:
             DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: localstack
             DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: localstack
             SNS_PROVIDER: localstack
-          command: ./gradlew testIntegration
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: gradle-{{ checksum "build.gradle" }}
-      - store_test_results:
-          path: build/test-results
-      - store_artifacts:
-          path: build/reports/tests
-  test-message-integration:
-    executor: validator-integration
-    steps:
-      - checkout
-      - hmpps/install_aws_cli
-      - run:
-          name: Wait for SQS to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4576
-      - run:
-          name: Wait for SNS to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4575
-      - run:
-          name: Set up queues
-          command: src/testMessageIntegration/resources/localstack/setup-queues.sh
-      - restore_cache:
-          keys:
-            - gradle-{{ checksum "build.gradle" }}
-            - gradle-
-      - run:
-          environment:
-            DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: localstack
-            DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: localstack
-            SNS_PROVIDER: localstack
-          command: ./gradlew testMessageIntegration
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: gradle-{{ checksum "build.gradle" }}
-      - store_test_results:
-          path: build/test-results
-      - store_artifacts:
-          path: build/reports/tests
-  test-message-integration-with-review-period:
-    executor: validator-integration
-    steps:
-      - checkout
-      - hmpps/install_aws_cli
-      - run:
-          name: Wait for SQS to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4576
-      - run:
-          name: Wait for SNS to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4575
-      - run:
-          name: Set up queues
-          command: src/testMessageIntegrationWithReviewPeriod/resources/localstack/setup-queues.sh
-      - restore_cache:
-          keys:
-            - gradle-{{ checksum "build.gradle" }}
-            - gradle-
-      - run:
-          environment:
-            DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: localstack
-            DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: localstack
-            SNS_PROVIDER: localstack
-          command: ./gradlew testMessageIntegrationWithReviewPeriod
+          command: ./gradlew <<parameters.gradle-task>>
       - save_cache:
           paths:
             - ~/.gradle
@@ -147,6 +39,55 @@ jobs:
       - store_artifacts:
           path: build/reports/tests
 
+jobs:
+  validate:
+    executor:
+      name: hmpps/java
+      tag: "16.0"
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle" }}
+            - gradle-
+      - run: ./gradlew test
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: gradle-{{ checksum "build.gradle" }}
+      - store_test_results:
+          path: build/test-results
+      - store_artifacts:
+          path: build/reports/tests
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build/libs
+            - build.gradle
+  test-integration:
+    executor:
+      name: hmpps/localstack
+      jdk_tag: "16.0"
+      services: "sqs,sns"
+    steps:
+      - run-tests:
+          gradle-task: testIntegration
+  test-message-integration:
+    executor:
+      name: hmpps/localstack
+      jdk_tag: "16.0"
+      services: "sqs,sns"
+    steps:
+      - run-tests:
+          gradle-task: testMessageIntegration
+  test-message-integration-with-review-period:
+    executor:
+      name: hmpps/localstack
+      jdk_tag: "16.0"
+      services: "sqs,sns"
+    steps:
+      - run-tests:
+          gradle-task: testMessageIntegrationWithReviewPeriod
 workflows:
   build-test-and-deploy:
     jobs:
