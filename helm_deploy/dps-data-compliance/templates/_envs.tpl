@@ -52,6 +52,9 @@ env:
   - name: IMAGE_RECOGNITION_DELETION_ENABLED
     value: "{{ .Values.env.IMAGE_RECOGNITION_DELETION_ENABLED }}"
 
+  - name: NOTIFY_ENABLED
+    value: "{{ .Values.env.NOTIFY_ENABLED }}"
+
   {{- if .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}
   - name: IMAGE_RECOGNITION_MIGRATION_CRON
     value: "{{ .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}"
