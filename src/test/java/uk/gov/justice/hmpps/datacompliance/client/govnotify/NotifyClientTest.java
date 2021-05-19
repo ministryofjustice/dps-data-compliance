@@ -38,7 +38,7 @@ class NotifyClientTest {
 
     @BeforeEach
     public void setUp() {
-        notifyClient = new NotifyClient(true, INTENTION_TO_DELETE_TEMPLATE_ID, OFFENDER_DATA_CLEANSED_TEMPLATE_ID, DIGITAL_SERVICE_URL, notificationClient, OffenderDeletionConfig.builder().reviewDuration(DURATION).build());
+        notifyClient = new NotifyClient(true, INTENTION_TO_DELETE_TEMPLATE_ID, OFFENDER_DATA_CLEANSED_TEMPLATE_ID, DIGITAL_SERVICE_URL, DURATION, notificationClient);
     }
 
     @Test

@@ -58,6 +58,9 @@ offender.retention:
     db.check.enabled: true
     ap.check.enabled: false
 
+notify.enabled: false
+digital.prison.service.url: https://digital-dev.prison.service.justice.gov.uk
+
 deletion.grant.enabled: true
 offender.deletion.review.required: true
 image.recognition.deletion.enabled: true
