@@ -9,7 +9,7 @@ import uk.gov.service.notify.NotificationClient;
 public class NotifyConfig {
 
     @Bean
-    public NotificationClient notifyClient(@Value("${notify.api.key:invalidKey}") String apiKey) {
+    public NotificationClient govNotificationClient(@Value("${notify.api.key:invalidKey}") String apiKey) {
         return new NotificationClient(apiKey);
     }
 }

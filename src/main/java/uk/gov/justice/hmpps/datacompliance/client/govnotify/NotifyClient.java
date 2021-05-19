@@ -3,10 +3,11 @@ package uk.gov.justice.hmpps.datacompliance.client.govnotify;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.justice.hmpps.datacompliance.config.OffenderDeletionConfig;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
+
+import java.time.Duration;
 
 import static uk.gov.justice.hmpps.datacompliance.client.govnotify.EmailTemplate.ofIntentionToDelete;
 import static uk.gov.justice.hmpps.datacompliance.client.govnotify.EmailTemplate.ofOffenderDataCleansed;
@@ -20,26 +21,26 @@ public class NotifyClient {
     private final String intentionToDeleteTemplateId;
     private final String offenderDataCleansedTemplateId;
     private final String digitalPrisonServiceBaseUrl;
+    private final Duration offenderDeletionReviewDuration;
     private final NotificationClient client;
-    private final OffenderDeletionConfig offenderDeletionConfig;
 
     public NotifyClient(
         @Value("${notify.enabled}") boolean enabled,
         @Value("${notify.templates.intention-to-delete}") String intentionToDeleteTemplateId,
-        @Value("${notify.templates.offender-data-Cleansed}") String offenderDataCleansedTemplateId,
+        @Value("${notify.templates.offender-data-cleansed}") String offenderDataCleansedTemplateId,
         @Value("${digital.prison.service.url}") String digitalPrisonServiceBaseUrl,
-        NotificationClient client, OffenderDeletionConfig offenderDeletionConfig) {
+        @Value("${offender.deletion.review.duration:P1D}") Duration offenderDeletionReviewDuration, NotificationClient client){
         this.offenderDataCleansedTemplateId = offenderDataCleansedTemplateId;
+        this.offenderDeletionReviewDuration = offenderDeletionReviewDuration;
         this.client = client;
         this.enabled = enabled;
         this.digitalPrisonServiceBaseUrl = digitalPrisonServiceBaseUrl;
         this.intentionToDeleteTemplateId = intentionToDeleteTemplateId;
-        this.offenderDeletionConfig = offenderDeletionConfig;
     }
 
 
     public void sendIntentionToDeleteEmail(final OffenderDeletionReferral offenderDeletionReferral, final String email) {
-        sendEmail(ofIntentionToDelete(offenderDeletionReferral, email, digitalPrisonServiceBaseUrl, intentionToDeleteTemplateId, offenderDeletionConfig.getReviewDuration()));
+        sendEmail(ofIntentionToDelete(offenderDeletionReferral, email, digitalPrisonServiceBaseUrl, intentionToDeleteTemplateId, offenderDeletionReviewDuration));
     }
 
     public void sendOffenderDataCleansedEmail(final OffenderDeletionReferral offenderDeletionReferral, final String email) {
