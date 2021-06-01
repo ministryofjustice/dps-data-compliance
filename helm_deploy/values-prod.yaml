@@ -47,6 +47,8 @@ env:
   NOTIFY_ENABLED: false
   DELETION_GRANT_ENABLED: false
 
+  OFFENDER_DELETION_REVIEW_REQUIRED: "true"
+
   # Run image recognition collection update every weekday.
   # Note: the AWS Rekognition service currently rate limits
   # us to 15 API calls per second.
