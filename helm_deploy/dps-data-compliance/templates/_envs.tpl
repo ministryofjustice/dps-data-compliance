@@ -55,6 +55,9 @@ env:
   - name: NOTIFY_ENABLED
     value: "{{ .Values.env.NOTIFY_ENABLED }}"
 
+  - name: OFFENDER_DELETION_REVIEW_REQUIRED
+    value: "{{ .Values.env.OFFENDER_DELETION_REVIEW_REQUIRED }}"
+
   {{- if .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}
   - name: IMAGE_RECOGNITION_MIGRATION_CRON
     value: "{{ .Values.env.IMAGE_RECOGNITION_MIGRATION_CRON }}"
@@ -125,10 +128,6 @@ env:
     value: "{{ .Values.env.OFFENDER_DELETION_REFERRAL_LIMIT }}"
   {{- end }}
 
-  {{- if .Values.env.OFFENDER_DELETION_REVIEW_REQUIRED }}
-  - name: OFFENDER_DELETION_REVIEW_REQUIRED
-    value: "{{ .Values.env.OFFENDER_DELETION_REVIEW_REQUIRED }}"
-  {{- end }}
 
   {{- if .Values.env.OFFENDER_DELETION_REVIEW_DURATION }}
   - name: OFFENDER_DELETION_REVIEW_DURATION
