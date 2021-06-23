@@ -1,0 +1,37 @@
+hmpps.auth.base.url: http://localhost:8081
+prison.api.base.url: http://localhost:8082
+pathfinder.api.base.url: http://localhost:8083
+community.api.base.url: http://localhost:8084
+prison.register.base.url: http://localhost:8085
+
+app.db.url: jdbc:postgresql://localhost:5432/dps-data-compliance-db
+
+spring:
+  jpa.show-sql: true
+  flyway.locations: classpath:db/migration,classpath:db/quartz
+  security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
+  datasource.username: admin
+  datasource.password: admin_password
+
+offender.retention:
+  false.positive.duplicate.check.enabled: false
+  image.duplicate.check.enabled: false
+  data.duplicate:
+    id.check.enabled: false
+    db.check.enabled: false
+    ap.check.enabled: false
+
+image.recognition.deletion.enabled: false
+deletion.grant.enabled: true
+offender.deletion.review.required: true
+
+aws.secret.access.key: arbitrary
+aws.access.key.id: arbitrary
+
+notify.enabled: false
+digital.prison.service.url: https://digital-dev.prison.service.justice.gov.uk
+
+server:
+  port: 8080
+  shutdown: immediate
+

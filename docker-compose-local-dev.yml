@@ -1,37 +1,6 @@
 version: '3.1'
 services:
 
-  dps-data-compliance:
-    image: quay.io/hmpps/dps-data-compliance:latest
-    container_name: dps-data-compliance
-    depends_on:
-      - localstack
-      - dps-data-compliance-db
-      - hmpps-auth
-      - prison-api
-      - pathfinder-api
-      - community-api
-      - prison-register
-    networks:
-      - hmpps
-    ports:
-      - "8080:8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-    environment:
-      - SERVER_PORT=8080
-      - HMPPS_AUTH_BASE_URL=http://hmpps-auth:8080/auth
-      - PRISON_API_BASE_URL=http://prison-api:8080
-      - COMMUNITY_API_BASE_URL=http://community-api:8080
-      - PATHFINDER_API_BASE_URL=http://pathfinder-api:8080
-      - PRISON_REGISTER_BASE_URL=http://prison-register:8080
-      - APP_DB_URL=jdbc:postgresql://dps-data-compliance-db:5432/dps-data-compliance-db
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=admin_password
-      - SPRING_PROFILES_ACTIVE=localstack
-      - AWS_ACCESS_KEY_ID=arbitrary
-      - AWS_SECRET_ACCESS_KEY=arbitrary
-
   hmpps-auth:
     image: quay.io/hmpps/hmpps-auth:latest
     networks:
@@ -42,8 +11,8 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
     environment:
-      - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
+      - DELIUS_ENABLED=false
 
   prison-api:
     image: quay.io/hmpps/prison-api:latest
@@ -57,11 +26,7 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
     environment:
-      - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=nomis-hsqldb
-      - DATA_COMPLIANCE_DB_ENABLE_PARALLEL_HINTS=false
-      - AWS_ACCESS_KEY_ID=arbitrary
-      - AWS_SECRET_ACCESS_KEY=arbitrary
 
   pathfinder-api:
     image: quay.io/hmpps/pathfinder-api:latest
@@ -103,7 +68,7 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
 
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:0.11.2
     container_name: localstack
     networks:
       - hmpps
