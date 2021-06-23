@@ -21,7 +21,7 @@ sns:
 
 spring:
   jpa.show-sql: true
-  flyway.locations: classpath:db/migration
+  flyway.locations: classpath:db/migration,classpath:db/quartz
   security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
 
 offender.retention:
@@ -33,9 +33,10 @@ offender.retention:
     ap.check.enabled: false
 
 notify.enabled: false
-digital_prison_service_url: https://digital-dev.prison.service.justice.gov.uk
+digital.prison.service.url: https://digital-dev.prison.service.justice.gov.uk
 
 deletion.grant.enabled: true
 offender.deletion.review.required: false
+image.recognition.deletion.enabled: false
 
 server.shutdown: immediate
