@@ -67,6 +67,29 @@ The service can be run in a similar way within IntelliJ by running the main clas
 -Dspring.profiles.active=dev
 ```
 
+To run the application locally during development you will need the project dependencies to be running.
+Use the `docker-compose-local-dev.yml` file to spin up the following dependencies:
+
+PostgreSQL
+HMPPS Auth
+Prison API
+Community-API
+Localstack
+Prison-register
+Pathfinder-API
+
+```
+TMPDIR=/private$TMPDIR docker-compose up -f docker-compose-local-dev.yml
+``````
+
+You can then run the application in the `local-dev` profile by using the following command:
+
+```
+-Dspring.profiles.active=dev
+```
+
+Please note: This profile already has all of the configuration values required for the application.
+
 ## Testing
 
 Running Integration Tests
