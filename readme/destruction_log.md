@@ -13,9 +13,9 @@ SELECT DISTINCT
     odr.middle_name AS offender_middle_name,
     odr.last_name AS offender_surname,
     odr.birth_date AS offender_date_of_birth,
-    'OFFENDER_NOMIS_RECORD' AS type_of_record_destroyed,
+    'NOMIS record' AS type_of_record_destroyed,
     rr.resolution_date_time AS destruction_date,
-    'NOMIS_DATABASE_DELETION' AS method_of_destruction,
+    'NOMIS database deletion' AS method_of_destruction,
     'MOJ' AS authorisation_of_destruction
 FROM offender_deletion_referral odr
 INNER JOIN referred_offender_alias roa 
