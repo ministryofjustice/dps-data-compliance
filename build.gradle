@@ -56,6 +56,9 @@ dependencies {
     // GOVUK Notify:
     implementation("uk.gov.service.notify:notifications-java-client:3.17.2-RELEASE")
 
+    // PDF
+    implementation("com.itextpdf:itext7-core:7.1.15")
+
     // Test
     testAnnotationProcessor "org.projectlombok:lombok:1.18.20"
     testCompileOnly 'org.projectlombok:lombok:1.18.20'
