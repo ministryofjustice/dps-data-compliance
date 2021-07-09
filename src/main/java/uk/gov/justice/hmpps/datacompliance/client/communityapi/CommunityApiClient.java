@@ -18,6 +18,8 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class CommunityApiClient {
 
     private static final String MAPPA_RISK_PATH = "/secure/offenders/nomsNumber/%s/risk/mappa";
+    private static final String ACTIVE_RECALL_PATH = "/secure/offenders/nomsNumber/%s/convictions/active/nsis/recall";
+    private static final String RELEASE = "/secure/offenders/nomsNumber/{nomsNumber}/release";
 
     private final WebClient webClient;
     private final DataComplianceProperties dataComplianceProperties;
@@ -33,6 +35,26 @@ public class CommunityApiClient {
             format(MAPPA_RISK_PATH, offenderNumber.getOffenderNumber());
 
         log.debug("Executing a MAPPA (Multi-Agency Public Protection Arrangements) check to {} for offender '{}'", url, offenderNumber.getOffenderNumber());
+
+        final var response = webClient.get()
+            .uri(url)
+            .retrieve()
+            .onStatus(NOT_FOUND::equals, ignored -> Mono.empty())
+            .toBodilessEntity()
+            .block(dataComplianceProperties.getCommunityApiTimeout());
+
+        final HttpStatus statusCode = requireNonNull(response).getStatusCode();
+        log.debug("Received response for request to {} for offender '{}'. Status code: '{}'", url, offenderNumber.getOffenderNumber(), statusCode.value());
+        return statusCode.is2xxSuccessful();
+    }
+
+
+    public boolean retrieveLatestRecallAndReleaseInfo(final OffenderNumber offenderNumber) {
+        final var url = dataComplianceProperties.getCommunityApiBaseUrl() +
+            format(ACTIVE_RECALL_PATH, offenderNumber.getOffenderNumber());
+
+        log.debug("Executing a request to community-api to retrieve the latest" +
+            " recall and release details to {} for offender '{}'", url, offenderNumber.getOffenderNumber());
 
         final var response = webClient.get()
             .uri(url)
