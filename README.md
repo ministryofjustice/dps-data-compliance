@@ -2,6 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/ministryofjustice/dps-data-compliance/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/dps-data-compliance)
 [![Docker Repository on Quay](https://quay.io/repository/hmpps/dps-data-compliance/status)](https://quay.io/repository/hmpps/dps-data-compliance)
+[![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://prison-data-compliance-dev.prison.service.justice.gov.uk/swagger-ui/index.html)
 
 A Spring Boot app to manage data compliance for the Digital Prison Services
 
