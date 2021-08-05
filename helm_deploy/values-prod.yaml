@@ -49,6 +49,10 @@ env:
 
   OFFENDER_DELETION_REVIEW_REQUIRED: "true"
 
+  # Switch off deceased offender job in prod
+  # DECEASED_OFFENDER_DELETION_CRON: "0 0 2 ? * MON-FRI *"
+  # DECEASED_OFFENDER_DELETION_LIMIT: 200
+
   # Run image recognition collection update every weekday.
   # Note: the AWS Rekognition service currently rate limits
   # us to 15 API calls per second.

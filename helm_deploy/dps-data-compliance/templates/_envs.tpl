@@ -139,6 +139,16 @@ env:
     value: "{{ .Values.env.OFFENDER_DELETION_LIMIT }}"
   {{- end }}
 
+  {{- if .Values.env.DECEASED_OFFENDER_DELETION_CRON }}
+  - name: DECEASED_OFFENDER_DELETION_CRON
+    value: "{{ .Values.env.DECEASED_OFFENDER_DELETION_CRON }}"
+  {{- end }}
+
+  {{- if .Values.env.DECEASED_OFFENDER_DELETION_LIMIT }}
+  - name: DECEASED_OFFENDER_DELETION_LIMIT
+    value: "{{ .Values.env.DECEASED_OFFENDER_DELETION_LIMIT }}"
+  {{- end }}
+
   - name: SPRING_DATASOURCE_USERNAME
     valueFrom:
       secretKeyRef:
