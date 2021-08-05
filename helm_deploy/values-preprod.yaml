@@ -58,6 +58,10 @@ env:
   OFFENDER_DELETION_REVIEW_DURATION: "PT22H"
   OFFENDER_DELETION_LIMIT: 200
 
+  # Switch off deceased offender job in preprod
+  # DECEASED_OFFENDER_DELETION_CRON: "0 0 2 ? * MON-FRI *"
+  # DECEASED_OFFENDER_DELETION_LIMIT: 200
+
   # Switching off in preprod so that it doesn't affect production collection
   #PRISON_API_OFFENDER_IDS_ITERATION_THREADS: 2
   #IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND: 14
