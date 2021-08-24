@@ -43,11 +43,13 @@ public class DuplicateDetectionQueryFactory {
     }
 
 
-    StartQueryExecutionRequest startQueryExecution(final OffenderNumber offenderNumber) {
+    StartQueryExecutionRequest startQueryExecution(final OffenderNumber offenderNum) {
 
         // Should not be allowed to happen, but double check:
-        checkArgument(OffenderNumber.isValid(offenderNumber.getOffenderNumber()),
-                "Offender number '%s' does not match regex", offenderNumber.getOffenderNumber());
+        final var offenderNumber = offenderNum.getOffenderNumber();
+
+        checkArgument(OffenderNumber.isValid(offenderNumber),
+                "Offender number '%s' does not match regex", offenderNumber);
 
         return StartQueryExecutionRequest.builder()
                 .queryString(constructSql(offenderNumber))
@@ -67,12 +69,12 @@ public class DuplicateDetectionQueryFactory {
                 .build();
     }
 
-    private String constructSql(final OffenderNumber offenderNumber) {
+    private String constructSql(final String offenderNumber) {
         return format(
                 QUERY_TEMPLATE,
                 database,
                 table,
-                offenderNumber.getOffenderNumber(),
+                offenderNumber,
                 String.valueOf(matchScoreThreshold).replaceAll("[.]?[0]*$", ""));
     }
 
