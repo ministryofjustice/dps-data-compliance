@@ -16,8 +16,12 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletio
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.Booking;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.OffenderWithBookings;
+import uk.gov.justice.hmpps.sqs.HmppsQueueService;
+import uk.gov.justice.hmpps.sqs.HmppsTopic;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,11 +37,20 @@ class OffenderDeletionCompleteEventPusherTest {
     @Mock
     private AmazonSNS client;
 
+    @Mock
+    HmppsQueueService hmppsQueueService;
+
+    @Mock
+    HmppsTopic hmppsTopic;
+
     private OffenderDeletionCompleteEventPusher eventPusher;
 
+
     @BeforeEach
-    void setUp() {
-        eventPusher = new OffenderDeletionCompleteAwsEventPusher(client, "topic.arn", OBJECT_MAPPER);
+    void setUp() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        eventPusher = new OffenderDeletionCompleteAwsEventPusher(hmppsQueueService, OBJECT_MAPPER);
+        mockHmppsService();
+        invokePostConstruct();
     }
 
     @Test
@@ -79,6 +92,19 @@ class OffenderDeletionCompleteEventPusherTest {
 
     private String getJson(final String filename) throws IOException {
         return IOUtils.toString(this.getClass().getResource(filename).openStream(), UTF_8);
+    }
+
+    private void mockHmppsService() {
+        when(hmppsQueueService.findByTopicId("datacomplianceevents"))
+            .thenReturn(hmppsTopic);
+        when(hmppsTopic.getSnsClient()).thenReturn(client);
+        when(hmppsTopic.getArn()).thenReturn("topic.arn");
+    }
+
+    private void invokePostConstruct() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method postConstruct = OffenderDeletionCompleteAwsEventPusher.class.getDeclaredMethod("initialise", null);
+        postConstruct.setAccessible(true);
+        postConstruct.invoke(eventPusher);
     }
 }
 

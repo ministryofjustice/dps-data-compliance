@@ -11,24 +11,12 @@ commands:
     steps:
       - checkout
       - hmpps/install_aws_cli
-      - run:
-          name: Wait for SQS to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4576
-      - run:
-          name: Wait for SNS to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4575
-      - run:
-          name: Set up queues
-          command: src/testIntegration/resources/localstack/setup-queues.sh
+      - hmpps/wait_till_ready
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle" }}
             - gradle-
       - run:
-          environment:
-            DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: localstack
-            DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: localstack
-            SNS_PROVIDER: localstack
           command: ./gradlew <<parameters.gradle-task>>
       - save_cache:
           paths:
@@ -67,6 +55,7 @@ jobs:
   test-integration:
     executor:
       name: hmpps/localstack
+      localstack_tag: "0.12.10"
       jdk_tag: "16.0"
       services: "sqs,sns"
     steps:
@@ -75,6 +64,7 @@ jobs:
   test-message-integration:
     executor:
       name: hmpps/localstack
+      localstack_tag: "0.12.10"
       jdk_tag: "16.0"
       services: "sqs,sns"
     steps:
@@ -83,6 +73,7 @@ jobs:
   test-message-integration-with-review-period:
     executor:
       name: hmpps/localstack
+      localstack_tag: "0.12.10"
       jdk_tag: "16.0"
       services: "sqs,sns"
     steps:
@@ -123,12 +114,12 @@ workflows:
               only:
                 - main
           requires:
+            - build_docker
             - validate
+            - helm_lint
             - test-integration
             - test-message-integration
             - test-message-integration-with-review-period
-            - helm_lint
-            - build_docker
       - request-preprod-approval:
           type: approval
           requires:
