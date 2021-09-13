@@ -3,6 +3,22 @@ version: 2.1
 orbs:
   hmpps: ministryofjustice/hmpps@3.11
 
+executors:
+  validator:
+    docker:
+      - image: cimg/openjdk:16.0
+      - image: localstack/localstack:0.12.10
+        environment:
+          - SERVICES=sqs,sns
+          - DEBUG=${DEBUG- }
+          - DATA_DIR=/tmp/localstack/data
+          - DOCKER_HOST=unix:///var/run/docker.sock
+          - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+          - AWS_EXECUTION_ENV=True
+          - DEFAULT_REGION=eu-west-2
+          - TMPDIR=/private
+    working_directory: ~/app
+
 commands:
   run-tests:
     parameters:
@@ -53,29 +69,17 @@ jobs:
             - build/libs
             - build.gradle
   test-integration:
-    executor:
-      name: hmpps/localstack
-      localstack_tag: "0.12.10"
-      jdk_tag: "16.0"
-      services: "sqs,sns"
+    executor: validator
     steps:
       - run-tests:
           gradle-task: testIntegration
   test-message-integration:
-    executor:
-      name: hmpps/localstack
-      localstack_tag: "0.12.10"
-      jdk_tag: "16.0"
-      services: "sqs,sns"
+    executor: validator
     steps:
       - run-tests:
           gradle-task: testMessageIntegration
   test-message-integration-with-review-period:
-    executor:
-      name: hmpps/localstack
-      localstack_tag: "0.12.10"
-      jdk_tag: "16.0"
-      services: "sqs,sns"
+    executor: validator
     steps:
       - run-tests:
           gradle-task: testMessageIntegrationWithReviewPeriod
