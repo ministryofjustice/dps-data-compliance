@@ -20,7 +20,7 @@ import java.time.Duration;
 
 @Sql("classpath:seed.data/reset.sql")
 @SqlMergeMode(MergeMode.MERGE)
-@ActiveProfiles("test")
+@ActiveProfiles("test-integration")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public abstract class IntegrationTest {
 

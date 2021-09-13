@@ -29,7 +29,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplicati
 
 @Slf4j
 @Service
-@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('${data.compliance.response.sqs.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack'}.contains('${hmpps.sqs.provider}')")
 public class DataComplianceEventListener {
 
     private static final String ADHOC_OFFENDER_DELETION_EVENT = "DATA_COMPLIANCE_AD-HOC-OFFENDER-DELETION";
@@ -41,19 +41,6 @@ public class DataComplianceEventListener {
     private static final String DATA_DUPLICATE_DB_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-RESULT";
     private static final String FREE_TEXT_MORATORIUM_RESULT = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT";
     private static final String OFFENDER_RESTRICTION_RESULT= "DATA_COMPLIANCE_OFFENDER-RESTRICTION-RESULT";
-
-
-    private final Map<String, MessageHandler> messageHandlers = Map.of(
-            ADHOC_OFFENDER_DELETION_EVENT, this::handleAdHocDeletion,
-            OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral,
-            OFFENDER_PROVISIONAL_DELETION_REFERRAL_EVENT, this::handleProvisionalDeletionReferralResult,
-            OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete,
-            OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
-            DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult,
-            DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult,
-            FREE_TEXT_MORATORIUM_RESULT, this::handleFreeTextSearchResult,
-            OFFENDER_RESTRICTION_RESULT, this::handleOffenderRestrictionResult
-        );
 
     private final ObjectMapper objectMapper;
     private final ReferralService referralService;
@@ -73,7 +60,7 @@ public class DataComplianceEventListener {
         this.deletionService = deletionService;
     }
 
-    @JmsListener(destination = "${data.compliance.response.sqs.queue.name}")
+    @JmsListener(destination = "datacomplianceresponse", containerFactory = "hmppsQueueContainerFactoryProxy")
     public void handleEvent(final Message<String> message) {
 
         final var eventType = getEventType(message.getHeaders());
@@ -147,8 +134,21 @@ public class DataComplianceEventListener {
         }
     }
 
+    private final Map<String, MessageHandler> messageHandlers = Map.of(
+        ADHOC_OFFENDER_DELETION_EVENT, this::handleAdHocDeletion,
+        OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral,
+        OFFENDER_PROVISIONAL_DELETION_REFERRAL_EVENT, this::handleProvisionalDeletionReferralResult,
+        OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete,
+        OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
+        DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult,
+        DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult,
+        FREE_TEXT_MORATORIUM_RESULT, this::handleFreeTextSearchResult,
+        OFFENDER_RESTRICTION_RESULT, this::handleOffenderRestrictionResult
+    );
+
     @FunctionalInterface
     private interface MessageHandler {
+
         void handle(Message<String> message);
     }
 }

@@ -93,20 +93,6 @@ env:
     value: "{{ .Values.env.PRISON_API_OFFENDER_IDS_ITERATION_THREADS }}"
   {{- end }}
 
-  {{- if .Values.env.SNS_PROVIDER }}
-  - name: SNS_PROVIDER
-    value: "{{ .Values.env.SNS_PROVIDER }}"
-  {{- end }}
-
-  {{- if .Values.env.DATA_COMPLIANCE_REQUEST_SQS_PROVIDER }}
-  - name: DATA_COMPLIANCE_REQUEST_SQS_PROVIDER
-    value: "{{ .Values.env.DATA_COMPLIANCE_REQUEST_SQS_PROVIDER }}"
-  {{- end }}
-
-  {{- if .Values.env.DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER }}
-  - name: DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER
-    value: "{{ .Values.env.DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER }}"
-  {{- end }}
 
   {{- if .Values.env.OFFENDER_DELETION_CRON }}
   - name: OFFENDER_DELETION_CRON
@@ -215,97 +201,97 @@ env:
         name: {{ template "app.name" . }}
         key: NOTIFY_API_KEY
 
-  - name: SNS_AWS_ACCESS_KEY_ID
+  - name: HMPPS_SQS_TOPICS_DATACOMPLIANCEEVENTS_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: offender-events-topic
         key: access_key_id
 
-  - name: SNS_AWS_SECRET_ACCESS_KEY
+  - name: HMPPS_SQS_TOPICS_DATACOMPLIANCEEVENTS_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: offender-events-topic
         key: secret_access_key
 
-  - name: SNS_TOPIC_ARN
+  - name: HMPPS_SQS_TOPICS_DATACOMPLIANCEEVENTS_ARN
     valueFrom:
       secretKeyRef:
         name: offender-events-topic
         key: topic_arn
 
-  - name: DATA_COMPLIANCE_RESPONSE_SQS_AWS_ACCESS_KEY_ID
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_QUEUE_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs
         key: access_key_id
 
-  - name: DATA_COMPLIANCE_RESPONSE_SQS_AWS_SECRET_ACCESS_KEY
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_QUEUE_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs
         key: secret_access_key
 
-  - name: DATA_COMPLIANCE_RESPONSE_SQS_QUEUE_NAME
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_QUEUE_NAME
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs
         key: sqs_dc_resp_name
 
-  - name: DATA_COMPLIANCE_RESPONSE_SQS_DLQ_AWS_ACCESS_KEY_ID
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_DLQ_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs-dl
         key: access_key_id
 
-  - name: DATA_COMPLIANCE_RESPONSE_SQS_DLQ_AWS_SECRET_ACCESS_KEY
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_DLQ_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs-dl
         key: secret_access_key
 
-  - name: DATA_COMPLIANCE_RESPONSE_SQS_DLQ_NAME
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_DLQ_NAME
     valueFrom:
       secretKeyRef:
         name: data-compliance-response-sqs-dl
         key: sqs_dc_resp_name
 
-  - name: DATA_COMPLIANCE_REQUEST_SQS_AWS_ACCESS_KEY_ID
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_QUEUE_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs
         key: access_key_id
 
-  - name: DATA_COMPLIANCE_REQUEST_SQS_AWS_SECRET_ACCESS_KEY
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_QUEUE_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs
         key: secret_access_key
 
-  - name: DATA_COMPLIANCE_REQUEST_SQS_QUEUE_NAME
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_QUEUE_NAME
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs
         key: sqs_dc_req_name
 
-  - name: DATA_COMPLIANCE_REQUEST_SQS_QUEUE_URL
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_QUEUE_URL
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs
         key: sqs_dc_req_url
 
-  - name: DATA_COMPLIANCE_REQUEST_SQS_DLQ_AWS_ACCESS_KEY_ID
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_DLQ_ACCESS_KEY_ID
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs-dl
         key: access_key_id
 
-  - name: DATA_COMPLIANCE_REQUEST_SQS_DLQ_AWS_SECRET_ACCESS_KEY
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_DLQ_SECRET_ACCESS_KEY
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs-dl
         key: secret_access_key
 
-  - name: DATA_COMPLIANCE_REQUEST_SQS_DLQ_NAME
+  - name: HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_DLQ_NAME
     valueFrom:
       secretKeyRef:
         name: data-compliance-request-sqs-dl

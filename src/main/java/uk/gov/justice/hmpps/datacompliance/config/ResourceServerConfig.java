@@ -42,7 +42,8 @@ public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
                         "/v2/api-docs",
                         "/swagger-resources/**",
                         "/swagger-ui/**",
-                        "/webjars/**")
+                        "/webjars/**",
+                        "/queue-admin/retry-all-dlqs")
                         .permitAll().anyRequest().authenticated())
                 .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new AuthAwareTokenConverter());
     }

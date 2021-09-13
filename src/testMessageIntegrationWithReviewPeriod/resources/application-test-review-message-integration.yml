@@ -12,27 +12,18 @@ prison.register.base.url: http://localhost:8995
 app.db.url: jdbc:hsqldb:mem:data-compliance-db;sql.syntax_pgs=true;shutdown=false
 
 
-data.compliance.request:
-  sqs:
-    provider: embedded-localstack
-    queue.name: data_compliance_request_queue
-    queue.url: http://localhost:4576/queue/data_compliance_request_queue
-    dlq.name: data_compliance_request_dead_letter_queue
-    endpoint.url: http://localhost:4576
-
-data.compliance.response:
-  sqs:
-    provider: embedded-localstack
-    queue.name: data_compliance_response_queue
-    dlq.name: data_compliance_response_dead_letter_queue
-    endpoint.url: http://localhost:4576
-
-sns:
-  provider: embedded-localstack
-  topic.name: offender_events
-  topic.arn: arn:aws:sns:eu-west-2:000000000000:offender_events
-  endpoint.url: http://localhost:4575
-  region: eu-west-2
+hmpps.sqs:
+  provider: localstack
+  queues:
+    datacompliancerequest:
+      queueName: data_compliance_request_queue
+      dlqName: data_compliance_request_dlq
+    datacomplianceresponse:
+      queueName: data_compliance_response_queue
+      dlqName: data_compliance_response_dlq
+  topics:
+    datacomplianceevents:
+      arn: arn:aws:sns:eu-west-2:000000000000:offender_events
 
 spring:
   main:
