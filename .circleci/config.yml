@@ -54,13 +54,28 @@ jobs:
             - build.gradle
   test-integration:
     executor:
-      name: hmpps/localstack
-      localstack_tag: "0.12.10"
-      jdk_tag: "16.0"
-      services: "sqs,sns"
+      name: hmpps/java
+      tag: "16.0"
     steps:
-      - run-tests:
-          gradle-task: testIntegration
+      - checkout
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle" }}
+            - gradle-
+      - run: ./gradlew testIntegration
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: gradle-{{ checksum "build.gradle" }}
+      - store_test_results:
+          path: build/test-results
+      - store_artifacts:
+          path: build/reports/tests
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build/libs
+            - build.gradle
   test-message-integration:
     executor:
       name: hmpps/localstack
