@@ -29,7 +29,7 @@ public class ReviewRequiredAdHocMessagesIntegrationTest extends QueueIntegration
     @Test
     public void shouldGrantProvisionalDeletionWhenAdHocDeletion() {
 
-        final var offenderIdDisplay = "A1234AD";
+        final var offenderIdDisplay = "A1234AZ";
 
         final var adHockOffenderDeletionEvent = forAdHocDeletionEvent(sqsResponseClientQueueUrl, offenderIdDisplay);
         mockJmsListener.triggerAdhocDeletion(adHockOffenderDeletionEvent);
@@ -47,7 +47,7 @@ public class ReviewRequiredAdHocMessagesIntegrationTest extends QueueIntegration
 
         mockJmsListener.respondToRequestWith(Set.of(offenderPendingDeletionResponse, pendingDeletionReferralComplete));
 
-        waitForPathFinderApiRequestTo("/pathfinder/offender/A1234AD");
+        waitForPathFinderApiRequestTo("/pathfinder/offender/A1234AZ");
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_ID_CHECK);
         final var dataDuplicateIdRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_ID_CHECK);
@@ -81,7 +81,7 @@ public class ReviewRequiredAdHocMessagesIntegrationTest extends QueueIntegration
 
         mockJmsListener.respondToRequestWith(Set.of(provisionalDeletionReferral));
 
-        waitForPathFinderApiRequestTo("/pathfinder/offender/A1234AD");
+        waitForPathFinderApiRequestTo("/pathfinder/offender/A1234AZ");
 
         mockJmsListener.verifyMessageReceivedOfEventType(DATA_DUPLICATE_ID_CHECK);
         final var secondDataDuplicateIdRetentionCheckId = mockJmsListener.getCheckId(DATA_DUPLICATE_ID_CHECK);
