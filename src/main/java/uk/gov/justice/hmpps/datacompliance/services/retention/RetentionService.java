@@ -75,14 +75,14 @@ public class RetentionService {
                 manualRetentionCheck(offenderNumber),
                 imageDuplicateCheck(offenderNumber),
                 idDataDuplicateCheck(offenderNumber),
-                databaseDataDuplicateCheck(offenderNumber),
                 analyticalPlatformDataDuplicateCheck(offenderNumber),
                 freeTextSearch(offenderNumber),
                 offenderRestrictionCheck(offenderNumber),
                 offenceCodeCheck(offenderToCheck),
                 alertCheck(offenderToCheck),
                 ualOffenderCheck(offenderNumber),
-                mappaReferralCheck(offenderNumber));
+                mappaReferralCheck(offenderNumber),
+                databaseDataDuplicateCheck(offenderNumber));
     }
 
     public void handleDataDuplicateResult(final DataDuplicateResult result, final Method method) {
