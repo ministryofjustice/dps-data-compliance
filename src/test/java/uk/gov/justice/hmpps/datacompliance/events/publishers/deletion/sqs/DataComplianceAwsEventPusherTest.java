@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.hmpps.datacompliance.dto.DeceasedOffenderDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
@@ -222,5 +223,48 @@ class DataComplianceAwsEventPusherTest {
                         "\"offenderIds\":[456]," +
                         "\"offenderBookIds\":[789]" +
                         "}");
+    }
+
+
+    @Test
+    void requestDeceasedOffenderDeletion() {
+
+        final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
+
+        when(client.sendMessage(request.capture()))
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
+
+        eventPusher.requestDeceasedOffenderDeletion(DeceasedOffenderDeletionRequest.builder()
+            .batchId(BATCH_ID)
+            .limit(REFERRAL_LIMIT)
+            .build());
+
+        assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
+        assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
+            .isEqualTo("DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-REQUEST");
+        assertThat(request.getValue().getMessageBody()).isEqualTo(
+            "{" +
+                "\"batchId\":987," +
+                "\"limit\":10" +
+                "}");
+    }
+
+    @Test
+    void requestDeceasedOffenderDeletionWithoutLimit() {
+
+        final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
+
+        when(client.sendMessage(request.capture()))
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
+
+        eventPusher.requestDeceasedOffenderDeletion(DeceasedOffenderDeletionRequest.builder()
+            .batchId(BATCH_ID)
+            .build());
+
+        assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
+        assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
+            .isEqualTo("DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-REQUEST");
+        assertThat(request.getValue().getMessageBody()).isEqualTo(
+            "{\"batchId\":987}");
     }
 }

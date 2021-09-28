@@ -1,5 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.events.publishers.sqs;
 
+import uk.gov.justice.hmpps.datacompliance.dto.DeceasedOffenderDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
@@ -17,4 +18,5 @@ public interface DataComplianceEventPusher {
     void requestFreeTextMoratoriumCheck(OffenderNumber offenderNumber, Long retentionCheckId, List<String> regex);
     void requestOffenderRestrictionCheck(OffenderNumber offenderNumber, Long retentionCheckId, Set<OffenderRestrictionCode> offenderRestrictionCodes, String regex);
     void grantDeletion(OffenderDeletionGrant offenderDeletionGrant);
+    void requestDeceasedOffenderDeletion(DeceasedOffenderDeletionRequest request);
 }

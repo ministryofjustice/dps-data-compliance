@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.data.util.Streamable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
@@ -21,7 +22,12 @@ import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.deceasedoffender.DeceasedOffenderDeletionBatch;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.deceasedoffender.DeceasedOffenderDeletionBatch.BatchType;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.deceasedoffender.DeceasedOffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.deceasedoffender.DeceasedOffenderDeletionBatchRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.deceasedoffender.DeceasedOffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.web.JwtAuthenticationHelper;
@@ -79,12 +85,21 @@ public class QueueIntegrationTest {
     }
 
      OffenderDeletionBatch persistNewBatch() {
-        return repository.save(OffenderDeletionBatch.builder()
+        return batchRepository.save(OffenderDeletionBatch.builder()
             .requestDateTime(NOW)
             .referralCompletionDateTime(NOW.plusSeconds(1))
             .windowStartDateTime(NOW.plusSeconds(2))
             .windowEndDateTime(NOW.plusSeconds(3))
             .batchType(SCHEDULED)
+            .build());
+    }
+
+
+    DeceasedOffenderDeletionBatch persistNewDeceasedOffenderBatch() {
+        return deceasedOffenderDeletionBatch.save(DeceasedOffenderDeletionBatch.builder()
+            .requestDateTime(NOW)
+            .referralCompletionDateTime(NOW.plusSeconds(1))
+            .batchType(BatchType.SCHEDULED)
             .build());
     }
 
@@ -99,6 +114,13 @@ public class QueueIntegrationTest {
         return new TransactionTemplate(transactionManager).execute(f -> {
             Awaitility.await().until(() -> offenderDeletionReferralRepository.findByOffenderNo(offenderId).get(0).getReferralResolution().get().getResolutionStatus().name().equals(status));
             return null;
+        });
+    }
+
+    List<DeceasedOffenderDeletionReferral> retrieveDeceasedReferralWithWait(String offenderNumber) {
+        return new TransactionTemplate(transactionManager).execute(f -> {
+            Awaitility.await().until(() -> Streamable.of(deceasedOffenderDeletionReferralRepository.findAll()).toList().size() == 1);
+            return deceasedOffenderDeletionReferralRepository.findByOffenderNo(offenderNumber);
         });
     }
 
@@ -157,10 +179,16 @@ public class QueueIntegrationTest {
     MockJmsListener mockJmsListener;
 
     @Autowired
-    OffenderDeletionBatchRepository repository;
+    OffenderDeletionBatchRepository batchRepository;
+
+    @Autowired
+    DeceasedOffenderDeletionBatchRepository deceasedOffenderDeletionBatch;
 
     @Autowired
     OffenderDeletionReferralRepository offenderDeletionReferralRepository;
+
+    @Autowired
+    DeceasedOffenderDeletionReferralRepository deceasedOffenderDeletionReferralRepository;
 
     @Autowired
     JwtAuthenticationHelper jwtAuthenticationHelper;
