@@ -14,7 +14,7 @@ import java.util.Set;
 
 @Slf4j
 @Component
-@ConditionalOnExpression("!{'aws', 'localstack', 'embedded-localstack'}.contains('${data.compliance.request.sqs.provider}')")
+@ConditionalOnExpression("!{'aws', 'localstack'}.contains('${hmpps.sqs.provider}')")
 public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher {
 
     public DataComplianceNoOpEventPusher() {

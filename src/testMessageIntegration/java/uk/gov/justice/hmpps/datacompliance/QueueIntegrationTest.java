@@ -10,18 +10,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.data.util.Streamable;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.testcontainers.containers.localstack.LocalStackContainer;
+import uk.gov.justice.hmpps.datacompliance.config.LocalStackConfig;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.deceasedoffender.DeceasedOffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.deceasedoffender.DeceasedOffenderDeletionBatch.BatchType;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.deceasedoffender.DeceasedOffenderDeletionReferral;
@@ -31,6 +34,7 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.deceasedoff
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionBatchRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral.OffenderDeletionReferralRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.web.JwtAuthenticationHelper;
+import uk.gov.justice.hmpps.sqs.HmppsQueueService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -46,7 +50,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class QueueIntegrationTest {
 
-    public static final String APPROXIMATE_NUMBER_OF_MESSAGES = "ApproximateNumberOfMessages";
+    public static final LocalStackContainer localStackContainer;
     public static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
 
     protected MockWebServer hmppsAuthMock;
@@ -54,6 +58,21 @@ public class QueueIntegrationTest {
     protected MockWebServer pathfinderApiMock;
     protected MockWebServer communityApiMock;
     protected MockWebServer prisonRegisterMock;
+    protected AmazonSQS sqsRequestClient;
+    protected String sqsResponseClientQueueUrl;
+
+
+    static {
+        localStackContainer = LocalStackConfig.instance();
+    }
+
+    @DynamicPropertySource
+    static void registerProperties(DynamicPropertyRegistry registry) {
+        if (localStackContainer != null) {
+            LocalStackConfig.setLocalStackProperties(localStackContainer, registry);
+        }
+    }
+
 
     public void waitForPathFinderApiRequestTo(String url) {
         await().until(() -> requestExists(url));
@@ -64,8 +83,8 @@ public class QueueIntegrationTest {
     }
 
     int getNumberOfMessagesCurrentlyOnSqsQueue(String queueUrl, AmazonSQS client) {
-        final GetQueueAttributesResult queueAttributes = client.getQueueAttributes(queueUrl, List.of(APPROXIMATE_NUMBER_OF_MESSAGES));
-        return Integer.parseInt(queueAttributes.getAttributes().get(APPROXIMATE_NUMBER_OF_MESSAGES));
+        final GetQueueAttributesResult queueAttributes = client.getQueueAttributes(queueUrl, List.of("ApproximateNumberOfMessages"));
+        return Integer.parseInt(queueAttributes.getAttributes().get("ApproximateNumberOfMessages"));
     }
 
 
@@ -77,15 +96,15 @@ public class QueueIntegrationTest {
         }
     }
 
-     MockResponse mockTokenAuthenticationResponse() {
+    MockResponse mockTokenAuthenticationResponse() {
         return new MockResponse()
             .setResponseCode(200)
             .setBody("{\"access_token\":\"123\",\"token_type\":\"bearer\",\"expires_in\":\"999999\"}")
             .setHeader("Content-Type", "application/json");
     }
 
-     OffenderDeletionBatch persistNewBatch() {
-        return batchRepository.save(OffenderDeletionBatch.builder()
+    OffenderDeletionBatch persistNewBatch() {
+        return repository.save(OffenderDeletionBatch.builder()
             .requestDateTime(NOW)
             .referralCompletionDateTime(NOW.plusSeconds(1))
             .windowStartDateTime(NOW.plusSeconds(2))
@@ -103,14 +122,14 @@ public class QueueIntegrationTest {
             .build());
     }
 
-     String waitUntilResolutionStatusIsPersisted(Long referralId, String status) {
+    String waitUntilResolutionStatusIsPersisted(Long referralId, String status) {
         return new TransactionTemplate(transactionManager).execute(f -> {
             Awaitility.await().until(() -> offenderDeletionReferralRepository.findById(referralId).get().getReferralResolution().get().getResolutionStatus().name().equals(status));
             return null;
         });
     }
 
-     String waitUntilResolutionStatusIsPersisted(String offenderId, String status) {
+    String waitUntilResolutionStatusIsPersisted(String offenderId, String status) {
         return new TransactionTemplate(transactionManager).execute(f -> {
             Awaitility.await().until(() -> offenderDeletionReferralRepository.findByOffenderNo(offenderId).get(0).getReferralResolution().get().getResolutionStatus().name().equals(status));
             return null;
@@ -136,50 +155,15 @@ public class QueueIntegrationTest {
         prisonRegisterMock.enqueue(response);
     }
 
-    @Value("${data.compliance.response.sqs.queue.name}")
-    String sqsResponseQueueName;
-
-    @Value("${data.compliance.request.sqs.queue.name}")
-    String sqsRequestQueueName;
 
     @Autowired
-    @Qualifier("dataComplianceRequestSqsClient")
-    AmazonSQS sqsRequestClient;
-
-    @Autowired
-    @Qualifier("dataComplianceRequestSqsDlqClient")
-    AmazonSQS sqsRequestDlqClient;
-
-    @Autowired
-    @Qualifier("dataComplianceResponseSqsClient")
-    AmazonSQS sqsResponseClient;
-
-    @Autowired
-    @Qualifier("dataComplianceResponseSqsDlqClient")
-    AmazonSQS sqsResponseDlqClient;
-
-
-    @Autowired
-    @Qualifier("sqsRequestQueueUrl")
-    public String sqsRequestClientQueueUrl;
-
-    @Autowired
-    @Qualifier("sqsRequestDlqQueueUrl")
-    public String sqsRequestDlqClientQueueUrl;
-
-    @Autowired
-    @Qualifier("sqsResponseQueueUrl")
-    public String sqsResponseClientQueueUrl;
-
-    @Autowired
-    @Qualifier("sqsResponseDlqQueueUrl")
-    public String sqsResponseDlqClientQueueUrl;
+    HmppsQueueService hmppsQueueService;
 
     @Autowired
     MockJmsListener mockJmsListener;
 
     @Autowired
-    OffenderDeletionBatchRepository batchRepository;
+    OffenderDeletionBatchRepository repository;
 
     @Autowired
     DeceasedOffenderDeletionBatchRepository deceasedOffenderDeletionBatch;
@@ -199,9 +183,12 @@ public class QueueIntegrationTest {
     @Autowired
     protected WebTestClient webTestClient;
 
+    @LocalServerPort
+    protected Integer port = 0;
+
 
     @BeforeAll
-    public static void setupAll(){
+    public static void setupAll() {
         Awaitility.setDefaultPollDelay(Duration.ZERO);
         Awaitility.setDefaultTimeout(Duration.ofMinutes(1));
     }
@@ -219,17 +206,24 @@ public class QueueIntegrationTest {
         prisonRegisterMock = new MockWebServer();
         prisonRegisterMock.start(8995);
 
-        mockJmsListener.clearMessages();
+        initaliseQueueProperties();
     }
 
     @AfterEach
-    protected  void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         prisonApiMock.shutdown();
         hmppsAuthMock.shutdown();
         pathfinderApiMock.shutdown();
         communityApiMock.shutdown();
         prisonRegisterMock.shutdown();
+
+        mockJmsListener.clearMessages();
     }
 
+
+    private void initaliseQueueProperties() {
+        sqsRequestClient = hmppsQueueService.findByQueueId("datacompliancerequest").getSqsClient();
+        sqsResponseClientQueueUrl = hmppsQueueService.findByQueueId("datacomplianceresponse").getQueueUrl();
+    }
 
 }

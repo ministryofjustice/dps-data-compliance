@@ -16,7 +16,11 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceAwsEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
+import uk.gov.justice.hmpps.sqs.HmppsQueue;
+import uk.gov.justice.hmpps.sqs.HmppsQueueService;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -39,13 +43,21 @@ class DataComplianceAwsEventPusherTest {
     private final static int REFERRAL_LIMIT = 10;
 
     @Mock
+    HmppsQueueService hmppsQueueService;
+
+    @Mock
+    HmppsQueue hmppsQueue;
+
+    @Mock
     private AmazonSQS client;
 
     private DataComplianceEventPusher eventPusher;
 
     @BeforeEach
-    void setUp() {
-        eventPusher = new DataComplianceAwsEventPusher(client, "queue.url", OBJECT_MAPPER);
+    void setUp() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        eventPusher = new DataComplianceAwsEventPusher(hmppsQueueService, OBJECT_MAPPER);
+        mockHmppsService();
+        invokePostConstruct();
     }
 
     @Test
@@ -54,7 +66,7 @@ class DataComplianceAwsEventPusherTest {
         final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
 
         when(client.sendMessage(request.capture()))
-                .thenReturn(new SendMessageResult().withMessageId("message1"));
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
 
         eventPusher.requestReferral(OffenderDeletionReferralRequest.builder()
                 .batchId(BATCH_ID)
@@ -266,5 +278,18 @@ class DataComplianceAwsEventPusherTest {
             .isEqualTo("DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-REQUEST");
         assertThat(request.getValue().getMessageBody()).isEqualTo(
             "{\"batchId\":987}");
+    }
+
+    private void mockHmppsService() {
+        when(hmppsQueueService.findByQueueId("datacompliancerequest"))
+            .thenReturn(hmppsQueue);
+        when(hmppsQueue.getSqsClient()).thenReturn(client);
+        when(hmppsQueue.getQueueUrl()).thenReturn("queue.url");
+    }
+
+    private void invokePostConstruct() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method postConstruct = DataComplianceAwsEventPusher.class.getDeclaredMethod("initialise", null);
+        postConstruct.setAccessible(true);
+        postConstruct.invoke(eventPusher);
     }
 }
