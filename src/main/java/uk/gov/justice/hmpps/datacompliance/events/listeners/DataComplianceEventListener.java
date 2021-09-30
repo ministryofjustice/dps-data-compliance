@@ -9,12 +9,14 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.AdHocOffenderDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateResult;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DeceasedOffenderDeletionResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderRestrictionResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.ProvisionalDeletionReferralResult;
+import uk.gov.justice.hmpps.datacompliance.services.deletion.DeceasedDeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
@@ -41,6 +43,7 @@ public class DataComplianceEventListener {
     private static final String DATA_DUPLICATE_DB_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-RESULT";
     private static final String FREE_TEXT_MORATORIUM_RESULT = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT";
     private static final String OFFENDER_RESTRICTION_RESULT= "DATA_COMPLIANCE_OFFENDER-RESTRICTION-RESULT";
+    private static final String DECEASED_OFFENDER_DELETION_RESULT = "DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-RESULT";
 
 
     private final Map<String, MessageHandler> messageHandlers = Map.of(
@@ -52,18 +55,21 @@ public class DataComplianceEventListener {
             DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult,
             DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult,
             FREE_TEXT_MORATORIUM_RESULT, this::handleFreeTextSearchResult,
-            OFFENDER_RESTRICTION_RESULT, this::handleOffenderRestrictionResult
+            OFFENDER_RESTRICTION_RESULT, this::handleOffenderRestrictionResult,
+            DECEASED_OFFENDER_DELETION_RESULT, this::handleDeceasedOffenderDeletionResult
         );
 
     private final ObjectMapper objectMapper;
     private final ReferralService referralService;
     private final RetentionService retentionService;
     private final DeletionService deletionService;
+    private final DeceasedDeletionService deceasedDeletionService;
 
     public DataComplianceEventListener(final ObjectMapper objectMapper,
                                        final ReferralService referralService,
                                        final RetentionService retentionService,
-                                       final DeletionService deletionService) {
+                                       final DeletionService deletionService,
+                                       final DeceasedDeletionService deceasedDeletionService) {
 
         log.info("Configured to listen to Offender Deletion events");
 
@@ -71,6 +77,7 @@ public class DataComplianceEventListener {
         this.referralService = referralService;
         this.retentionService = retentionService;
         this.deletionService = deletionService;
+        this.deceasedDeletionService = deceasedDeletionService;
     }
 
     @JmsListener(destination = "${data.compliance.response.sqs.queue.name}")
@@ -137,6 +144,11 @@ public class DataComplianceEventListener {
     private void handleOffenderRestrictionResult(final Message<String> message) {
         retentionService.handleOffenderRestrictionResult(
             parseEvent(message.getPayload(), OffenderRestrictionResult.class));
+    }
+
+    private void handleDeceasedOffenderDeletionResult(final Message<String> message) {
+        deceasedDeletionService.handleDeceasedOffenderDeletionResult(
+            parseEvent(message.getPayload(), DeceasedOffenderDeletionResult.class));
     }
 
     private <T> T parseEvent(final String requestJson, final Class<T> eventType) {

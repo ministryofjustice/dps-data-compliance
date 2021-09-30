@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.config;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -14,8 +13,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import uk.gov.justice.hmpps.datacompliance.jobs.offenderdeletion.OffenderDeletionJob;
+import uk.gov.justice.hmpps.datacompliance.jobs.deceasedoffenderdeletion.DeceasedOffenderDeletionJob;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.quartz.CronScheduleBuilder.cronSchedule;
@@ -30,7 +30,7 @@ public class DeceasedOffenderDeletionConfig {
     private String deceasedOffenderDeletionCron;
 
     @Value("${deceased.offender.deletion.limit:#{null}}")
-    private Integer deceasedReferralLimit;
+    private Integer deletionLimit;
 
     @Autowired
     private SchedulerFactoryBean schedulerFactoryBean;
@@ -56,9 +56,14 @@ public class DeceasedOffenderDeletionConfig {
     }
 
     public JobDetail deceasedOffenderDeletionJobDetails() {
-        return JobBuilder.newJob(OffenderDeletionJob.class)
+        return JobBuilder.newJob(DeceasedOffenderDeletionJob.class)
             .withIdentity("deceased-offender-complete-deletion-job")
             .storeDurably()
             .build();
     }
+
+    public Optional<Integer> getDeletionLimit() {
+        return Optional.ofNullable(deletionLimit);
+    }
+
 }

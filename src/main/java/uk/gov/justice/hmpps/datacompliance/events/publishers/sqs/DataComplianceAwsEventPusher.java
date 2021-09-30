@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+import uk.gov.justice.hmpps.datacompliance.dto.DeceasedOffenderDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
@@ -31,6 +32,7 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     private static final String DATA_DUPLICATE_DB_CHECK = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK";
     private static final String FREE_TEXT_MORATORIUM_CHECK = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK";
     private static final String OFFENDER_RESTRICTION_CHECK = "DATA_COMPLIANCE_OFFENDER-RESTRICTION-CHECK";
+    private static final String DECEASED_OFFENDER_DELETION_REQUEST = "DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-REQUEST";
 
     private final ObjectMapper objectMapper;
     private final AmazonSQS sqsClient;
@@ -60,6 +62,19 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
                         .dueForDeletionWindowEnd(request.getDueForDeletionWindowEnd())
                         .limit(request.getLimit())
                         .build()));
+    }
+
+    @Override
+    public void requestDeceasedOffenderDeletion(DeceasedOffenderDeletionRequest request) {
+
+        log.debug("Requesting deceased offender deletion: {}", request);
+
+        sqsClient.sendMessage(generateRequest(DECEASED_OFFENDER_DELETION_REQUEST,
+            DeceasedDeletionRequest.builder()
+                .batchId(request.getBatchId())
+                .limit(request.getLimit())
+                .build()));
+
     }
 
     @Override
