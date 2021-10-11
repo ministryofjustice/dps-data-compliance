@@ -13,3 +13,5 @@ dps-gradle-spring-boot-suppressions.xml
 *.ipr
 out/
 .editorconfig
+helm_deploy/*/Chart.lock
+helm_deploy/*/charts/

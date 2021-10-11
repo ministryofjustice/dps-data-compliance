@@ -1,73 +1,49 @@
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# Environment specific values, override helm_deploy/prison-to-probation-update/values.yaml
+generic-service:
+  replicaCount: 4
 
-replicaCount: 2
+  ingress:
+    host: prison-data-compliance.prison.service.justice.gov.uk
 
-image:
-  repository: quay.io/hmpps/dps-data-compliance
-  tag: latest
-  port: 8080
+  env:
+    HMPPS_AUTH_BASE_URL: "https://sign-in.hmpps.service.justice.gov.uk/auth"
+    PRISON_API_BASE_URL: "https://api.prison.service.justice.gov.uk"
+    PATHFINDER_API_BASE_URL: "https://api.pathfinder.service.justice.gov.uk"
+    COMMUNITY_API_BASE_URL: "https://community-api-secure.probation.service.justice.gov.uk"
+    PRISON_REGISTER_BASE_URL: "https://prison-register.hmpps.service.justice.gov.uk"
+    DIGITAL_PRISON_SERVICE_URL: "https://digital.prison.service.justice.gov.uk"
 
-ingress:
-  enabled: true
-  enable_whitelist: true
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-  hosts:
-    - host: prison-data-compliance.prison.service.justice.gov.uk
-      cert_secret: prison-data-compliance-cert
-  path: /
+    SNS_PROVIDER: aws
+    DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
+    DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: aws
+    IMAGE_RECOGNITION_PROVIDER: aws
+    DUPLICATE_DETECTION_PROVIDER: aws
 
-env:
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
 
-  JAVA_OPTS: "Xmx512m"
+    # Materialized View not available:
+    OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED: false
+    OFFENDER_RETENTION_IMAGE_DUPLICATE_CHECK_ENABLED: true
+    OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED: true
+    OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED: true
+    OFFENDER_RETENTION_FALSE_POSITIVE_DUPLICATE_CHECK_ENABLED: true
+    IMAGE_RECOGNITION_DELETION_ENABLED: true
+    NOTIFY_ENABLED: false
+    DELETION_GRANT_ENABLED: false
 
-  HMPPS_AUTH_BASE_URL: "https://sign-in.hmpps.service.justice.gov.uk/auth"
-  PRISON_API_BASE_URL: "https://api.prison.service.justice.gov.uk"
-  PATHFINDER_API_BASE_URL: "https://api.pathfinder.service.justice.gov.uk"
-  COMMUNITY_API_BASE_URL: "https://community-api-secure.probation.service.justice.gov.uk"
-  PRISON_REGISTER_BASE_URL: "https://prison-register.hmpps.service.justice.gov.uk"
-  DIGITAL_PRISON_SERVICE_URL: "https://digital.prison.service.justice.gov.uk"
+    OFFENDER_DELETION_REVIEW_REQUIRED: "true"
 
-  SNS_PROVIDER: aws
-  DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
-  DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: aws
-  IMAGE_RECOGNITION_PROVIDER: aws
-  DUPLICATE_DETECTION_PROVIDER: aws
+    # Switch off deceased offender job in prod
+    # DECEASED_OFFENDER_DELETION_CRON: "0 0 2 ? * MON-FRI *"
+    # DECEASED_OFFENDER_DELETION_LIMIT: 200
 
-  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
+    # Run image recognition collection update every weekday.
+    # Note: the AWS Rekognition service currently rate limits
+    # us to 15 API calls per second.
+    IMAGE_RECOGNITION_MIGRATION_CRON: "0 0 13 ? * MON-FRI *"
+    PRISON_API_OFFENDER_IDS_ITERATION_THREADS: 2
+    IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND: 14
 
-  # Materialized View not available:
-  OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED: false
-  OFFENDER_RETENTION_IMAGE_DUPLICATE_CHECK_ENABLED: true
-  OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED: true
-  OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED: true
-  OFFENDER_RETENTION_FALSE_POSITIVE_DUPLICATE_CHECK_ENABLED: true
-  IMAGE_RECOGNITION_DELETION_ENABLED: true
-  NOTIFY_ENABLED: false
-  DELETION_GRANT_ENABLED: false
-
-  OFFENDER_DELETION_REVIEW_REQUIRED: "true"
-
-  # Switch off deceased offender job in prod
-  # DECEASED_OFFENDER_DELETION_CRON: "0 0 2 ? * MON-FRI *"
-  # DECEASED_OFFENDER_DELETION_LIMIT: 200
-
-  # Run image recognition collection update every weekday.
-  # Note: the AWS Rekognition service currently rate limits
-  # us to 15 API calls per second.
-  IMAGE_RECOGNITION_MIGRATION_CRON: "0 0 13 ? * MON-FRI *"
-  PRISON_API_OFFENDER_IDS_ITERATION_THREADS: 2
-  IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND: 14
-
-whitelist:
-  office: "217.33.148.210/32"
-  health-kick: "35.177.252.195/32"
-  mojvpn: "81.134.202.29/32"
-  cloudplatform-live1-1: "35.178.209.113/32"
-  cloudplatform-live1-2: "3.8.51.207/32"
-  cloudplatform-live1-3: "35.177.252.54/32"
-
-# determine which slack channel alerts are sent to, via the correct Alert Manager receiver
+# CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service
