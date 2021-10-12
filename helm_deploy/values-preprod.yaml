@@ -1,76 +1,52 @@
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+---
+# Environment specific values, override helm_deploy/prison-to-probation-update/values.yaml
+generic-service:
+  ingress:
+    host: prison-data-compliance-preprod.prison.service.justice.gov.uk
 
-replicaCount: 2
+  env:
+    HMPPS_AUTH_BASE_URL: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
+    PRISON_API_BASE_URL: "https://api-preprod.prison.service.justice.gov.uk"
+    PATHFINDER_API_BASE_URL: "https://preprod-api.pathfinder.service.justice.gov.uk"
+    COMMUNITY_API_BASE_URL: "https://community-api-secure.pre-prod.delius.probation.hmpps.dsd.io"
+    PRISON_REGISTER_BASE_URL: "https://prison-register-preprod.hmpps.service.justice.gov.uk"
+    DIGITAL_PRISON_SERVICE_URL: "https://digital-preprod.prison.service.justice.gov.uk"
 
-image:
-  repository: quay.io/hmpps/dps-data-compliance
-  tag: latest
-  port: 8080
+    IMAGE_RECOGNITION_PROVIDER: aws
+    DUPLICATE_DETECTION_PROVIDER: aws
 
-ingress:
-  enabled: true
-  enable_whitelist: true
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-  hosts:
-    - host: prison-data-compliance-preprod.prison.service.justice.gov.uk
-      cert_secret: prison-data-compliance-cert
-  path: /
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
 
-env:
+    # Materialized View not available :
+    OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED: false
+    OFFENDER_RETENTION_IMAGE_DUPLICATE_CHECK_ENABLED: true
+    OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED: true
+    OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED: true
+    OFFENDER_RETENTION_FALSE_POSITIVE_DUPLICATE_CHECK_ENABLED: true
+    DELETION_GRANT_ENABLED: true
+    # Prevent preprod from editing the image collection:
+    IMAGE_RECOGNITION_DELETION_ENABLED: false
 
-  JAVA_OPTS: "Xmx512m"
+    # Prevent preprod from sending email notifications
+    NOTIFY_ENABLED: false
 
-  HMPPS_AUTH_BASE_URL: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
-  PRISON_API_BASE_URL: "https://api-preprod.prison.service.justice.gov.uk"
-  PATHFINDER_API_BASE_URL: "https://preprod-api.pathfinder.service.justice.gov.uk"
-  COMMUNITY_API_BASE_URL: "https://community-api-secure.pre-prod.delius.probation.hmpps.dsd.io"
-  PRISON_REGISTER_BASE_URL: "https://prison-register-preprod.hmpps.service.justice.gov.uk"
-  DIGITAL_PRISON_SERVICE_URL: "https://digital-preprod.prison.service.justice.gov.uk"
+    OFFENDER_DELETION_CRON: "0 0 14 14 JAN ? 2029"
+    OFFENDER_DELETION_INITIAL_WINDOW_START: "2000-04-20T00:00:00"
+    OFFENDER_DELETION_WINDOW_LENGTH: "P6000D"
+    OFFENDER_DELETION_REFERRAL_LIMIT: 200
+    OFFENDER_DELETION_REVIEW_REQUIRED: "true"
+    OFFENDER_DELETION_REVIEW_DURATION: "PT22H"
+    OFFENDER_DELETION_LIMIT: 200
 
-  SNS_PROVIDER: aws
-  DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
-  DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: aws
-  IMAGE_RECOGNITION_PROVIDER: aws
-  DUPLICATE_DETECTION_PROVIDER: aws
+    # Switch off deceased offender job in preprod
+    # DECEASED_OFFENDER_DELETION_CRON: "0 0 2 ? * MON-FRI *"
+    # DECEASED_OFFENDER_DELETION_LIMIT: 200
 
-  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
+    # Switching off in preprod so that it doesn't affect production collection
+    #PRISON_API_OFFENDER_IDS_ITERATION_THREADS: 2
+    #IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND: 14
+    #IMAGE_RECOGNITION_MIGRATION_CRON: "0 30 12 27 7 ? 2020"
 
-  # Materialized View not available :
-  OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED: false
-  OFFENDER_RETENTION_IMAGE_DUPLICATE_CHECK_ENABLED: true
-  OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED: true
-  OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED: true
-  OFFENDER_RETENTION_FALSE_POSITIVE_DUPLICATE_CHECK_ENABLED: true
-  DELETION_GRANT_ENABLED: true
-  # Prevent preprod from editing the image collection:
-  IMAGE_RECOGNITION_DELETION_ENABLED: false
-
-  # Prevent preprod from sending email notifications
-  NOTIFY_ENABLED: false
-
-  OFFENDER_DELETION_CRON: "0 0 14 14 JAN ? 2029"
-  OFFENDER_DELETION_INITIAL_WINDOW_START: "2000-04-20T00:00:00"
-  OFFENDER_DELETION_WINDOW_LENGTH: "P6000D"
-  OFFENDER_DELETION_REFERRAL_LIMIT: 200
-  OFFENDER_DELETION_REVIEW_REQUIRED: "true"
-  OFFENDER_DELETION_REVIEW_DURATION: "PT22H"
-  OFFENDER_DELETION_LIMIT: 200
-
-  # Switch off deceased offender job in preprod
-  # DECEASED_OFFENDER_DELETION_CRON: "0 0 2 ? * MON-FRI *"
-  # DECEASED_OFFENDER_DELETION_LIMIT: 200
-
-  # Switching off in preprod so that it doesn't affect production collection
-  #PRISON_API_OFFENDER_IDS_ITERATION_THREADS: 2
-  #IMAGE_RECOGNITION_UPLOAD_PERMITS_PER_SECOND: 14
-  #IMAGE_RECOGNITION_MIGRATION_CRON: "0 30 12 27 7 ? 2020"
-
-whitelist:
-  office: "217.33.148.210/32"
-  health-kick: "35.177.252.195/32"
-  mojvpn: "81.134.202.29/32"
-  cloudplatform-live1-1: "35.178.209.113/32"
-  cloudplatform-live1-2: "3.8.51.207/32"
-  cloudplatform-live1-3: "35.177.252.54/32"
+# CloudPlatform AlertManager receiver to route prometheus alerts to slack
+generic-prometheus-alerts:
+  alertSeverity: digital-prison-service-dev

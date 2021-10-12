@@ -1,5 +1,76 @@
 ---
 # Values here are the same across all environments
+generic-service:
+  nameOverride: dps-data-compliance
+
+  image:
+    repository: quay.io/hmpps/dps-data-compliance
+    tag: app_version   # override at deployment time
+    port: 8080
+
+  ingress:
+    enabled: true
+    tlsSecretName: prison-data-compliance-cert
+
+  # Environment variables to load into the deployment
+  env:
+    JAVA_OPTS: "-Xmx512m"
+    APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
+    SNS_PROVIDER: aws
+    DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
+    DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: aws
+
+  # Pre-existing kubernetes secrets to load as environment variables in the deployment.
+  # namespace_secrets:
+  #   [name of kubernetes secret]:
+  #     [name of environment variable as seen by app]: [key of kubernetes secret to load]
+  namespace_secrets:
+    dps-data-compliance:
+      APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
+      DPS_DATA_COMPLIANCE_CLIENT_ID: "DPS_DATA_COMPLIANCE_CLIENT_ID"
+      DPS_DATA_COMPLIANCE_CLIENT_SECRET: "DPS_DATA_COMPLIANCE_CLIENT_SECRET"
+      DUPLICATE_DETECTION_ATHENA_OUTPUT_LOCATION: "DUPLICATE_DETECTION_ATHENA_OUTPUT_LOCATION"
+      DUPLICATE_DETECTION_ROLE_ARN: "DUPLICATE_DETECTION_ROLE_ARN"
+      IMAGE_RECOGNITION_AWS_ACCESS_KEY_ID: "IMAGE_RECOGNITION_AWS_ACCESS_KEY_ID"
+      IMAGE_RECOGNITION_AWS_SECRET_ACCESS_KEY: "IMAGE_RECOGNITION_AWS_SECRET_ACCESS_KEY"
+      NOTIFY_API_KEY: "NOTIFY_API_KEY"
+    dps-rds-instance-output:
+      SPRING_DATASOURCE_USERNAME: "dps-rds-instance-output"
+      SPRING_DATASOURCE_PASSWORD: "database_password"
+      DB_NAME: "database_name"
+      DB_ENDPOINT: "rds_instance_endpoint"
+    offender-events-topic:
+      SNS_AWS_ACCESS_KEY_ID: "access_key_id"
+      SNS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
+      SNS_TOPIC_ARN: "topic_arn"
+    data-compliance-response-sqs:
+      DATA_COMPLIANCE_RESPONSE_SQS_AWS_ACCESS_KEY_ID: "access_key_id"
+      DATA_COMPLIANCE_RESPONSE_SQS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
+      DATA_COMPLIANCE_RESPONSE_SQS_QUEUE_NAME: "sqs_dc_resp_name"
+    data-compliance-response-sqs-dl:
+      DATA_COMPLIANCE_RESPONSE_SQS_DLQ_AWS_ACCESS_KEY_ID: "access_key_id"
+      DATA_COMPLIANCE_RESPONSE_SQS_DLQ_AWS_SECRET_ACCESS_KEY: "secret_access_key"
+      DATA_COMPLIANCE_RESPONSE_SQS_DLQ_NAME: "sqs_dc_resp_name"
+    data-compliance-request-sqs:
+      DATA_COMPLIANCE_REQUEST_SQS_AWS_ACCESS_KEY_ID: "access_key_id"
+      DATA_COMPLIANCE_REQUEST_SQS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
+      DATA_COMPLIANCE_REQUEST_SQS_QUEUE_NAME: "sqs_dc_req_name"
+      DATA_COMPLIANCE_REQUEST_SQS_QUEUE_URL: "sqs_dc_req_url"
+    data-compliance-request-sqs-dl:
+      DATA_COMPLIANCE_REQUEST_SQS_DLQ_AWS_ACCESS_KEY_ID: "access_key_id"
+      DATA_COMPLIANCE_REQUEST_SQS_DLQ_AWS_SECRET_ACCESS_KEY: "secret_access_key"
+      DATA_COMPLIANCE_REQUEST_SQS_DLQ_NAME: "sqs_dc_req_name"
+    data-compliance-ap-user:
+      DUPLICATE_DETECTION_AWS_ACCESS_KEY_ID: "data_compliance_ap_access_key_id"
+      DUPLICATE_DETECTION_AWS_SECRET_ACCESS_KEY: "data_compliance_ap_secret_access_key"
+
+  allowlist:
+    office: "217.33.148.210/32"
+    health-kick: "35.177.252.195/32"
+    mojvpn: "81.134.202.29/32"
+    cloudplatform-live1-1: "35.178.209.113/32"
+    cloudplatform-live1-2: "3.8.51.207/32"
+    cloudplatform-live1-3: "35.177.252.54/32"
 
 generic-prometheus-alerts:
   targetApplication: dps-data-compliance
