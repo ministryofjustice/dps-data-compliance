@@ -16,6 +16,10 @@ generic-service:
 
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
 
+    # Switched off in dev:
+    IMAGE_RECOGNITION_PROVIDER: null
+    DUPLICATE_DETECTION_PROVIDER: null
+
     # No dev image collection to use:
     OFFENDER_RETENTION_IMAGE_DUPLICATE_CHECK_ENABLED: false
     OFFENDER_RETENTION_FALSE_POSITIVE_DUPLICATE_CHECK_ENABLED: false
