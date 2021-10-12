@@ -15,6 +15,7 @@ generic-service:
   # Environment variables to load into the deployment
   env:
     JAVA_OPTS: "-Xmx512m"
+    APP_DB_URL: "jdbc:postgresql://$(DB_ENDPOINT)/$(DB_NAME)?sslmode=verify-full"
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
     SNS_PROVIDER: aws
     DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
