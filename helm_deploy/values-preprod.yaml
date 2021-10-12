@@ -1,8 +1,6 @@
 ---
 # Environment specific values, override helm_deploy/prison-to-probation-update/values.yaml
 generic-service:
-  replicaCount: 4
-
   ingress:
     host: prison-data-compliance-preprod.prison.service.justice.gov.uk
 
@@ -14,9 +12,6 @@ generic-service:
     PRISON_REGISTER_BASE_URL: "https://prison-register-preprod.hmpps.service.justice.gov.uk"
     DIGITAL_PRISON_SERVICE_URL: "https://digital-preprod.prison.service.justice.gov.uk"
 
-    SNS_PROVIDER: aws
-    DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
-    DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: aws
     IMAGE_RECOGNITION_PROVIDER: aws
     DUPLICATE_DETECTION_PROVIDER: aws
 

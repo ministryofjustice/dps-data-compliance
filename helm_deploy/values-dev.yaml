@@ -14,10 +14,6 @@ generic-service:
     PRISON_REGISTER_BASE_URL: "https://prison-register-dev.hmpps.service.justice.gov.uk"
     DIGITAL_PRISON_SERVICE_URL: "https://digital-dev.prison.service.justice.gov.uk"
 
-    SNS_PROVIDER: aws
-    DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
-    DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: aws
-
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
 
     # No dev image collection to use:
