@@ -12,9 +12,6 @@ generic-service:
     PRISON_REGISTER_BASE_URL: "https://prison-register-preprod.hmpps.service.justice.gov.uk"
     DIGITAL_PRISON_SERVICE_URL: "https://digital-preprod.prison.service.justice.gov.uk"
 
-    IMAGE_RECOGNITION_PROVIDER: aws
-    DUPLICATE_DETECTION_PROVIDER: aws
-
     SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json"
 
     # Materialized View not available :
