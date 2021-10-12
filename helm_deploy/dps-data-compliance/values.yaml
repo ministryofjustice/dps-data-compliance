@@ -19,6 +19,8 @@ generic-service:
     SNS_PROVIDER: aws
     DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
     DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: aws
+    IMAGE_RECOGNITION_PROVIDER: aws
+    DUPLICATE_DETECTION_PROVIDER: aws
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
@@ -35,7 +37,7 @@ generic-service:
       IMAGE_RECOGNITION_AWS_SECRET_ACCESS_KEY: "IMAGE_RECOGNITION_AWS_SECRET_ACCESS_KEY"
       NOTIFY_API_KEY: "NOTIFY_API_KEY"
     dps-rds-instance-output:
-      SPRING_DATASOURCE_USERNAME: "dps-rds-instance-output"
+      SPRING_DATASOURCE_USERNAME: "database_username"
       SPRING_DATASOURCE_PASSWORD: "database_password"
       DB_NAME: "database_name"
       DB_ENDPOINT: "rds_instance_endpoint"
