@@ -2,7 +2,10 @@
 ---
 ## Destruction Log
 
-A copy of the destruction log can be obtained from
+The destruction log can be retrieved using the `/audit/destruction-log` endpoint as either json or a csv file.
+Please see the swagger docs for more info using the swagger docs `/swagger-ui/index.html`
+
+Alternatively, A copy of the destruction log can be obtained from
 the system at any time by making the following query
 on the database:
 

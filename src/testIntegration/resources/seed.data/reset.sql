@@ -7,6 +7,7 @@ DELETE FROM retention_reason_manual;
 DELETE FROM manual_retention;
 DELETE FROM retention_check;
 DELETE FROM referral_resolution;
+DELETE FROM referred_offender_alias;
 DELETE FROM offender_deletion_referral;
 DELETE FROM offender_deletion_batch;
 DELETE FROM offender_ual;
