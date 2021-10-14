@@ -2,8 +2,7 @@ package uk.gov.justice.hmpps.datacompliance.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +17,7 @@ import java.util.List;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 
-@ApiModel(description = "Offender data retention details")
+@Schema(description = "Offender data retention details")
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,23 +25,23 @@ import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME
 @JsonInclude(NON_NULL)
 public class ManualRetention {
 
-    @ApiModelProperty(required = true, value = "The offender's unique offender number (aka NOMS number).")
+    @Schema(required = true, description = "The offender's unique offender number (aka NOMS number).")
     @NotNull
     @JsonProperty("offenderNo")
     private String offenderNo;
 
-    @ApiModelProperty(required = true, value = "The user id of the member of staff who last modified this retention record.")
+    @Schema(required = true, description = "The user id of the member of staff who last modified this retention record.")
     @NotNull
     @JsonProperty("userId")
     private String userId;
 
-    @ApiModelProperty(required = true, value = "The timestamp of when this retention record was last modified.")
+    @Schema(required = true, description = "The timestamp of when this retention record was last modified.")
     @NotNull
     @JsonProperty("modifiedDateTime")
     @DateTimeFormat(iso = DATE_TIME)
     private LocalDateTime modifiedDateTime;
 
-    @ApiModelProperty(required = true, value = "The list of reason codes for why the offender record should be retained")
+    @Schema(required = true, description = "The list of reason codes for why the offender record should be retained")
     @NotNull
     @Singular
     @JsonProperty("retentionReasons")

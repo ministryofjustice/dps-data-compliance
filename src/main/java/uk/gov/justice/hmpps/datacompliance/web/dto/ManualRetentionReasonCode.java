@@ -1,8 +1,9 @@
 package uk.gov.justice.hmpps.datacompliance.web.dto;
 
-import io.swagger.annotations.ApiModel;
 
-@ApiModel
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema
 public enum ManualRetentionReasonCode {
     CHILD_SEX_ABUSE,
     HIGH_PROFILE,
