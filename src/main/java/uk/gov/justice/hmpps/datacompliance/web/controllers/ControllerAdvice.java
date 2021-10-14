@@ -24,49 +24,49 @@ public class ControllerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handle(final EntityNotFoundException e) {
         return ResponseEntity
-                .status(NOT_FOUND)
-                .body(ErrorResponse
-                        .builder()
-                        .status(NOT_FOUND.value())
-                        .userMessage("Entity Not Found")
-                        .developerMessage(e.getMessage())
-                        .build());
+            .status(NOT_FOUND)
+            .body(ErrorResponse
+                .builder()
+                .status(NOT_FOUND.value())
+                .userMessage("Entity Not Found")
+                .developerMessage(e.getMessage())
+                .build());
     }
 
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ErrorResponse> handle(final HttpClientErrorException e) {
         return ResponseEntity
-                .status(e.getStatusCode())
-                .body(ErrorResponse
-                        .builder()
-                        .status(e.getStatusCode().value())
-                        .userMessage("Client Error")
-                        .developerMessage(e.getStatusText())
-                        .build());
+            .status(e.getStatusCode())
+            .body(ErrorResponse
+                .builder()
+                .status(e.getStatusCode().value())
+                .userMessage("Client Error")
+                .developerMessage(e.getStatusText())
+                .build());
     }
 
     @ExceptionHandler(OptimisticLockException.class)
     public ResponseEntity<ErrorResponse> handle(final OptimisticLockException e) {
         return ResponseEntity
-                .status(BAD_REQUEST)
-                .body(ErrorResponse
-                        .builder()
-                        .status(BAD_REQUEST.value())
-                        .userMessage("Client Error")
-                        .developerMessage(e.getMessage())
-                        .build());
+            .status(BAD_REQUEST)
+            .body(ErrorResponse
+                .builder()
+                .status(BAD_REQUEST.value())
+                .userMessage("Client Error")
+                .developerMessage(e.getMessage())
+                .build());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handle(final AccessDeniedException e) {
         return ResponseEntity
-                .status(FORBIDDEN)
-                .body(ErrorResponse
-                        .builder()
-                        .status(FORBIDDEN.value())
-                        .userMessage(e.getMessage())
-                        .developerMessage(e.getMessage())
-                        .build());
+            .status(FORBIDDEN)
+            .body(ErrorResponse
+                .builder()
+                .status(FORBIDDEN.value())
+                .userMessage(e.getMessage())
+                .developerMessage(e.getMessage())
+                .build());
     }
 
     @ExceptionHandler(Exception.class)
@@ -75,12 +75,12 @@ public class ControllerAdvice extends ResponseEntityExceptionHandler {
         log.error("Unexpected exception", e);
 
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse
-                        .builder()
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .userMessage("Internal Server Error")
-                        .developerMessage(e.getMessage())
-                        .build());
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(ErrorResponse
+                .builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .userMessage("Internal Server Error")
+                .developerMessage(e.getMessage())
+                .build());
     }
 }

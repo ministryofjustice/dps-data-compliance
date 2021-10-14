@@ -7,8 +7,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +19,7 @@ import java.time.LocalDateTime;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-@ApiModel(description = "A log of offender deletions")
+@Schema(description = "A log of offender deletions")
 @Data
 @Builder
 @NoArgsConstructor
@@ -30,60 +29,60 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
     "TYPE_OF_RECORD_DESTROYED", "DESTRUCTION_DATE", "METHOD_OF_DESTRUCTION", "AUTHORISATION_OF_DESTRUCTION"})
 public class DestructionLogResponse {
 
-    @ApiModelProperty(required = true, value = "This is known as the 'offender number")
+    @Schema(required = true, description = "This is known as the 'offender number")
     @NotNull
     @JsonProperty("NOMIS_ID")
     private String nomisId;
 
 
-    @ApiModelProperty(required = true, value = "The first and middle names of the offender")
+    @Schema(required = true, description = "The first and middle names of the offender")
     @NotNull
     @JsonProperty("FIRST_NAME")
     private String firstName;
 
-    @ApiModelProperty(required = true, value = "The offenders middle names")
+    @Schema(required = true, description = "The offenders middle names")
     @NotNull
     @JsonProperty("MIDDLE_NAME")
     private String middleName;
 
 
-    @ApiModelProperty(required = true, value = "The offenders last name")
+    @Schema(required = true, description = "The offenders last name")
     @NotNull
     @JsonProperty("LAST_NAME")
     private String lastName;
 
 
-    @ApiModelProperty(required = true, value = "The timestamp of the offenders date of birth (Format: ISO DATE- yyyy-MM-dd)")
+    @Schema(required = true, description = "The timestamp of the offenders date of birth (Format: ISO DATE- yyyy-MM-dd)")
     @NotNull
     @JsonProperty("DATE_OF_BIRTH")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate dateOfBirth;
 
-    @ApiModelProperty(required = true, value = "The last known offender management unit at which the offender resided.")
+    @Schema(required = true, description = "The last known offender management unit at which the offender resided.")
     @NotNull
     @JsonProperty("LAST_KNOWN_OFFENDER_MANAGEMENT_UNIT")
     private String lastKnownOmu;
 
-    @ApiModelProperty(required = true, value = "The of type of record that was destroyed.")
+    @Schema(required = true, description = "The of type of record that was destroyed.")
     @NotNull
     @JsonProperty("TYPE_OF_RECORD_DESTROYED")
     private String typeOfRecordDestroyed;
 
 
-    @ApiModelProperty(required = true, value = "The timestamp of when this offender record was destroyed.")
+    @Schema(required = true, description = "The timestamp of when this offender record was destroyed.")
     @NotNull
     @JsonProperty("DESTRUCTION_DATE")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime destructionDate;
 
-    @ApiModelProperty(required = true, value = "The method of destruction utilised.")
+    @Schema(required = true, description = "The method of destruction utilised.")
     @NotNull
     @JsonProperty("METHOD_OF_DESTRUCTION")
     private String methodOfDestruction;
 
-    @ApiModelProperty(required = true, value = "The authoriser of the record destruction.")
+    @Schema(required = true, description = "The authoriser of the record destruction.")
     @NotNull
     @JsonProperty("AUTHORISATION_OF_DESTRUCTION")
     private String authorisationOfDestruction;

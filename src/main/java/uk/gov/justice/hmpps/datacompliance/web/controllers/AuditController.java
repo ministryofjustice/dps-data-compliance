@@ -1,10 +1,11 @@
 package uk.gov.justice.hmpps.datacompliance.web.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,6 @@ import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
 import uk.gov.justice.hmpps.datacompliance.services.audit.AuditService;
 import uk.gov.justice.hmpps.datacompliance.services.audit.CsvService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
-import uk.gov.justice.hmpps.datacompliance.web.dto.ErrorResponse;
 
 import java.util.Optional;
 
@@ -32,7 +32,7 @@ import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
-@Api(tags = {"/audit"})
+@Tag(name = "/audit")
 @RequestMapping("/audit")
 @RequiredArgsConstructor
 public class AuditController {
@@ -45,13 +45,12 @@ public class AuditController {
     private final UserSecurityUtils userSecurityUtils;
     private final TimeSource timeSource;
 
-    @ApiOperation(
-        value = "Get the destruction log",
-        notes = "Get the destruction log for NOMIS offender data deletions",
-        nickname = "getDestructionLog")
+    @Operation(
+        summary = "Get the destruction log",
+        description = "Get the destruction log for NOMIS offender data deletions")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = String.class),
-        @ApiResponse(code = 500, message = "Unrecoverable error occurred whilst processing request", response = ErrorResponse.class),
+        @ApiResponse(responseCode = "200", description = "OK"),
+        @ApiResponse(responseCode = "500", description = "Unrecoverable error occurred whilst processing request"),
     })
     @GetMapping(path = "/destruction-log",
         produces = {APPLICATION_JSON_VALUE, "text/csv"})
@@ -62,17 +61,21 @@ public class AuditController {
             : buildCsvFileResponse(csvService.toCsv(destructionLogResponse), DESTRUCTION_LOG_FILENAME);
     }
 
-    @ApiOperation(
-        value = "Get retained offenders",
-        notes = "Get the offenders which have been retained and the reasons for which they were retained",
-        nickname = "getDestructionLog")
+    @Operation(
+        summary = "Get retained offenders",
+        description = """
+             Get the offenders which have been retained and their respective retention reasons.
+             Update the request 'Accept' Header to 'text/csv' for a csv file response.""")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = String.class),
-        @ApiResponse(code = 500, message = "Unrecoverable error occurred whilst processing request", response = ErrorResponse.class),
+        @ApiResponse(responseCode = "200", description = "OK"),
+        @ApiResponse(responseCode = "500", description = "Unrecoverable error occurred whilst processing request")
     })
     @GetMapping(path = "/retained-offenders",
         produces = {APPLICATION_JSON_VALUE, "text/csv"})
-    public ResponseEntity<?> getRetainedOffenders(@RequestBody Optional<Pageable> pageable, @RequestHeader(ACCEPT) String acceptHeader, @RequestParam("filter") Optional<String> filter) throws JsonProcessingException {
+    public ResponseEntity<?> getRetainedOffenders(@RequestBody Optional<Pageable> pageable,
+                                                  @RequestHeader(ACCEPT) String acceptHeader,
+                                                  @Parameter(name = "filter", description = "Filter the results to a subset", example = "duplicates")
+                                                  @RequestParam("filter") Optional<String> filter) throws JsonProcessingException {
         final var retainedOffenderResponse = filter.isPresent() && equalsIgnoreCase(filter.get(), "duplicates")
             ? auditService.retrieveRetainedOffenderDuplicates(pageable.orElse(Pageable.unpaged()))
             : auditService.retrieveRetainedOffenders(pageable.orElse(Pageable.unpaged()));
