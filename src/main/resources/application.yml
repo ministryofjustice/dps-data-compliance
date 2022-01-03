@@ -35,7 +35,6 @@ spring:
       threadPool.threadCount: 5
       jobStore:
         isClustered: true
-        class: org.quartz.impl.jdbcjobstore.JobStoreTX
         driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
         tablePrefix: QRTZ_
       scheduler.instanceId: AUTO

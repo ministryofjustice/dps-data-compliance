@@ -1,6 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.config;
 
-import javassist.bytecode.stackmap.TypeData.ClassName;
+import org.junit.jupiter.api.ClassOrderer.ClassName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
