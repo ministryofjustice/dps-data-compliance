@@ -31,7 +31,7 @@ import static org.springframework.http.MediaType.IMAGE_JPEG;
 public class PrisonApiClient {
 
     private static final String OFFENDER_IDS_PATH = "/api/offenders/ids";
-    private static final String OFFENDERS_WITH_IMAGES_PATH = "/api/data-compliance/offenders-with-images";
+    private static final String OFFENDERS_WITH_IMAGES_PATH = "/api/images/offenders";
     private static final String OFFENDER_IMAGE_METADATA_PATH = "/api/images/offenders/%s";
     private static final String IMAGE_DATA_PATH = "/api/images/%s/data";
     private static final String OFFENDER_PENDING_DELETIONS_PATH = "/api/data-compliance/offenders/pending-deletions";

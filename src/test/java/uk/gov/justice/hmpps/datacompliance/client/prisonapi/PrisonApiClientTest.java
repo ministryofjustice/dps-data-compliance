@@ -201,7 +201,7 @@ class PrisonApiClientTest {
         RecordedRequest recordedRequest = prisonApiMock.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("GET");
         assertThat(recordedRequest.getPath())
-                .isEqualTo("/api/data-compliance/offenders-with-images?fromDateTime=2020-02-01T00:00&paged=true&size=2&page=0");
+                .isEqualTo("/api/images/offenders?fromDateTime=2020-02-01T00:00&paged=true&size=2&page=0");
     }
 
     @Test
