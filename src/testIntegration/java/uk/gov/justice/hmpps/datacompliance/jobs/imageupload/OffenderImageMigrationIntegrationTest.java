@@ -126,7 +126,7 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
                 var path = requireNonNull(request.getPath());
                 var offenderIdsMatch = compile("^/api/offenders/ids$").matcher(path);
-                var offendersWithImagesMatch = compile("^/api/data-compliance/offenders-with-images.*$").matcher(path);
+                var offendersWithImagesMatch = compile("^/api/images/offenders\\?fromDateTime=.*$").matcher(path);
                 var imageMetaDataMatch = compile("^/api/images/offenders/A([0-9]){4}AA$").matcher(path);
                 var imageDataMatch = compile("^/api/images/([1-9]+)/data$").matcher(path);
 
