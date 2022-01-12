@@ -1,5 +1,5 @@
 plugins {
-    id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.0"
+    id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.1"
     id "org.unbroken-dome.test-sets" version "4.0.0"
 }
 
@@ -26,13 +26,13 @@ dependencies {
     implementation 'org.springframework:spring-jms:5.3.14'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.17.102')
+    implementation platform('software.amazon.awssdk:bom:2.17.109')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.131')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.131'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.138')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.138'
     implementation 'com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8'
 
     // Utils
@@ -47,12 +47,12 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
 
     runtimeOnly 'org.hsqldb:hsqldb:2.6.1'
-    runtimeOnly 'org.flywaydb:flyway-core:8.3.0'
+    runtimeOnly 'org.flywaydb:flyway-core:8.4.1'
     runtimeOnly 'org.postgresql:postgresql:42.3.1'
 
     // Swagger
-    implementation 'org.springdoc:springdoc-openapi-ui:1.6.3'
-    implementation 'org.springdoc:springdoc-openapi-data-rest:1.6.3'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.4'
+    implementation 'org.springdoc:springdoc-openapi-data-rest:1.6.4'
 
     // GOVUK Notify:
     implementation("uk.gov.service.notify:notifications-java-client:3.17.2-RELEASE")
