@@ -11,6 +11,7 @@ generic-service:
   ingress:
     enabled: true
     tlsSecretName: prison-data-compliance-cert
+    contextColour: green
 
   # Environment variables to load into the deployment
   env:
