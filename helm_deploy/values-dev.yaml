@@ -5,7 +5,6 @@ generic-service:
 
   ingress:
     host: prison-data-compliance-dev.prison.service.justice.gov.uk
-    contextColour: green
 
   env:
     HMPPS_AUTH_BASE_URL: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
