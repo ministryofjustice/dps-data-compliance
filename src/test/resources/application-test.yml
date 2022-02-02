@@ -12,19 +12,6 @@ prison.register.base.url: http://localhost:8995
 app.db.url: jdbc:hsqldb:mem:data-compliance-db;sql.syntax_pgs=true;shutdown=false
 
 
-hmpps.sqs:
-  provider: localstack
-  queues:
-    datacompliancerequest:
-      queueName: ${random.uuid}
-      dlqName: ${random.uuid}
-    datacomplianceresponse:
-      queueName: ${random.uuid}
-      dlqName: ${random.uuid}
-  topics:
-    datacomplianceevents:
-      arn: arn:aws:sns:eu-west-2:000000000000:offender_events
-
 spring:
   main:
     allow-bean-definition-overriding: true
@@ -56,7 +43,7 @@ notify.enabled: false
 digital.prison.service.url: https://digital-dev.prison.service.justice.gov.uk
 
 deletion.grant.enabled: true
-offender.deletion.review.required: true
+offender.deletion.review.required: false
 image.recognition.deletion.enabled: true
 
 server.shutdown: immediate

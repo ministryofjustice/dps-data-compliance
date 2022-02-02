@@ -18,9 +18,6 @@ generic-service:
     JAVA_OPTS: "-Xmx512m"
     APP_DB_URL: "jdbc:postgresql://$(DB_ENDPOINT)/$(DB_NAME)?sslmode=verify-full"
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
-    SNS_PROVIDER: aws
-    DATA_COMPLIANCE_REQUEST_SQS_PROVIDER: aws
-    DATA_COMPLIANCE_RESPONSE_SQS_PROVIDER: aws
     IMAGE_RECOGNITION_PROVIDER: aws
     DUPLICATE_DETECTION_PROVIDER: aws
 
@@ -44,26 +41,26 @@ generic-service:
       DB_NAME: "database_name"
       DB_ENDPOINT: "rds_instance_endpoint"
     offender-events-topic:
-      SNS_AWS_ACCESS_KEY_ID: "access_key_id"
-      SNS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      SNS_TOPIC_ARN: "topic_arn"
+      HMPPS_SQS_TOPICS_DATACOMPLIANCEEVENTS_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_TOPICS_DATACOMPLIANCEEVENTS_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_TOPICS_DATACOMPLIANCEEVENTS_ARN: "topic_arn"
     data-compliance-response-sqs:
-      DATA_COMPLIANCE_RESPONSE_SQS_AWS_ACCESS_KEY_ID: "access_key_id"
-      DATA_COMPLIANCE_RESPONSE_SQS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      DATA_COMPLIANCE_RESPONSE_SQS_QUEUE_NAME: "sqs_dc_resp_name"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_QUEUE_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_QUEUE_NAME: "sqs_dc_resp_name"
     data-compliance-response-sqs-dl:
-      DATA_COMPLIANCE_RESPONSE_SQS_DLQ_AWS_ACCESS_KEY_ID: "access_key_id"
-      DATA_COMPLIANCE_RESPONSE_SQS_DLQ_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      DATA_COMPLIANCE_RESPONSE_SQS_DLQ_NAME: "sqs_dc_resp_name"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_DLQ_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCERESPONSE_DLQ_NAME: "sqs_dc_resp_name"
     data-compliance-request-sqs:
-      DATA_COMPLIANCE_REQUEST_SQS_AWS_ACCESS_KEY_ID: "access_key_id"
-      DATA_COMPLIANCE_REQUEST_SQS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      DATA_COMPLIANCE_REQUEST_SQS_QUEUE_NAME: "sqs_dc_req_name"
-      DATA_COMPLIANCE_REQUEST_SQS_QUEUE_URL: "sqs_dc_req_url"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_QUEUE_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_QUEUE_NAME: "sqs_dc_req_name"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_QUEUE_URL: "sqs_dc_req_url"
     data-compliance-request-sqs-dl:
-      DATA_COMPLIANCE_REQUEST_SQS_DLQ_AWS_ACCESS_KEY_ID: "access_key_id"
-      DATA_COMPLIANCE_REQUEST_SQS_DLQ_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      DATA_COMPLIANCE_REQUEST_SQS_DLQ_NAME: "sqs_dc_req_name"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_DLQ_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_DATACOMPLIANCEREQUEST_DLQ_NAME: "sqs_dc_req_name"
     data-compliance-ap-user:
       DUPLICATE_DETECTION_AWS_ACCESS_KEY_ID: "data_compliance_ap_access_key_id"
       DUPLICATE_DETECTION_AWS_SECRET_ACCESS_KEY: "data_compliance_ap_secret_access_key"

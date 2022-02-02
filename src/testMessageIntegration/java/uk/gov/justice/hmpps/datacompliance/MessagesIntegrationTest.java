@@ -155,8 +155,8 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
         mockJmsListener.triggerAdhocDeletion(adHockOffenderDeletionEvent);
 
         mockJmsListener.verifyMessageReceivedOfEventType(AD_HOC_REFERRAL_REQUEST);
-        assertThat(batchRepository.findAll().iterator()).hasNext();
-        var batch = batchRepository.findAll().iterator().next();
+        assertThat(repository.findAll().iterator()).hasNext();
+        var batch = repository.findAll().iterator().next();
 
         final var offenderPendingDeletionResponse = forOffenderPendingDeletion(sqsResponseClientQueueUrl, batch.getBatchId(), offenderIdDisplay);
         final var pendingDeletionReferralComplete = forPendingDeletionReferralComplete(sqsResponseClientQueueUrl, batch.getBatchId(), 1L, 1L);

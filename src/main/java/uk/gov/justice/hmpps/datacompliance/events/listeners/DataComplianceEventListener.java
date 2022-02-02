@@ -31,7 +31,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplicati
 
 @Slf4j
 @Service
-@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('${data.compliance.response.sqs.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack'}.contains('${hmpps.sqs.provider}')")
 public class DataComplianceEventListener {
 
     private static final String ADHOC_OFFENDER_DELETION_EVENT = "DATA_COMPLIANCE_AD-HOC-OFFENDER-DELETION";
@@ -80,7 +80,7 @@ public class DataComplianceEventListener {
         this.deceasedDeletionService = deceasedDeletionService;
     }
 
-    @JmsListener(destination = "${data.compliance.response.sqs.queue.name}")
+    @JmsListener(destination = "datacomplianceresponse", containerFactory = "hmppsQueueContainerFactoryProxy")
     public void handleEvent(final Message<String> message) {
 
         final var eventType = getEventType(message.getHeaders());

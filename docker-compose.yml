@@ -103,7 +103,7 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
 
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:0.12.18
     container_name: localstack
     networks:
       - hmpps
