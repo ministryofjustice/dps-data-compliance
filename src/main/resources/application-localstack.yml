@@ -1,23 +1,15 @@
-data.compliance.request:
-  sqs:
-    provider: localstack
-    queue.name: data_compliance_request_queue
-    queue.url: http://localhost:4576/queue/data_compliance_request_queue
-    dlq.name: data_compliance_request_dead_letter_queue
-    endpoint.url: http://localhost:4576
-
-data.compliance.response:
-  sqs:
-    provider: localstack
-    queue.name: data_compliance_response_queue
-    dlq.name: data_compliance_response_dead_letter_queue
-    endpoint.url: http://localhost:4576
-
-sns:
+hmpps.sqs:
   provider: localstack
-  topic.arn: arn:aws:sns:eu-west-2:000000000000:offender_events
-  endpoint.url: http://localstack:4575
-  region: eu-west-2
+  queues:
+    datacompliancerequest:
+      queueName: data_compliance_request_queue
+      dlqName: data_compliance_request_dlq
+    datacomplianceresponse:
+      queueName: data_compliance_response_queue
+      dlqName: data_compliance_response_dlq
+  topics:
+    datacomplianceevents:
+      arn: arn:aws:sns:eu-west-2:000000000000:offender_events
 
 spring:
   jpa.show-sql: true

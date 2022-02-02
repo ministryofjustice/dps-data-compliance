@@ -52,10 +52,6 @@ duplicate.detection:
     database: ap_nomis_dedupe
     table: id_pairs_and_scores_test
 
-sns.region: eu-west-2
-data.compliance.request.sqs.region: eu-west-2
-data.compliance.response.sqs.region: eu-west-2
-
 server:
   port: 8080
   servlet:
