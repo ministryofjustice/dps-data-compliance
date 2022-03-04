@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@3.12
+  hmpps: ministryofjustice/hmpps@3.14
 
 commands:
   run-tests:
@@ -55,7 +55,7 @@ jobs:
   test-integration:
     executor:
       name: hmpps/localstack
-      localstack_tag: "0.12.18"
+      localstack_tag: "0.14.0"
       jdk_tag: "16.0"
       services: "sqs,sns"
     steps:
@@ -64,7 +64,7 @@ jobs:
   test-message-integration:
     executor:
       name: hmpps/localstack
-      localstack_tag: "0.12.18"
+      localstack_tag: "0.14.0"
       jdk_tag: "16.0"
       services: "sqs,sns"
     steps:
@@ -73,7 +73,7 @@ jobs:
   test-message-integration-with-review-period:
     executor:
       name: hmpps/localstack
-      localstack_tag: "0.12.18"
+      localstack_tag: "0.14.0"
       jdk_tag: "16.0"
       services: "sqs,sns"
     steps:
