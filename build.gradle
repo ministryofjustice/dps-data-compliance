@@ -23,16 +23,16 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
     implementation 'org.springframework:spring-webflux'
-    implementation 'uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.6'
+    implementation 'uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.2'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.17.146')
+    implementation platform('software.amazon.awssdk:bom:2.17.153')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.175')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.175'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.182')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.182'
 
     // Utils
     implementation 'io.github.resilience4j:resilience4j-retry:1.7.1'
@@ -46,7 +46,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
 
     runtimeOnly 'org.hsqldb:hsqldb:2.6.1'
-    runtimeOnly 'org.flywaydb:flyway-core:8.5.2'
+    runtimeOnly 'org.flywaydb:flyway-core:8.5.4'
     runtimeOnly 'org.postgresql:postgresql:42.3.3'
 
     // Swagger
@@ -54,7 +54,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-data-rest:1.6.6'
 
     // GOVUK Notify:
-    implementation("uk.gov.service.notify:notifications-java-client:3.17.2-RELEASE")
+    implementation("uk.gov.service.notify:notifications-java-client:3.17.3-RELEASE")
 
     // Test
     testAnnotationProcessor "org.projectlombok:lombok:1.18.22"
