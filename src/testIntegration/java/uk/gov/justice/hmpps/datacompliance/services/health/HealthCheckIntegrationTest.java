@@ -8,8 +8,7 @@ import static org.hamcrest.core.StringContains.containsString;
 
 public class HealthCheckIntegrationTest extends IntegrationTest {
 
-   // @Test
-    //FIXME: UNDO THIS COMMENT
+    @Test
     void healthPageReportsOk() {
 
         mockExternalServiceResponseCode(200);

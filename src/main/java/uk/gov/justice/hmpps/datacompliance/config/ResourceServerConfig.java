@@ -29,6 +29,7 @@ public class ResourceServerConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests(auth -> auth.antMatchers(
                     "/health/**", "/info",
                     "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+                    "/queue-admin/retry-all-dlqs",
                     "/webjars/**")
                 .permitAll().anyRequest().authenticated())
             .oauth2ResourceServer().jwt().jwtAuthenticationConverter(new AuthAwareTokenConverter());

@@ -1,17 +1,28 @@
 #!/usr/bin/env bash
 
-echo 'Running OWASP security checks'
-./gradlew clean dependencyCheckAnalyze --info
+println () {
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo $1
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  }
 
-echo 'Running Unit Tests'
+println 'Running Unit Tests'
 ./gradlew clean build
 
-echo 'Running Integration Tests'
+println 'Running OWASP security checks'
+./gradlew clean dependencyCheckAnalyze --info
+
+println 'Running Integration Tests'
 ./gradlew testIntegration 
 
-echo 'Running Message Integration Tests'
+println 'Running Message Integration Tests'
 ./gradlew testMessageIntegration
 
-echo 'Running Message Integration Tests with review period'
+println 'Running Message Integration Tests with review period'
 ./gradlew testMessageIntegrationWithReviewPeriod  
 
+println 'Running Message Integration Tests with review period'
+./gradlew testMessageIntegrationWithReviewPeriod
+
+println 'Running DLQ tests'
+./gradlew testDlq
