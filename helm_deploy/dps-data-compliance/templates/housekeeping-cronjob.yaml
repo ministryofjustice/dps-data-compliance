@@ -1,4 +1,4 @@
-apiVersion: batch/v1 CronJob
+apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: {{ include "app.fullname" . }}-queue-housekeeping-cronjob
