@@ -114,6 +114,7 @@ class RetentionServiceTest {
                         .idDataDuplicateCheckEnabled(true)
                         .databaseDataDuplicateCheckEnabled(true)
                         .analyticalPlatformDataDuplicateCheckEnabled(true)
+                        .mappaCheckEnabled(true)
                         .build());
     }
 
@@ -171,6 +172,7 @@ class RetentionServiceTest {
                         .idDataDuplicateCheckEnabled(false)
                         .databaseDataDuplicateCheckEnabled(false)
                         .analyticalPlatformDataDuplicateCheckEnabled(false)
+                        .mappaCheckEnabled(true)
                         .build());
 
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(false);
