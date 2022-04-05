@@ -254,9 +254,12 @@ public class RetentionService {
 
     private ActionableRetentionCheck mappaReferralCheck(final OffenderNumber offenderNumber) {
 
+        if (!dataComplianceProperties.isMappaCheckEnabled()) {
+            return new ActionableRetentionCheck(new RetentionCheckMappa(DISABLED));
+        }
+
         final var check = new RetentionCheckMappa(communityApiClient.isReferredForMappa(offenderNumber) ?
             RETENTION_REQUIRED : RETENTION_NOT_REQUIRED);
-
         return new ActionableRetentionCheck(check);
     }
 }

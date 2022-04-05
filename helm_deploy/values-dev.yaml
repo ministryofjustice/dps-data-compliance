@@ -28,6 +28,7 @@ generic-service:
     # Materialized View not available :
     OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED: false
     OFFENDER_RETENTION_DATA_DUPLICATE_ID_CHECK_ENABLED: true
+    OFFENDER_RETENTION_MAPPA_CHECK_ENABLED: true
     # Testing deletion kill switch:
     DELETION_GRANT_ENABLED: false
     IMAGE_RECOGNITION_DELETION_ENABLED: false

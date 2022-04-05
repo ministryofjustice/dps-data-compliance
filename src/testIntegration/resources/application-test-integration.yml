@@ -37,6 +37,7 @@ jwt:
 offender.retention:
   false.positive.duplicate.check.enabled: false
   image.duplicate.check.enabled: false
+  mappa.check.enabled: true
   data.duplicate:
     id.check.enabled: true
     db.check.enabled: true

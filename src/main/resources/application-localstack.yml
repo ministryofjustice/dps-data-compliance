@@ -19,6 +19,7 @@ spring:
 offender.retention:
   false.positive.duplicate.check.enabled: false
   image.duplicate.check.enabled: false
+  mappa.check.enabled: true
   data.duplicate:
     id.check.enabled: false
     db.check.enabled: false

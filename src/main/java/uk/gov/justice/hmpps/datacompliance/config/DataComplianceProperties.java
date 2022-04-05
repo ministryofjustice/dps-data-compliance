@@ -41,6 +41,7 @@ public class DataComplianceProperties {
     private final boolean databaseDataDuplicateCheckEnabled;  // Duplicate check based on points based similarity SQL query on NOMIS database
     private final boolean analyticalPlatformDataDuplicateCheckEnabled;  // Duplicate check based on Analytical Platform's Apache Spark deduplication solution (Splink)
     private final boolean falsePositiveDuplicateCheckEnabled; // Enable to run verification when only one check method flags up a duplicate
+    private final boolean mappaCheckEnabled; // Check Delius (via community api) for MAPPA
     private final double falsePositiveDuplicateImageSimilarityThreshold;
     private final int falsePositiveDuplicateRequiredImageCount;
 
@@ -63,6 +64,7 @@ public class DataComplianceProperties {
                                     @Value("${offender.retention.data.duplicate.db.check.enabled}") final boolean databaseDataDuplicateCheckEnabled,
                                     @Value("${offender.retention.data.duplicate.ap.check.enabled}") final boolean analyticalPlatformDataDuplicateCheckEnabled,
                                     @Value("${offender.retention.false.positive.duplicate.check.enabled}") final boolean falsePositiveDuplicateCheckEnabled,
+                                    @Value("${offender.retention.mappa.check.enabled}") final boolean mappaCheckEnabled,
                                     @Value("${offender.retention.false.positive.duplicate.image.similarity.threshold:80}") final double falsePositiveDuplicateImageSimilarityThreshold,
                                     @Value("${offender.retention.false.positive.duplicate.required.image.count:1}") final int falsePositiveDuplicateRequiredImageCount) {
 
@@ -78,6 +80,7 @@ public class DataComplianceProperties {
         log.info("Data Duplicate - SQL query check enabled: {}", databaseDataDuplicateCheckEnabled);
         log.info("Data Duplicate - Analytical Platform check enabled: {}", analyticalPlatformDataDuplicateCheckEnabled);
         log.info("Data Duplicate - False positive check enabled: {}", falsePositiveDuplicateCheckEnabled);
+        log.info("MAPPA check enabled: {}", mappaCheckEnabled);
 
         this.prisonApiBaseUrl = prisonApiBaseUrl;
         this.prisonApiOffenderIdsIterationThreads = prisonApiOffenderIdsIterationThreads;
@@ -98,6 +101,7 @@ public class DataComplianceProperties {
         this.databaseDataDuplicateCheckEnabled = databaseDataDuplicateCheckEnabled;
         this.analyticalPlatformDataDuplicateCheckEnabled = analyticalPlatformDataDuplicateCheckEnabled;
         this.falsePositiveDuplicateCheckEnabled = falsePositiveDuplicateCheckEnabled;
+        this.mappaCheckEnabled = mappaCheckEnabled;
         this.falsePositiveDuplicateImageSimilarityThreshold = falsePositiveDuplicateImageSimilarityThreshold;
         this.falsePositiveDuplicateRequiredImageCount = falsePositiveDuplicateRequiredImageCount;
     }
