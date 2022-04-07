@@ -40,6 +40,8 @@ spring:
       scheduler.instanceId: AUTO
       scheduler.instanceName: data-compliance-quartz
 
+hmpps.sqs.provider: aws
+
 image.recognition:
   region: eu-west-2
   aws:
