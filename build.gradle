@@ -1,5 +1,5 @@
 plugins {
-    id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.2"
+    id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.3"
     id "org.unbroken-dome.test-sets" version "4.0.0"
 }
 
@@ -24,16 +24,16 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
     implementation 'org.springframework:spring-webflux'
-    implementation 'uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.2'
+    implementation 'uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.3'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.17.158')
+    implementation platform('software.amazon.awssdk:bom:2.17.165')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.187')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.187'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.194')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.194'
 
     // Utils
     implementation 'io.github.resilience4j:resilience4j-retry:1.7.1'
@@ -48,7 +48,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.2.2")
 
     runtimeOnly 'org.hsqldb:hsqldb:2.6.1'
-    runtimeOnly 'org.flywaydb:flyway-core:8.5.5'
+    runtimeOnly 'org.flywaydb:flyway-core:8.5.6'
     runtimeOnly 'org.postgresql:postgresql:42.3.3'
 
     // Swagger
@@ -61,7 +61,7 @@ dependencies {
     // Test
     testAnnotationProcessor "org.projectlombok:lombok:1.18.22"
     testCompileOnly 'org.projectlombok:lombok:1.18.22'
-    testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.32.0'
+    testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.33.0'
     testImplementation 'com.squareup.okhttp3:okhttp:4.9.3'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'
     testImplementation 'io.jsonwebtoken:jjwt:0.9.1'
