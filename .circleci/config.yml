@@ -55,7 +55,7 @@ jobs:
   test-integration:
     executor:
       name: hmpps/localstack
-      localstack_tag: "0.14.0"
+      localstack_tag: "0.14.2"
       jdk_tag: "17.0"
       services: "sqs,sns"
     steps:
@@ -64,7 +64,7 @@ jobs:
   test-message-integration:
     executor:
       name: hmpps/localstack
-      localstack_tag: "0.14.0"
+      localstack_tag: "0.14.2"
       jdk_tag: "17.0"
       services: "sqs,sns"
     steps:
@@ -73,7 +73,7 @@ jobs:
   test-message-integration-with-review-period:
     executor:
       name: hmpps/localstack
-      localstack_tag: "0.14.0"
+      localstack_tag: "0.14.2"
       jdk_tag: "17.0"
       services: "sqs,sns"
     steps:
