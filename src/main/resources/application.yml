@@ -40,7 +40,9 @@ spring:
       scheduler.instanceId: AUTO
       scheduler.instanceName: data-compliance-quartz
 
-hmpps.sqs.provider: aws
+hmpps.sqs:
+  queueAdminRole: ROLE_DATA_COMPLIANCE_QUEUE_ADMIN
+  provider: aws
 
 image.recognition:
   region: eu-west-2
