@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class FreeTextSearchRequest {
     @JsonProperty("retentionCheckId")
     private Long retentionCheckId;
 
+    @Singular
     @JsonProperty("regex")
     private List<String> regex;
 }

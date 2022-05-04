@@ -29,6 +29,12 @@ public class OffenderPendingDeletion {
 
     private String lastName;
 
+    @Singular
+    private Set<String> pncs;
+
+    @Singular
+    private Set<String> cros;
+
     private String agencyLocationId;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -73,6 +79,8 @@ public class OffenderPendingDeletion {
     public static class OffenderBooking {
 
         private Long offenderBookId;
+
+        private String bookingNo;
 
         @Singular
         private Set<String> offenceCodes;

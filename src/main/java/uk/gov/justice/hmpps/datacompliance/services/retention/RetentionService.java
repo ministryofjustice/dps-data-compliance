@@ -81,7 +81,7 @@ public class RetentionService {
                 offenderRestrictionCheck(offenderNumber),
                 offenceCodeCheck(offenderToCheck),
                 alertCheck(offenderToCheck),
-                ualOffenderCheck(offenderNumber),
+                ualOffenderCheck(offenderToCheck),
                 mappaReferralCheck(offenderNumber));
     }
 
@@ -247,8 +247,8 @@ public class RetentionService {
                 moratoriumCheckService.retainDueToAlert(offenderToCheck) ? RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
     }
 
-    private ActionableRetentionCheck ualOffenderCheck(final OffenderNumber offenderNumber) {
-         return new ActionableRetentionCheck(new RetentionCheckUal(ualService.isUnlawfullyAtLarge(offenderNumber) ?
+    private ActionableRetentionCheck ualOffenderCheck(final OffenderToCheck offenderToCheck) {
+         return new ActionableRetentionCheck(new RetentionCheckUal(ualService.isUnlawfullyAtLarge(offenderToCheck) ?
             RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
     }
 

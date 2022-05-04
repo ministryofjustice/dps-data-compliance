@@ -6,6 +6,7 @@ import uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.DeceasedOffe
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -25,21 +26,6 @@ public class SqsResponseQueueFactory extends QueueFactory {
                 .firstName("someFirstName")
                 .middleName("someMiddleName")
                 .lastName("someLastName")
-                .agencyLocationId("someAgencyLocationId")
-                .build()));
-    }
-
-    public static SendMessageRequest forProvisionalDeletionReferral(String queueUrl, Long referralId, String offenderIdDisplay) {
-        return new SendMessageRequest()
-            .withQueueUrl(queueUrl)
-            .withMessageAttributes(Map.of(
-                EVENT_TYPE, stringAttribute(Response.OFFENDER_PROVISIONAL_DELETION_REFERRAL_EVENT),
-                CONTENT_TYPE, stringAttribute(APPLICATION_JSON_VALUE)))
-            .withMessageBody(asJson(ProvisionalDeletionReferralResult.builder()
-                .referralId(referralId)
-                .offenderIdDisplay(offenderIdDisplay)
-                .alertCode("someAlertCode")
-                .offenceCode("someOffenseCode")
                 .agencyLocationId("someAgencyLocationId")
                 .build()));
     }

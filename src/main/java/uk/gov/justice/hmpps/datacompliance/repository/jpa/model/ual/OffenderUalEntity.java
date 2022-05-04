@@ -15,8 +15,6 @@ import javax.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
-import static org.springframework.util.StringUtils.hasText;
-
 @Entity
 @Data
 @Builder
@@ -36,8 +34,11 @@ public class OffenderUalEntity{
     @Column(name = "OFFENDER_BOOKING_NO")
     private String offenderBookingNo;
 
-    @Column(name = "OFFENDER_CRO_PNC")
-    private String offenderCroPnc;
+    @Column(name = "OFFENDER_PNC")
+    private String offenderPnc;
+
+    @Column(name = "OFFENDER_CRO")
+    private String offenderCro;
 
     @Column(name = "FIRST_NAMES")
     private String firstNames;
@@ -55,9 +56,4 @@ public class OffenderUalEntity{
     @NotNull
     @Column(name = "USER_ID", nullable = false)
     private String userId;
-
-
-    public boolean hasOffenderNumber(){
-        return hasText(offenderNo) && !(offenderNo.contains("N/K") || offenderNo.contains("N/A"));
-    }
 }

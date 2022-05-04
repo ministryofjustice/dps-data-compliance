@@ -45,6 +45,14 @@ public class OffenderPendingDeletion {
     @JsonProperty("lastName")
     private String lastName;
 
+    @Singular
+    @JsonProperty("pncs")
+    private Set<String> pncs;
+
+    @Singular
+    @JsonProperty("cros")
+    private Set<String> cros;
+
     @JsonProperty("birthDate")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @JsonDeserialize(using = LocalDateDeserializer.class)
@@ -103,6 +111,9 @@ public class OffenderPendingDeletion {
 
         @JsonProperty("offenderBookId")
         private Long offenderBookId;
+
+        @JsonProperty("bookingNo")
+        private String bookingNo;
 
         @Singular
         @JsonProperty("offenceCodes")

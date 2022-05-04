@@ -1,15 +1,15 @@
 package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ual;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ual.OffenderUalEntity;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,27 +22,29 @@ class UalOffenderEntityRepositoryTest extends IntegrationTest {
     @Test
     @Sql("classpath:seed.data/offender_ual.sql")
     public void findOneByOffenderNo() {
-        assertThat(offenderUalRepository.findOneByOffenderNo("A1234AA")).isPresent();
-        assertThat(offenderUalRepository.findOneByOffenderNo("A1234AA").get().getOffenderUalId()).isEqualTo(1L);
+        assertThat(offenderUalRepository.findOneByOffenderNoIgnoreCase("A1234AA")).isPresent();
+        assertThat(offenderUalRepository.findOneByOffenderNoIgnoreCase("A1234AA").get().getOffenderUalId()).isEqualTo(1L);
     }
 
     @Test
     @Sql("classpath:seed.data/offender_ual.sql")
-    public void findOneByOffenderBookingNoAndOffenderCroPncAndFirstNamesAndLastName() {
-        final Optional<OffenderUalEntity> offender = offenderUalRepository.findOneByOffenderBookingNoAndOffenderCroPncAndFirstNamesAndLastName("PR2788", "13862/77U", "John", "Smith");
+    public void findOneByOffenderBookingNo() {
+        final Optional<OffenderUalEntity> offender = offenderUalRepository.findOneByOffenderBookingNoIgnoreCase("PR2788");
+        final Optional<OffenderUalEntity> offender2 = offenderUalRepository.findOneByOffenderBookingNoIgnoreCase("CR2799");
+
         assertThat(offender).isPresent();
         assertThat(offender.get().getOffenderUalId()).isEqualTo(1L);
+
+        assertThat(offender2).isPresent();
+        assertThat(offender2.get().getOffenderUalId()).isEqualTo(2L);
     }
 
-    @Test
     @Sql("classpath:seed.data/offender_ual.sql")
-    public void deleteByOffenderUalIdNotIn() {
-        assertThat(StreamSupport.stream(offenderUalRepository.findAll().spliterator(), false).count()).isEqualTo(2);
+    public void findByOffenderPnc() {
+        final Optional<OffenderUalEntity> offender = offenderUalRepository.findOneByOffenderPncIgnoreCase("13862/77U'");
 
-        offenderUalRepository.deleteByOffenderUalIdNotIn(List.of(1L));
-
-        assertThat(StreamSupport.stream(offenderUalRepository.findAll().spliterator(), false).count()).isEqualTo(1);
-        assertThat(offenderUalRepository.findById(1L)).isPresent();
+        assertThat(offender).isPresent();
+        assertThat(offender.get().getOffenderUalId()).isEqualTo(1L);
     }
 
 }

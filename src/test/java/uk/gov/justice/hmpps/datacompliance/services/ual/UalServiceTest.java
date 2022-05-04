@@ -5,207 +5,203 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck.OffenderToCheckBuilder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ual.OffenderUalEntity;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ual.OffenderUalEntity.OffenderUalEntityBuilder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ual.OffenderUalRepository;
-import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
-import uk.gov.justice.hmpps.datacompliance.utils.ReportUtility;
-import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
-import uk.gov.justice.hmpps.datacompliance.web.dto.UalOffenderResponse;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
-import static java.util.Collections.emptyList;
+import static java.util.Optional.empty;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
 class UalServiceTest {
 
-    public static final long OFFENDER_ENTITY_ID = 1L;
     private static final String USERNAME = "user1";
     private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
+    public static final String CRO = "569151/08";
+    public static final String PNC = "14/663516A";
 
     @Mock
     OffenderUalRepository offenderUalRepository;
 
-    @Mock
-    ReportUtility reportUtility;
-
-    @Mock
-    private UserSecurityUtils userSecurityUtils;
-
     private UalService ualService;
 
     @BeforeEach
-    public void setUp(){
-        ualService = new UalService(reportUtility, offenderUalRepository, TimeSource.of(NOW), userSecurityUtils);
+    public void setUp() {
+        ualService = new UalService(offenderUalRepository);
     }
 
     @Test
-    void getUalOffenders() {
-        when(offenderUalRepository.findAll()).thenReturn(List.of(offenderEntity()));
+    void isUnlawfullyAtLarge_whenNoMatch() {
+        var offenderToCheck = offenderToCheck().build();
+        when(offenderUalRepository.findOneByOffenderNoIgnoreCase(offenderToCheck.getOffenderNumber().getOffenderNumber()))
+            .thenReturn(empty());
 
-        assertThat(ualService.getUalOffenders()).containsExactly(expectedUalOffenderResponse());
+        offenderToCheck.getBookingNos().forEach(bookNo -> when(offenderUalRepository.findOneByOffenderBookingNoIgnoreCase(bookNo))
+            .thenReturn(empty()));
+
+        when(offenderUalRepository.findOneByOffenderPncIgnoreCase(PNC))
+            .thenReturn(empty());
+
+        when(offenderUalRepository.findOneByOffenderCroIgnoreCase(CRO))
+            .thenReturn(empty());
+
+        assertThat(ualService.isUnlawfullyAtLarge(offenderToCheck)).isFalse();
     }
 
     @Test
-    void getUalOffendersWhenEmpty() {
-        when(offenderUalRepository.findAll()).thenReturn(emptyList());
+    void isUnlawfullyAtLarge_whenMatchOffenderNo() {
+        var offenderToCheck = offenderToCheck().build();
+        when(offenderUalRepository.findOneByOffenderNoIgnoreCase(offenderToCheck.getOffenderNumber().getOffenderNumber()))
+            .thenReturn(Optional.of(offenderEntity().build()));
 
-        assertThat(ualService.getUalOffenders()).isEmpty();
+        assertThat(ualService.isUnlawfullyAtLarge(offenderToCheck)).isTrue();
     }
 
     @Test
-    void updateReport() {
-        final var ualOffender = ualOffender();
-        final var mockReport = new MockMultipartFile("someFile.csv", "someBytes".getBytes(StandardCharsets.UTF_8));
+    void isUnlawfullyAtLarge_whenMatchBookNo() {
+        var offenderToCheck = offenderToCheck().build();
+        when(offenderUalRepository.findOneByOffenderNoIgnoreCase(offenderToCheck.getOffenderNumber().getOffenderNumber()))
+            .thenReturn(empty());
 
-        mockUsername();
-        when(reportUtility.parseFromUalReport(any())).thenReturn(List.of(ualOffender));
-        when(offenderUalRepository.findOneByOffenderNo(ualOffender.getNomsId())).thenReturn(Optional.of(offenderEntity(OFFENDER_ENTITY_ID)));
-        when(offenderUalRepository.save(offenderEntity(OFFENDER_ENTITY_ID))).thenReturn(offenderEntity(OFFENDER_ENTITY_ID));
+        when(offenderUalRepository.findOneByOffenderBookingNoIgnoreCase("B07236"))
+            .thenReturn(Optional.of(offenderEntity().build()));
 
-        final Optional<List<Long>> result = ualService.updateReport(mockReport);
-
-        assertThat(result).isPresent();
-        assertThat(result.get()).containsExactly(OFFENDER_ENTITY_ID);
-        verify(offenderUalRepository).deleteByOffenderUalIdNotIn(List.of(OFFENDER_ENTITY_ID));
+        assertThat(ualService.isUnlawfullyAtLarge(offenderToCheck)).isTrue();
     }
 
     @Test
-    void updateReportWhenNoNomsId() {
-        final var offenderWithNoNomisId = UalOffender
-            .builder()
-            .prisonNumber("AW3222")
-            .croPnc("569151/08")
-            .firstNames("Tom")
-            .familyName("Smith")
-            .indexOffenceDescription("CONSPIRACY TO DEFRAUD")
+    void isUnlawfullyAtLarge_whenMatchCro() {
+        var offenderToCheck = offenderToCheck().build();
+        when(offenderUalRepository.findOneByOffenderNoIgnoreCase(offenderToCheck.getOffenderNumber().getOffenderNumber()))
+            .thenReturn(empty());
+
+        offenderToCheck.getBookingNos().forEach(bookNo -> when(offenderUalRepository.findOneByOffenderBookingNoIgnoreCase(bookNo))
+            .thenReturn(empty()));
+
+        when(offenderUalRepository.findOneByOffenderPncIgnoreCase(PNC))
+            .thenReturn(empty());
+
+        when(offenderUalRepository.findOneByOffenderCroIgnoreCase(CRO))
+            .thenReturn(Optional.of(offenderEntity().build()));
+
+        assertThat(ualService.isUnlawfullyAtLarge(offenderToCheck)).isTrue();
+    }
+
+    @Test
+    void isUnlawfullyAtLarge_whenFirstNameDoesNotMatch() {
+        final var offenderToCheck_firstName = "abcdefghij";
+        final var ualOffender_firstName = "abcdefghik";
+
+        var offenderToCheck = offenderToCheck().firstName(offenderToCheck_firstName).build();
+        when(offenderUalRepository.findOneByOffenderNoIgnoreCase(offenderToCheck.getOffenderNumber().getOffenderNumber()))
+            .thenReturn(empty());
+
+        offenderToCheck.getBookingNos().forEach(bookNo -> when(offenderUalRepository.findOneByOffenderBookingNoIgnoreCase(bookNo))
+            .thenReturn(empty()));
+
+        when(offenderUalRepository.findOneByOffenderPncIgnoreCase(PNC))
+            .thenReturn(Optional.of(offenderEntity().firstNames(ualOffender_firstName).build()));
+
+        assertThat(ualService.isUnlawfullyAtLarge(offenderToCheck)).isFalse();
+    }
+
+    @Test
+    void isUnlawfullyAtLarge_whenFirstNameNotIdenticalButIsAboveThreshold() {
+        final var offenderToCheck_firstName = "abcdefghi";
+        final var offenderToCheck_middleName = "jklmnop";
+        final var ualOffender_firstName = "abcdefghi jklmnoz";
+
+        var offenderToCheck = offenderToCheck()
+            .firstName(offenderToCheck_firstName)
+            .middleName(offenderToCheck_middleName)
             .build();
+        when(offenderUalRepository.findOneByOffenderNoIgnoreCase(offenderToCheck.getOffenderNumber().getOffenderNumber()))
+            .thenReturn(empty());
 
-        final var mockReport = new MockMultipartFile("someFile.csv", "someBytes".getBytes(StandardCharsets.UTF_8));
+        offenderToCheck.getBookingNos().forEach(bookNo -> when(offenderUalRepository.findOneByOffenderBookingNoIgnoreCase(bookNo))
+            .thenReturn(empty()));
 
-        mockUsername();
-        when(reportUtility.parseFromUalReport(any())).thenReturn(List.of(offenderWithNoNomisId));
-        when(offenderUalRepository.findOneByOffenderBookingNoAndOffenderCroPncAndFirstNamesAndLastName("AW3222", "569151/08", "Tom", "Smith")).thenReturn(Optional.of(offenderEntity(OFFENDER_ENTITY_ID)));
-        when(offenderUalRepository.save(offenderEntityWithOutOffenderNo(OFFENDER_ENTITY_ID))).thenReturn(offenderEntityWithOutOffenderNo(OFFENDER_ENTITY_ID));
+        when(offenderUalRepository.findOneByOffenderPncIgnoreCase(PNC))
+            .thenReturn(Optional.of(offenderEntity()
+                .firstNames(ualOffender_firstName).build()));
 
-        final Optional<List<Long>> result = ualService.updateReport(mockReport);
+        assertThat(ualService.isUnlawfullyAtLarge(offenderToCheck)).isTrue();
+    }
 
-        assertThat(result).isPresent();
-        assertThat(result.get()).containsExactly(OFFENDER_ENTITY_ID);
-        verify(offenderUalRepository).deleteByOffenderUalIdNotIn(List.of(OFFENDER_ENTITY_ID));
+
+    @Test
+    void isUnlawfullyAtLarge_whenLastNameDoesNotMatch() {
+        final var offenderToCheck_lastName = "abcdefghij";
+        final var ualOffender_lastName = "abcdefghik";
+
+        var offenderToCheck = offenderToCheck().lastName(offenderToCheck_lastName).build();
+        when(offenderUalRepository.findOneByOffenderNoIgnoreCase(offenderToCheck.getOffenderNumber().getOffenderNumber()))
+            .thenReturn(empty());
+
+        offenderToCheck.getBookingNos().forEach(bookNo -> when(offenderUalRepository.findOneByOffenderBookingNoIgnoreCase(bookNo))
+            .thenReturn(empty()));
+
+        when(offenderUalRepository.findOneByOffenderPncIgnoreCase(PNC))
+            .thenReturn(Optional.of(offenderEntity().lastName(ualOffender_lastName).build()));
+
+        assertThat(ualService.isUnlawfullyAtLarge(offenderToCheck)).isFalse();
     }
 
     @Test
-    void updateReportWhenNoExistingOffender() {
-        final var ualOffender = ualOffender();
-        final var mockReport = new MockMultipartFile("someFile.csv", "someBytes".getBytes(StandardCharsets.UTF_8));
+    void isUnlawfullyAtLarge_whenLastNameNotIdenticalButIsAboveThreshold() {
+        final var offenderToCheck_lastName = "abcdefghijklmnop";
+        final var ualOffender_lastName = "abcdefghijklmnoz";
 
-        mockUsername();
-        when(reportUtility.parseFromUalReport(any())).thenReturn(List.of(ualOffender));
-        when(offenderUalRepository.findOneByOffenderNo(ualOffender.getNomsId())).thenReturn(Optional.empty());
-        when(offenderUalRepository.save(offenderEntity())).thenReturn(offenderEntity(OFFENDER_ENTITY_ID));
-
-        final Optional<List<Long>> result = ualService.updateReport(mockReport);
-
-        assertThat(result).isPresent();
-        assertThat(result.get()).containsExactly(OFFENDER_ENTITY_ID);
-        verify(offenderUalRepository).deleteByOffenderUalIdNotIn(List.of(OFFENDER_ENTITY_ID));
-    }
-
-    @Test
-    void updateReportWhenNoExistingOffenderAndNoNomsNumber() {
-        final var offenderWithNoNomisId = UalOffender
-            .builder()
-            .prisonNumber("AW3222")
-            .croPnc("569151/08")
-            .firstNames("Tom")
-            .familyName("Smith")
-            .indexOffenceDescription("CONSPIRACY TO DEFRAUD")
+        var offenderToCheck = offenderToCheck()
+            .lastName(offenderToCheck_lastName)
             .build();
+        when(offenderUalRepository.findOneByOffenderNoIgnoreCase(offenderToCheck.getOffenderNumber().getOffenderNumber()))
+            .thenReturn(empty());
 
-        final var mockReport = new MockMultipartFile("someFile.csv", "someBytes".getBytes(StandardCharsets.UTF_8));
+        offenderToCheck.getBookingNos().forEach(bookNo -> when(offenderUalRepository.findOneByOffenderBookingNoIgnoreCase(bookNo))
+            .thenReturn(empty()));
 
-        mockUsername();
-        when(reportUtility.parseFromUalReport(any())).thenReturn(List.of(offenderWithNoNomisId));
-        when(offenderUalRepository.findOneByOffenderBookingNoAndOffenderCroPncAndFirstNamesAndLastName("AW3222", "569151/08", "Tom", "Smith")).thenReturn(Optional.empty());
-        when(offenderUalRepository.save(offenderEntityWithOutOffenderNo(null))).thenReturn(offenderEntityWithOutOffenderNo(OFFENDER_ENTITY_ID));
+        when(offenderUalRepository.findOneByOffenderPncIgnoreCase(PNC))
+            .thenReturn(Optional.of(offenderEntity()
+                .lastName(ualOffender_lastName).build()));
 
-        final Optional<List<Long>> result = ualService.updateReport(mockReport);
-
-        assertThat(result).isPresent();
-        assertThat(result.get()).containsExactly(OFFENDER_ENTITY_ID);
-        verify(offenderUalRepository).deleteByOffenderUalIdNotIn(List.of(OFFENDER_ENTITY_ID));
+        assertThat(ualService.isUnlawfullyAtLarge(offenderToCheck)).isTrue();
     }
 
-    @Test
-    void updateReportWhenFileParsesToEmpty() {
-        when(reportUtility.parseFromUalReport(any())).thenReturn(emptyList());
-
-        final var mockReport = new MockMultipartFile("someFile.csv", "someBytes".getBytes(StandardCharsets.UTF_8));
-
-        assertThat(ualService.updateReport(mockReport)).isEmpty();
-    }
-
-    private void mockUsername() {
-        when(userSecurityUtils.getCurrentUsername()).thenReturn(Optional.of(USERNAME));
-    }
-
-    private OffenderUalEntity offenderEntity(long id) {
-        return offenderUalEntityBuilder().offenderUalId(id).build();
-    }
-
-    private OffenderUalEntity offenderEntity() {
-        return offenderUalEntityBuilder().build();
-    }
-
-    private OffenderUalEntity offenderEntityWithOutOffenderNo(Long id) {
-        return offenderUalEntityBuilder().offenderUalId(id).offenderNo(null).build();
-    }
-
-    private UalOffender ualOffender(){
-            return UalOffender
-                .builder()
-                .nomsId("A1234AA")
-                .prisonNumber("AW3222")
-                .croPnc("569151/08")
-                .firstNames("Tom")
-                .familyName("Smith")
-                .indexOffenceDescription("CONSPIRACY TO DEFRAUD")
-                .build();
-    }
-
-    private UalOffenderResponse expectedUalOffenderResponse(){
-        return UalOffenderResponse
-            .builder()
-            .nomsId("A1234AA")
-            .prisonNumber("AW3222")
-            .croPnc("569151/08")
-            .firstNames("Tom")
-            .familyName("Smith")
-            .indexOffenceDescription("CONSPIRACY TO DEFRAUD")
-            .build();
-    }
-
-    private OffenderUalEntityBuilder offenderUalEntityBuilder() {
-        return  OffenderUalEntity.builder()
+    private OffenderUalEntityBuilder offenderEntity() {
+        return OffenderUalEntity.builder()
             .offenderNo("A1234AA")
             .offenderBookingNo("AW3222")
-            .offenderCroPnc("569151/08")
+            .offenderPnc(PNC)
+            .offenderCro(CRO)
             .firstNames("Tom")
             .lastName("Smith")
             .offenceDescription("CONSPIRACY TO DEFRAUD")
             .userId(USERNAME)
             .uploadDateTime(NOW);
+
+    }
+
+    private OffenderToCheckBuilder offenderToCheck() {
+        return OffenderToCheck.builder()
+            .offenderNumber(new OffenderNumber("A1234AA"))
+            .offenceCodes(Set.of("offenceCode"))
+            .alertCodes(Set.of("alertCode"))
+            .firstName("Tom")
+            .lastName("Smith")
+            .bookingNo("B07236")
+            .bookingNo("Z07236")
+            .pnc(PNC)
+            .cro(CRO);
     }
 }
