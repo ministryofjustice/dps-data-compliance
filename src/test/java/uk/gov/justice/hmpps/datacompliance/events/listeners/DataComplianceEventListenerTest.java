@@ -71,20 +71,34 @@ class DataComplianceEventListenerTest {
     @Test
     void handlePendingDeletionEvent() {
         handleMessage(
-                "{" +
-                        "\"offenderIdDisplay\":\"A1234AA\"," +
-                        "\"firstName\":\"Bob\"," +
-                        "\"middleName\":\"Middle\"," +
-                        "\"lastName\":\"Jones\"," +
-                        "\"birthDate\":\"1990-01-02\"," +
-                        "\"agencyLocationId\":\"LEI\"," +
-                        "\"offenderAliases\":[{" +
-                            "\"offenderId\":123," +
-                            "\"bookings\":[" +
-                                "{\"offenderBookId\":321,\"offenceCodes\":[\"offence1\"],\"alertCodes\":[\"alert1\"]}" +
-                            "]" +
-                        "}]" +
-                "}",
+            """
+                {
+                   "offenderIdDisplay":"A1234AA",
+                   "firstName":"Bob",
+                   "middleName":"Middle",
+                   "lastName":"Jones",
+                   "birthDate":"1990-01-02",
+                   "agencyLocationId":"LEI",
+                   "pncs":[],
+                   "cros":[],
+                   "offenderAliases":[
+                      {
+                         "offenderId":123,
+                         "bookings":[
+                            {
+                               "offenderBookId":321,
+                               "offenceCodes":[
+                                  "offence1"
+                               ],
+                               "alertCodes":[
+                                  "alert1"
+                               ]
+                            }
+                         ]
+                      }
+                   ]
+                }
+                """,
                 Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION"));
 
         verify(referralService).handlePendingDeletionReferral(OffenderPendingDeletion.builder()

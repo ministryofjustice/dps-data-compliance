@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
-
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @Schema(description = "Ual Offender data")
@@ -20,33 +18,31 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @JsonInclude(NON_NULL)
 public class UalOffenderResponse {
 
-    @Schema(required = true, description = "This is known as the 'offender number")
-    @NotNull
+    @Schema(description = "This is known as the 'offender number")
     @JsonProperty("nomsId")
     private String nomsId;
 
-    @Schema(required = true, description = "The offenders prisonNumber (book number)")
-    @NotNull
+    @Schema(description = "The offenders prisonNumber (book number)")
     @JsonProperty("prisonNumber")
     private String prisonNumber;
 
-    @Schema(required = true, description = "This may contain the CRO number or the PNC number or both")
-    @NotNull
-    @JsonProperty("croPnc")
-    private String croPnc;
+    @Schema(description = "The PNC number")
+    @JsonProperty("pnc")
+    private String pnc;
 
-    @Schema(required = true, description = "The first and middle names of the offender")
-    @NotNull
+    @Schema(description = "The CRO number")
+    @JsonProperty("cro")
+    private String cro;
+
+    @Schema(description = "The first and middle names of the offender")
     @JsonProperty("firstNames")
     private String firstNames;
 
-    @Schema(required = true, description = "The offenders last name")
-    @NotNull
+    @Schema(description = "The offenders last name")
     @JsonProperty("familyName")
     private String familyName;
 
-    @Schema(required = true, description = "The description of an offence relating to the offender")
-    @NotNull
+    @Schema(description = "The description of an offence relating to the offender")
     @JsonProperty("indexOffenceDescription")
     private String indexOffenceDescription;
 }

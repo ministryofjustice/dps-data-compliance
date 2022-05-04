@@ -1,4 +1,4 @@
-package uk.gov.justice.hmpps.datacompliance.services.ual;
+package uk.gov.justice.hmpps.datacompliance.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

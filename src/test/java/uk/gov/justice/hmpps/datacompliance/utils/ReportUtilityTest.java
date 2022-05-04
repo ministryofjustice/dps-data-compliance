@@ -3,7 +3,7 @@ package uk.gov.justice.hmpps.datacompliance.utils;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.HttpClientErrorException;
-import uk.gov.justice.hmpps.datacompliance.services.ual.UalOffender;
+import uk.gov.justice.hmpps.datacompliance.dto.UalOffender;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

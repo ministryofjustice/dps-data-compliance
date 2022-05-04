@@ -13,7 +13,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.justice.hmpps.datacompliance.services.ual.UalOffender;
+import uk.gov.justice.hmpps.datacompliance.dto.UalOffender;
 
 import java.io.IOException;
 import java.lang.reflect.Field;

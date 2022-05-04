@@ -53,6 +53,12 @@ class ReferralServiceTest {
     private static final String AGENCY_LOCATION_ID = "LEI";
     private static final Set<String> OFFENCE_CODES = Set.of("offenceCode");
     private static final Set<String> ALERT_CODES = Set.of("alertCode");
+    public static final String FIRST_NAME = "John";
+    public static final String MIDDLE_NAME = "Middle";
+    public static final String LAST_NAME = "Smith";
+    public static final LocalDate DOB = LocalDate.of(1969, 1, 1);
+    public static final String PNC = "14/663516A";
+    public static final String CRO = "569151/08";
 
     @Mock
     private OffenderDeletionBatchRepository batchRepository;
@@ -107,8 +113,15 @@ class ReferralServiceTest {
 
         final var retentionCheck = mock(ActionableRetentionCheck.class);
         when(batchRepository.findById(BATCH_ID)).thenReturn(Optional.of(batch));
-        when(retentionService.conductRetentionChecks(OffenderToCheck.builder().offenderNumber(new OffenderNumber(OFFENDER_NUMBER)).build()))
-                .thenReturn(List.of(retentionCheck));
+        when(retentionService.conductRetentionChecks(OffenderToCheck.builder()
+            .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
+            .firstName(FIRST_NAME)
+            .middleName(MIDDLE_NAME)
+            .lastName(LAST_NAME)
+            .pnc(PNC)
+            .cro(CRO)
+            .bookingNos(Set.of("B07236", "V30240")).build()))
+            .thenReturn(List.of(retentionCheck));
 
         referralService.handlePendingDeletionReferral(generatePendingDeletionEvent());
 
@@ -255,14 +268,16 @@ class ReferralServiceTest {
         return OffenderPendingDeletion.builder()
                 .batchId(BATCH_ID)
                 .offenderIdDisplay(OFFENDER_NUMBER)
-                .firstName("John")
-                .middleName("Middle")
-                .lastName("Smith")
-                .birthDate(LocalDate.of(1969, 1, 1))
+                .firstName(FIRST_NAME)
+                .middleName(MIDDLE_NAME)
+                .lastName(LAST_NAME)
+                .birthDate(DOB)
+                .pnc(PNC)
+                .cro(CRO)
                 .offenderAlias(OffenderAlias.builder()
                         .offenderId(123L)
-                        .offenderBooking(OffenderBooking.builder().offenderBookId(456L).build())
-                        .offenderBooking(OffenderBooking.builder().offenderBookId(789L).build())
+                        .offenderBooking(OffenderBooking.builder().offenderBookId(456L).bookingNo("B07236").build())
+                        .offenderBooking(OffenderBooking.builder().offenderBookId(789L).bookingNo("V30240").build())
                         .build())
                 .offenderAlias(OffenderAlias.builder().offenderId(321L).build())
                 .build();
@@ -272,10 +287,10 @@ class ReferralServiceTest {
 
         assertThat(referral.getOffenderDeletionBatch()).isEqualTo(batch);
         assertThat(referral.getOffenderNo()).isEqualTo(OFFENDER_NUMBER);
-        assertThat(referral.getFirstName()).isEqualTo("John");
-        assertThat(referral.getMiddleName()).isEqualTo("Middle");
-        assertThat(referral.getLastName()).isEqualTo("Smith");
-        assertThat(referral.getBirthDate()).isEqualTo(LocalDate.of(1969, 1, 1));
+        assertThat(referral.getFirstName()).isEqualTo(FIRST_NAME);
+        assertThat(referral.getMiddleName()).isEqualTo(MIDDLE_NAME);
+        assertThat(referral.getLastName()).isEqualTo(LAST_NAME);
+        assertThat(referral.getBirthDate()).isEqualTo(DOB);
         assertThat(referral.getReceivedDateTime()).isEqualTo(NOW);
 
         verifyBooking(referral);

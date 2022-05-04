@@ -9,6 +9,7 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.AdHocOffenderDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.ProvisionalDeletionReferralResult;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
@@ -21,6 +22,7 @@ import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
@@ -56,11 +58,18 @@ public class ReferralService {
 
         final var referral = createReferral(event);
 
+        final var bookingNos = event.getOffenderAliases().stream().flatMap(offenderAlias -> offenderAlias.getOffenderBookings().stream()).map(OffenderBooking::getBookingNo).collect(Collectors.toSet());
         final var retentionChecks = retentionService.conductRetentionChecks(
                 OffenderToCheck.builder()
                         .offenderNumber(new OffenderNumber(event.getOffenderIdDisplay()))
                         .offenceCodes(event.getOffenceCodes())
                         .alertCodes(event.getAlertCodes())
+                        .bookingNos(bookingNos)
+                        .firstName(event.getFirstName())
+                        .middleName(event.getMiddleName())
+                        .lastName(event.getLastName())
+                        .cros(event.getCros())
+                        .pncs(event.getPncs())
                         .build());
 
         referralResolutionService.processReferral(referral, retentionChecks);

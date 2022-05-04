@@ -59,9 +59,14 @@ class RetentionServiceTest {
     private static final String OFFENCE_CODE = "offence1";
     private static final long DATA_DUPLICATE_CHECK_ID = 1;
     private static final long FREE_TEXT_CHECK_ID = 2;
+    private static final String BOOKING_NO = "R26283";
     private static final OffenderToCheck OFFENDER_TO_CHECK = OffenderToCheck.builder()
             .offenderNumber(OFFENDER_NUMBER)
             .offenceCode(OFFENCE_CODE)
+            .firstName("firstName")
+            .middleName("middleName")
+            .lastName("lastName")
+            .bookingNo(BOOKING_NO)
             .build();
 
     @Mock
@@ -186,7 +191,7 @@ class RetentionServiceTest {
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
         verify(moratoriumCheckService).requestFreeTextSearch(eq(OFFENDER_NUMBER), any());
         verify(offenderRestrictionCheckService).requestOffenderRestrictionCheck(eq(OFFENDER_NUMBER), any());
-        verify(ualService).isUnlawfullyAtLarge(eq(OFFENDER_NUMBER));
+        verify(ualService).isUnlawfullyAtLarge(eq(OFFENDER_TO_CHECK));
         verify(communityApiClient).isReferredForMappa(eq(OFFENDER_NUMBER));
         verifyNoInteractions(dataDuplicationDetectionService);
     }
@@ -274,7 +279,7 @@ class RetentionServiceTest {
                 .thenReturn(List.of(dataDuplicate));
         when(moratoriumCheckService.retainDueToOffence(OFFENDER_TO_CHECK)).thenReturn(true);
         when(moratoriumCheckService.retainDueToAlert(OFFENDER_TO_CHECK)).thenReturn(true);
-        when(ualService.isUnlawfullyAtLarge(OFFENDER_NUMBER)).thenReturn(true);
+        when(ualService.isUnlawfullyAtLarge(OFFENDER_TO_CHECK)).thenReturn(true);
         when(communityApiClient.isReferredForMappa(OFFENDER_NUMBER)).thenReturn(true);
     }
 
@@ -285,7 +290,7 @@ class RetentionServiceTest {
         when(dataDuplicationDetectionService.searchForAnalyticalPlatformDuplicates(OFFENDER_NUMBER)).thenReturn(emptyList());
         when(moratoriumCheckService.retainDueToOffence(OFFENDER_TO_CHECK)).thenReturn(false);
         when(moratoriumCheckService.retainDueToAlert(OFFENDER_TO_CHECK)).thenReturn(false);
-        when(ualService.isUnlawfullyAtLarge(OFFENDER_NUMBER)).thenReturn(false);
+        when(ualService.isUnlawfullyAtLarge(OFFENDER_TO_CHECK)).thenReturn(false);
         when(communityApiClient.isReferredForMappa(OFFENDER_NUMBER)).thenReturn(false);
     }
 

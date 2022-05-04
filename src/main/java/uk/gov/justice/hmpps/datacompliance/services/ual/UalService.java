@@ -2,22 +2,15 @@ package uk.gov.justice.hmpps.datacompliance.services.ual;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ual.OffenderUalEntity;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ual.OffenderUalRepository;
-import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
-import uk.gov.justice.hmpps.datacompliance.utils.ReportUtility;
-import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
-import uk.gov.justice.hmpps.datacompliance.web.dto.UalOffenderResponse;
 
-import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -25,88 +18,73 @@ import static java.util.stream.StreamSupport.stream;
 @RequiredArgsConstructor
 public class UalService {
 
-    private final ReportUtility reportUtility;
+    public static final double SIMILARITY_THRESHOLD = 0.93;
     private final OffenderUalRepository offenderUalRepository;
-    private final TimeSource timeSource;
-    private final UserSecurityUtils userSecurityUtils;
 
-    public List<UalOffenderResponse> getUalOffenders() {
-        return transform(offenderUalRepository.findAll());
+    public boolean isUnlawfullyAtLarge(OffenderToCheck offender) {
+        log.info("Conducting a search for offender {} against the unlawfully at large database", offender.getOffenderNumber().getOffenderNumber());
+        final var isUal = findUalOffender(offender).isPresent();
+        log.info(isUal ? "Match found for Offender {} against the unlawfully at large database" : "No Match found for Offender {} against the unlawfully at large database", offender.getOffenderNumber().getOffenderNumber());
+        return isUal;
+    }
+
+    public Optional<OffenderUalEntity> findUalOffender(final OffenderToCheck offender) {
+        final var ualOffender = offenderUalRepository.findOneByOffenderNoIgnoreCase(offender.getOffenderNumber().getOffenderNumber())
+            .or(() -> findOffenderByBooking(offender.getBookingNos())
+                .or(() -> findOffenderByPncs(offender.getPncs())
+                    .or(() -> findOffenderByCros(offender.getCros()))));
+
+        return ualOffender
+            .filter(ualOff -> findLeventienSimilarity(ualOff.getFirstNames(), offender.getFirstNames()) >= SIMILARITY_THRESHOLD)
+            .filter(ualOff -> findLeventienSimilarity(ualOff.getLastName(), offender.getLastName()) >= SIMILARITY_THRESHOLD)
+            .filter(ualOff -> findJaroWinklerDistanceSimilarity(ualOff.getFirstNames(), offender.getFirstNames()) >= SIMILARITY_THRESHOLD)
+            .filter(ualOff -> findJaroWinklerDistanceSimilarity(ualOff.getLastName(), offender.getLastName()) >= SIMILARITY_THRESHOLD);
     }
 
 
-    public Optional<List<Long>> updateReport(final MultipartFile report) {
-
-        final var offendersUal = reportUtility.parseFromUalReport(report);
-
-        if (offendersUal.isEmpty()) {
-            return Optional.empty();
+    private double findLeventienSimilarity(String x, String y) {
+        double maxLength = Double.max(x.length(), y.length());
+        if (maxLength > 0) {
+            return (maxLength - StringUtils.getLevenshteinDistance(x, y)) / maxLength;
         }
-
-        final var updatedReportIds = transform(offendersUal).stream()
-            .map(this::update)
-            .map(OffenderUalEntity::getOffenderUalId)
-            .collect(toList());
-
-        deleteWithdrawnOffenders(updatedReportIds);
-
-        return Optional.of(updatedReportIds);
+        return 1.0;
     }
 
-
-    public boolean isUnlawfullyAtLarge(OffenderNumber offenderNumber) {
-        return offenderUalRepository.findOneByOffenderNo(offenderNumber.getOffenderNumber()).isPresent();
+    private double findJaroWinklerDistanceSimilarity(String x, String y) {
+        if (x == null && y == null) {
+            return 1.0;
+        }
+        if (x == null || y == null) {
+            return 0.0;
+        }
+        return StringUtils.getJaroWinklerDistance(x, y);
     }
 
-    private OffenderUalEntity update(final OffenderUalEntity offenderUalEntity) {
-
-        final var existingEntity = offenderUalEntity.hasOffenderNumber() ?
-            offenderUalRepository.findOneByOffenderNo(offenderUalEntity.getOffenderNo())
-            : offenderUalRepository.findOneByOffenderBookingNoAndOffenderCroPncAndFirstNamesAndLastName(offenderUalEntity.getOffenderBookingNo(), offenderUalEntity.getOffenderCroPnc(), offenderUalEntity.getFirstNames(), offenderUalEntity.getLastName());
-
-        existingEntity.ifPresent(existingMatch -> offenderUalEntity.setOffenderUalId(existingMatch.getOffenderUalId()));
-
-        return offenderUalRepository.save(offenderUalEntity);
+    private Optional<OffenderUalEntity> findOffenderByBooking(final Set<String> bookingNos) {
+        return bookingNos.stream()
+            .map(offenderUalRepository::findOneByOffenderBookingNoIgnoreCase)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .findFirst();
     }
 
-    private void deleteWithdrawnOffenders(final List<Long> updatedReportIds) {
-        offenderUalRepository.deleteByOffenderUalIdNotIn(updatedReportIds);
+    private Optional<OffenderUalEntity> findOffenderByPncs(Set<String> pncs) {
+        return pncs.stream()
+            .filter(org.springframework.util.StringUtils::hasText)
+            .map(offenderUalRepository::findOneByOffenderPncIgnoreCase)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .findFirst();
+
     }
 
-
-    private List<OffenderUalEntity> transform(final List<UalOffender> offendersUal) {
-
-        final var userId = userSecurityUtils.getCurrentUsername()
-            .orElseThrow(() -> new IllegalStateException("Cannot retrieve username from request"));
-
-        final var now = timeSource.nowAsLocalDateTime();
-
-        return offendersUal.stream().map(ualOffender -> OffenderUalEntity
-            .builder()
-            .offenderNo(ualOffender.getNomsId())
-            .offenderBookingNo(ualOffender.getPrisonNumber())
-            .offenderCroPnc(ualOffender.getCroPnc())
-            .firstNames(ualOffender.getFirstNames())
-            .lastName(ualOffender.getFamilyName())
-            .offenceDescription(ualOffender.getIndexOffenceDescription())
-            .userId(userId)
-            .uploadDateTime(now)
-            .build())
-            .collect(toList());
-    }
-
-    private List<UalOffenderResponse> transform(final Iterable<OffenderUalEntity> offenderUalEntities) {
-        return stream(offenderUalEntities.spliterator(), false)
-            .map(offenderUalEntity -> UalOffenderResponse
-                .builder()
-                .nomsId(offenderUalEntity.getOffenderNo())
-                .prisonNumber(offenderUalEntity.getOffenderBookingNo())
-                .croPnc(offenderUalEntity.getOffenderCroPnc())
-                .firstNames(offenderUalEntity.getFirstNames())
-                .familyName(offenderUalEntity.getLastName())
-                .indexOffenceDescription(offenderUalEntity.getOffenceDescription())
-                .build())
-            .collect(toList());
+    private Optional<? extends OffenderUalEntity> findOffenderByCros(final Set<String> cros) {
+        return cros.stream()
+            .filter(org.springframework.util.StringUtils::hasText)
+            .map(offenderUalRepository::findOneByOffenderCroIgnoreCase)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .findFirst();
     }
 
 }
