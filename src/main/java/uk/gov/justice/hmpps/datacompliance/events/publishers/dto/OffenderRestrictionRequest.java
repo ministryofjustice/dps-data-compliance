@@ -24,7 +24,7 @@ public class OffenderRestrictionRequest {
     private Long retentionCheckId;
 
     @Singular
-    @JsonProperty("restrictionCode")
+    @JsonProperty("restrictionCodes")
     private Set<OffenderRestrictionCode> restrictionCodes;
 
     @JsonProperty("regex")

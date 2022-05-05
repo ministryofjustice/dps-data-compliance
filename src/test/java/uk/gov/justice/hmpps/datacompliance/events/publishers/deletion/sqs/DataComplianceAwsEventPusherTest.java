@@ -204,7 +204,7 @@ class DataComplianceAwsEventPusherTest {
         eventPusher.requestOffenderRestrictionCheck(OFFENDER_NUMBER, 123L, Set.of(CHILD), "^(regex|1)$");
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"restrictionCode\":[\"CHILD\"],\"regex\":\"^(regex|1)$\"}");
+        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"restrictionCodes\":[\"CHILD\"],\"regex\":\"^(regex|1)$\"}");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_OFFENDER-RESTRICTION-CHECK");
     }
