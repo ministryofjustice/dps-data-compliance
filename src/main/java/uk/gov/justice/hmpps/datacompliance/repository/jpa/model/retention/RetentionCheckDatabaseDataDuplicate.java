@@ -14,7 +14,7 @@ public class RetentionCheckDatabaseDataDuplicate extends RetentionCheckDataDupli
 
     public static final String DATA_DUPLICATE_DB = "DATA_DUPLICATE_DB";
 
-    public RetentionCheckDatabaseDataDuplicate(final Status status){
+    public RetentionCheckDatabaseDataDuplicate(final Status status) {
         super(DATA_DUPLICATE_DB, status);
     }
 }

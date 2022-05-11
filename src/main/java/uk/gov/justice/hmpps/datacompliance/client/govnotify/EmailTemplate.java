@@ -19,7 +19,6 @@ public class EmailTemplate {
     private final String reference;
 
 
-
     public static EmailTemplate ofIntentionToDelete(final OffenderDeletionReferral offenderDeletionReferral, final String email, final String digitalServiceUrl, final String intentionToDeleteTemplateId, Duration reviewDuration) {
         return EmailTemplate.builder()
             .templateId(intentionToDeleteTemplateId)

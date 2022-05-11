@@ -29,8 +29,8 @@ public class DuplicateOffenderRow {
         final var matchToOffender2 = Objects.equals(offenderNumber, getOffender2());
 
         checkState(matchToOffender1 || matchToOffender2,
-                "Neither offender in the row (%s / %s) matches the intended reference offender number: '%s'",
-                getOffender1().getOffenderNumber(), getOffender2().getOffenderNumber(), offenderNumber.getOffenderNumber());
+            "Neither offender in the row (%s / %s) matches the intended reference offender number: '%s'",
+            getOffender1().getOffenderNumber(), getOffender2().getOffenderNumber(), offenderNumber.getOffenderNumber());
 
         return matchToOffender1 ? getOffender2() : getOffender1();
     }

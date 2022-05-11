@@ -46,15 +46,15 @@ public abstract class RetentionCheckDataDuplicate extends RetentionCheck {
 
     public List<DataDuplicate> getDataDuplicates() {
         return dataDuplicates.stream()
-                .map(RetentionReasonDataDuplicate::getDataDuplicate)
-                .collect(toList());
+            .map(RetentionReasonDataDuplicate::getDataDuplicate)
+            .collect(toList());
     }
 
     private void addDataDuplicate(final DataDuplicate dataDuplicate) {
         dataDuplicates.add(RetentionReasonDataDuplicate.builder()
-                .retentionCheck(this)
-                .dataDuplicate(dataDuplicate)
-                .build());
+            .retentionCheck(this)
+            .dataDuplicate(dataDuplicate)
+            .build());
     }
 
     @Data

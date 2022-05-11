@@ -29,10 +29,10 @@ class PathfinderApiClientTest {
     @BeforeEach
     void initialize() {
         pathfinderApiClient = new PathfinderApiClient(WebClient.create(),
-                DataComplianceProperties.builder()
-                        .pathfinderApiBaseUrl(format("http://localhost:%s", pathfinderApiMock.getPort()))
-                        .pathfinderApiTimeout(Duration.ofSeconds(5))
-                        .build());
+            DataComplianceProperties.builder()
+                .pathfinderApiBaseUrl(format("http://localhost:%s", pathfinderApiMock.getPort()))
+                .pathfinderApiTimeout(Duration.ofSeconds(5))
+                .build());
     }
 
     @AfterEach
@@ -44,30 +44,30 @@ class PathfinderApiClientTest {
     void isReferredToPathfinderTrueWhenSuccessResponse() {
 
         pathfinderApiMock.enqueue(new MockResponse()
-                .setResponseCode(HttpStatus.OK.value()));
+            .setResponseCode(HttpStatus.OK.value()));
 
         assertThat(pathfinderApiClient.isReferredToPathfinder(new OffenderNumber("A1234AA")))
-                .isTrue();
+            .isTrue();
     }
 
     @Test
     void isReferredToPathfinderFalseWhenNotFound() {
 
         pathfinderApiMock.enqueue(new MockResponse()
-                .setResponseCode(HttpStatus.NOT_FOUND.value()));
+            .setResponseCode(HttpStatus.NOT_FOUND.value()));
 
         assertThat(pathfinderApiClient.isReferredToPathfinder(new OffenderNumber("A1234AA")))
-                .isFalse();
+            .isFalse();
     }
 
     @Test
     void isReferredToPathfinderThrowsOnUnexpectedStatus() {
 
         pathfinderApiMock.enqueue(new MockResponse()
-                .setResponseCode(HttpStatus.I_AM_A_TEAPOT.value()));
+            .setResponseCode(HttpStatus.I_AM_A_TEAPOT.value()));
 
         assertThatThrownBy(() -> pathfinderApiClient.isReferredToPathfinder(new OffenderNumber("A1234AA")))
-                .isInstanceOf(WebClientResponseException.class)
-                .hasMessageContaining("I'm a teapot");
+            .isInstanceOf(WebClientResponseException.class)
+            .hasMessageContaining("I'm a teapot");
     }
 }

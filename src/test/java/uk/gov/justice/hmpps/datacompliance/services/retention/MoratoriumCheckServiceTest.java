@@ -43,13 +43,13 @@ class MoratoriumCheckServiceTest {
         service.requestFreeTextSearch(OFFENDER_NUMBER, RETENTION_CHECK_ID);
 
         verify(eventPusher).requestFreeTextMoratoriumCheck(
-                OFFENDER_NUMBER,
-                RETENTION_CHECK_ID,
-                List.of(RED_FLAGS,
-                        CHILD_ABUSE_REGEX,
-                        CHILD_ABUSE_REGEX_REVERSED,
-                        PUBLIC_ROLE_ABUSE_REGEX,
-                        PUBLIC_ROLE_ABUSE_REGEX_REVERSED));
+            OFFENDER_NUMBER,
+            RETENTION_CHECK_ID,
+            List.of(RED_FLAGS,
+                CHILD_ABUSE_REGEX,
+                CHILD_ABUSE_REGEX_REVERSED,
+                PUBLIC_ROLE_ABUSE_REGEX,
+                PUBLIC_ROLE_ABUSE_REGEX_REVERSED));
     }
 
     @Test

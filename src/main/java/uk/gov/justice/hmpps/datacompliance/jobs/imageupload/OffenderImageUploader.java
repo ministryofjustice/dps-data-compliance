@@ -34,8 +34,8 @@ class OffenderImageUploader implements OffenderAction {
         }
 
         faceImages.stream()
-                .filter(image -> !uploadLogger.isAlreadyUploaded(offenderNumber, image.getImageId()))
-                .forEach(image -> getAndUploadImageData(offenderNumber, image));
+            .filter(image -> !uploadLogger.isAlreadyUploaded(offenderNumber, image.getImageId()))
+            .forEach(image -> getAndUploadImageData(offenderNumber, image));
     }
 
     long getUploadCount() {
@@ -50,9 +50,9 @@ class OffenderImageUploader implements OffenderAction {
 
         image.ifPresentOrElse(
 
-                this::uploadAndLogImage,
+            this::uploadAndLogImage,
 
-                () -> logMissingImageData(offenderNumber, imageMetadata.getImageId()));
+            () -> logMissingImageData(offenderNumber, imageMetadata.getImageId()));
     }
 
     private void uploadAndLogImage(final OffenderImage image) {
@@ -60,8 +60,8 @@ class OffenderImageUploader implements OffenderAction {
         rateLimiter.acquire();
 
         imageRecognitionClient.uploadImageToCollection(image)
-                .handle(faceId -> uploadLogger.log(image, faceId),
-                        error -> uploadLogger.logUploadError(image.getOffenderNumber(), image.getImageId(), error.getReason()));
+            .handle(faceId -> uploadLogger.log(image, faceId),
+                error -> uploadLogger.logUploadError(image.getOffenderNumber(), image.getImageId(), error.getReason()));
     }
 
     private void logMissingImageData(final OffenderNumber offenderNumber, final long imageId) {

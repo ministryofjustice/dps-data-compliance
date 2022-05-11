@@ -12,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,7 +20,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "OFFENDER_UAL")
-public class OffenderUalEntity{
+public class OffenderUalEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

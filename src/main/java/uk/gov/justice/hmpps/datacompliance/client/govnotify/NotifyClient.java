@@ -29,7 +29,7 @@ public class NotifyClient {
         @Value("${notify.templates.intention-to-delete}") String intentionToDeleteTemplateId,
         @Value("${notify.templates.offender-data-cleansed}") String offenderDataCleansedTemplateId,
         @Value("${digital.prison.service.url}") String digitalPrisonServiceBaseUrl,
-        @Value("${offender.deletion.review.duration:P1D}") Duration offenderDeletionReviewDuration, NotificationClient client){
+        @Value("${offender.deletion.review.duration:P1D}") Duration offenderDeletionReviewDuration, NotificationClient client) {
         this.offenderDataCleansedTemplateId = offenderDataCleansedTemplateId;
         this.offenderDeletionReviewDuration = offenderDeletionReviewDuration;
         this.client = client;

@@ -57,7 +57,7 @@ public class ReportUtility {
         if (!(resource.exists() && resource.isReadable())) {
             throw new HttpClientErrorException(BAD_REQUEST, "Invalid file provided.");
         }
-        if(!isCsvExtension(file.getOriginalFilename())){
+        if (!isCsvExtension(file.getOriginalFilename())) {
             throw new HttpClientErrorException(BAD_REQUEST, "The file must be a CSV with the .csv extension type.");
         }
     }

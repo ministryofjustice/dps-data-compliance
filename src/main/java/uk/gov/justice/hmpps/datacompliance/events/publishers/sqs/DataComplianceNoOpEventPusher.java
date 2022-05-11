@@ -29,7 +29,7 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
     @Override
     public void requestAdHocReferral(OffenderNumber offenderNo, Long batchId) {
         log.warn("Pretending to request ad hoc referral for offender: '{}' and batch: '{}'",
-                offenderNo.getOffenderNumber(), batchId);
+            offenderNo.getOffenderNumber(), batchId);
     }
 
     @Override
@@ -41,13 +41,13 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
     @Override
     public void requestIdDataDuplicateCheck(final OffenderNumber offenderNo, final Long retentionCheckId) {
         log.warn("Pretending to push ID data duplicate check '{}/{}' to queue",
-                offenderNo.getOffenderNumber(), retentionCheckId);
+            offenderNo.getOffenderNumber(), retentionCheckId);
     }
 
     @Override
     public void requestDatabaseDataDuplicateCheck(final OffenderNumber offenderNo, final Long retentionCheckId) {
         log.warn("Pretending to push data duplicate database check '{}/{}' to queue",
-                offenderNo.getOffenderNumber(), retentionCheckId);
+            offenderNo.getOffenderNumber(), retentionCheckId);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
                                                final Long retentionCheckId,
                                                final List<String> regex) {
         log.warn("Pretending to push free text moratorium check '{}/{}' to queue",
-                offenderNo.getOffenderNumber(), retentionCheckId);
+            offenderNo.getOffenderNumber(), retentionCheckId);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class DataComplianceNoOpEventPusher implements DataComplianceEventPusher 
     @Override
     public void grantDeletion(final OffenderDeletionGrant offenderDeletionGrant) {
         log.warn("Pretending to push offender deletion granted events for '{}/{}' to queue",
-                offenderDeletionGrant.getOffenderNumber().getOffenderNumber(), offenderDeletionGrant.getReferralId());
+            offenderDeletionGrant.getOffenderNumber().getOffenderNumber(), offenderDeletionGrant.getReferralId());
     }
 
     @Override

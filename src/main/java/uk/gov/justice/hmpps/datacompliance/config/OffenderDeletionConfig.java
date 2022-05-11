@@ -60,10 +60,10 @@ public class OffenderDeletionConfig {
     @Bean
     public ApplicationRunner rescheduleOffenderDeletion() {
         return args -> schedulerFactoryBean.getScheduler()
-                .scheduleJob(
-                        offenderDeletionJobDetails(),
-                        Set.of(offenderDeletionTrigger()),
-                        true);
+            .scheduleJob(
+                offenderDeletionJobDetails(),
+                Set.of(offenderDeletionTrigger()),
+                true);
     }
 
     public Trigger offenderDeletionTrigger() {
@@ -71,16 +71,16 @@ public class OffenderDeletionConfig {
         log.info("Configured to delete offenders with schedule: '{}'", offenderDeletionCron);
 
         return TriggerBuilder.newTrigger().forJob(offenderDeletionJobDetails())
-                .withIdentity("offender-deletion-trigger")
-                .withSchedule(cronSchedule(offenderDeletionCron))
-                .build();
+            .withIdentity("offender-deletion-trigger")
+            .withSchedule(cronSchedule(offenderDeletionCron))
+            .build();
     }
 
     public JobDetail offenderDeletionJobDetails() {
         return JobBuilder.newJob(OffenderDeletionJob.class)
-                .withIdentity("offender-deletion-job")
-                .storeDurably()
-                .build();
+            .withIdentity("offender-deletion-job")
+            .storeDurably()
+            .build();
     }
 
     public Optional<Integer> getReferralLimit() {

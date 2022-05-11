@@ -8,7 +8,9 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.error;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.success;
 
@@ -31,8 +33,8 @@ class ResultTest {
         final var result = success(1);
 
         assertThatThrownBy(result::getError)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("No error value present, success value is: '1'");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("No error value present, success value is: '1'");
     }
 
     @Test
@@ -51,8 +53,8 @@ class ResultTest {
         final var result = error(1);
 
         assertThatThrownBy(result::get)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("No success value present, error value is: '1'");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("No success value present, error value is: '1'");
     }
 
     @Test

@@ -13,7 +13,9 @@ public interface OffenderDeletionReferralRepository extends CrudRepository<Offen
 
 
     List<OffenderDeletionReferral> findByOffenderNo(final String offenderNo);
+
     List<OffenderDeletionReferral> findByAgencyLocationId(final String agencyLocationId);
+
     @Query(
         value = "SELECT * FROM offender_deletion_referral odr " +
             "LEFT JOIN referral_resolution rr " +
@@ -24,7 +26,7 @@ public interface OffenderDeletionReferralRepository extends CrudRepository<Offen
             "AND rr.resolution_date_time < :deleteAfterDateTime " +
             "AND rr.provisional_deletion_previously_granted = :provisionalDeletionPreviouslyGranted " +
             "ORDER BY rr.resolution_date_time ASC " +
-            "LIMIT :limit",  nativeQuery = true)
+            "LIMIT :limit", nativeQuery = true)
     List<OffenderDeletionReferral> findByReferralResolutionStatus(final String resolutionStatus, final Boolean provisionalDeletionPreviouslyGranted, final LocalDateTime deleteAfterDateTime, long limit);
 
 }

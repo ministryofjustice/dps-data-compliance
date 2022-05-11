@@ -53,14 +53,14 @@ class AwsAthenaDuplicateDetectionClientTest {
 
     private DuplicateDetectionClient client;
 
-    @BeforeEach
-    void setUp() {
-        client = new AwsAthenaDuplicateDetectionClient(athenaClient, queryFactory, Duration.ZERO);
-    }
-
     @AfterAll
     static void afterAll() {
         Mockito.framework().clearInlineMocks();
+    }
+
+    @BeforeEach
+    void setUp() {
+        client = new AwsAthenaDuplicateDetectionClient(athenaClient, queryFactory, Duration.ZERO);
     }
 
     @Test
@@ -71,9 +71,9 @@ class AwsAthenaDuplicateDetectionClientTest {
         mockGetQueryResultsExchange();
 
         assertThat(client.findDuplicatesFor(REFERENCE_OFFENDER))
-                .containsExactlyInAnyOrder(
-                        new DuplicateResult(DUPLICATE_OFFENDER_1, CONFIDENCE_1),
-                        new DuplicateResult(DUPLICATE_OFFENDER_2, CONFIDENCE_2));
+            .containsExactlyInAnyOrder(
+                new DuplicateResult(DUPLICATE_OFFENDER_1, CONFIDENCE_1),
+                new DuplicateResult(DUPLICATE_OFFENDER_2, CONFIDENCE_2));
     }
 
     @Test
@@ -83,8 +83,8 @@ class AwsAthenaDuplicateDetectionClientTest {
         mockExecutionState(RUNNING);
 
         assertThatThrownBy(() -> client.findDuplicatesFor(REFERENCE_OFFENDER))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Athena query 'query1' has timed out");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Athena query 'query1' has timed out");
     }
 
     @Test
@@ -94,16 +94,16 @@ class AwsAthenaDuplicateDetectionClientTest {
         mockExecutionState(FAILED, "Some error");
 
         assertThatThrownBy(() -> client.findDuplicatesFor(REFERENCE_OFFENDER))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Athena query 'query1' has failed with reason: 'FAILED', 'Some error'");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Athena query 'query1' has failed with reason: 'FAILED', 'Some error'");
     }
 
     private void mockStartQueryExecutionExchange() {
         final var startQueryExecution = StartQueryExecutionRequest.builder().build();
         when(queryFactory.startQueryExecution(REFERENCE_OFFENDER)).thenReturn(startQueryExecution);
         when(athenaClient.startQueryExecution(startQueryExecution)).thenReturn(StartQueryExecutionResponse.builder()
-                .queryExecutionId(QUERY_EXECUTION_ID)
-                .build());
+            .queryExecutionId(QUERY_EXECUTION_ID)
+            .build());
     }
 
     private void mockExecutionState(final QueryExecutionState state) {
@@ -114,13 +114,13 @@ class AwsAthenaDuplicateDetectionClientTest {
         final var getQueryExecution = GetQueryExecutionRequest.builder().build();
         when(queryFactory.getQueryExecution(QUERY_EXECUTION_ID)).thenReturn(getQueryExecution);
         when(athenaClient.getQueryExecution(getQueryExecution)).thenReturn(GetQueryExecutionResponse.builder()
-                .queryExecution(QueryExecution.builder()
-                        .status(QueryExecutionStatus.builder()
-                                .state(state)
-                                .stateChangeReason(stateChangeReason)
-                                .build())
-                        .build())
-                .build());
+            .queryExecution(QueryExecution.builder()
+                .status(QueryExecutionStatus.builder()
+                    .state(state)
+                    .stateChangeReason(stateChangeReason)
+                    .build())
+                .build())
+            .build());
     }
 
     private void mockGetQueryResultsExchange() {
@@ -128,30 +128,30 @@ class AwsAthenaDuplicateDetectionClientTest {
         when(queryFactory.getQueryResults(QUERY_EXECUTION_ID)).thenReturn(getQueryResults);
         when(athenaClient.getQueryResultsPaginator(getQueryResults)).thenReturn(new GetQueryResultsIterable(athenaClient, getQueryResults));
         when(athenaClient.getQueryResults(getQueryResults)).thenReturn(GetQueryResultsResponse.builder()
-                .resultSet(ResultSet.builder()
-                        .rows(
-                                headerRow(),
-                                dataRow(REFERENCE_OFFENDER, DUPLICATE_OFFENDER_1, MATCH_SCORE_1),
-                                dataRow(DUPLICATE_OFFENDER_2, REFERENCE_OFFENDER, MATCH_SCORE_2)) // offenders may be either way round
-                        .build())
-                .build());
+            .resultSet(ResultSet.builder()
+                .rows(
+                    headerRow(),
+                    dataRow(REFERENCE_OFFENDER, DUPLICATE_OFFENDER_1, MATCH_SCORE_1),
+                    dataRow(DUPLICATE_OFFENDER_2, REFERENCE_OFFENDER, MATCH_SCORE_2)) // offenders may be either way round
+                .build())
+            .build());
     }
 
     private Row headerRow() {
         return Row.builder()
-                .data(
-                        Datum.builder().varCharValue("offender_id_display_l").build(),
-                        Datum.builder().varCharValue("offender_id_display_r").build(),
-                        Datum.builder().varCharValue("match_score").build())
-                .build();
+            .data(
+                Datum.builder().varCharValue("offender_id_display_l").build(),
+                Datum.builder().varCharValue("offender_id_display_r").build(),
+                Datum.builder().varCharValue("match_score").build())
+            .build();
     }
 
     private Row dataRow(final OffenderNumber offender1, final OffenderNumber offender2, final double matchScore) {
         return Row.builder()
-                .data(
-                        Datum.builder().varCharValue(offender1.getOffenderNumber()).build(),
-                        Datum.builder().varCharValue(offender2.getOffenderNumber()).build(),
-                        Datum.builder().varCharValue(String.valueOf(matchScore)).build())
-                .build();
+            .data(
+                Datum.builder().varCharValue(offender1.getOffenderNumber()).build(),
+                Datum.builder().varCharValue(offender2.getOffenderNumber()).build(),
+                Datum.builder().varCharValue(String.valueOf(matchScore)).build())
+            .build();
     }
 }

@@ -49,9 +49,9 @@ class OffenderIterator {
                             final PrisonApiClient prisonApiClient,
                             final DataComplianceProperties properties) {
         this(repository, prisonApiClient, properties, custom()
-                .maxAttempts(UPLOAD_RETRY_MAX_ATTEMPTS)
-                .intervalFunction(ofExponentialBackoff(UPLOAD_RETRY_INITIAL_INTERVAL, UPLOAD_RETRY_MULTIPLIER))
-                .build());
+            .maxAttempts(UPLOAD_RETRY_MAX_ATTEMPTS)
+            .intervalFunction(ofExponentialBackoff(UPLOAD_RETRY_INITIAL_INTERVAL, UPLOAD_RETRY_MULTIPLIER))
+            .build());
     }
 
     @VisibleForTesting
@@ -69,15 +69,15 @@ class OffenderIterator {
     void applyForAll(final ImageUploadBatch batch, final OffenderAction action) {
 
         log.info("Applying offender action to first page of up to {} offenders, offset: {}",
-                pageLimit(), properties.getPrisonApiOffenderIdsInitialOffset());
+            pageLimit(), properties.getPrisonApiOffenderIdsInitialOffset());
         final var firstPageResponse = applyForPage(0, action, batch);
 
         log.info("Total number of {} offenders", firstPageResponse.getTotalCount());
         properties.getOffenderIdsTotalPages()
-                .ifPresent(total -> log.info("Limiting iteration to {} pages of data", total));
+            .ifPresent(total -> log.info("Limiting iteration to {} pages of data", total));
 
         LongStream.rangeClosed(1, indexOfFinalPage(firstPageResponse))
-                .forEach(pageNumber -> applyForPage(pageNumber, action, batch));
+            .forEach(pageNumber -> applyForPage(pageNumber, action, batch));
 
         log.info("Offender action applied");
     }
@@ -91,13 +91,13 @@ class OffenderIterator {
         final var offset = properties.getPrisonApiOffenderIdsInitialOffset() + (pageNumber * pageLimit());
         final var response = getOffenderNumbers(offset, pageLimit(), batch);
         final var tasks = response.getOffenderNumbers().stream()
-                .map(offenderNumber -> applyWithRetry(action, offenderNumber))
-                .collect(toList());
+            .map(offenderNumber -> applyWithRetry(action, offenderNumber))
+            .collect(toList());
 
         try {
 
             executorService.invokeAll(tasks)
-                    .forEach(future -> propagateAnyError(future::get));
+                .forEach(future -> propagateAnyError(future::get));
 
         } catch (InterruptedException e) {
 
@@ -114,9 +114,9 @@ class OffenderIterator {
                                                        final ImageUploadBatch batch) {
 
         return repository.findFirstByBatchIdNotOrderByUploadStartDateTimeDesc(batch.getBatchId())
-                .map(lastUpload -> prisonApiClient.getOffendersWithNewImages(
-                        lastUpload.getUploadStartDateTime().toLocalDate(), offset / limit, limit))
-                .orElseGet(() -> prisonApiClient.getOffenderNumbers(offset, limit));
+            .map(lastUpload -> prisonApiClient.getOffendersWithNewImages(
+                lastUpload.getUploadStartDateTime().toLocalDate(), offset / limit, limit))
+            .orElseGet(() -> prisonApiClient.getOffenderNumbers(offset, limit));
     }
 
     private long indexOfFinalPage(final OffenderNumbersResponse response) {
@@ -130,10 +130,11 @@ class OffenderIterator {
         return properties.getPrisonApiOffenderIdsLimit();
     }
 
-    interface OffenderAction extends Consumer<OffenderNumber> { }
-
     private Callable<Object> applyWithRetry(final OffenderAction offenderAction, final OffenderNumber offenderNumber) {
         return callable(() -> Retry.of(offenderNumber.getOffenderNumber(), retryConfig)
-                .executeRunnable(() -> offenderAction.accept(offenderNumber)));
+            .executeRunnable(() -> offenderAction.accept(offenderNumber)));
+    }
+
+    interface OffenderAction extends Consumer<OffenderNumber> {
     }
 }

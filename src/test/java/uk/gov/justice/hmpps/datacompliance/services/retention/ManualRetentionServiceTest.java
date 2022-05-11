@@ -59,42 +59,42 @@ class ManualRetentionServiceTest {
     @BeforeEach
     void setUp() {
         manualRetentionService = new ManualRetentionService(
-                TimeSource.of(NOW),
-                userSecurityUtils,
-                manualRetentionRepository,
-                retentionReasonCodeRepository);
+            TimeSource.of(NOW),
+            userSecurityUtils,
+            manualRetentionRepository,
+            retentionReasonCodeRepository);
     }
 
     @Test
     void getRetentionReasons() {
 
         when(retentionReasonCodeRepository.findAll()).thenReturn(List.of(
-                RetentionReasonCode.builder()
-                        .retentionReasonCodeId(Code.HIGH_PROFILE)
-                        .displayName("High Profile Offenders")
-                        .allowReasonDetails(false)
-                        .displayOrder(1)
-                        .build(),
-                RetentionReasonCode.builder()
-                        .retentionReasonCodeId(Code.OTHER)
-                        .displayName("Other")
-                        .allowReasonDetails(true)
-                        .displayOrder(2)
-                        .build()));
+            RetentionReasonCode.builder()
+                .retentionReasonCodeId(Code.HIGH_PROFILE)
+                .displayName("High Profile Offenders")
+                .allowReasonDetails(false)
+                .displayOrder(1)
+                .build(),
+            RetentionReasonCode.builder()
+                .retentionReasonCodeId(Code.OTHER)
+                .displayName("Other")
+                .allowReasonDetails(true)
+                .displayOrder(2)
+                .build()));
 
         assertThat(manualRetentionService.getRetentionReasons()).containsExactly(
-                ManualRetentionReasonDisplayName.builder()
-                        .reasonCode(HIGH_PROFILE)
-                        .displayName("High Profile Offenders")
-                        .allowReasonDetails(false)
-                        .displayOrder(1)
-                        .build(),
-                ManualRetentionReasonDisplayName.builder()
-                        .reasonCode(OTHER)
-                        .displayName("Other")
-                        .allowReasonDetails(true)
-                        .displayOrder(2)
-                        .build());
+            ManualRetentionReasonDisplayName.builder()
+                .reasonCode(HIGH_PROFILE)
+                .displayName("High Profile Offenders")
+                .allowReasonDetails(false)
+                .displayOrder(1)
+                .build(),
+            ManualRetentionReasonDisplayName.builder()
+                .reasonCode(OTHER)
+                .displayName("Other")
+                .allowReasonDetails(true)
+                .displayOrder(2)
+                .build());
     }
 
     @Test
@@ -103,20 +103,20 @@ class ManualRetentionServiceTest {
         final var manualRetention = mock(ManualRetention.class);
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
-                .thenReturn(Optional.of(manualRetention));
+            .thenReturn(Optional.of(manualRetention));
 
         assertThat(manualRetentionService.findManualOffenderRetention(new OffenderNumber(OFFENDER_NO)))
-                .contains(manualRetention);
+            .contains(manualRetention);
     }
 
     @Test
     void findManualOffenderRetentionReturnsEmpty() {
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         assertThat(manualRetentionService.findManualOffenderRetention(new OffenderNumber(OFFENDER_NO)))
-                .isEmpty();
+            .isEmpty();
     }
 
     @Test
@@ -125,23 +125,23 @@ class ManualRetentionServiceTest {
         final var manualRetention = ManualRetention.builder().build();
 
         manualRetention.addManualRetentionReason(
-                uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetentionReason.builder().build());
+            uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetentionReason.builder().build());
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
-                .thenReturn(Optional.of(manualRetention));
+            .thenReturn(Optional.of(manualRetention));
 
         assertThat(manualRetentionService.findManualOffenderRetentionWithReasons(new OffenderNumber(OFFENDER_NO)))
-                .contains(manualRetention);
+            .contains(manualRetention);
     }
 
     @Test
     void findManualOffenderRetentionWithReasonsReturnsEmptyWhenNoRetentionRecord() {
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         assertThat(manualRetentionService.findManualOffenderRetentionWithReasons(new OffenderNumber(OFFENDER_NO)))
-                .isEmpty();
+            .isEmpty();
     }
 
     @Test
@@ -150,10 +150,10 @@ class ManualRetentionServiceTest {
         final var manualRetention = ManualRetention.builder().build();
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
-                .thenReturn(Optional.of(manualRetention));
+            .thenReturn(Optional.of(manualRetention));
 
         assertThat(manualRetentionService.findManualOffenderRetentionWithReasons(new OffenderNumber(OFFENDER_NO)))
-                .isEmpty();
+            .isEmpty();
     }
 
     @Test
@@ -169,13 +169,13 @@ class ManualRetentionServiceTest {
     void createManualOffenderRetention() {
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
 
         mockUsername();
         mockReasonCodeRetrieval(Code.HIGH_PROFILE);
 
         manualRetentionService.updateManualOffenderRetention(
-                new OffenderNumber(OFFENDER_NO), requestWith(HIGH_PROFILE), null);
+            new OffenderNumber(OFFENDER_NO), requestWith(HIGH_PROFILE), null);
 
         assertEntityPersistedWith(0, Code.HIGH_PROFILE);
     }
@@ -184,13 +184,13 @@ class ManualRetentionServiceTest {
     void updateManualOffenderRetention() {
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
-                .thenReturn(Optional.of(EXISTING_RECORD));
+            .thenReturn(Optional.of(EXISTING_RECORD));
 
         mockUsername();
         mockReasonCodeRetrieval(Code.OTHER);
 
         manualRetentionService.updateManualOffenderRetention(
-                new OffenderNumber(OFFENDER_NO), requestWith(OTHER), "\"0\"");
+            new OffenderNumber(OFFENDER_NO), requestWith(OTHER), "\"0\"");
 
         assertEntityPersistedWith(1, Code.OTHER);
     }
@@ -199,26 +199,26 @@ class ManualRetentionServiceTest {
     void updateManualOffenderRetentionThrowsWhenIfMatchMissing() {
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
-                .thenReturn(Optional.of(EXISTING_RECORD));
+            .thenReturn(Optional.of(EXISTING_RECORD));
 
         assertThatThrownBy(() ->
-                manualRetentionService.updateManualOffenderRetention(
-                        new OffenderNumber(OFFENDER_NO), requestWith(OTHER), null))
-                .isInstanceOf(HttpClientErrorException.class)
-                .hasMessageContaining("Must provide 'If-Match' header");
+            manualRetentionService.updateManualOffenderRetention(
+                new OffenderNumber(OFFENDER_NO), requestWith(OTHER), null))
+            .isInstanceOf(HttpClientErrorException.class)
+            .hasMessageContaining("Must provide 'If-Match' header");
     }
 
     @Test
     void updateManualOffenderRetentionThrowsWhenExistingVersionDoesNotMatch() {
 
         when(manualRetentionRepository.findFirstByOffenderNoOrderByRetentionVersionDesc(OFFENDER_NO))
-                .thenReturn(Optional.of(EXISTING_RECORD));
+            .thenReturn(Optional.of(EXISTING_RECORD));
 
         assertThatThrownBy(() ->
-                manualRetentionService.updateManualOffenderRetention(
-                        new OffenderNumber(OFFENDER_NO), requestWith(OTHER), "\"-1\""))
-                .isInstanceOf(OptimisticLockException.class)
-                .hasMessageContaining("Attempting to update an old version of the retention record");
+            manualRetentionService.updateManualOffenderRetention(
+                new OffenderNumber(OFFENDER_NO), requestWith(OTHER), "\"-1\""))
+            .isInstanceOf(OptimisticLockException.class)
+            .hasMessageContaining("Attempting to update an old version of the retention record");
     }
 
     private void assertEntityPersistedWith(final int version, final Code reasonCode) {
@@ -241,11 +241,11 @@ class ManualRetentionServiceTest {
 
     private ManualRetentionRequest requestWith(final ManualRetentionReasonCode code) {
         return ManualRetentionRequest.builder()
-                .retentionReason(ManualRetentionReason.builder()
-                        .reasonCode(code)
-                        .reasonDetails(REASON_DETAILS)
-                        .build())
-                .build();
+            .retentionReason(ManualRetentionReason.builder()
+                .reasonCode(code)
+                .reasonDetails(REASON_DETAILS)
+                .build())
+            .build();
     }
 
     private void mockUsername() {
@@ -255,8 +255,8 @@ class ManualRetentionServiceTest {
     private void mockReasonCodeRetrieval(final Code code) {
 
         when(retentionReasonCodeRepository.findById(code))
-                .thenReturn(Optional.of(RetentionReasonCode.builder()
-                        .retentionReasonCodeId(code)
-                        .build()));
+            .thenReturn(Optional.of(RetentionReasonCode.builder()
+                .retentionReasonCodeId(code)
+                .build()));
     }
 }

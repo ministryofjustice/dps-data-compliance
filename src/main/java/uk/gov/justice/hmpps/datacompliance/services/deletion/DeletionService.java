@@ -49,26 +49,26 @@ public class DeletionService {
         log.info("Granting deletion of offender: '{}'", referral.getOffenderNo());
 
         deletionGrantedEventPusher.grantDeletion(OffenderDeletionGrant.builder()
-                .offenderNumber(referral.getOffenderNumber())
-                .referralId(referral.getReferralId())
-                .offenderIds(referral.getOffenderAliases().stream()
-                        .map(ReferredOffenderAlias::getOffenderId)
-                        .collect(toSet()))
-                .offenderBookIds(referral.getOffenderAliases().stream()
-                        .map(ReferredOffenderAlias::getOffenderBookId)
-                        .filter(Objects::nonNull)
-                        .collect(toSet()))
-                .build());
+            .offenderNumber(referral.getOffenderNumber())
+            .referralId(referral.getReferralId())
+            .offenderIds(referral.getOffenderAliases().stream()
+                .map(ReferredOffenderAlias::getOffenderId)
+                .collect(toSet()))
+            .offenderBookIds(referral.getOffenderAliases().stream()
+                .map(ReferredOffenderAlias::getOffenderBookId)
+                .filter(Objects::nonNull)
+                .collect(toSet()))
+            .build());
     }
 
     public void handleDeletionComplete(final OffenderDeletionComplete event) {
 
         final var referral = referralRepository.findById(event.getReferralId())
-                .orElseThrow(illegalState("Cannot retrieve referral record for id: '%s'", event.getReferralId()));
+            .orElseThrow(illegalState("Cannot retrieve referral record for id: '%s'", event.getReferralId()));
 
         checkState(Objects.equals(event.getOffenderIdDisplay(), referral.getOffenderNo()),
-                "Offender number '%s' of referral '%s' does not match '%s'",
-                referral.getOffenderNo(), referral.getReferralId(), event.getOffenderIdDisplay());
+            "Offender number '%s' of referral '%s' does not match '%s'",
+            referral.getOffenderNo(), referral.getReferralId(), event.getOffenderIdDisplay());
 
         if (properties.isImageRecognitionDeletionEnabled()) {
             imageDuplicationDetectionService.deleteOffenderImages(referral.getOffenderNumber());
@@ -83,8 +83,8 @@ public class DeletionService {
         log.info("Updating destruction log with deletion confirmation for: '{}'", referral.getOffenderNo());
 
         final var referralResolution = referral.getReferralResolution()
-                .filter(resolution -> resolution.isType(DELETION_GRANTED))
-                .orElseThrow(illegalState("Referral '%s' does not have expected resolution type", referral.getReferralId()));
+            .filter(resolution -> resolution.isType(DELETION_GRANTED))
+            .orElseThrow(illegalState("Referral '%s' does not have expected resolution type", referral.getReferralId()));
 
         referralResolution.setResolutionDateTime(timeSource.nowAsLocalDateTime());
         referralResolution.setResolutionStatus(DELETED);
@@ -97,16 +97,16 @@ public class DeletionService {
         log.info("Publishing deletion complete event for: '{}'", deletionCompletion.getOffenderNo());
 
         final var deletionCompleteEvent =
-                uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.builder()
-                        .offenderIdDisplay(deletionCompletion.getOffenderNo());
+            uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.builder()
+                .offenderIdDisplay(deletionCompletion.getOffenderNo());
 
         deletionCompletion.getOffenderAliases().stream()
-                .collect(groupingBy(ReferredOffenderAlias::getOffenderId))
-                .forEach((offenderId, bookings) -> {
-                    final var offenderWithBookings =  OffenderWithBookings.builder().offenderId(offenderId);
-                    bookings.forEach(booking -> offenderWithBookings.booking(new Booking(booking.getOffenderBookId())));
-                    deletionCompleteEvent.offender(offenderWithBookings.build());
-                });
+            .collect(groupingBy(ReferredOffenderAlias::getOffenderId))
+            .forEach((offenderId, bookings) -> {
+                final var offenderWithBookings = OffenderWithBookings.builder().offenderId(offenderId);
+                bookings.forEach(booking -> offenderWithBookings.booking(new Booking(booking.getOffenderBookId())));
+                deletionCompleteEvent.offender(offenderWithBookings.build());
+            });
 
         deletionCompleteEventPusher.sendEvent(deletionCompleteEvent.build());
     }

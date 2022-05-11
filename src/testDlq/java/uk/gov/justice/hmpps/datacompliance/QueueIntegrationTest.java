@@ -54,6 +54,10 @@ public class QueueIntegrationTest {
     public static final LocalStackContainer localStackContainer;
     public static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
 
+    static {
+        localStackContainer = LocalStackConfig.instance();
+    }
+
     protected ObjectMapper objectMapper;
     protected AmazonSQS sqsRequestClient;
     protected AmazonSQS sqsResponseClient;
@@ -63,11 +67,18 @@ public class QueueIntegrationTest {
     protected AmazonSQS sqsDlqResponseClient;
     protected String sqsDlqResponseClientQueueUrl;
     protected String sqsDlqRequestClientQueueUrl;
-
-
-    static {
-        localStackContainer = LocalStackConfig.instance();
-    }
+    @Autowired
+    protected WebTestClient webTestClient;
+    @LocalServerPort
+    protected Integer port = 0;
+    @Autowired
+    HmppsQueueService hmppsQueueService;
+    @Autowired
+    DeceasedOffenderDeletionBatchRepository deceasedOffenderDeletionBatch;
+    @Autowired
+    DeceasedOffenderDeletionReferralRepository deceasedOffenderDeletionReferralRepository;
+    @Autowired
+    PlatformTransactionManager transactionManager;
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
@@ -76,6 +87,11 @@ public class QueueIntegrationTest {
         }
     }
 
+    @BeforeAll
+    protected static void setupAll() {
+        Awaitility.setDefaultPollDelay(Duration.ZERO);
+        Awaitility.setDefaultTimeout(Duration.ofMinutes(1));
+    }
 
     protected int getNumberOfMessagesOnRequestQueue() {
         return getNumberOfMessagesCurrentlyOnSqsQueue(sqsRequestClientQueueUrl, sqsRequestClient);
@@ -94,7 +110,6 @@ public class QueueIntegrationTest {
         return Integer.parseInt(queueAttributes.getAttributes().get("ApproximateNumberOfMessages"));
     }
 
-
     DeceasedOffenderDeletionBatch persistNewDeceasedOffenderBatch() {
         return deceasedOffenderDeletionBatch.save(DeceasedOffenderDeletionBatch.builder()
             .requestDateTime(NOW)
@@ -103,39 +118,11 @@ public class QueueIntegrationTest {
             .build());
     }
 
-
     List<DeceasedOffenderDeletionReferral> retrieveDeceasedReferralWithWait(String offenderNumber) {
         return new TransactionTemplate(transactionManager).execute(f -> {
             Awaitility.await().until(() -> Streamable.of(deceasedOffenderDeletionReferralRepository.findAll()).toList().size() == 1);
             return deceasedOffenderDeletionReferralRepository.findByOffenderNo(offenderNumber);
         });
-    }
-
-
-    @Autowired
-    HmppsQueueService hmppsQueueService;
-
-    @Autowired
-    DeceasedOffenderDeletionBatchRepository deceasedOffenderDeletionBatch;
-
-
-    @Autowired
-    DeceasedOffenderDeletionReferralRepository deceasedOffenderDeletionReferralRepository;
-
-    @Autowired
-    PlatformTransactionManager transactionManager;
-
-    @Autowired
-    protected WebTestClient webTestClient;
-
-    @LocalServerPort
-    protected Integer port = 0;
-
-
-    @BeforeAll
-    protected static void setupAll() {
-        Awaitility.setDefaultPollDelay(Duration.ZERO);
-        Awaitility.setDefaultTimeout(Duration.ofMinutes(1));
     }
 
     @BeforeEach
@@ -179,13 +166,14 @@ public class QueueIntegrationTest {
         }
         return objectMapper;
     }
+
     protected MessageAttributeValue stringAttribute(final String value) {
         return new MessageAttributeValue()
             .withDataType("String")
             .withStringValue(value);
     }
 
-    protected  DeceasedOffender getDeceasedOffender(String offenderIdDisplay) {
+    protected DeceasedOffender getDeceasedOffender(String offenderIdDisplay) {
         return DeceasedOffender.builder()
             .offenderIdDisplay(offenderIdDisplay)
             .firstName("someFirstName")

@@ -60,7 +60,7 @@ public class AwsAthenaDuplicateDetectionClient implements DuplicateDetectionClie
 
     private String submitAthenaQuery(final OffenderNumber offenderNumber) {
         return athenaClient.startQueryExecution(queryFactory.startQueryExecution(offenderNumber))
-                .queryExecutionId();
+            .queryExecutionId();
     }
 
     private void awaitResponse(final String queryExecutionId) {
@@ -83,7 +83,7 @@ public class AwsAthenaDuplicateDetectionClient implements DuplicateDetectionClie
             }
 
             throw new IllegalStateException(format("Athena query '%s' has failed with reason: '%s', '%s'",
-                    queryExecutionId, queryStatus.state(), queryStatus.stateChangeReason()));
+                queryExecutionId, queryStatus.state(), queryStatus.stateChangeReason()));
         }
 
         throw new IllegalStateException(format("Athena query '%s' has timed out", queryExecutionId));
@@ -92,8 +92,8 @@ public class AwsAthenaDuplicateDetectionClient implements DuplicateDetectionClie
     private Set<DuplicateResult> retrieveResult(final String queryExecutionId, final OffenderNumber referenceOffender) {
 
         return athenaClient.getQueryResultsPaginator(queryFactory.getQueryResults(queryExecutionId)).stream()
-                .flatMap(resultPage -> getDuplicatesFromPagedResult(resultPage, referenceOffender))
-                .collect(toSet());
+            .flatMap(resultPage -> getDuplicatesFromPagedResult(resultPage, referenceOffender))
+            .collect(toSet());
     }
 
     private void wait(final AtomicInteger numberOfAttempts) {
@@ -110,12 +110,12 @@ public class AwsAthenaDuplicateDetectionClient implements DuplicateDetectionClie
 
     private Stream<DuplicateResult> getDuplicatesFromPagedResult(final GetQueryResultsResponse resultPage,
                                                                  final OffenderNumber referenceOffender) {
-        return  resultPage.resultSet().rows().stream()
-                .map(DuplicateOffenderRow::new)
-                .filter(not(DuplicateOffenderRow::isHeaderRow))
-                .map(row -> new DuplicateResult(
-                        row.getComplementOf(referenceOffender),
-                        matchScoreToPercentageConfidence(row.getMatchScore())));
+        return resultPage.resultSet().rows().stream()
+            .map(DuplicateOffenderRow::new)
+            .filter(not(DuplicateOffenderRow::isHeaderRow))
+            .map(row -> new DuplicateResult(
+                row.getComplementOf(referenceOffender),
+                matchScoreToPercentageConfidence(row.getMatchScore())));
     }
 
     private double matchScoreToPercentageConfidence(final double matchScore) {

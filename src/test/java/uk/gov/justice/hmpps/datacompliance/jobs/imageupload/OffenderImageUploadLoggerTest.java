@@ -47,11 +47,11 @@ class OffenderImageUploadLoggerTest {
         assertThat(logger.getUploadCount()).isZero();
 
         logger.log(
-                OffenderImage.builder()
-                        .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
-                        .imageId(IMAGE_ID)
-                        .build(),
-                FACE_ID);
+            OffenderImage.builder()
+                .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
+                .imageId(IMAGE_ID)
+                .build(),
+            FACE_ID);
 
         var offenderImageUpload = ArgumentCaptor.forClass(OffenderImageUpload.class);
         verify(repository).save(offenderImageUpload.capture());

@@ -14,7 +14,7 @@ public class RetentionCheckAnalyticalPlatformDataDuplicate extends RetentionChec
 
     public static final String DATA_DUPLICATE_AP = "DATA_DUPLICATE_AP";
 
-    public RetentionCheckAnalyticalPlatformDataDuplicate(final Status status){
+    public RetentionCheckAnalyticalPlatformDataDuplicate(final Status status) {
         super(DATA_DUPLICATE_AP, status);
     }
 }

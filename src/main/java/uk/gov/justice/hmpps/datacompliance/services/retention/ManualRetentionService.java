@@ -40,9 +40,9 @@ public class ManualRetentionService {
 
     public List<ManualRetentionReasonDisplayName> getRetentionReasons() {
         return stream(retentionReasonCodeRepository.findAll().spliterator(), false)
-                .map(this::transform)
-                .distinct()
-                .collect(toList());
+            .map(this::transform)
+            .distinct()
+            .collect(toList());
     }
 
     public Optional<ManualRetention> findManualOffenderRetention(final OffenderNumber offenderNumber) {
@@ -51,12 +51,12 @@ public class ManualRetentionService {
 
     public Optional<ManualRetention> findManualOffenderRetentionWithReasons(final OffenderNumber offenderNumber) {
         return findManualOffenderRetention(offenderNumber)
-                .filter(retention -> !retention.getManualRetentionReasons().isEmpty());
+            .filter(retention -> !retention.getManualRetentionReasons().isEmpty());
     }
 
     /**
      * Updates / creates a retention record for the offender.
-     *
+     * <p>
      * Uses optimistic locking to ensure the client is updating the latest version of the record.
      *
      * @param ifMatchValue Uses the 'If-Match' header (for an update) to check the client has the latest version of the record.
@@ -71,9 +71,9 @@ public class ManualRetentionService {
         existingRecord.ifPresent(record -> checkForConflict(record, ifMatchValue));
 
         final var versionToPersist = existingRecord
-                .map(ManualRetention::getRetentionVersion)
-                .map(version -> version + 1)
-                .orElse(0);
+            .map(ManualRetention::getRetentionVersion)
+            .map(version -> version + 1)
+            .orElse(0);
 
         manualRetentionRepository.save(generateRecordToPersist(offenderNumber, manualRetentionRequest, versionToPersist));
 
@@ -100,16 +100,16 @@ public class ManualRetentionService {
                                                     final int version) {
 
         final var recordToPersist = ManualRetention.builder()
-                .offenderNo(offenderNumber.getOffenderNumber())
-                .retentionDateTime(timeSource.nowAsLocalDateTime())
-                .userId(userSecurityUtils.getCurrentUsername()
-                        .orElseThrow(() -> new IllegalStateException("Cannot retrieve username from request")))
-                .retentionVersion(version)
-                .build();
+            .offenderNo(offenderNumber.getOffenderNumber())
+            .retentionDateTime(timeSource.nowAsLocalDateTime())
+            .userId(userSecurityUtils.getCurrentUsername()
+                .orElseThrow(() -> new IllegalStateException("Cannot retrieve username from request")))
+            .retentionVersion(version)
+            .build();
 
         manualRetentionRequest.getRetentionReasons().stream()
-                .map(this::transform)
-                .forEach(recordToPersist::addManualRetentionReason);
+            .map(this::transform)
+            .forEach(recordToPersist::addManualRetentionReason);
 
         return recordToPersist;
     }
@@ -117,19 +117,19 @@ public class ManualRetentionService {
     private ManualRetentionReason transform(final uk.gov.justice.hmpps.datacompliance.web.dto.ManualRetentionReason reason) {
 
         return ManualRetentionReason.builder()
-                .retentionReasonCodeId(
-                        retentionReasonCodeRepository.findById(Code.valueOf(reason.getReasonCode().name()))
-                                .orElseThrow())
-                .reasonDetails(reason.getReasonDetails())
-                .build();
+            .retentionReasonCodeId(
+                retentionReasonCodeRepository.findById(Code.valueOf(reason.getReasonCode().name()))
+                    .orElseThrow())
+            .reasonDetails(reason.getReasonDetails())
+            .build();
     }
 
     private ManualRetentionReasonDisplayName transform(final RetentionReasonCode reason) {
         return ManualRetentionReasonDisplayName.builder()
-                .reasonCode(ManualRetentionReasonCode.valueOf(reason.getRetentionReasonCodeId().name()))
-                .displayName(reason.getDisplayName())
-                .allowReasonDetails(reason.getAllowReasonDetails())
-                .displayOrder(reason.getDisplayOrder())
-                .build();
+            .reasonCode(ManualRetentionReasonCode.valueOf(reason.getRetentionReasonCodeId().name()))
+            .displayName(reason.getDisplayName())
+            .allowReasonDetails(reason.getAllowReasonDetails())
+            .displayOrder(reason.getDisplayOrder())
+            .build();
     }
 }

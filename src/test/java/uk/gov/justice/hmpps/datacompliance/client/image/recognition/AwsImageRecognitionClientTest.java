@@ -7,7 +7,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
-import software.amazon.awssdk.services.rekognition.model.*;
+import software.amazon.awssdk.services.rekognition.model.CompareFacesMatch;
+import software.amazon.awssdk.services.rekognition.model.CompareFacesRequest;
+import software.amazon.awssdk.services.rekognition.model.CompareFacesResponse;
+import software.amazon.awssdk.services.rekognition.model.DeleteFacesRequest;
+import software.amazon.awssdk.services.rekognition.model.Face;
+import software.amazon.awssdk.services.rekognition.model.FaceRecord;
+import software.amazon.awssdk.services.rekognition.model.IndexFacesRequest;
+import software.amazon.awssdk.services.rekognition.model.IndexFacesResponse;
+import software.amazon.awssdk.services.rekognition.model.SearchFacesRequest;
+import software.amazon.awssdk.services.rekognition.model.SearchFacesResponse;
+import software.amazon.awssdk.services.rekognition.model.UnindexedFace;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 import static java.lang.String.format;
@@ -18,23 +28,25 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static software.amazon.awssdk.services.rekognition.model.QualityFilter.HIGH;
-import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.*;
+import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.FACE_NOT_FOUND;
+import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.FACE_POOR_QUALITY;
+import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.MULTIPLE_FACES_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 class AwsImageRecognitionClientTest {
 
-    private static final byte[] DATA_1 = new byte[] { (byte) 0x01 };
-    private static final byte[] DATA_2 = new byte[] { (byte) 0x02 };
+    private static final byte[] DATA_1 = new byte[]{(byte) 0x01};
+    private static final byte[] DATA_2 = new byte[]{(byte) 0x02};
     private static final OffenderNumber OFFENDER_NUMBER = new OffenderNumber("A1234AA");
     private static final long OFFENDER_IMAGE_ID = 1L;
     private static final String EXPECTED_FACE_ID = "face1";
     private static final String COLLECTION_NAME = "collection_name";
     private static final float SIMILARITY_THRESHOLD = 99.9f;
     private static final OffenderImage OFFENDER_IMAGE = OffenderImage.builder()
-            .offenderNumber(OFFENDER_NUMBER)
-            .imageId(OFFENDER_IMAGE_ID)
-            .imageData(DATA_1)
-            .build();
+        .offenderNumber(OFFENDER_NUMBER)
+        .imageId(OFFENDER_IMAGE_ID)
+        .imageData(DATA_1)
+        .build();
 
     @Mock
     private RekognitionClient awsClient;
@@ -54,7 +66,7 @@ class AwsImageRecognitionClientTest {
         when(awsClient.indexFaces(request.capture())).thenReturn(indexedFaces(EXPECTED_FACE_ID));
 
         assertThat(client.uploadImageToCollection(OFFENDER_IMAGE).get().getFaceId())
-                .isEqualTo(EXPECTED_FACE_ID);
+            .isEqualTo(EXPECTED_FACE_ID);
 
         assertThat(request.getValue().maxFaces()).isEqualTo(2);
         assertThat(request.getValue().qualityFilter()).isEqualTo(HIGH);
@@ -67,41 +79,41 @@ class AwsImageRecognitionClientTest {
     void uploadImageToCollectionEnsuresOnlyOneFaceIndexed() {
 
         when(awsClient.indexFaces(any(IndexFacesRequest.class)))
-                .thenReturn(indexedFaces(EXPECTED_FACE_ID, "another-face-in-the-image"));
+            .thenReturn(indexedFaces(EXPECTED_FACE_ID, "another-face-in-the-image"));
 
         assertThat(client.uploadImageToCollection(OFFENDER_IMAGE).getError())
-                .isEqualTo(MULTIPLE_FACES_FOUND);
+            .isEqualTo(MULTIPLE_FACES_FOUND);
 
         verify(awsClient).deleteFaces(DeleteFacesRequest.builder()
-                .collectionId(COLLECTION_NAME)
-                .faceIds(EXPECTED_FACE_ID)
-                .build());
+            .collectionId(COLLECTION_NAME)
+            .faceIds(EXPECTED_FACE_ID)
+            .build());
         verify(awsClient).deleteFaces(DeleteFacesRequest.builder()
-                .collectionId(COLLECTION_NAME)
-                .faceIds("another-face-in-the-image")
-                .build());
+            .collectionId(COLLECTION_NAME)
+            .faceIds("another-face-in-the-image")
+            .build());
     }
 
     @Test
     void uploadImageToCollectionHandlesImageWithNoFace() {
 
         when(awsClient.indexFaces(any(IndexFacesRequest.class)))
-                .thenReturn(indexedFaces(/* NONE */));
+            .thenReturn(indexedFaces(/* NONE */));
 
         assertThat(client.uploadImageToCollection(OFFENDER_IMAGE).getError())
-                .isEqualTo(FACE_NOT_FOUND);
+            .isEqualTo(FACE_NOT_FOUND);
     }
 
     @Test
     void uploadImageToCollectionHandlesImageWithPoorQualityFace() {
 
         when(awsClient.indexFaces(any(IndexFacesRequest.class)))
-                .thenReturn(indexedFacesBuilder(/* NONE */)
-                        .unindexedFaces(UnindexedFace.builder().build())
-                        .build());
+            .thenReturn(indexedFacesBuilder(/* NONE */)
+                .unindexedFaces(UnindexedFace.builder().build())
+                .build());
 
         assertThat(client.uploadImageToCollection(OFFENDER_IMAGE).getError())
-                .isEqualTo(FACE_POOR_QUALITY);
+            .isEqualTo(FACE_POOR_QUALITY);
     }
 
     @Test
@@ -160,36 +172,36 @@ class AwsImageRecognitionClientTest {
 
     private CompareFacesResponse compareFacesResponse(final Float... similarities) {
         return CompareFacesResponse.builder()
-                .faceMatches(stream(similarities)
-                        .map(similarity -> CompareFacesMatch.builder().similarity(similarity).build())
-                        .collect(toList()))
-                .build();
+            .faceMatches(stream(similarities)
+                .map(similarity -> CompareFacesMatch.builder().similarity(similarity).build())
+                .collect(toList()))
+            .build();
     }
 
-    private IndexFacesResponse indexedFaces(final String ... faceIds) {
+    private IndexFacesResponse indexedFaces(final String... faceIds) {
         return indexedFacesBuilder(faceIds).build();
     }
 
-    private IndexFacesResponse.Builder indexedFacesBuilder(final String ... faceIds) {
+    private IndexFacesResponse.Builder indexedFacesBuilder(final String... faceIds) {
         return IndexFacesResponse.builder()
-                .faceRecords(stream(faceIds)
-                        .map(id -> FaceRecord.builder()
-                                .face(Face.builder()
-                                        .faceId(id)
-                                        .build())
-                                .build())
-                        .collect(toList()));
+            .faceRecords(stream(faceIds)
+                .map(id -> FaceRecord.builder()
+                    .face(Face.builder()
+                        .faceId(id)
+                        .build())
+                    .build())
+                .collect(toList()));
     }
 
     private SearchFacesResponse matchingFace() {
         return SearchFacesResponse.builder()
-                .faceMatches(software.amazon.awssdk.services.rekognition.model.FaceMatch.builder()
-                        .similarity(97.89f)
-                        .face(Face.builder()
-                                .faceId(EXPECTED_FACE_ID)
-                                .build())
-                        .build())
-                .build();
+            .faceMatches(software.amazon.awssdk.services.rekognition.model.FaceMatch.builder()
+                .similarity(97.89f)
+                .face(Face.builder()
+                    .faceId(EXPECTED_FACE_ID)
+                    .build())
+                .build())
+            .build();
     }
 
     private SearchFacesResponse noMatchingFace() {

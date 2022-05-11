@@ -47,6 +47,10 @@ public class QueueIntegrationTest {
     public static final LocalStackContainer localStackContainer;
     public static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
 
+    static {
+        localStackContainer = LocalStackConfig.instance();
+    }
+
     protected MockWebServer hmppsAuthMock;
     protected MockWebServer prisonApiMock;
     protected MockWebServer pathfinderApiMock;
@@ -54,11 +58,22 @@ public class QueueIntegrationTest {
     protected MockWebServer prisonRegisterMock;
     protected AmazonSQS sqsRequestClient;
     protected String sqsResponseClientQueueUrl;
-
-
-    static {
-        localStackContainer = LocalStackConfig.instance();
-    }
+    @Autowired
+    protected WebTestClient webTestClient;
+    @LocalServerPort
+    protected Integer port = 0;
+    @Autowired
+    HmppsQueueService hmppsQueueService;
+    @Autowired
+    MockJmsListener mockJmsListener;
+    @Autowired
+    OffenderDeletionBatchRepository repository;
+    @Autowired
+    OffenderDeletionReferralRepository offenderDeletionReferralRepository;
+    @Autowired
+    JwtAuthenticationHelper jwtAuthenticationHelper;
+    @Autowired
+    PlatformTransactionManager transactionManager;
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
@@ -67,6 +82,11 @@ public class QueueIntegrationTest {
         }
     }
 
+    @BeforeAll
+    public static void setupAll() {
+        Awaitility.setDefaultPollDelay(Duration.ZERO);
+        Awaitility.setDefaultTimeout(Duration.ofMinutes(1));
+    }
 
     public void waitForPathFinderApiRequestTo(String url) {
         await().until(() -> requestExists(url));
@@ -80,7 +100,6 @@ public class QueueIntegrationTest {
         final GetQueueAttributesResult queueAttributes = client.getQueueAttributes(queueUrl, List.of("ApproximateNumberOfMessages"));
         return Integer.parseInt(queueAttributes.getAttributes().get("ApproximateNumberOfMessages"));
     }
-
 
     public boolean requestExists(String url) {
         try {
@@ -131,38 +150,6 @@ public class QueueIntegrationTest {
         pathfinderApiMock.enqueue(response);
         communityApiMock.enqueue(response);
         prisonRegisterMock.enqueue(response);
-    }
-
-
-    @Autowired
-    HmppsQueueService hmppsQueueService;
-
-    @Autowired
-    MockJmsListener mockJmsListener;
-
-    @Autowired
-    OffenderDeletionBatchRepository repository;
-
-    @Autowired
-    OffenderDeletionReferralRepository offenderDeletionReferralRepository;
-
-    @Autowired
-    JwtAuthenticationHelper jwtAuthenticationHelper;
-
-    @Autowired
-    PlatformTransactionManager transactionManager;
-
-    @Autowired
-    protected WebTestClient webTestClient;
-
-    @LocalServerPort
-    protected Integer port = 0;
-
-
-    @BeforeAll
-    public static void setupAll() {
-        Awaitility.setDefaultPollDelay(Duration.ZERO);
-        Awaitility.setDefaultTimeout(Duration.ofMinutes(1));
     }
 
     @BeforeEach

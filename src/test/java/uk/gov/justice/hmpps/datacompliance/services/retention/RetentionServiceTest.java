@@ -61,13 +61,13 @@ class RetentionServiceTest {
     private static final long FREE_TEXT_CHECK_ID = 2;
     private static final String BOOKING_NO = "R26283";
     private static final OffenderToCheck OFFENDER_TO_CHECK = OffenderToCheck.builder()
-            .offenderNumber(OFFENDER_NUMBER)
-            .offenceCode(OFFENCE_CODE)
-            .firstName("firstName")
-            .middleName("middleName")
-            .lastName("lastName")
-            .bookingNo(BOOKING_NO)
-            .build();
+        .offenderNumber(OFFENDER_NUMBER)
+        .offenceCode(OFFENCE_CODE)
+        .firstName("firstName")
+        .middleName("middleName")
+        .lastName("lastName")
+        .bookingNo(BOOKING_NO)
+        .build();
 
     @Mock
     private ManualRetentionService manualRetentionService;
@@ -104,23 +104,23 @@ class RetentionServiceTest {
     @BeforeEach
     void setUp() {
         service = new RetentionService(
-                pathfinderApiClient,
-                communityApiClient,
-                manualRetentionService,
-                imageDuplicationDetectionService,
-                dataDuplicationDetectionService,
-                retentionCheckRepository,
-                referralResolutionService,
-                moratoriumCheckService,
-                offenderRestrictionCheckService,
-                ualService,
-                DataComplianceProperties.builder()
-                        .imageDuplicateCheckEnabled(true)
-                        .idDataDuplicateCheckEnabled(true)
-                        .databaseDataDuplicateCheckEnabled(true)
-                        .analyticalPlatformDataDuplicateCheckEnabled(true)
-                        .mappaCheckEnabled(true)
-                        .build());
+            pathfinderApiClient,
+            communityApiClient,
+            manualRetentionService,
+            imageDuplicationDetectionService,
+            dataDuplicationDetectionService,
+            retentionCheckRepository,
+            referralResolutionService,
+            moratoriumCheckService,
+            offenderRestrictionCheckService,
+            ualService,
+            DataComplianceProperties.builder()
+                .imageDuplicateCheckEnabled(true)
+                .idDataDuplicateCheckEnabled(true)
+                .databaseDataDuplicateCheckEnabled(true)
+                .analyticalPlatformDataDuplicateCheckEnabled(true)
+                .mappaCheckEnabled(true)
+                .build());
     }
 
     @Test
@@ -131,7 +131,7 @@ class RetentionServiceTest {
         final var retentionChecks = service.conductRetentionChecks(OFFENDER_TO_CHECK);
 
         assertThat(retentionChecks).extracting(ActionableRetentionCheck::getRetentionCheck)
-                .allMatch(check -> isExpectedStatusWhenChecksEnabled(check, RETENTION_REQUIRED));
+            .allMatch(check -> isExpectedStatusWhenChecksEnabled(check, RETENTION_REQUIRED));
 
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
         verify(dataDuplicationDetectionService).searchForIdDuplicates(eq(OFFENDER_NUMBER), any());
@@ -149,7 +149,7 @@ class RetentionServiceTest {
         final var retentionChecks = service.conductRetentionChecks(OFFENDER_TO_CHECK);
 
         assertThat(retentionChecks).extracting(ActionableRetentionCheck::getRetentionCheck)
-                .allMatch(check -> isExpectedStatusWhenChecksEnabled(check, RETENTION_NOT_REQUIRED));
+            .allMatch(check -> isExpectedStatusWhenChecksEnabled(check, RETENTION_NOT_REQUIRED));
 
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
         verify(dataDuplicationDetectionService).searchForIdDuplicates(eq(OFFENDER_NUMBER), any());
@@ -162,23 +162,23 @@ class RetentionServiceTest {
     void conductRetentionChecksWhenDataDuplicateChecksDisabled() {
 
         service = new RetentionService(
-                pathfinderApiClient,
-                communityApiClient,
-                manualRetentionService,
-                imageDuplicationDetectionService,
-                dataDuplicationDetectionService,
-                retentionCheckRepository,
-                referralResolutionService,
-                moratoriumCheckService,
-                offenderRestrictionCheckService,
-                ualService,
-                DataComplianceProperties.builder()
-                        .imageDuplicateCheckEnabled(false)
-                        .idDataDuplicateCheckEnabled(false)
-                        .databaseDataDuplicateCheckEnabled(false)
-                        .analyticalPlatformDataDuplicateCheckEnabled(false)
-                        .mappaCheckEnabled(true)
-                        .build());
+            pathfinderApiClient,
+            communityApiClient,
+            manualRetentionService,
+            imageDuplicationDetectionService,
+            dataDuplicationDetectionService,
+            retentionCheckRepository,
+            referralResolutionService,
+            moratoriumCheckService,
+            offenderRestrictionCheckService,
+            ualService,
+            DataComplianceProperties.builder()
+                .imageDuplicateCheckEnabled(false)
+                .idDataDuplicateCheckEnabled(false)
+                .databaseDataDuplicateCheckEnabled(false)
+                .analyticalPlatformDataDuplicateCheckEnabled(false)
+                .mappaCheckEnabled(true)
+                .build());
 
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(false);
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER)).thenReturn(Optional.empty());
@@ -186,7 +186,7 @@ class RetentionServiceTest {
         final var retentionChecks = service.conductRetentionChecks(OFFENDER_TO_CHECK);
 
         assertThat(retentionChecks).extracting(ActionableRetentionCheck::getRetentionCheck)
-                .allMatch(check -> isExpectedStatusWhenChecksDisabled(check, RETENTION_NOT_REQUIRED));
+            .allMatch(check -> isExpectedStatusWhenChecksDisabled(check, RETENTION_NOT_REQUIRED));
 
         retentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
         verify(moratoriumCheckService).requestFreeTextSearch(eq(OFFENDER_NUMBER), any());
@@ -203,10 +203,10 @@ class RetentionServiceTest {
         final var dataDuplicates = mockedDataDuplicates();
 
         service.handleDataDuplicateResult(DataDuplicateResult.builder()
-                .offenderIdDisplay(OFFENDER_NUMBER.getOffenderNumber())
-                .retentionCheckId(DATA_DUPLICATE_CHECK_ID)
-                .duplicateOffenders(List.of(DUPLICATE_OFFENDER_NUMBER.getOffenderNumber()))
-                .build(), ID);
+            .offenderIdDisplay(OFFENDER_NUMBER.getOffenderNumber())
+            .retentionCheckId(DATA_DUPLICATE_CHECK_ID)
+            .duplicateOffenders(List.of(DUPLICATE_OFFENDER_NUMBER.getOffenderNumber()))
+            .build(), ID);
 
         assertThat(dataDuplicateCheck.getDataDuplicates()).containsAll(dataDuplicates);
         assertThat(dataDuplicateCheck.getCheckStatus()).isEqualTo(RETENTION_REQUIRED);
@@ -221,9 +221,9 @@ class RetentionServiceTest {
         final var dataDuplicateCheck = persistedDataDuplicateCheck();
 
         service.handleDataDuplicateResult(DataDuplicateResult.builder()
-                .offenderIdDisplay(OFFENDER_NUMBER.getOffenderNumber())
-                .retentionCheckId(DATA_DUPLICATE_CHECK_ID)
-                .build(), ID);
+            .offenderIdDisplay(OFFENDER_NUMBER.getOffenderNumber())
+            .retentionCheckId(DATA_DUPLICATE_CHECK_ID)
+            .build(), ID);
 
         assertThat(dataDuplicateCheck.getDataDuplicates()).isEmpty();
         assertThat(dataDuplicateCheck.getCheckStatus()).isEqualTo(RETENTION_NOT_REQUIRED);
@@ -238,10 +238,10 @@ class RetentionServiceTest {
         final var freeTextCheck = persistedFreeTextCheck();
 
         service.handleFreeTextSearchResult(FreeTextSearchResult.builder()
-                .offenderIdDisplay(OFFENDER_NUMBER.getOffenderNumber())
-                .retentionCheckId(DATA_DUPLICATE_CHECK_ID)
-                .matchingTable("SOME_TABLE")
-                .build());
+            .offenderIdDisplay(OFFENDER_NUMBER.getOffenderNumber())
+            .retentionCheckId(DATA_DUPLICATE_CHECK_ID)
+            .matchingTable("SOME_TABLE")
+            .build());
 
         assertThat(freeTextCheck.getCheckStatus()).isEqualTo(RETENTION_REQUIRED);
 
@@ -255,9 +255,9 @@ class RetentionServiceTest {
         final var freeTextCheck = persistedFreeTextCheck();
 
         service.handleFreeTextSearchResult(FreeTextSearchResult.builder()
-                .offenderIdDisplay(OFFENDER_NUMBER.getOffenderNumber())
-                .retentionCheckId(DATA_DUPLICATE_CHECK_ID)
-                .build());
+            .offenderIdDisplay(OFFENDER_NUMBER.getOffenderNumber())
+            .retentionCheckId(DATA_DUPLICATE_CHECK_ID)
+            .build());
 
         assertThat(freeTextCheck.getCheckStatus()).isEqualTo(RETENTION_NOT_REQUIRED);
 
@@ -273,10 +273,10 @@ class RetentionServiceTest {
 
         when(pathfinderApiClient.isReferredToPathfinder(OFFENDER_NUMBER)).thenReturn(true);
         when(manualRetentionService.findManualOffenderRetentionWithReasons(OFFENDER_NUMBER))
-                .thenReturn(Optional.of(manualRetention));
+            .thenReturn(Optional.of(manualRetention));
         when(imageDuplicationDetectionService.findDuplicatesFor(OFFENDER_NUMBER)).thenReturn(List.of(imageDuplicate));
         when(dataDuplicationDetectionService.searchForAnalyticalPlatformDuplicates(OFFENDER_NUMBER))
-                .thenReturn(List.of(dataDuplicate));
+            .thenReturn(List.of(dataDuplicate));
         when(moratoriumCheckService.retainDueToOffence(OFFENDER_TO_CHECK)).thenReturn(true);
         when(moratoriumCheckService.retainDueToAlert(OFFENDER_TO_CHECK)).thenReturn(true);
         when(ualService.isUnlawfullyAtLarge(OFFENDER_TO_CHECK)).thenReturn(true);
@@ -313,10 +313,10 @@ class RetentionServiceTest {
     private List<DataDuplicate> mockedDataDuplicates() {
         final var dataDuplicates = List.of(mock(DataDuplicate.class));
         when(dataDuplicationDetectionService.persistDataDuplicates(
-                OFFENDER_NUMBER,
-                List.of(new DuplicateResult(DUPLICATE_OFFENDER_NUMBER, 100.0)),
-                ID))
-                .thenReturn(dataDuplicates);
+            OFFENDER_NUMBER,
+            List.of(new DuplicateResult(DUPLICATE_OFFENDER_NUMBER, 100.0)),
+            ID))
+            .thenReturn(dataDuplicates);
         return dataDuplicates;
     }
 
@@ -332,15 +332,15 @@ class RetentionServiceTest {
 
     private boolean isPendingCheck(final RetentionCheck check) {
         return DATA_DUPLICATE_ID.equals(check.getCheckType())
-                || DATA_DUPLICATE_DB.equals(check.getCheckType())
-                || FREE_TEXT_SEARCH.equals(check.getCheckType())
-                || OFFENDER_RESTRICTION.equals(check.getCheckType());
+            || DATA_DUPLICATE_DB.equals(check.getCheckType())
+            || FREE_TEXT_SEARCH.equals(check.getCheckType())
+            || OFFENDER_RESTRICTION.equals(check.getCheckType());
     }
 
     private boolean isDisabledCheck(final RetentionCheck check) {
         return IMAGE_DUPLICATE.equals(check.getCheckType())
-                || DATA_DUPLICATE_ID.equals(check.getCheckType())
-                || DATA_DUPLICATE_DB.equals(check.getCheckType())
-                || DATA_DUPLICATE_AP.equals(check.getCheckType());
+            || DATA_DUPLICATE_ID.equals(check.getCheckType())
+            || DATA_DUPLICATE_DB.equals(check.getCheckType())
+            || DATA_DUPLICATE_AP.equals(check.getCheckType());
     }
 }

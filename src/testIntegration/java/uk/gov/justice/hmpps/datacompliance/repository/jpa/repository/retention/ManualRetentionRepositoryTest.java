@@ -1,12 +1,8 @@
 package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetentionReason;
@@ -34,16 +30,16 @@ class ManualRetentionRepositoryTest extends IntegrationTest {
     void persistManualRetentionAndRetrieveById() {
 
         final var manualRetention = ManualRetention.builder()
-                .offenderNo("A1234BC")
-                .userId("user1")
-                .retentionDateTime(NOW)
-                .retentionVersion(1)
-                .build();
+            .offenderNo("A1234BC")
+            .userId("user1")
+            .retentionDateTime(NOW)
+            .retentionVersion(1)
+            .build();
 
         manualRetention.addManualRetentionReason(ManualRetentionReason.builder()
-                .retentionReasonCodeId(reasonCodeRepository.findById(HIGH_PROFILE).orElseThrow())
-                .reasonDetails("High profile for some reason")
-                .build());
+            .retentionReasonCodeId(reasonCodeRepository.findById(HIGH_PROFILE).orElseThrow())
+            .reasonDetails("High profile for some reason")
+            .build());
 
         manualRetentionRepository.save(manualRetention);
 
@@ -55,11 +51,11 @@ class ManualRetentionRepositoryTest extends IntegrationTest {
         assertThat(retrievedEntity.getRetentionVersion()).isEqualTo(1);
         assertThat(retrievedEntity.getManualRetentionReasons()).hasSize(1);
         assertThat(retrievedEntity.getManualRetentionReasons())
-                .extracting(r -> r.getRetentionReasonCodeId().getRetentionReasonCodeId())
-                .containsExactly(HIGH_PROFILE);
+            .extracting(r -> r.getRetentionReasonCodeId().getRetentionReasonCodeId())
+            .containsExactly(HIGH_PROFILE);
         assertThat(retrievedEntity.getManualRetentionReasons())
-                .extracting(ManualRetentionReason::getReasonDetails)
-                .containsExactly("High profile for some reason");
+            .extracting(ManualRetentionReason::getReasonDetails)
+            .containsExactly("High profile for some reason");
     }
 
     @Test
@@ -76,10 +72,10 @@ class ManualRetentionRepositoryTest extends IntegrationTest {
         assertThat(latestManualRetention.getRetentionVersion()).isEqualTo(3);
         assertThat(latestManualRetention.getManualRetentionReasons()).hasSize(1);
         assertThat(latestManualRetention.getManualRetentionReasons())
-                .extracting(r -> r.getRetentionReasonCodeId().getRetentionReasonCodeId())
-                .containsExactly(HIGH_PROFILE);
+            .extracting(r -> r.getRetentionReasonCodeId().getRetentionReasonCodeId())
+            .containsExactly(HIGH_PROFILE);
         assertThat(latestManualRetention.getManualRetentionReasons())
-                .extracting(ManualRetentionReason::getReasonDetails)
-                .containsExactly("High profile for some reason");
+            .extracting(ManualRetentionReason::getReasonDetails)
+            .containsExactly("High profile for some reason");
     }
 }

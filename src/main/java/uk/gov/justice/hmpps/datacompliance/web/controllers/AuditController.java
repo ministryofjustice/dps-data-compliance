@@ -64,8 +64,8 @@ public class AuditController {
     @Operation(
         summary = "Get retained offenders",
         description = """
-             Get the offenders which have been retained and their respective retention reasons.
-             Update the request 'Accept' Header to 'text/csv' for a csv file response.""")
+            Get the offenders which have been retained and their respective retention reasons.
+            Update the request 'Accept' Header to 'text/csv' for a csv file response.""")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK"),
         @ApiResponse(responseCode = "500", description = "Unrecoverable error occurred whilst processing request")

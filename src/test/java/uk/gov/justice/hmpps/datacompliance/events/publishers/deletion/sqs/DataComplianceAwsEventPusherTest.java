@@ -69,21 +69,21 @@ class DataComplianceAwsEventPusherTest {
             .thenReturn(new SendMessageResult().withMessageId("message1"));
 
         eventPusher.requestReferral(OffenderDeletionReferralRequest.builder()
-                .batchId(BATCH_ID)
-                .dueForDeletionWindowStart(REFERRAL_WINDOW_START)
-                .dueForDeletionWindowEnd(REFERRAL_WINDOW_END)
-                .limit(REFERRAL_LIMIT)
-                .build());
+            .batchId(BATCH_ID)
+            .dueForDeletionWindowStart(REFERRAL_WINDOW_START)
+            .dueForDeletionWindowEnd(REFERRAL_WINDOW_END)
+            .limit(REFERRAL_LIMIT)
+            .build());
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
-                .isEqualTo("DATA_COMPLIANCE_REFERRAL-REQUEST");
+            .isEqualTo("DATA_COMPLIANCE_REFERRAL-REQUEST");
         assertThat(request.getValue().getMessageBody()).isEqualTo(
-                "{" +
-                        "\"batchId\":987," +
-                        "\"dueForDeletionWindowStart\":\"2020-01-02\"," +
-                        "\"dueForDeletionWindowEnd\":\"2020-03-04\"," +
-                        "\"limit\":10" +
+            "{" +
+                "\"batchId\":987," +
+                "\"dueForDeletionWindowStart\":\"2020-01-02\"," +
+                "\"dueForDeletionWindowEnd\":\"2020-03-04\"," +
+                "\"limit\":10" +
                 "}");
     }
 
@@ -93,22 +93,22 @@ class DataComplianceAwsEventPusherTest {
         final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
 
         when(client.sendMessage(request.capture()))
-                .thenReturn(new SendMessageResult().withMessageId("message1"));
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
 
         eventPusher.requestReferral(OffenderDeletionReferralRequest.builder()
-                .batchId(BATCH_ID)
-                .dueForDeletionWindowStart(REFERRAL_WINDOW_START)
-                .dueForDeletionWindowEnd(REFERRAL_WINDOW_END)
-                .build());
+            .batchId(BATCH_ID)
+            .dueForDeletionWindowStart(REFERRAL_WINDOW_START)
+            .dueForDeletionWindowEnd(REFERRAL_WINDOW_END)
+            .build());
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
-                .isEqualTo("DATA_COMPLIANCE_REFERRAL-REQUEST");
+            .isEqualTo("DATA_COMPLIANCE_REFERRAL-REQUEST");
         assertThat(request.getValue().getMessageBody()).isEqualTo(
-                "{" +
-                        "\"batchId\":987," +
-                        "\"dueForDeletionWindowStart\":\"2020-01-02\"," +
-                        "\"dueForDeletionWindowEnd\":\"2020-03-04\"" +
+            "{" +
+                "\"batchId\":987," +
+                "\"dueForDeletionWindowStart\":\"2020-01-02\"," +
+                "\"dueForDeletionWindowEnd\":\"2020-03-04\"" +
                 "}");
     }
 
@@ -118,14 +118,14 @@ class DataComplianceAwsEventPusherTest {
         final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
 
         when(client.sendMessage(request.capture()))
-                .thenReturn(new SendMessageResult().withMessageId("message1"));
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
 
         eventPusher.requestAdHocReferral(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"batchId\":123}");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
-                .isEqualTo("DATA_COMPLIANCE_AD-HOC-REFERRAL-REQUEST");
+            .isEqualTo("DATA_COMPLIANCE_AD-HOC-REFERRAL-REQUEST");
     }
 
     @Test
@@ -150,14 +150,14 @@ class DataComplianceAwsEventPusherTest {
         final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
 
         when(client.sendMessage(request.capture()))
-                .thenReturn(new SendMessageResult().withMessageId("message1"));
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
 
         eventPusher.requestIdDataDuplicateCheck(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123}");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
-                .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-ID-CHECK");
+            .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-ID-CHECK");
     }
 
     @Test
@@ -166,14 +166,14 @@ class DataComplianceAwsEventPusherTest {
         final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
 
         when(client.sendMessage(request.capture()))
-                .thenReturn(new SendMessageResult().withMessageId("message1"));
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
 
         eventPusher.requestDatabaseDataDuplicateCheck(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123}");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
-                .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK");
+            .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK");
     }
 
     @Test
@@ -182,14 +182,14 @@ class DataComplianceAwsEventPusherTest {
         final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
 
         when(client.sendMessage(request.capture()))
-                .thenReturn(new SendMessageResult().withMessageId("message1"));
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
 
-        eventPusher.requestFreeTextMoratoriumCheck(OFFENDER_NUMBER, 123L, List.of("^(regex|1)$","^(regex|2)$"));
+        eventPusher.requestFreeTextMoratoriumCheck(OFFENDER_NUMBER, 123L, List.of("^(regex|1)$", "^(regex|2)$"));
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"regex\":[\"^(regex|1)$\",\"^(regex|2)$\"]}");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
-                .isEqualTo("DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK");
+            .isEqualTo("DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK");
     }
 
 
@@ -215,26 +215,26 @@ class DataComplianceAwsEventPusherTest {
         final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
 
         when(client.sendMessage(request.capture()))
-                .thenReturn(new SendMessageResult().withMessageId("message1"));
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
 
         eventPusher.grantDeletion(
-                OffenderDeletionGrant.builder()
-                        .offenderNumber(OFFENDER_NUMBER)
-                        .referralId(REFERRAL_ID)
-                        .offenderId(OFFENDER_ID)
-                        .offenderBookId(OFFENDER_BOOK_ID)
-                        .build());
+            OffenderDeletionGrant.builder()
+                .offenderNumber(OFFENDER_NUMBER)
+                .referralId(REFERRAL_ID)
+                .offenderId(OFFENDER_ID)
+                .offenderBookId(OFFENDER_BOOK_ID)
+                .build());
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
-                .isEqualTo("DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED");
+            .isEqualTo("DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED");
         assertThat(request.getValue().getMessageBody()).isEqualTo(
-                "{" +
-                        "\"offenderIdDisplay\":\"A1234AA\"," +
-                        "\"referralId\":123," +
-                        "\"offenderIds\":[456]," +
-                        "\"offenderBookIds\":[789]" +
-                        "}");
+            "{" +
+                "\"offenderIdDisplay\":\"A1234AA\"," +
+                "\"referralId\":123," +
+                "\"offenderIds\":[456]," +
+                "\"offenderBookIds\":[789]" +
+                "}");
     }
 
 

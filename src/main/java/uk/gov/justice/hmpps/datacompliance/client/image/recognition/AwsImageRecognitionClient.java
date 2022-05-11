@@ -57,7 +57,7 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
     public Result<FaceId, IndexFacesError> uploadImageToCollection(final OffenderImage image) {
 
         log.trace("Uploading image data for offender: '{}', image: '{}'",
-                image.getOffenderNumberString(), image.getImageData());
+            image.getOffenderNumberString(), image.getImageData());
 
         final var result = client.indexFaces(generateIndexFaceRequest(image));
 
@@ -78,17 +78,17 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
     public Optional<Double> getSimilarity(final OffenderImage image1, final OffenderImage image2) {
 
         final var response = client.compareFaces(CompareFacesRequest.builder()
-                .similarityThreshold(0f) // Set no threshold so similarity is always provided
-                .qualityFilter(HIGH)
-                .sourceImage(Image.builder().bytes(SdkBytes.fromByteArray(image1.getImageData())).build())
-                .targetImage(Image.builder().bytes(SdkBytes.fromByteArray(image2.getImageData())).build())
-                .build());
+            .similarityThreshold(0f) // Set no threshold so similarity is always provided
+            .qualityFilter(HIGH)
+            .sourceImage(Image.builder().bytes(SdkBytes.fromByteArray(image1.getImageData())).build())
+            .targetImage(Image.builder().bytes(SdkBytes.fromByteArray(image2.getImageData())).build())
+            .build());
 
         if (response.hasFaceMatches()) {
             return response.faceMatches().stream()
-                    .map(CompareFacesMatch::similarity)
-                    .map(Double::valueOf)
-                    .max(comparingDouble(d -> d));
+                .map(CompareFacesMatch::similarity)
+                .map(Double::valueOf)
+                .max(comparingDouble(d -> d));
         }
 
         return Optional.empty();
@@ -109,7 +109,7 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
 
         if (indexedFaces.isEmpty()) {
             return indexedFacesResponse.hasUnindexedFaces() ?
-                    error(FACE_POOR_QUALITY) : error(FACE_NOT_FOUND);
+                error(FACE_POOR_QUALITY) : error(FACE_NOT_FOUND);
         }
 
         if (indexedFaces.size() > 1) {
@@ -117,11 +117,11 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
         }
 
         return indexedFaces.stream()
-                .map(FaceRecord::face)
-                .map(Face::faceId)
-                .findFirst()
-                .map(this::singleFaceId)
-                .orElse(error(FACE_NOT_FOUND));
+            .map(FaceRecord::face)
+            .map(Face::faceId)
+            .findFirst()
+            .map(this::singleFaceId)
+            .orElse(error(FACE_NOT_FOUND));
     }
 
     private IndexFacesRequest generateIndexFaceRequest(final OffenderImage image) {
@@ -129,18 +129,18 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
         // Check for up to two faces in a single image so that we are warned
         // if multiple faces are detected.
         return IndexFacesRequest.builder()
-                .collectionId(collectionId)
-                .maxFaces(2)
-                .qualityFilter(HIGH)
-                .externalImageId(generateExternalImageId(image))
-                .image(Image.builder().bytes(fromByteArray(image.getImageData())).build())
-                .build();
+            .collectionId(collectionId)
+            .maxFaces(2)
+            .qualityFilter(HIGH)
+            .externalImageId(generateExternalImageId(image))
+            .image(Image.builder().bytes(fromByteArray(image.getImageData())).build())
+            .build();
     }
 
     private Result<FaceId, IndexFacesError> handleMultipleFaces(final OffenderImage image,
                                                                 final List<FaceRecord> multipleFaces) {
         log.warn("Multiple faces (count: '{}') for offender: '{}' and image: '{}'",
-                multipleFaces.size(), image.getOffenderNumberString(), image.getImageId());
+            multipleFaces.size(), image.getOffenderNumberString(), image.getImageId());
 
         // Need to delete all indexed faces in this image because we cannot tell which one
         // belongs to the offender:
@@ -152,9 +152,9 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
 
     private DeleteFacesRequest generateDeleteFaceRequest(final String faceId) {
         return DeleteFacesRequest.builder()
-                .collectionId(collectionId)
-                .faceIds(faceId)
-                .build();
+            .collectionId(collectionId)
+            .faceIds(faceId)
+            .build();
     }
 
     private String generateExternalImageId(final OffenderImage image) {
@@ -167,17 +167,17 @@ public class AwsImageRecognitionClient implements ImageRecognitionClient {
 
     private SearchFacesRequest generateSearchFacesRequest(final FaceId faceId) {
         return SearchFacesRequest.builder()
-                .collectionId(collectionId)
-                .faceId(faceId.getFaceId())
-                .faceMatchThreshold((float) faceSimilarityThreshold)
-                .build();
+            .collectionId(collectionId)
+            .faceId(faceId.getFaceId())
+            .faceMatchThreshold((float) faceSimilarityThreshold)
+            .build();
     }
 
     private Set<FaceMatch> transformFaceMatches(
-            final List<software.amazon.awssdk.services.rekognition.model.FaceMatch> faceMatches) {
+        final List<software.amazon.awssdk.services.rekognition.model.FaceMatch> faceMatches) {
 
         return faceMatches.stream()
-                .map(match -> new FaceMatch(new FaceId(match.face().faceId()), match.similarity()))
-                .collect(toSet());
+            .map(match -> new FaceMatch(new FaceId(match.face().faceId()), match.similarity()))
+            .collect(toSet());
     }
 }

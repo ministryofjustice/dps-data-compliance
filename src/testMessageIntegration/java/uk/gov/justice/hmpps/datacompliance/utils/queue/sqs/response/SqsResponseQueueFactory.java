@@ -6,7 +6,6 @@ import uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.DeceasedOffe
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;

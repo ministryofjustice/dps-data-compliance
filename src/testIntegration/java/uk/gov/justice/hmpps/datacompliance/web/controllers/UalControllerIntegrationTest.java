@@ -18,10 +18,9 @@ import java.nio.charset.StandardCharsets;
 
 public class UalControllerIntegrationTest extends IntegrationTest {
 
+    private final byte[] EXAMPLE_UAL_REPORT = getReport();
     @Autowired
     private JwtAuthenticationHelper jwtAuthenticationHelper;
-
-    private final byte[] EXAMPLE_UAL_REPORT = getReport();
 
     @Test
     public void getUalOffenderDataWhenNoDataExists() {

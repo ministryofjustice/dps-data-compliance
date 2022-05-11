@@ -52,33 +52,33 @@ public class FalsePositiveCheckService {
 
         if (referenceOffenderImages.size() < requiredImageCount || duplicateOffenderImages.size() < requiredImageCount) {
             log.debug("Number of images ({}/{}) is not sufficient to check duplicate: '{}'",
-                    referenceOffenderImages.size(), duplicateOffenderImages.size(), duplicate.getDataDuplicateId());
+                referenceOffenderImages.size(), duplicateOffenderImages.size(), duplicate.getDataDuplicateId());
             return false;
         }
 
         return referenceOffenderImages.stream()
-                .allMatch(referenceImage -> noSimilarity(referenceImage, duplicateOffenderImages));
+            .allMatch(referenceImage -> noSimilarity(referenceImage, duplicateOffenderImages));
     }
 
     private boolean noSimilarity(final OffenderImage referenceImage, final Collection<OffenderImage> comparisonImages) {
 
         final var successfulComparisons = comparisonImages.stream()
-                .map(comparisonImage -> imageDuplicationDetectionService.getSimilarity(referenceImage, comparisonImage))
-                .flatMap(Optional::stream)
-                .collect(toList());
+            .map(comparisonImage -> imageDuplicationDetectionService.getSimilarity(referenceImage, comparisonImage))
+            .flatMap(Optional::stream)
+            .collect(toList());
 
         log.debug("Image comparisons for offender: '{}' had similarities: {}",
-                referenceImage.getOffenderNumberString(), successfulComparisons);
+            referenceImage.getOffenderNumberString(), successfulComparisons);
 
         return successfulComparisons.size() == comparisonImages.size() &&
-                successfulComparisons.stream().allMatch(similarity ->
-                        similarity < properties.getFalsePositiveDuplicateImageSimilarityThreshold());
+            successfulComparisons.stream().allMatch(similarity ->
+                similarity < properties.getFalsePositiveDuplicateImageSimilarityThreshold());
     }
 
     private List<OffenderImage> getImagesFor(final OffenderNumber offenderNumber) {
         return prisonApiClient.getOffenderFaceImagesFor(offenderNumber).stream()
-                .map(metadata -> prisonApiClient.getImageData(offenderNumber, metadata.getImageId()))
-                .flatMap(Optional::stream)
-                .collect(toList());
+            .map(metadata -> prisonApiClient.getImageData(offenderNumber, metadata.getImageId()))
+            .flatMap(Optional::stream)
+            .collect(toList());
     }
 }

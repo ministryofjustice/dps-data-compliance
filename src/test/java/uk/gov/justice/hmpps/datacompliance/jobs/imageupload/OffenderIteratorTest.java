@@ -45,11 +45,11 @@ class OffenderIteratorTest {
     private static final String OFFENDER_4 = "D1234DD";
     private static final int REQUEST_LIMIT = 2;
     private static final DataComplianceProperties PROPERTIES = DataComplianceProperties.builder()
-            .prisonApiBaseUrl("some-url")
-            .prisonApiOffenderIdsIterationThreads(2)
-            .prisonApiOffenderIdsLimit(REQUEST_LIMIT)
-            .prisonApiOffenderIdsInitialOffset(0L)
-            .build();
+        .prisonApiBaseUrl("some-url")
+        .prisonApiOffenderIdsIterationThreads(2)
+        .prisonApiOffenderIdsLimit(REQUEST_LIMIT)
+        .prisonApiOffenderIdsInitialOffset(0L)
+        .build();
 
     @Mock
     private PrisonApiClient client;
@@ -92,16 +92,16 @@ class OffenderIteratorTest {
     void applyForAllWithRetry() {
 
         offenderIterator = new OffenderIterator(repository, client, PROPERTIES,
-                RetryConfig.custom().maxAttempts(2)
-                        .waitDuration(Duration.ZERO)
-                        .build());
+            RetryConfig.custom().maxAttempts(2)
+                .waitDuration(Duration.ZERO)
+                .build());
 
         mockOffenderNumbersResponse(OFFENDER_1, OFFENDER_2, OFFENDER_3);
 
         final var processedOffenderNumbers = new ArrayList<String>();
 
         offenderIterator.applyForAll(BATCH,
-                throwOnFirstAttempt(offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber())));
+            throwOnFirstAttempt(offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber())));
 
         assertThat(processedOffenderNumbers).containsExactlyInAnyOrder(OFFENDER_1, OFFENDER_2, OFFENDER_3);
     }
@@ -110,14 +110,14 @@ class OffenderIteratorTest {
     void exhaustedRetriesThrowsAndPreventsFurtherBatchesProcessing() {
 
         offenderIterator = new OffenderIterator(repository, client, PROPERTIES,
-                RetryConfig.custom().maxAttempts(1).build());
+            RetryConfig.custom().maxAttempts(1).build());
 
         mockOffenderNumbersResponse(OFFENDER_1, OFFENDER_2, OFFENDER_3);
 
         final var processedOffenderNumbers = new ArrayList<String>();
         assertThatThrownBy(() -> offenderIterator.applyForAll(BATCH,
-                throwOnFirstAttempt(offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber()))))
-                .hasMessageContaining("Failed!");
+            throwOnFirstAttempt(offenderNumber -> processedOffenderNumbers.add(offenderNumber.getOffenderNumber()))))
+            .hasMessageContaining("Failed!");
 
         assertThat(processedOffenderNumbers).doesNotContain(OFFENDER_3);
     }
@@ -126,12 +126,12 @@ class OffenderIteratorTest {
     void canLimitIterationOverAConfigurableSubset() {
 
         offenderIterator = new OffenderIterator(repository, client,
-                DataComplianceProperties.builder()
-                        .prisonApiOffenderIdsIterationThreads(2)
-                        .prisonApiOffenderIdsLimit(REQUEST_LIMIT)
-                        .prisonApiOffenderIdsInitialOffset(1L)
-                        .prisonApiOffenderIdsTotalPages(1L)
-                        .build());
+            DataComplianceProperties.builder()
+                .prisonApiOffenderIdsIterationThreads(2)
+                .prisonApiOffenderIdsLimit(REQUEST_LIMIT)
+                .prisonApiOffenderIdsInitialOffset(1L)
+                .prisonApiOffenderIdsTotalPages(1L)
+                .build());
 
         mockOffenderNumbersResponseWithOffset(1, OFFENDER_1, OFFENDER_2, OFFENDER_3, OFFENDER_4);
 
@@ -143,7 +143,7 @@ class OffenderIteratorTest {
     void applyForAllUsesAlternativeApiForUpdate() {
 
         when(repository.findFirstByBatchIdNotOrderByUploadStartDateTimeDesc(BATCH_ID))
-                .thenReturn(Optional.of(ImageUploadBatch.builder().uploadStartDateTime(TIMESTAMP).build()));
+            .thenReturn(Optional.of(ImageUploadBatch.builder().uploadStartDateTime(TIMESTAMP).build()));
 
         when(client.getOffendersWithNewImages(TIMESTAMP.toLocalDate(), 0, REQUEST_LIMIT)).thenReturn(response(3, List.of(OFFENDER_1, OFFENDER_2)));
         when(client.getOffendersWithNewImages(TIMESTAMP.toLocalDate(), 1, REQUEST_LIMIT)).thenReturn(response(3, List.of(OFFENDER_3)));
@@ -157,11 +157,11 @@ class OffenderIteratorTest {
         return processedOffenderNumbers;
     }
 
-    private void mockOffenderNumbersResponse(final String ... offenderNumbers) {
+    private void mockOffenderNumbersResponse(final String... offenderNumbers) {
         mockOffenderNumbersResponseWithOffset(0, offenderNumbers);
     }
 
-    private void mockOffenderNumbersResponseWithOffset(final int offset, final String ... offenderNumbers) {
+    private void mockOffenderNumbersResponseWithOffset(final int offset, final String... offenderNumbers) {
 
         final var list = asList(offenderNumbers);
         final var count = new AtomicInteger(offset);
@@ -170,7 +170,7 @@ class OffenderIteratorTest {
 
         do {
             lenient().when(client.getOffenderNumbers(count.get(), REQUEST_LIMIT)).thenReturn(
-                    response(list.size(), list.subList(count.get(), min(count.get() + REQUEST_LIMIT, list.size()))));
+                response(list.size(), list.subList(count.get(), min(count.get() + REQUEST_LIMIT, list.size()))));
 
             count.addAndGet(REQUEST_LIMIT);
         } while (count.get() < list.size());
@@ -178,9 +178,9 @@ class OffenderIteratorTest {
 
     private OffenderNumbersResponse response(final long total, final Collection<String> offenderNumbers) {
         return OffenderNumbersResponse.builder()
-                .totalCount(total)
-                .offenderNumbers(offenderNumbers.stream().map(OffenderNumber::new).collect(toSet()))
-                .build();
+            .totalCount(total)
+            .offenderNumbers(offenderNumbers.stream().map(OffenderNumber::new).collect(toSet()))
+            .build();
     }
 
     private OffenderAction throwOnFirstAttempt(final OffenderAction action) {

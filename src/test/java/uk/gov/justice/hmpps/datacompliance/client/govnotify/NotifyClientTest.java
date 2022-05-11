@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.hmpps.datacompliance.config.OffenderDeletionConfig;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
@@ -73,9 +72,11 @@ class NotifyClientTest {
         final EmailTemplate emailTemplate = EmailTemplate.ofIntentionToDelete(buildReferral(), EMAIL, DIGITAL_SERVICE_URL, INTENTION_TO_DELETE_TEMPLATE_ID, DURATION);
 
         when(notificationClient.sendEmail(INTENTION_TO_DELETE_TEMPLATE_ID, EMAIL, intentionToDeleteParams(), "Ref-A1234AA-LEI"))
-            .thenThrow(new NotificationClientException("\t[{\n" +
-                "\"error\": \"BadRequestError\",\n" +
-                "\"message\": \"Can't send to this recipient using a team-only API key\"\n" + "}]"));
+            .thenThrow(new NotificationClientException("""
+                \t[{
+                "error": "BadRequestError",
+                "message": "Can't send to this recipient using a team-only API key"
+                }]"""));
 
         notifyClient.sendEmail(emailTemplate);
     }

@@ -10,6 +10,8 @@ import java.util.Optional;
 @Repository
 public interface OffenderImageUploadRepository extends CrudRepository<OffenderImageUpload, Long> {
     List<OffenderImageUpload> findByOffenderNo(String offenderNo);
+
     Optional<OffenderImageUpload> findByOffenderNoAndImageId(String offenderNo, Long imageId);
+
     Optional<OffenderImageUpload> findByFaceId(String faceId);
 }

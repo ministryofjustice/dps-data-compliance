@@ -37,28 +37,17 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention
 @Table(name = "RETENTION_CHECK")
 public abstract class RetentionCheck implements OffenderEntity {
 
-    public enum Status {
-        PENDING,
-        RETENTION_REQUIRED,
-        RETENTION_NOT_REQUIRED,
-        FALSE_POSITIVE,
-        DISABLED
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RETENTION_CHECK_ID", nullable = false)
     private Long retentionCheckId;
-
     @NotNull
     @ManyToOne(fetch = EAGER)
     @JoinColumn(name = "RESOLUTION_ID", nullable = false)
     private ReferralResolution referralResolution;
-
     @NotNull
     @Column(name = "CHECK_TYPE", nullable = false, insertable = false, updatable = false)
     private String checkType;
-
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "CHECK_STATUS", nullable = false)
@@ -79,5 +68,13 @@ public abstract class RetentionCheck implements OffenderEntity {
 
     public boolean isType(final String value) {
         return value.equalsIgnoreCase(checkType);
+    }
+
+    public enum Status {
+        PENDING,
+        RETENTION_REQUIRED,
+        RETENTION_NOT_REQUIRED,
+        FALSE_POSITIVE,
+        DISABLED
     }
 }

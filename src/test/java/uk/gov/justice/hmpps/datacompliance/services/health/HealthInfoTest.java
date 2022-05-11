@@ -17,6 +17,6 @@ class HealthInfoTest {
         properties.setProperty("version", "someVersion");
 
         assertThat(new HealthInfo(new BuildProperties(properties)).health().getDetails())
-                .isEqualTo(Map.of("version", "someVersion"));
+            .isEqualTo(Map.of("version", "someVersion"));
     }
 }

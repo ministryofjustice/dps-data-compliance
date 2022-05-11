@@ -46,6 +46,12 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 @ExtendWith(MockitoExtension.class)
 class ReferralServiceTest {
 
+    public static final String FIRST_NAME = "John";
+    public static final String MIDDLE_NAME = "Middle";
+    public static final String LAST_NAME = "Smith";
+    public static final LocalDate DOB = LocalDate.of(1969, 1, 1);
+    public static final String PNC = "14/663516A";
+    public static final String CRO = "569151/08";
     private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
     private static final long BATCH_ID = 123L;
     private static final String OFFENDER_NUMBER = "A1234AA";
@@ -53,13 +59,6 @@ class ReferralServiceTest {
     private static final String AGENCY_LOCATION_ID = "LEI";
     private static final Set<String> OFFENCE_CODES = Set.of("offenceCode");
     private static final Set<String> ALERT_CODES = Set.of("alertCode");
-    public static final String FIRST_NAME = "John";
-    public static final String MIDDLE_NAME = "Middle";
-    public static final String LAST_NAME = "Smith";
-    public static final LocalDate DOB = LocalDate.of(1969, 1, 1);
-    public static final String PNC = "14/663516A";
-    public static final String CRO = "569151/08";
-
     @Mock
     private OffenderDeletionBatchRepository batchRepository;
 
@@ -83,12 +82,12 @@ class ReferralServiceTest {
     @BeforeEach
     void setUp() {
         referralService = new ReferralService(
-                TimeSource.of(NOW),
-                batchRepository,
-                retentionService,
-                referralResolutionService,
-                eventPusher,
-                offenderDeletionReferralRepository);
+            TimeSource.of(NOW),
+            batchRepository,
+            retentionService,
+            referralResolutionService,
+            eventPusher,
+            offenderDeletionReferralRepository);
     }
 
     @Test
@@ -97,7 +96,7 @@ class ReferralServiceTest {
         final var batch = ArgumentCaptor.forClass(OffenderDeletionBatch.class);
 
         when(batchRepository.save(batch.capture()))
-                .thenReturn(OffenderDeletionBatch.builder().batchId(BATCH_ID).build());
+            .thenReturn(OffenderDeletionBatch.builder().batchId(BATCH_ID).build());
 
         referralService.handleAdHocDeletion(new AdHocOffenderDeletion(OFFENDER_NUMBER, "Some reason"));
 
@@ -149,9 +148,9 @@ class ReferralServiceTest {
         when(batchRepository.findById(123L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                referralService.handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L, 4L, 5L)))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Cannot find batch with id: '123'");
+            referralService.handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L, 4L, 5L)))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Cannot find batch with id: '123'");
 
         verify(batchRepository, never()).save(any());
     }
@@ -177,7 +176,7 @@ class ReferralServiceTest {
     @Test
     void handleProvisionalDeletionReferralResultWhenNoPreviousAgencyLocationIdentified() {
 
-        final var referral =OffenderDeletionReferral.builder()
+        final var referral = OffenderDeletionReferral.builder()
             .referralId(REFERRAL_ID)
             .offenderNo(OFFENDER_NUMBER)
             .build();
@@ -266,21 +265,21 @@ class ReferralServiceTest {
 
     private OffenderPendingDeletion generatePendingDeletionEvent() {
         return OffenderPendingDeletion.builder()
-                .batchId(BATCH_ID)
-                .offenderIdDisplay(OFFENDER_NUMBER)
-                .firstName(FIRST_NAME)
-                .middleName(MIDDLE_NAME)
-                .lastName(LAST_NAME)
-                .birthDate(DOB)
-                .pnc(PNC)
-                .cro(CRO)
-                .offenderAlias(OffenderAlias.builder()
-                        .offenderId(123L)
-                        .offenderBooking(OffenderBooking.builder().offenderBookId(456L).bookingNo("B07236").build())
-                        .offenderBooking(OffenderBooking.builder().offenderBookId(789L).bookingNo("V30240").build())
-                        .build())
-                .offenderAlias(OffenderAlias.builder().offenderId(321L).build())
-                .build();
+            .batchId(BATCH_ID)
+            .offenderIdDisplay(OFFENDER_NUMBER)
+            .firstName(FIRST_NAME)
+            .middleName(MIDDLE_NAME)
+            .lastName(LAST_NAME)
+            .birthDate(DOB)
+            .pnc(PNC)
+            .cro(CRO)
+            .offenderAlias(OffenderAlias.builder()
+                .offenderId(123L)
+                .offenderBooking(OffenderBooking.builder().offenderBookId(456L).bookingNo("B07236").build())
+                .offenderBooking(OffenderBooking.builder().offenderBookId(789L).bookingNo("V30240").build())
+                .build())
+            .offenderAlias(OffenderAlias.builder().offenderId(321L).build())
+            .build();
     }
 
     private void verifyReferral(final OffenderDeletionReferral referral) {

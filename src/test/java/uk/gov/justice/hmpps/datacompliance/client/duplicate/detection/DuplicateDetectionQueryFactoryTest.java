@@ -34,7 +34,7 @@ class DuplicateDetectionQueryFactoryTest {
         assertThat(request.resultConfiguration().outputLocation()).isEqualTo(OUTPUT_LOCATION);
         assertThat(request.resultConfiguration().encryptionConfiguration().encryptionOption()).isEqualTo(SSE_S3);
         assertThat(request.queryString()).isEqualTo(
-                "SELECT * FROM database1.table1 " +
+            "SELECT * FROM database1.table1 " +
                 "WHERE (offender_id_display_l = 'A1234AA' OR offender_id_display_r = 'A1234AA') " +
                 "AND match_score > 0.75");
     }
@@ -46,8 +46,8 @@ class DuplicateDetectionQueryFactoryTest {
         when(badOffenderNumber.getOffenderNumber()).thenReturn("'OR 1=1; --");
 
         assertThatThrownBy(() -> factory.startQueryExecution(badOffenderNumber))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Offender number ''OR 1=1; --' does not match regex");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Offender number ''OR 1=1; --' does not match regex");
     }
 
     @Test

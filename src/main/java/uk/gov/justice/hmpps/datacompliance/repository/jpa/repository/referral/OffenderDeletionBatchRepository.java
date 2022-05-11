@@ -11,5 +11,6 @@ import java.util.Optional;
 @Repository
 public interface OffenderDeletionBatchRepository extends CrudRepository<OffenderDeletionBatch, Long> {
     Optional<OffenderDeletionBatch> findFirstByBatchTypeOrderByRequestDateTimeDesc(BatchType batchType);
+
     List<OffenderDeletionBatch> findByReferralCompletionDateTimeIsNull();
 }

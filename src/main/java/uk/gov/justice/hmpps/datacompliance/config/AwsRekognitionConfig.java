@@ -38,19 +38,19 @@ public class AwsRekognitionConfig {
         final var credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
         return RekognitionClient.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .build();
+            .region(Region.of(region))
+            .credentialsProvider(StaticCredentialsProvider.create(credentials))
+            .build();
     }
 
     @Bean
     @ConditionalOnProperty(name = "image.recognition.migration.cron")
     public ApplicationRunner rescheduleImageMigration(@Value("${image.recognition.migration.cron}") final String imageMigrationCron) {
         return args -> schedulerFactoryBean.getScheduler()
-                .scheduleJob(
-                        offenderImageMigrationJobDetails(),
-                        Set.of(offenderImageMigrationTrigger(imageMigrationCron)),
-                        true);
+            .scheduleJob(
+                offenderImageMigrationJobDetails(),
+                Set.of(offenderImageMigrationTrigger(imageMigrationCron)),
+                true);
     }
 
     public Trigger offenderImageMigrationTrigger(final String imageMigrationCron) {
@@ -58,15 +58,15 @@ public class AwsRekognitionConfig {
         log.info("Configured to run offender image recognition migration with schedule: '{}'", imageMigrationCron);
 
         return TriggerBuilder.newTrigger().forJob(offenderImageMigrationJobDetails())
-                .withIdentity("offender-image-migration-trigger")
-                .withSchedule(cronSchedule(imageMigrationCron))
-                .build();
+            .withIdentity("offender-image-migration-trigger")
+            .withSchedule(cronSchedule(imageMigrationCron))
+            .build();
     }
 
     public JobDetail offenderImageMigrationJobDetails() {
         return JobBuilder.newJob(OffenderImageMigrationJob.class)
-                .withIdentity("offender-image-migration-job")
-                .storeDurably()
-                .build();
+            .withIdentity("offender-image-migration-job")
+            .storeDurably()
+            .build();
     }
 }

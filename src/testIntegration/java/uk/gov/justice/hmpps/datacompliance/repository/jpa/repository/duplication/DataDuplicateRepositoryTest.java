@@ -25,12 +25,12 @@ class DataDuplicateRepositoryTest extends IntegrationTest {
     void persistDataDuplicateAndRetrieveById() {
 
         final var dataDuplicate = DataDuplicate.builder()
-                .referenceOffenderNo("A1234AA")
-                .duplicateOffenderNo("B1234BB")
-                .detectionDateTime(DATE_TIME)
-                .method(ANALYTICAL_PLATFORM)
-                .confidence(98.76)
-                .build();
+            .referenceOffenderNo("A1234AA")
+            .duplicateOffenderNo("B1234BB")
+            .detectionDateTime(DATE_TIME)
+            .method(ANALYTICAL_PLATFORM)
+            .confidence(98.76)
+            .build();
 
         repository.save(dataDuplicate);
         assertThat(dataDuplicate.getDataDuplicateId()).isNotNull();
@@ -47,12 +47,12 @@ class DataDuplicateRepositoryTest extends IntegrationTest {
     void persistDataDuplicateWith100PercentConfidence() {
 
         final var dataDuplicate = DataDuplicate.builder()
-                .referenceOffenderNo("A1234AA")
-                .duplicateOffenderNo("B1234BB")
-                .detectionDateTime(DATE_TIME)
-                .method(ANALYTICAL_PLATFORM)
-                .confidence(100.00)
-                .build();
+            .referenceOffenderNo("A1234AA")
+            .duplicateOffenderNo("B1234BB")
+            .detectionDateTime(DATE_TIME)
+            .method(ANALYTICAL_PLATFORM)
+            .confidence(100.00)
+            .build();
 
         repository.save(dataDuplicate);
         assertThat(dataDuplicate.getDataDuplicateId()).isNotNull();

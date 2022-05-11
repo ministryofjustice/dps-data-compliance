@@ -59,6 +59,27 @@ class DeceasedDeletionServiceTest {
 
     private DeceasedDeletionService deceasedDeletionService;
 
+    public static DeceasedOffender buildDeceasedOffender() {
+        return DeceasedOffender.builder()
+            .offenderIdDisplay(OFFENDER_NUMBER)
+            .firstName("someFirstName")
+            .middleName("someMiddleName")
+            .lastName("someLastName")
+            .agencyLocationId("someAgencyLocationId")
+            .birthDate(LocalDate.now().minusYears(30))
+            .deceasedDate(LocalDate.now().minusYears(1))
+            .deletionDateTime(LocalDateTime.now().minusMinutes(1))
+            .offenderAlias(buildOffenderAlias())
+            .build();
+    }
+
+    private static OffenderAlias buildOffenderAlias() {
+        return OffenderAlias.builder()
+            .offenderId(OFFENDER_ID)
+            .offenderBookId(OFFENDER_BOOK_ID)
+            .build();
+    }
+
     @BeforeEach
     void setUp() {
         deceasedDeletionService = new DeceasedDeletionService(
@@ -121,7 +142,6 @@ class DeceasedDeletionServiceTest {
         return referral;
     }
 
-
     private DeceasedOffenderDeletionBatch updateBatch(DeceasedOffenderDeletionBatch batch) {
         return batch.toBuilder()
             .referralCompletionDateTime(NOW)
@@ -140,27 +160,6 @@ class DeceasedDeletionServiceTest {
         return DeceasedOffenderDeletionResult.builder()
             .batchId(BATCH_ID)
             .deceasedOffender(buildDeceasedOffender())
-            .build();
-    }
-
-    public static DeceasedOffender buildDeceasedOffender() {
-        return DeceasedOffender.builder()
-            .offenderIdDisplay(OFFENDER_NUMBER)
-            .firstName("someFirstName")
-            .middleName("someMiddleName")
-            .lastName("someLastName")
-            .agencyLocationId("someAgencyLocationId")
-            .birthDate(LocalDate.now().minusYears(30))
-            .deceasedDate(LocalDate.now().minusYears(1))
-            .deletionDateTime(LocalDateTime.now().minusMinutes(1))
-            .offenderAlias(buildOffenderAlias())
-            .build();
-    }
-
-    private static OffenderAlias buildOffenderAlias() {
-        return OffenderAlias.builder()
-            .offenderId(OFFENDER_ID)
-            .offenderBookId(OFFENDER_BOOK_ID)
             .build();
     }
 

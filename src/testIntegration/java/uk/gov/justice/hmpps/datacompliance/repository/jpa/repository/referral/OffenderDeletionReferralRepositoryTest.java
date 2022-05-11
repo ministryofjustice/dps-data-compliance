@@ -120,37 +120,37 @@ class OffenderDeletionReferralRepositoryTest extends IntegrationTest {
 
     private OffenderDeletionReferral offenderDeletionReferral() {
         final var referral = OffenderDeletionReferral.builder()
-                .receivedDateTime(LocalDateTime.of(2020, 1, 2, 3, 4, 5))
-                .offenderDeletionBatch(batchRepository.findById(1L).orElseThrow())
-                .offenderNo("A1234AA")
-                .firstName("John")
-                .middleName("Middle")
-                .lastName("Smith")
-                .agencyLocationId("LEI")
-                .birthDate(LocalDate.of(1969, 1, 1))
-                .build();
+            .receivedDateTime(LocalDateTime.of(2020, 1, 2, 3, 4, 5))
+            .offenderDeletionBatch(batchRepository.findById(1L).orElseThrow())
+            .offenderNo("A1234AA")
+            .firstName("John")
+            .middleName("Middle")
+            .lastName("Smith")
+            .agencyLocationId("LEI")
+            .birthDate(LocalDate.of(1969, 1, 1))
+            .build();
 
         referral.setReferralResolution(referralResolution());
         referral.addReferredOffenderAlias(ReferredOffenderAlias.builder()
-                .offenderId(-1001L)
-                .offenderBookId(-1L)
-                .build());
+            .offenderId(-1001L)
+            .offenderBookId(-1L)
+            .build());
 
         return referral;
     }
 
     private ReferralResolution referralResolution() {
         return ReferralResolution.builder()
-                .resolutionStatus(PENDING)
-                .resolutionDateTime(LocalDateTime.of(2021, 2, 3, 4, 5, 6))
-                .provisionalDeletionPreviouslyGranted(false)
-                .build()
+            .resolutionStatus(PENDING)
+            .resolutionDateTime(LocalDateTime.of(2021, 2, 3, 4, 5, 6))
+            .provisionalDeletionPreviouslyGranted(false)
+            .build()
 
-                .addRetentionCheck(new RetentionCheckManual(Status.PENDING)
-                        .setManualRetention(manualRetentionRepository.findById(1L).orElseThrow()))
-                .addRetentionCheck(new RetentionCheckPathfinder(RETENTION_REQUIRED))
-                .addRetentionCheck(new RetentionCheckImageDuplicate(RETENTION_NOT_REQUIRED)
-                        .addImageDuplicate(imageDuplicateRepository.findById(1L).orElseThrow()));
+            .addRetentionCheck(new RetentionCheckManual(Status.PENDING)
+                .setManualRetention(manualRetentionRepository.findById(1L).orElseThrow()))
+            .addRetentionCheck(new RetentionCheckPathfinder(RETENTION_REQUIRED))
+            .addRetentionCheck(new RetentionCheckImageDuplicate(RETENTION_NOT_REQUIRED)
+                .addImageDuplicate(imageDuplicateRepository.findById(1L).orElseThrow()));
     }
 
     private void assertMatchesExpectedContents(final OffenderDeletionReferral referral) {
@@ -199,9 +199,9 @@ class OffenderDeletionReferralRepositoryTest extends IntegrationTest {
     private <T extends RetentionCheck> T getRetentionCheck(final List<RetentionCheck> retentionChecks,
                                                            final Class<T> retentionCheckClass) {
         return retentionChecks.stream()
-                .filter(retentionCheckClass::isInstance)
-                .map(retentionCheckClass::cast)
-                .findFirst()
-                .orElseThrow();
+            .filter(retentionCheckClass::isInstance)
+            .map(retentionCheckClass::cast)
+            .findFirst()
+            .orElseThrow();
     }
 }

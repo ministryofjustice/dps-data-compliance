@@ -25,15 +25,15 @@ class OffenderNumberTest {
     void cannotCreateWithNullString() {
 
         assertThatThrownBy(() -> new OffenderNumber(null))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessage("Null offender number");
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("Null offender number");
     }
 
     @Test
     void cannotCreateWithInvalidId() {
 
         assertThatThrownBy(() -> new OffenderNumber("invalid"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Invalid offender number: 'invalid'");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Invalid offender number: 'invalid'");
     }
 }

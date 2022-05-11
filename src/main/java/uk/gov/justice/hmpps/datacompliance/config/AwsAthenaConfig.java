@@ -28,9 +28,9 @@ public class AwsAthenaConfig {
                               @Value("${duplicate.detection.region}") final String region,
                               @Value("${duplicate.detection.role.arn}") final String roleArn) {
         return AthenaClient.builder()
-                .region(Region.of(region))
-                .credentialsProvider(assumedRoleCredentialsProvider(accessKey, secretKey, region, roleArn))
-                .build();
+            .region(Region.of(region))
+            .credentialsProvider(assumedRoleCredentialsProvider(accessKey, secretKey, region, roleArn))
+            .build();
     }
 
     private AwsCredentialsProvider assumedRoleCredentialsProvider(final String accessKey,
@@ -41,19 +41,19 @@ public class AwsAthenaConfig {
         final var credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
         final var assumeRoleRequest = AssumeRoleRequest.builder()
-                .roleArn(roleArn)
-                .roleSessionName(SESSION_NAME)
-                .build();
+            .roleArn(roleArn)
+            .roleSessionName(SESSION_NAME)
+            .build();
 
         final var stsClient = StsClient.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .build();
+            .region(Region.of(region))
+            .credentialsProvider(StaticCredentialsProvider.create(credentials))
+            .build();
 
         return StsAssumeRoleCredentialsProvider.builder()
-                .stsClient(stsClient)
-                .refreshRequest(assumeRoleRequest)
-                .asyncCredentialUpdateEnabled(true)
-                .build();
+            .stsClient(stsClient)
+            .refreshRequest(assumeRoleRequest)
+            .asyncCredentialUpdateEnabled(true)
+            .build();
     }
 }

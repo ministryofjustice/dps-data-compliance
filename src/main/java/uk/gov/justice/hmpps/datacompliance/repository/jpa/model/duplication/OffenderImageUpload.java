@@ -32,49 +32,42 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplicati
 @Table(name = "OFFENDER_IMAGE_UPLOAD")
 public class OffenderImageUpload {
 
-    public enum ImageUploadStatus {
-        SUCCESS,
-        ERROR,
-        DELETED
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UPLOAD_ID", nullable = false)
     private Long uploadId;
-
     @NotNull
     @Length(max = 10)
     @Column(name = "OFFENDER_NO", nullable = false)
     private String offenderNo;
-
     @NotNull
     @Column(name = "OFFENDER_IMAGE_ID", nullable = false)
     private Long imageId;
-
     @Length(max = 255)
     @Column(name = "FACE_ID")
     private String faceId;
-
     @NotNull
     @Column(name = "UPLOAD_DATE_TIME", nullable = false)
     private LocalDateTime uploadDateTime;
-
     @NotNull
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "BATCH_ID", nullable = false)
     private ImageUploadBatch imageUploadBatch;
-
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "UPLOAD_STATUS", nullable = false)
     private ImageUploadStatus uploadStatus;
-
     @Length(max = 255)
     @Column(name = "UPLOAD_ERROR_REASON")
     private String uploadErrorReason;
 
     public boolean isSuccess() {
         return SUCCESS == uploadStatus;
+    }
+
+    public enum ImageUploadStatus {
+        SUCCESS,
+        ERROR,
+        DELETED
     }
 }

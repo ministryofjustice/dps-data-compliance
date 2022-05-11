@@ -33,7 +33,7 @@ public class DataDuplicationDetectionService {
     public void searchForIdDuplicates(final OffenderNumber offenderNumber, final Long retentionCheckId) {
 
         log.debug("Submitting a request to search for data duplicates by ID: '{}/{}'",
-                offenderNumber.getOffenderNumber(), retentionCheckId);
+            offenderNumber.getOffenderNumber(), retentionCheckId);
 
         eventPusher.requestIdDataDuplicateCheck(offenderNumber, retentionCheckId);
     }
@@ -41,7 +41,7 @@ public class DataDuplicationDetectionService {
     public void searchForDatabaseDuplicates(final OffenderNumber offenderNumber, final Long retentionCheckId) {
 
         log.debug("Submitting a request to search for data duplicates (using similarity query on NOMIS DB): '{}/{}'",
-                offenderNumber.getOffenderNumber(), retentionCheckId);
+            offenderNumber.getOffenderNumber(), retentionCheckId);
 
         eventPusher.requestDatabaseDataDuplicateCheck(offenderNumber, retentionCheckId);
     }
@@ -49,7 +49,7 @@ public class DataDuplicationDetectionService {
     public List<DataDuplicate> searchForAnalyticalPlatformDuplicates(final OffenderNumber offenderNumber) {
 
         log.debug("Performing Analytical Platform duplicate search for offender : '{}'",
-                offenderNumber.getOffenderNumber());
+            offenderNumber.getOffenderNumber());
 
         final var duplicates = duplicateDetectionClient.findDuplicatesFor(offenderNumber);
 
@@ -63,13 +63,13 @@ public class DataDuplicationDetectionService {
         final var timestamp = timeSource.nowAsLocalDateTime();
 
         return duplicates.stream()
-                .map(duplicate -> dataDuplicateRepository.save(DataDuplicate.builder()
-                        .detectionDateTime(timestamp)
-                        .referenceOffenderNo(referenceOffenderNo.getOffenderNumber())
-                        .duplicateOffenderNo(duplicate.getDuplicateOffenderNumber().getOffenderNumber())
-                        .confidence(duplicate.getConfidence())
-                        .method(method)
-                        .build()))
-                .collect(toList());
+            .map(duplicate -> dataDuplicateRepository.save(DataDuplicate.builder()
+                .detectionDateTime(timestamp)
+                .referenceOffenderNo(referenceOffenderNo.getOffenderNumber())
+                .duplicateOffenderNo(duplicate.getDuplicateOffenderNumber().getOffenderNumber())
+                .confidence(duplicate.getConfidence())
+                .method(method)
+                .build()))
+            .collect(toList());
     }
 }

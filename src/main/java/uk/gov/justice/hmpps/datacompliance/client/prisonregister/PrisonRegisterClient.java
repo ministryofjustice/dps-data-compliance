@@ -23,7 +23,7 @@ public class PrisonRegisterClient {
     private final DataComplianceProperties dataComplianceProperties;
 
     public PrisonRegisterClient(@Qualifier("authorizedWebClient") final WebClient webClient,
-                              final DataComplianceProperties dataComplianceProperties) {
+                                final DataComplianceProperties dataComplianceProperties) {
         this.webClient = webClient;
         this.dataComplianceProperties = dataComplianceProperties;
     }

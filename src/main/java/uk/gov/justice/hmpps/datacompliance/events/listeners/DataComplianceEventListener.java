@@ -42,28 +42,25 @@ public class DataComplianceEventListener {
     private static final String DATA_DUPLICATE_ID_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-ID-RESULT";
     private static final String DATA_DUPLICATE_DB_RESULT = "DATA_COMPLIANCE_DATA-DUPLICATE-DB-RESULT";
     private static final String FREE_TEXT_MORATORIUM_RESULT = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT";
-    private static final String OFFENDER_RESTRICTION_RESULT= "DATA_COMPLIANCE_OFFENDER-RESTRICTION-RESULT";
+    private static final String OFFENDER_RESTRICTION_RESULT = "DATA_COMPLIANCE_OFFENDER-RESTRICTION-RESULT";
     private static final String DECEASED_OFFENDER_DELETION_RESULT = "DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-RESULT";
-
-
-    private final Map<String, MessageHandler> messageHandlers = Map.of(
-            ADHOC_OFFENDER_DELETION_EVENT, this::handleAdHocDeletion,
-            OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral,
-            OFFENDER_PROVISIONAL_DELETION_REFERRAL_EVENT, this::handleProvisionalDeletionReferralResult,
-            OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete,
-            OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
-            DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult,
-            DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult,
-            FREE_TEXT_MORATORIUM_RESULT, this::handleFreeTextSearchResult,
-            OFFENDER_RESTRICTION_RESULT, this::handleOffenderRestrictionResult,
-            DECEASED_OFFENDER_DELETION_RESULT, this::handleDeceasedOffenderDeletionResult
-        );
-
     private final ObjectMapper objectMapper;
     private final ReferralService referralService;
     private final RetentionService retentionService;
     private final DeletionService deletionService;
     private final DeceasedDeletionService deceasedDeletionService;
+    private final Map<String, MessageHandler> messageHandlers = Map.of(
+        ADHOC_OFFENDER_DELETION_EVENT, this::handleAdHocDeletion,
+        OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral,
+        OFFENDER_PROVISIONAL_DELETION_REFERRAL_EVENT, this::handleProvisionalDeletionReferralResult,
+        OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete,
+        OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
+        DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult,
+        DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult,
+        FREE_TEXT_MORATORIUM_RESULT, this::handleFreeTextSearchResult,
+        OFFENDER_RESTRICTION_RESULT, this::handleOffenderRestrictionResult,
+        DECEASED_OFFENDER_DELETION_RESULT, this::handleDeceasedOffenderDeletionResult
+    );
 
     public DataComplianceEventListener(final ObjectMapper objectMapper,
                                        final ReferralService referralService,
@@ -96,24 +93,24 @@ public class DataComplianceEventListener {
 
         checkNotNull(eventType, "Message event type not found");
         checkState(messageHandlers.containsKey(eventType),
-                "Unexpected message event type: '%s', expecting one of: %s", eventType, messageHandlers.keySet());
+            "Unexpected message event type: '%s', expecting one of: %s", eventType, messageHandlers.keySet());
 
         return eventType;
     }
 
     private void handleDeletionComplete(final Message<String> message) {
         deletionService.handleDeletionComplete(
-                parseEvent(message.getPayload(), OffenderDeletionComplete.class));
+            parseEvent(message.getPayload(), OffenderDeletionComplete.class));
     }
 
     private void handleReferralComplete(final Message<String> message) {
         referralService.handleReferralComplete(
-                parseEvent(message.getPayload(), OffenderPendingDeletionReferralComplete.class));
+            parseEvent(message.getPayload(), OffenderPendingDeletionReferralComplete.class));
     }
 
     private void handlePendingDeletionReferral(final Message<String> message) {
         referralService.handlePendingDeletionReferral(
-                parseEvent(message.getPayload(), OffenderPendingDeletion.class));
+            parseEvent(message.getPayload(), OffenderPendingDeletion.class));
     }
 
     private void handleProvisionalDeletionReferralResult(final Message<String> message) {
@@ -123,22 +120,22 @@ public class DataComplianceEventListener {
 
     private void handleAdHocDeletion(final Message<String> message) {
         referralService.handleAdHocDeletion(
-                parseEvent(message.getPayload(), AdHocOffenderDeletion.class));
+            parseEvent(message.getPayload(), AdHocOffenderDeletion.class));
     }
 
     private void handleDataDuplicateIdResult(final Message<String> message) {
         retentionService.handleDataDuplicateResult(
-                parseEvent(message.getPayload(), DataDuplicateResult.class), ID);
+            parseEvent(message.getPayload(), DataDuplicateResult.class), ID);
     }
 
     private void handleDataDuplicateDbResult(final Message<String> message) {
         retentionService.handleDataDuplicateResult(
-                parseEvent(message.getPayload(), DataDuplicateResult.class), DATABASE);
+            parseEvent(message.getPayload(), DataDuplicateResult.class), DATABASE);
     }
 
     private void handleFreeTextSearchResult(final Message<String> message) {
         retentionService.handleFreeTextSearchResult(
-                parseEvent(message.getPayload(), FreeTextSearchResult.class));
+            parseEvent(message.getPayload(), FreeTextSearchResult.class));
     }
 
     private void handleOffenderRestrictionResult(final Message<String> message) {

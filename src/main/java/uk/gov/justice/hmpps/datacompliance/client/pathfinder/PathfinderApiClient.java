@@ -30,19 +30,19 @@ public class PathfinderApiClient {
 
     public boolean isReferredToPathfinder(final OffenderNumber offenderNumber) {
         final var url = dataComplianceProperties.getPathfinderApiBaseUrl() +
-                format(PATHFINDER_PATH, offenderNumber.getOffenderNumber());
+            format(PATHFINDER_PATH, offenderNumber.getOffenderNumber());
 
         log.debug("Executing a path finder check to {} for offender '{}'", url, offenderNumber.getOffenderNumber());
 
         final var response = webClient.get()
-                .uri(url)
-                .retrieve()
+            .uri(url)
+            .retrieve()
 
-                // Not found should not generate an exception:
-                .onStatus(NOT_FOUND::equals, ignored -> Mono.empty())
+            // Not found should not generate an exception:
+            .onStatus(NOT_FOUND::equals, ignored -> Mono.empty())
 
-                .toBodilessEntity()
-                .block(dataComplianceProperties.getPathfinderApiTimeout());
+            .toBodilessEntity()
+            .block(dataComplianceProperties.getPathfinderApiTimeout());
 
         final HttpStatus statusCode = requireNonNull(response).getStatusCode();
         log.debug("Received response for request to {} for offender '{}'. Status code: '{}'", url, offenderNumber.getOffenderNumber(), statusCode.value());

@@ -12,8 +12,22 @@ import java.time.temporal.ChronoUnit;
 import static java.util.Set.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.*;
-import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.*;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.AD_HOC_REFERRAL_REQUEST;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.DATA_DUPLICATE_DB_CHECK;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.DATA_DUPLICATE_ID_CHECK;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.FREE_TEXT_MORATORIUM_CHECK;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.OFFENDER_DELETION_GRANTED;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.request.Request.OFFENDER_RESTRICTION_CHECK;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forAdHocDeletionEvent;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forDataDuplicateDbResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forDataDuplicateIdResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forDeceasedOffenderDeletionResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forFreeTextSearchResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forOffenderDeletionCompleteResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forOffenderPendingDeletion;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forOffenderRestrictionResult;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.forPendingDeletionReferralComplete;
+import static uk.gov.justice.hmpps.datacompliance.utils.queue.sqs.response.SqsResponseQueueFactory.getDeceasedOffender;
 import static uk.gov.justice.hmpps.datacompliance.utils.web.request.RequestFactory.forManualRetentionRequest;
 
 
@@ -218,7 +232,7 @@ public class MessagesIntegrationTest extends QueueIntegrationTest {
         assertThat(deceasedOffenderDeletionReferrals.get(0).getLastName()).isEqualTo(deceasedOffender.getLastName());
         assertThat(deceasedOffenderDeletionReferrals.get(0).getAgencyLocationId()).isEqualTo(deceasedOffender.getAgencyLocationId());
         assertThat(deceasedOffenderDeletionReferrals.get(0).getDeceasedDate()).isEqualTo(deceasedOffender.getDeceasedDate());
-        assertThat(deceasedOffenderDeletionReferrals.get(0).getDeletionDateTime()).isCloseTo(deceasedOffender.getDeletionDateTime(),  within(1, ChronoUnit.SECONDS));
+        assertThat(deceasedOffenderDeletionReferrals.get(0).getDeletionDateTime()).isCloseTo(deceasedOffender.getDeletionDateTime(), within(1, ChronoUnit.SECONDS));
         assertThat(deceasedOffenderDeletionReferrals.get(0).getBirthDate()).isEqualTo(deceasedOffender.getBirthDate());
 
     }

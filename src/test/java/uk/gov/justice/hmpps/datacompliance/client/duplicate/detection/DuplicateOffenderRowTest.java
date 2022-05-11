@@ -18,11 +18,11 @@ class DuplicateOffenderRowTest {
     void headerRow() {
 
         final var row = new DuplicateOffenderRow(Row.builder()
-                .data(
-                        Datum.builder().varCharValue("offender_id_display_l").build(),
-                        Datum.builder().varCharValue("offender_id_display_r").build(),
-                        Datum.builder().varCharValue("match_score").build())
-                .build());
+            .data(
+                Datum.builder().varCharValue("offender_id_display_l").build(),
+                Datum.builder().varCharValue("offender_id_display_r").build(),
+                Datum.builder().varCharValue("match_score").build())
+            .build());
 
         assertThat(row.isHeaderRow()).isTrue();
         assertThatThrownBy(row::getMatchScore).isInstanceOf(IllegalStateException.class).hasMessage("Cannot retrieve value from header row");
@@ -33,11 +33,11 @@ class DuplicateOffenderRowTest {
     void dataRow() {
 
         final var row = new DuplicateOffenderRow(Row.builder()
-                .data(
-                        Datum.builder().varCharValue(OFFENDER_1.getOffenderNumber()).build(),
-                        Datum.builder().varCharValue(OFFENDER_2.getOffenderNumber()).build(),
-                        Datum.builder().varCharValue("0.123").build())
-                .build());
+            .data(
+                Datum.builder().varCharValue(OFFENDER_1.getOffenderNumber()).build(),
+                Datum.builder().varCharValue(OFFENDER_2.getOffenderNumber()).build(),
+                Datum.builder().varCharValue("0.123").build())
+            .build());
 
         assertThat(row.isHeaderRow()).isFalse();
         assertThat(row.getMatchScore()).isEqualTo(0.123);
@@ -49,14 +49,14 @@ class DuplicateOffenderRowTest {
     void getComplementThrowsIfOffenderNumberNotPresent() {
 
         final var row = new DuplicateOffenderRow(Row.builder()
-                .data(
-                        Datum.builder().varCharValue(OFFENDER_1.getOffenderNumber()).build(),
-                        Datum.builder().varCharValue(OFFENDER_2.getOffenderNumber()).build(),
-                        Datum.builder().varCharValue("0.123").build())
-                .build());
+            .data(
+                Datum.builder().varCharValue(OFFENDER_1.getOffenderNumber()).build(),
+                Datum.builder().varCharValue(OFFENDER_2.getOffenderNumber()).build(),
+                Datum.builder().varCharValue("0.123").build())
+            .build());
 
         assertThatThrownBy(() -> row.getComplementOf(OFFENDER_3))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Neither offender in the row (A1234AA / B1234BB) matches the intended reference offender number: 'C1234CC'");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Neither offender in the row (A1234AA / B1234BB) matches the intended reference offender number: 'C1234CC'");
     }
 }

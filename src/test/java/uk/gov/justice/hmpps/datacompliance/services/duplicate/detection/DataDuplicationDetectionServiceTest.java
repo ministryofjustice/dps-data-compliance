@@ -51,10 +51,10 @@ class DataDuplicationDetectionServiceTest {
     @BeforeEach
     void setUp() {
         service = new DataDuplicationDetectionService(
-                TimeSource.of(NOW),
-                eventPusher,
-                dataDuplicateRepository,
-                duplicateDetectionClient);
+            TimeSource.of(NOW),
+            eventPusher,
+            dataDuplicateRepository,
+            duplicateDetectionClient);
     }
 
     @Test
@@ -79,7 +79,7 @@ class DataDuplicationDetectionServiceTest {
         final var dataDuplicate = mock(DataDuplicate.class);
 
         when(duplicateDetectionClient.findDuplicatesFor(OFFENDER_NUMBER))
-                .thenReturn(Set.of(new DuplicateResult(DUPLICATE_OFFENDER_NUMBER_1, CONFIDENCE)));
+            .thenReturn(Set.of(new DuplicateResult(DUPLICATE_OFFENDER_NUMBER_1, CONFIDENCE)));
 
         final var dataDuplicateCaptor = ArgumentCaptor.forClass(DataDuplicate.class);
         when(dataDuplicateRepository.save(dataDuplicateCaptor.capture())).thenReturn(dataDuplicate);
@@ -97,8 +97,8 @@ class DataDuplicationDetectionServiceTest {
     void persistDataDuplicates() {
 
         final var duplicates = List.of(
-                new DuplicateResult(DUPLICATE_OFFENDER_NUMBER_1, CONFIDENCE),
-                new DuplicateResult(DUPLICATE_OFFENDER_NUMBER_2, CONFIDENCE));
+            new DuplicateResult(DUPLICATE_OFFENDER_NUMBER_1, CONFIDENCE),
+            new DuplicateResult(DUPLICATE_OFFENDER_NUMBER_2, CONFIDENCE));
 
         service.persistDataDuplicates(OFFENDER_NUMBER, duplicates, ID);
 
@@ -111,9 +111,9 @@ class DataDuplicationDetectionServiceTest {
         assertThat(dataDuplicates).extracting(DataDuplicate::getMethod).allMatch(ID::equals);
         assertThat(dataDuplicates).extracting(DataDuplicate::getConfidence).allMatch(CONFIDENCE::equals);
         assertThat(dataDuplicates)
-                .extracting(DataDuplicate::getDuplicateOffenderNo)
-                .containsExactlyInAnyOrder(
-                        DUPLICATE_OFFENDER_NUMBER_1.getOffenderNumber(),
-                        DUPLICATE_OFFENDER_NUMBER_2.getOffenderNumber());
+            .extracting(DataDuplicate::getDuplicateOffenderNo)
+            .containsExactlyInAnyOrder(
+                DUPLICATE_OFFENDER_NUMBER_1.getOffenderNumber(),
+                DUPLICATE_OFFENDER_NUMBER_2.getOffenderNumber());
     }
 }
