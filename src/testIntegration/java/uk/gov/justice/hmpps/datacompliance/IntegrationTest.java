@@ -6,7 +6,6 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -35,7 +34,7 @@ public abstract class IntegrationTest {
 
 
     @BeforeAll
-    public static void setupAll(){
+    public static void setupAll() {
         Awaitility.setDefaultPollDelay(Duration.ZERO);
         Awaitility.setDefaultTimeout(Duration.ofMinutes(1));
     }
@@ -67,7 +66,7 @@ public abstract class IntegrationTest {
     }
 
     @AfterEach
-    protected  void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         prisonApiMock.shutdown();
         hmppsAuthMock.shutdown();
         pathfinderApiMock.shutdown();

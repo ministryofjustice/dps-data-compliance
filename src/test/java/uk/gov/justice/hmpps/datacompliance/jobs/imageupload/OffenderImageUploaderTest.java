@@ -6,19 +6,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError;
-import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
-import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
-import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.FaceId;
 import uk.gov.justice.hmpps.datacompliance.client.image.recognition.ImageRecognitionClient;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError;
+import uk.gov.justice.hmpps.datacompliance.client.image.recognition.OffenderImage;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.PrisonApiClient;
+import uk.gov.justice.hmpps.datacompliance.client.prisonapi.dto.OffenderImageMetadata;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.hmpps.datacompliance.client.image.recognition.IndexFacesError.FACE_NOT_FOUND;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.error;
 import static uk.gov.justice.hmpps.datacompliance.utils.Result.success;
@@ -31,10 +35,10 @@ class OffenderImageUploaderTest {
     private static final FaceId FACE_ID = new FaceId("face1");
     private static final OffenderImageMetadata IMAGE_METADATA = new OffenderImageMetadata(IMAGE_ID, "FACE");
     private static final OffenderImage OFFENDER_IMAGE = OffenderImage.builder()
-            .offenderNumber(OFFENDER_NUMBER)
-            .imageId(IMAGE_ID)
-            .imageData(new byte[]{0x12})
-            .build();
+        .offenderNumber(OFFENDER_NUMBER)
+        .imageId(IMAGE_ID)
+        .imageData(new byte[]{0x12})
+        .build();
 
     @Mock
     private PrisonApiClient prisonApiClient;
@@ -59,9 +63,9 @@ class OffenderImageUploaderTest {
     void uploadOffenderImages() {
 
         givenFaceImageExistsForOffender(true)
-                .andImageAlreadyUploaded(false)
-                .andImageDataExists(true)
-                .andImageUploadsSuccessfully();
+            .andImageAlreadyUploaded(false)
+            .andImageDataExists(true)
+            .andImageUploadsSuccessfully();
 
         imageUploader.accept(OFFENDER_NUMBER);
 
@@ -73,7 +77,7 @@ class OffenderImageUploaderTest {
     void uploadOffenderImagesSkipsUploadIfAlreadyUploaded() {
 
         givenFaceImageExistsForOffender(true)
-                .andImageAlreadyUploaded(true);
+            .andImageAlreadyUploaded(true);
 
         imageUploader.accept(OFFENDER_NUMBER);
 
@@ -96,8 +100,8 @@ class OffenderImageUploaderTest {
     void uploadOffenderImagesHandlesMissingImageData() {
 
         givenFaceImageExistsForOffender(true)
-                .andImageAlreadyUploaded(false)
-                .andImageDataExists(false);
+            .andImageAlreadyUploaded(false)
+            .andImageDataExists(false);
 
         imageUploader.accept(OFFENDER_NUMBER);
 
@@ -109,9 +113,9 @@ class OffenderImageUploaderTest {
     void uploadMayResultInNoIndexedFaces() {
 
         givenFaceImageExistsForOffender(true)
-                .andImageAlreadyUploaded(false)
-                .andImageDataExists(true)
-                .andImageUploadFailsWith(FACE_NOT_FOUND);
+            .andImageAlreadyUploaded(false)
+            .andImageDataExists(true)
+            .andImageUploadFailsWith(FACE_NOT_FOUND);
 
         imageUploader.accept(OFFENDER_NUMBER);
 
@@ -120,7 +124,7 @@ class OffenderImageUploaderTest {
 
     private OffenderImageUploaderTest givenFaceImageExistsForOffender(final boolean exists) {
         when(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
-                .thenReturn(exists ? List.of(IMAGE_METADATA) : emptyList());
+            .thenReturn(exists ? List.of(IMAGE_METADATA) : emptyList());
         return this;
     }
 
@@ -131,17 +135,17 @@ class OffenderImageUploaderTest {
 
     private OffenderImageUploaderTest andImageDataExists(final boolean exists) {
         when(prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID))
-                .thenReturn(exists ? Optional.of(OFFENDER_IMAGE) : Optional.empty());
+            .thenReturn(exists ? Optional.of(OFFENDER_IMAGE) : Optional.empty());
         return this;
     }
 
     private void andImageUploadsSuccessfully() {
         when(imageRecognitionClient.uploadImageToCollection(OFFENDER_IMAGE))
-                .thenReturn(success(FACE_ID));
+            .thenReturn(success(FACE_ID));
     }
 
     private void andImageUploadFailsWith(final IndexFacesError error) {
         when(imageRecognitionClient.uploadImageToCollection(OFFENDER_IMAGE))
-                .thenReturn(error(error));
+            .thenReturn(error(error));
     }
 }

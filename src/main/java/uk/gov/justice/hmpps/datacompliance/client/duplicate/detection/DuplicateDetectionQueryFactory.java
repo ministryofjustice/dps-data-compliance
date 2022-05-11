@@ -23,7 +23,7 @@ public class DuplicateDetectionQueryFactory {
 
     private static final int MAX_RESULTS = 100;
     private static final String QUERY_TEMPLATE =
-            "SELECT * FROM %s.%s " +
+        "SELECT * FROM %s.%s " +
             "WHERE (offender_id_display_l = '%s' OR offender_id_display_r = '%<s') " +
             "AND match_score > %s";
 
@@ -47,13 +47,13 @@ public class DuplicateDetectionQueryFactory {
 
         // Should not be allowed to happen, but double check:
         checkArgument(OffenderNumber.isValid(offenderNumber.getOffenderNumber()),
-                "Offender number '%s' does not match regex", offenderNumber.getOffenderNumber());
+            "Offender number '%s' does not match regex", offenderNumber.getOffenderNumber());
 
         return StartQueryExecutionRequest.builder()
-                .queryString(constructSql(offenderNumber))
-                .queryExecutionContext(queryExecutionContext())
-                .resultConfiguration(resultConfiguration())
-                .build();
+            .queryString(constructSql(offenderNumber))
+            .queryExecutionContext(queryExecutionContext())
+            .resultConfiguration(resultConfiguration())
+            .build();
     }
 
     GetQueryExecutionRequest getQueryExecution(final String queryExecutionId) {
@@ -62,18 +62,18 @@ public class DuplicateDetectionQueryFactory {
 
     GetQueryResultsRequest getQueryResults(final String queryExecutionId) {
         return GetQueryResultsRequest.builder()
-                .queryExecutionId(queryExecutionId)
-                .maxResults(MAX_RESULTS)
-                .build();
+            .queryExecutionId(queryExecutionId)
+            .maxResults(MAX_RESULTS)
+            .build();
     }
 
     private String constructSql(final OffenderNumber offenderNumber) {
         return format(
-                QUERY_TEMPLATE,
-                database,
-                table,
-                offenderNumber.getOffenderNumber(),
-                String.valueOf(matchScoreThreshold).replaceAll("[.]?[0]*$", ""));
+            QUERY_TEMPLATE,
+            database,
+            table,
+            offenderNumber.getOffenderNumber(),
+            String.valueOf(matchScoreThreshold).replaceAll("[.]?[0]*$", ""));
     }
 
     private QueryExecutionContext queryExecutionContext() {
@@ -82,10 +82,10 @@ public class DuplicateDetectionQueryFactory {
 
     private ResultConfiguration resultConfiguration() {
         return ResultConfiguration.builder()
-                .outputLocation(outputLocation)
-                .encryptionConfiguration(EncryptionConfiguration.builder()
-                        .encryptionOption(SSE_S3)
-                        .build())
-                .build();
+            .outputLocation(outputLocation)
+            .encryptionConfiguration(EncryptionConfiguration.builder()
+                .encryptionOption(SSE_S3)
+                .build())
+            .build();
     }
 }

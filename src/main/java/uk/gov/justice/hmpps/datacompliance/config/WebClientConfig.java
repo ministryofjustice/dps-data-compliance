@@ -69,24 +69,24 @@ public class WebClientConfig {
         oauth2Client.setDefaultClientRegistrationId("dps-data-compliance");
 
         return WebClient.builder()
-                .apply(oauth2Client.oauth2Configuration())
-                .exchangeStrategies(ExchangeStrategies.builder()
-                        .codecs(configurer  -> configurer.defaultCodecs().maxInMemorySize(-1))
-                        .build())
-                .build();
+            .apply(oauth2Client.oauth2Configuration())
+            .exchangeStrategies(ExchangeStrategies.builder()
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(-1))
+                .build())
+            .build();
     }
 
     @Bean
     OAuth2AuthorizedClientManager authorizedClientManager(
-            final ClientRegistrationRepository clientRegistrationRepository,
-            final OAuth2AuthorizedClientService clientService) {
+        final ClientRegistrationRepository clientRegistrationRepository,
+        final OAuth2AuthorizedClientService clientService) {
 
         var authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
-                .clientCredentials()
-                .build();
+            .clientCredentials()
+            .build();
 
         var authorizedClientManager =
-                new AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, clientService);
+            new AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, clientService);
 
         authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
 

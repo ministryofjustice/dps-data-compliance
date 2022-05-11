@@ -25,7 +25,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(NON_NULL)
-@JsonPropertyOrder({ "NOMIS_ID", "FIRST_NAME", "MIDDLE_NAME", "LAST_NAME", "DATE_OF_BIRTH", "LAST_KNOWN_OFFENDER_MANAGEMENT_UNIT",
+@JsonPropertyOrder({"NOMIS_ID", "FIRST_NAME", "MIDDLE_NAME", "LAST_NAME", "DATE_OF_BIRTH", "LAST_KNOWN_OFFENDER_MANAGEMENT_UNIT",
     "TYPE_OF_RECORD_DESTROYED", "DESTRUCTION_DATE", "METHOD_OF_DESTRUCTION", "AUTHORISATION_OF_DESTRUCTION"})
 public class DestructionLogResponse {
 

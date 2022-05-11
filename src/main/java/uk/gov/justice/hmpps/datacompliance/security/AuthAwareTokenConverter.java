@@ -43,10 +43,10 @@ public class AuthAwareTokenConverter implements Converter<Jwt, AbstractAuthentic
 
         if (jwt.getClaims().containsKey("authorities")) {
             authorities.addAll(
-                    ((Collection<String>) jwt.getClaims().get("authorities"))
-                            .stream()
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(toSet()));
+                ((Collection<String>) jwt.getClaims().get("authorities"))
+                    .stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(toSet()));
         }
 
         return Set.copyOf(authorities);

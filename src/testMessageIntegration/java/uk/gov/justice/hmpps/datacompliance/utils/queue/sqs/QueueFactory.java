@@ -1,14 +1,10 @@
 package uk.gov.justice.hmpps.datacompliance.utils.queue.sqs;
 
 import com.amazonaws.services.sqs.model.MessageAttributeValue;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import java.util.Set;
 
 
 public abstract class QueueFactory {

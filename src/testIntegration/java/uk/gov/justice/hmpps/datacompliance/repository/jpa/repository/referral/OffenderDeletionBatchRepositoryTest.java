@@ -1,12 +1,8 @@
 package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 
@@ -28,12 +24,12 @@ class OffenderDeletionBatchRepositoryTest extends IntegrationTest {
     @Test
     void persistBatchAndRetrieveById() {
         final var batch = repository.save(OffenderDeletionBatch.builder()
-                .requestDateTime(NOW)
-                .referralCompletionDateTime(NOW.plusSeconds(1))
-                .windowStartDateTime(NOW.plusSeconds(2))
-                .windowEndDateTime(NOW.plusSeconds(3))
-                .batchType(SCHEDULED)
-                .build());
+            .requestDateTime(NOW)
+            .referralCompletionDateTime(NOW.plusSeconds(1))
+            .windowStartDateTime(NOW.plusSeconds(2))
+            .windowEndDateTime(NOW.plusSeconds(3))
+            .batchType(SCHEDULED)
+            .build());
 
         final var retrievedEntity = repository.findById(batch.getBatchId()).orElseThrow();
 
@@ -57,7 +53,7 @@ class OffenderDeletionBatchRepositoryTest extends IntegrationTest {
     @Sql("classpath:seed.data/offender_deletion_batch.sql")
     void findBatchesWithNoReferralCompletionDate() {
         assertThat(repository.findByReferralCompletionDateTimeIsNull())
-                .extracting(OffenderDeletionBatch::getBatchId)
-                .containsExactlyInAnyOrder(2L, 3L);
+            .extracting(OffenderDeletionBatch::getBatchId)
+            .containsExactlyInAnyOrder(2L, 3L);
     }
 }

@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 @JsonInclude(Include.NON_NULL)
-public class EmailParameters implements Mappable{
+public class EmailParameters implements Mappable {
 
     private String omu;
     private String offenderName;

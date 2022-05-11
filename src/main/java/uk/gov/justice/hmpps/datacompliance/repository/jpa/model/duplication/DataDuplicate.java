@@ -27,36 +27,31 @@ import java.time.LocalDateTime;
 @Table(name = "DATA_DUPLICATE")
 public class DataDuplicate {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "DATA_DUPLICATE_ID", nullable = false)
+    private Long dataDuplicateId;
+    @NotNull
+    @Length(max = 10)
+    @Column(name = "REFERENCE_OFFENDER_NO", nullable = false)
+    private String referenceOffenderNo;
+    @NotNull
+    @Length(max = 10)
+    @Column(name = "DUPLICATE_OFFENDER_NO", nullable = false)
+    private String duplicateOffenderNo;
+    @NotNull
+    @Column(name = "DETECTION_DATE_TIME", nullable = false)
+    private LocalDateTime detectionDateTime;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "METHOD", nullable = false)
+    private Method method;
+    @Column(name = "CONFIDENCE", precision = 5, scale = 2)
+    private Double confidence;
+
     public enum Method {
         ID,
         DATABASE,
         ANALYTICAL_PLATFORM
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DATA_DUPLICATE_ID", nullable = false)
-    private Long dataDuplicateId;
-
-    @NotNull
-    @Length(max = 10)
-    @Column(name = "REFERENCE_OFFENDER_NO", nullable = false)
-    private String referenceOffenderNo;
-
-    @NotNull
-    @Length(max = 10)
-    @Column(name = "DUPLICATE_OFFENDER_NO", nullable = false)
-    private String duplicateOffenderNo;
-
-    @NotNull
-    @Column(name = "DETECTION_DATE_TIME", nullable = false)
-    private LocalDateTime detectionDateTime;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "METHOD", nullable = false)
-    private Method method;
-
-    @Column(name = "CONFIDENCE", precision = 5, scale = 2)
-    private Double confidence;
 }

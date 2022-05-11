@@ -1,12 +1,8 @@
 package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 
@@ -33,11 +29,11 @@ class ImageDuplicateRepositoryTest extends IntegrationTest {
     void persistImageDuplicateAndRetrieveById() {
 
         final var imageDuplicate = ImageDuplicate.builder()
-                .referenceOffenderImageUpload(offenderImageUploadRepository.findById(1L).orElseThrow())
-                .duplicateOffenderImageUpload(offenderImageUploadRepository.findById(2L).orElseThrow())
-                .detectionDateTime(DATE_TIME)
-                .similarity(97.89)
-                .build();
+            .referenceOffenderImageUpload(offenderImageUploadRepository.findById(1L).orElseThrow())
+            .duplicateOffenderImageUpload(offenderImageUploadRepository.findById(2L).orElseThrow())
+            .detectionDateTime(DATE_TIME)
+            .similarity(97.89)
+            .build();
 
         repository.save(imageDuplicate);
         assertThat(imageDuplicate.getImageDuplicateId()).isNotNull();
@@ -55,11 +51,11 @@ class ImageDuplicateRepositoryTest extends IntegrationTest {
     void persistImageDuplicateWith100PercentSimilarity() {
 
         final var imageDuplicate = ImageDuplicate.builder()
-                .referenceOffenderImageUpload(offenderImageUploadRepository.findById(1L).orElseThrow())
-                .duplicateOffenderImageUpload(offenderImageUploadRepository.findById(2L).orElseThrow())
-                .detectionDateTime(DATE_TIME)
-                .similarity(100.00)
-                .build();
+            .referenceOffenderImageUpload(offenderImageUploadRepository.findById(1L).orElseThrow())
+            .duplicateOffenderImageUpload(offenderImageUploadRepository.findById(2L).orElseThrow())
+            .detectionDateTime(DATE_TIME)
+            .similarity(100.00)
+            .build();
 
         repository.save(imageDuplicate);
         assertThat(imageDuplicate.getImageDuplicateId()).isNotNull();

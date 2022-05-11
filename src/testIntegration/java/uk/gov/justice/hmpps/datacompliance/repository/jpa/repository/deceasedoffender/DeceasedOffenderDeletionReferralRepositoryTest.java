@@ -63,26 +63,25 @@ class DeceasedOffenderDeletionReferralRepositoryTest extends IntegrationTest {
 
     private DeceasedOffenderDeletionReferral deceasedOffenderDeletionReferral() {
         final var referral = DeceasedOffenderDeletionReferral.builder()
-                .deletionDateTime(LocalDateTime.of(2020, 1, 2, 3, 4, 5))
-                .deceasedOffenderDeletionBatch(batchRepository.findById(1L).orElseThrow())
-                .offenderNo("A1234AA")
-                .firstName("John")
-                .middleName("Middle")
-                .lastName("Smith")
-                .agencyLocationId("LEI")
-                .birthDate(LocalDate.of(1969, 1, 1))
-                .deceasedDate(LocalDate.of(2000, 1, 1))
-                .deletionDateTime(LocalDateTime.of(2020, 1, 2, 3, 4, 5))
-                .build();
+            .deletionDateTime(LocalDateTime.of(2020, 1, 2, 3, 4, 5))
+            .deceasedOffenderDeletionBatch(batchRepository.findById(1L).orElseThrow())
+            .offenderNo("A1234AA")
+            .firstName("John")
+            .middleName("Middle")
+            .lastName("Smith")
+            .agencyLocationId("LEI")
+            .birthDate(LocalDate.of(1969, 1, 1))
+            .deceasedDate(LocalDate.of(2000, 1, 1))
+            .deletionDateTime(LocalDateTime.of(2020, 1, 2, 3, 4, 5))
+            .build();
 
         referral.addReferredOffenderAlias(ReferredDeceasedOffenderAlias.builder()
-                .offenderId(-1001L)
-                .offenderBookId(-1L)
-                .build());
+            .offenderId(-1001L)
+            .offenderBookId(-1L)
+            .build());
 
         return referral;
     }
-
 
 
     private void assertMatchesExpectedContents(final DeceasedOffenderDeletionReferral referral) {
@@ -103,7 +102,6 @@ class DeceasedOffenderDeletionReferralRepositoryTest extends IntegrationTest {
         assertThat(offenderBooking.getOffenderId()).isEqualTo(-1001L);
         assertThat(offenderBooking.getOffenderBookId()).isEqualTo(-1L);
     }
-
 
 
 }

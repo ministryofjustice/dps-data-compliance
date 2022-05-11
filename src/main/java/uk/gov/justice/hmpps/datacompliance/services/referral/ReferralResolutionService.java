@@ -25,7 +25,11 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
 import static javax.persistence.LockModeType.PESSIMISTIC_WRITE;
-import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.*;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.CHANGES_OCCURRED_IN_REVIEW_PERIOD;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PROVISIONAL_DELETION_GRANTED;
+import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.DISABLED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.FALSE_POSITIVE;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
@@ -51,11 +55,11 @@ public class ReferralResolutionService {
                                 final List<ActionableRetentionCheck> actionableRetentionChecks) {
 
         final var retentionChecks = actionableRetentionChecks.stream()
-                .map(ActionableRetentionCheck::getRetentionCheck)
-                .collect(toList());
+            .map(ActionableRetentionCheck::getRetentionCheck)
+            .collect(toList());
 
         checkState(retentionChecks.stream().anyMatch(check -> !check.isStatus(DISABLED)),
-                "No retention checks have been conducted for offender: '%s'", referral.getOffenderNo());
+            "No retention checks have been conducted for offender: '%s'", referral.getOffenderNo());
 
         final var provisionalDeletionPreviouslyGranted = false;
         final var resolution = findResolution(retentionChecks, provisionalDeletionPreviouslyGranted);
@@ -64,8 +68,7 @@ public class ReferralResolutionService {
 
         if (resolution == PENDING) {
             actionableRetentionChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
-        }
-        else if(resolution == DELETION_GRANTED) {
+        } else if (resolution == DELETION_GRANTED) {
             deletionService.grantDeletion(referral);
         }
     }
@@ -94,8 +97,7 @@ public class ReferralResolutionService {
 
         if (resolution == PENDING) {
             subsequentActionableChecks.forEach(ActionableRetentionCheck::triggerPendingCheck);
-        }
-        else if(resolution == DELETION_GRANTED) {
+        } else if (resolution == DELETION_GRANTED) {
             deletionService.grantDeletion(referral);
         }
     }
@@ -103,8 +105,8 @@ public class ReferralResolutionService {
     public void processUpdatedRetentionCheck(final RetentionCheck retentionCheck) {
 
         final var referralResolution =
-                referralResolutionRepository.findById(retentionCheck.getReferralResolution().getResolutionId())
-                        .orElseThrow();
+            referralResolutionRepository.findById(retentionCheck.getReferralResolution().getResolutionId())
+                .orElseThrow();
 
         // Ensure no race condition when we check other retention check statuses:
         referralResolutionRepository.lock(referralResolution, PESSIMISTIC_WRITE);
@@ -112,9 +114,9 @@ public class ReferralResolutionService {
         final var resolutionStatus = findResolution(referralResolution.getRetentionChecks(), referralResolution.isProvisionalDeletionPreviouslyGranted());
 
         log.info("Updating offender referral '{}' to resolution status : '{}'",
-                referralResolution.getOffenderNumber(), resolutionStatus);
+            referralResolution.getOffenderNumber(), resolutionStatus);
 
-        if(PROVISIONAL_DELETION_GRANTED == resolutionStatus){
+        if (PROVISIONAL_DELETION_GRANTED == resolutionStatus) {
             referralResolution.setProvisionalDeletionPreviouslyGranted(true);
         }
         referralResolution.setResolutionStatus(resolutionStatus);
@@ -142,8 +144,8 @@ public class ReferralResolutionService {
         }
 
         findPotentialFalsePositiveRetention(retentionChecks)
-                .filter(falsePositiveCheckService::isFalsePositive)
-                .ifPresent(this::markAsFalsePositive);
+            .filter(falsePositiveCheckService::isFalsePositive)
+            .ifPresent(this::markAsFalsePositive);
 
         if (allChecksCompleted(retentionChecks)) {
             return properties.isReviewRequired() && !provisionalDeletionPreviouslyGranted ? PROVISIONAL_DELETION_GRANTED : DELETION_GRANTED;
@@ -159,13 +161,13 @@ public class ReferralResolutionService {
     private Optional<RetentionCheckDataDuplicate> findPotentialFalsePositiveRetention(final List<RetentionCheck> retentionChecks) {
 
         final var checksCausingRetention = retentionChecks.stream()
-                .filter(check -> check.isStatus(RETENTION_REQUIRED))
-                .collect(toList());
+            .filter(check -> check.isStatus(RETENTION_REQUIRED))
+            .collect(toList());
 
         final var dataDuplicateRetentions = checksCausingRetention.stream()
-                .filter(check -> check.isType(DATA_DUPLICATE_DB) || check.isType(DATA_DUPLICATE_AP))
-                .map(RetentionCheckDataDuplicate.class::cast)
-                .collect(toList());
+            .filter(check -> check.isType(DATA_DUPLICATE_DB) || check.isType(DATA_DUPLICATE_AP))
+            .map(RetentionCheckDataDuplicate.class::cast)
+            .collect(toList());
 
         return checksCausingRetention.size() == 1 ? dataDuplicateRetentions.stream().findFirst() : Optional.empty();
     }
@@ -177,23 +179,23 @@ public class ReferralResolutionService {
 
     private boolean allChecksCompleted(final List<RetentionCheck> retentionChecks) {
         return retentionChecks.stream().allMatch(check ->
-                check.isStatus(RETENTION_NOT_REQUIRED)
-                        || check.isStatus(FALSE_POSITIVE)
-                        || check.isStatus(DISABLED));
+            check.isStatus(RETENTION_NOT_REQUIRED)
+                || check.isStatus(FALSE_POSITIVE)
+                || check.isStatus(DISABLED));
     }
 
     private void persistRetentionChecks(final OffenderDeletionReferral referral,
-                                                            final List<RetentionCheck> retentionChecks,
-                                                            final ResolutionStatus resolutionStatus,
-                                                            final boolean provisionalDeletionPreviouslyGranted) {
+                                        final List<RetentionCheck> retentionChecks,
+                                        final ResolutionStatus resolutionStatus,
+                                        final boolean provisionalDeletionPreviouslyGranted) {
 
         log.info("Offender referral '{}' has resolution status : '{}'", referral.getOffenderNo(), resolutionStatus);
 
         final var resolution = ReferralResolution.builder()
-                .resolutionDateTime(timeSource.nowAsLocalDateTime())
-                .resolutionStatus(resolutionStatus)
-                .provisionalDeletionPreviouslyGranted(provisionalDeletionPreviouslyGranted)
-                .build();
+            .resolutionDateTime(timeSource.nowAsLocalDateTime())
+            .resolutionStatus(resolutionStatus)
+            .provisionalDeletionPreviouslyGranted(provisionalDeletionPreviouslyGranted)
+            .build();
 
         retentionChecks.forEach(resolution::addRetentionCheck);
 

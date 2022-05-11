@@ -37,40 +37,40 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
     void getRetentionReasons() {
 
         webTestClient.get().uri("/retention/offenders/retention-reasons")
-                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody().json(
-                        "[" +
-                                "{\"reasonCode\":\"CHILD_SEX_ABUSE\",\"displayName\":\"Child Sex Abuse Moratorium\",\"allowReasonDetails\":false,\"displayOrder\":0}," +
-                                "{\"reasonCode\":\"HIGH_PROFILE\",\"displayName\":\"High Profile Offenders\",\"allowReasonDetails\":false,\"displayOrder\":1}," +
-                                "{\"reasonCode\":\"LITIGATION_DISPUTE\",\"displayName\":\"Litigation/Dispute\",\"allowReasonDetails\":false,\"displayOrder\":2}," +
-                                "{\"reasonCode\":\"LOOKED_AFTER_CHILDREN\",\"displayName\":\"Looked after children\",\"allowReasonDetails\":false,\"displayOrder\":3}," +
-                                "{\"reasonCode\":\"MAPPA\",\"displayName\":\"MAPPA (Multi-Agency Public Protection Agreement)\",\"allowReasonDetails\":false,\"displayOrder\":4}," +
-                                "{\"reasonCode\":\"FOI_SAR\",\"displayName\":\"Subject to FOI/SARs\",\"allowReasonDetails\":false,\"displayOrder\":5}," +
-                                "{\"reasonCode\":\"UAL\",\"displayName\":\"UAL Recall on Licence\",\"allowReasonDetails\":false,\"displayOrder\":6}," +
-                                "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\",\"allowReasonDetails\":true,\"displayOrder\":7}" +
-                        "]");
+            .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody().json(
+                "[" +
+                    "{\"reasonCode\":\"CHILD_SEX_ABUSE\",\"displayName\":\"Child Sex Abuse Moratorium\",\"allowReasonDetails\":false,\"displayOrder\":0}," +
+                    "{\"reasonCode\":\"HIGH_PROFILE\",\"displayName\":\"High Profile Offenders\",\"allowReasonDetails\":false,\"displayOrder\":1}," +
+                    "{\"reasonCode\":\"LITIGATION_DISPUTE\",\"displayName\":\"Litigation/Dispute\",\"allowReasonDetails\":false,\"displayOrder\":2}," +
+                    "{\"reasonCode\":\"LOOKED_AFTER_CHILDREN\",\"displayName\":\"Looked after children\",\"allowReasonDetails\":false,\"displayOrder\":3}," +
+                    "{\"reasonCode\":\"MAPPA\",\"displayName\":\"MAPPA (Multi-Agency Public Protection Agreement)\",\"allowReasonDetails\":false,\"displayOrder\":4}," +
+                    "{\"reasonCode\":\"FOI_SAR\",\"displayName\":\"Subject to FOI/SARs\",\"allowReasonDetails\":false,\"displayOrder\":5}," +
+                    "{\"reasonCode\":\"UAL\",\"displayName\":\"UAL Recall on Licence\",\"allowReasonDetails\":false,\"displayOrder\":6}," +
+                    "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\",\"allowReasonDetails\":true,\"displayOrder\":7}" +
+                    "]");
     }
 
     @Test
     void getRetentionReasonsWithBadTokenIsUnauthorised() {
 
         webTestClient.get().uri("/retention/offenders/retention-reasons")
-                .header("Authorization", "Bearer BAD.TOK.EN")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isUnauthorized();
+            .header("Authorization", "Bearer BAD.TOK.EN")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isUnauthorized();
     }
 
     @Test
     void getRetentionReasonsWithNoAuthorizationHeaderIsUnauthorised() {
 
         webTestClient.get().uri("/retention/offenders/retention-reasons")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isUnauthorized();
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isUnauthorized();
     }
 
     @Test
@@ -80,73 +80,73 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
     void getRetentionRecord() {
 
         webTestClient.get().uri("/retention/offenders/A1234BC")
-                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals("ETag", "\"1\"")
-                .expectBody().json(
-                        "{" +
-                                "\"offenderNo\":\"A1234BC\"," +
-                                "\"userId\":\"user1\"," +
-                                "\"modifiedDateTime\":\"1970-01-01T00:00:00\"," +
-                                "\"retentionReasons\":[" +
-                                "{\"reasonCode\":\"HIGH_PROFILE\",\"reasonDetails\":\"High profile for some reason\"}" +
-                                "]" +
-                        "}");
+            .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .expectHeader().valueEquals("ETag", "\"1\"")
+            .expectBody().json(
+                "{" +
+                    "\"offenderNo\":\"A1234BC\"," +
+                    "\"userId\":\"user1\"," +
+                    "\"modifiedDateTime\":\"1970-01-01T00:00:00\"," +
+                    "\"retentionReasons\":[" +
+                    "{\"reasonCode\":\"HIGH_PROFILE\",\"reasonDetails\":\"High profile for some reason\"}" +
+                    "]" +
+                    "}");
     }
 
     @Test
     void getRetentionRecordWithBadTokenIsUnauthorised() {
 
         webTestClient.get().uri("/retention/offenders/A1234BC")
-                .header("Authorization", "Bearer BAD.TOK.EN")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isUnauthorized();
+            .header("Authorization", "Bearer BAD.TOK.EN")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isUnauthorized();
     }
 
     @Test
     void getRetentionRecordWithNoAuthorizationHeaderIsUnauthorised() {
 
         webTestClient.get().uri("/retention/offenders/A1234BC")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isUnauthorized();
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isUnauthorized();
     }
 
     @Test
     void getRetentionRecordReturnsNotFound() {
 
         webTestClient.get().uri("/retention/offenders/A1234BC")
-                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody().json(
-                        "{" +
-                                "\"status\":404," +
-                                "\"userMessage\":\"Entity Not Found\"" +
-                        "}");
+            .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isNotFound()
+            .expectBody().json(
+                "{" +
+                    "\"status\":404," +
+                    "\"userMessage\":\"Entity Not Found\"" +
+                    "}");
     }
 
     @Test
     void getRetentionRecordReturnsInternalServerError() {
 
         when(retentionService.findManualOffenderRetention(new OffenderNumber("A1234BC")))
-                .thenThrow(new RuntimeException("error!"));
+            .thenThrow(new RuntimeException("error!"));
 
         webTestClient.get().uri("/retention/offenders/A1234BC")
-                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().is5xxServerError()
-                .expectBody().json(
-                        "{" +
-                                "\"status\":500," +
-                                "\"userMessage\":\"Internal Server Error\"," +
-                                "\"developerMessage\":\"error!\"" +
-                        "}");
+            .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().is5xxServerError()
+            .expectBody().json(
+                "{" +
+                    "\"status\":500," +
+                    "\"userMessage\":\"Internal Server Error\"," +
+                    "\"developerMessage\":\"error!\"" +
+                    "}");
     }
 
     @Test
@@ -156,35 +156,35 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
         when(timeSource.nowAsLocalDateTime()).thenReturn(TIMESTAMP);
 
         final var request = ManualRetentionRequest.builder()
-                .retentionReason(ManualRetentionReason.builder()
-                        .reasonCode(ManualRetentionReasonCode.HIGH_PROFILE)
-                        .reasonDetails("High profile for some reason")
-                        .build())
-                .build();
+            .retentionReason(ManualRetentionReason.builder()
+                .reasonCode(ManualRetentionReasonCode.HIGH_PROFILE)
+                .reasonDetails("High profile for some reason")
+                .build())
+            .build();
 
         webTestClient.put().uri("/retention/offenders/A1234BC")
-                .bodyValue(request)
-                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().valueEquals("Location", "/retention/offenders/A1234BC")
-                .expectBody().isEmpty();
+            .bodyValue(request)
+            .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+            .exchange()
+            .expectStatus().isCreated()
+            .expectHeader().valueEquals("Location", "/retention/offenders/A1234BC")
+            .expectBody().isEmpty();
 
         webTestClient.get().uri("/retention/offenders/A1234BC")
-                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals("ETag", "\"0\"")
-                .expectBody().json(
+            .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .expectHeader().valueEquals("ETag", "\"0\"")
+            .expectBody().json(
                 "{" +
-                        "\"offenderNo\":\"A1234BC\"," +
-                        "\"userId\":\"data-compliance-user\"," +
-                        "\"modifiedDateTime\":\"2020-01-02T03:04:05\"," +
-                        "\"retentionReasons\":[" +
-                        "{\"reasonCode\":\"HIGH_PROFILE\",\"reasonDetails\":\"High profile for some reason\"}" +
-                        "]" +
-                "}");
+                    "\"offenderNo\":\"A1234BC\"," +
+                    "\"userId\":\"data-compliance-user\"," +
+                    "\"modifiedDateTime\":\"2020-01-02T03:04:05\"," +
+                    "\"retentionReasons\":[" +
+                    "{\"reasonCode\":\"HIGH_PROFILE\",\"reasonDetails\":\"High profile for some reason\"}" +
+                    "]" +
+                    "}");
     }
 
     @Test
@@ -196,35 +196,35 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
         when(timeSource.nowAsLocalDateTime()).thenReturn(TIMESTAMP);
 
         final var request = ManualRetentionRequest.builder()
-                .retentionReason(ManualRetentionReason.builder()
-                        .reasonCode(ManualRetentionReasonCode.OTHER)
-                        .reasonDetails("Some other reason")
-                        .build())
-                .build();
+            .retentionReason(ManualRetentionReason.builder()
+                .reasonCode(ManualRetentionReasonCode.OTHER)
+                .reasonDetails("Some other reason")
+                .build())
+            .build();
 
         webTestClient.put().uri("/retention/offenders/A1234BC")
-                .bodyValue(request)
-                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
-                .header("If-Match", "\"1\"")
-                .exchange()
-                .expectStatus().isNoContent()
-                .expectBody().isEmpty();
+            .bodyValue(request)
+            .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+            .header("If-Match", "\"1\"")
+            .exchange()
+            .expectStatus().isNoContent()
+            .expectBody().isEmpty();
 
         webTestClient.get().uri("/retention/offenders/A1234BC")
-                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals("ETag", "\"2\"")
-                .expectBody().json(
+            .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .expectHeader().valueEquals("ETag", "\"2\"")
+            .expectBody().json(
                 "{" +
-                        "\"offenderNo\":\"A1234BC\"," +
-                        "\"userId\":\"data-compliance-user\"," +
-                        "\"modifiedDateTime\":\"2020-01-02T03:04:05\"," +
-                        "\"retentionReasons\":[" +
-                        "{\"reasonCode\":\"OTHER\",\"reasonDetails\":\"Some other reason\"}" +
-                        "]" +
-                "}");
+                    "\"offenderNo\":\"A1234BC\"," +
+                    "\"userId\":\"data-compliance-user\"," +
+                    "\"modifiedDateTime\":\"2020-01-02T03:04:05\"," +
+                    "\"retentionReasons\":[" +
+                    "{\"reasonCode\":\"OTHER\",\"reasonDetails\":\"Some other reason\"}" +
+                    "]" +
+                    "}");
     }
 
     @Test
@@ -234,16 +234,16 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
     void updateRetentionRecordReturnsBadRequestWhenIfMatchMissing() {
 
         webTestClient.put().uri("/retention/offenders/A1234BC")
-                .bodyValue(ManualRetentionRequest.builder().build())
-                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody().json(
-                        "{" +
-                                "\"status\":400," +
-                                "\"userMessage\":\"Client Error\"," +
-                                "\"developerMessage\":\"Must provide 'If-Match' header\"" +
-                        "}");
+            .bodyValue(ManualRetentionRequest.builder().build())
+            .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+            .exchange()
+            .expectStatus().isBadRequest()
+            .expectBody().json(
+                "{" +
+                    "\"status\":400," +
+                    "\"userMessage\":\"Client Error\"," +
+                    "\"developerMessage\":\"Must provide 'If-Match' header\"" +
+                    "}");
     }
 
     @Test
@@ -253,34 +253,35 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
     void updateRetentionRecordReturnsBadRequestWhenExistingVersionDoesNotMatch() {
 
         webTestClient.put().uri("/retention/offenders/A1234BC")
-                .bodyValue(ManualRetentionRequest.builder().build())
-                .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
-                .header("If-Match", "\"0\"")
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody().json(
+            .bodyValue(ManualRetentionRequest.builder().build())
+            .header("Authorization", "Bearer " + jwtAuthenticationHelper.createJwt())
+            .header("If-Match", "\"0\"")
+            .exchange()
+            .expectStatus().isBadRequest()
+            .expectBody().json(
                 "{" +
-                        "\"status\":400," +
-                        "\"userMessage\":\"Client Error\"," +
-                        "\"developerMessage\":\"Attempting to update an old version of the retention record\"" +
-                        "}");
+                    "\"status\":400," +
+                    "\"userMessage\":\"Client Error\"," +
+                    "\"developerMessage\":\"Attempting to update an old version of the retention record\"" +
+                    "}");
     }
 
     @Test
     void updateRetentionRecordWithBadTokenIsUnauthorised() {
 
         webTestClient.put().uri("/retention/offenders/A1234BC")
-                .bodyValue(ManualRetentionRequest.builder().build())
-                .header("Authorization", "Bearer BAD.TOK.EN")
-                .exchange()
-                .expectStatus().isUnauthorized();
+            .bodyValue(ManualRetentionRequest.builder().build())
+            .header("Authorization", "Bearer BAD.TOK.EN")
+            .exchange()
+            .expectStatus().isUnauthorized();
     }
 
     @Test
     void updateRetentionRecordWithNoAuthorizationHeaderIsUnauthorised() {
 
         webTestClient.put().uri("/retention/offenders/A1234BC")
-                .bodyValue(ManualRetentionRequest.builder().build())
-                .exchange()
-                .expectStatus().isUnauthorized();
-    }}
+            .bodyValue(ManualRetentionRequest.builder().build())
+            .exchange()
+            .expectStatus().isUnauthorized();
+    }
+}

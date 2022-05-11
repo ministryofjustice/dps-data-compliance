@@ -23,6 +23,20 @@ import javax.validation.constraints.NotNull;
 @Table(name = "RETENTION_REASON_CODE")
 public class RetentionReasonCode {
 
+    @Id
+    @Enumerated(EnumType.STRING)
+    @Column(name = "RETENTION_REASON_CODE_ID", nullable = false)
+    private Code retentionReasonCodeId;
+    @NotNull
+    @Column(name = "DISPLAY_NAME", nullable = false)
+    private String displayName;
+    @NotNull
+    @Column(name = "ALLOW_REASON_DETAILS", nullable = false)
+    private Boolean allowReasonDetails;
+    @NotNull
+    @Column(name = "DISPLAY_ORDER", nullable = false)
+    private Integer displayOrder;
+
     public enum Code {
         CHILD_SEX_ABUSE,
         HIGH_PROFILE,
@@ -33,21 +47,4 @@ public class RetentionReasonCode {
         UAL,
         OTHER
     }
-
-    @Id
-    @Enumerated(EnumType.STRING)
-    @Column(name = "RETENTION_REASON_CODE_ID", nullable = false)
-    private Code retentionReasonCodeId;
-
-    @NotNull
-    @Column(name = "DISPLAY_NAME", nullable = false)
-    private String displayName;
-
-    @NotNull
-    @Column(name = "ALLOW_REASON_DETAILS", nullable = false)
-    private Boolean allowReasonDetails;
-
-    @NotNull
-    @Column(name = "DISPLAY_ORDER", nullable = false)
-    private Integer displayOrder;
 }

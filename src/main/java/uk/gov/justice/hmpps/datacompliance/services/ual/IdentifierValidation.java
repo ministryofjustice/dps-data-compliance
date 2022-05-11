@@ -28,40 +28,40 @@ public class IdentifierValidation {
 
     public static Optional<ChecksumComponents> getValidPncComponents(final String pncNumber) {
         return matching(pncNumber, VALID_PNC_FORMAT)
-                .map(match -> ChecksumComponents.builder()
-                        .year(match.group(1))
-                        .serial(match.group(2))
-                        .serialFormat("%07d")
-                        .checksum(match.group(3))
-                        .build())
-                .filter(IdentifierValidation::isChecksumAMatch);
+            .map(match -> ChecksumComponents.builder()
+                .year(match.group(1))
+                .serial(match.group(2))
+                .serialFormat("%07d")
+                .checksum(match.group(3))
+                .build())
+            .filter(IdentifierValidation::isChecksumAMatch);
     }
 
     public static Optional<ChecksumComponents> getValidCroComponents(final String croNumber) {
         return getValidStandardCroComponents(croNumber)
-                .or(() -> getValidCroSfComponents(croNumber));
+            .or(() -> getValidCroSfComponents(croNumber));
     }
 
     private static Optional<ChecksumComponents> getValidStandardCroComponents(final String croNumber) {
         return matching(croNumber, VALID_CRO_FORMAT)
-                .map(match -> ChecksumComponents.builder()
-                        .year(match.group(2))
-                        .serial(match.group(1))
-                        .serialFormat("%06d")
-                        .checksum(match.group(3))
-                        .build())
-                .filter(IdentifierValidation::isChecksumAMatch);
+            .map(match -> ChecksumComponents.builder()
+                .year(match.group(2))
+                .serial(match.group(1))
+                .serialFormat("%06d")
+                .checksum(match.group(3))
+                .build())
+            .filter(IdentifierValidation::isChecksumAMatch);
     }
 
     private static Optional<ChecksumComponents> getValidCroSfComponents(final String croNumber) {
         return matching(croNumber, VALID_CRO_SF_FORMAT)
-                .map(match -> ChecksumComponents.builder()
-                        .year(match.group(1))
-                        .serial(match.group(2))
-                        .serialFormat("%05d")
-                        .checksum(match.group(3))
-                        .build())
-                .filter(IdentifierValidation::isChecksumAMatch);
+            .map(match -> ChecksumComponents.builder()
+                .year(match.group(1))
+                .serial(match.group(2))
+                .serialFormat("%05d")
+                .checksum(match.group(3))
+                .build())
+            .filter(IdentifierValidation::isChecksumAMatch);
     }
 
     private static Optional<Matcher> matching(final String identity, final Pattern pattern) {

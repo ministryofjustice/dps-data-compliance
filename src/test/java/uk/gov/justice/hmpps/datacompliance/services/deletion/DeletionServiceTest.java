@@ -70,77 +70,77 @@ class DeletionServiceTest {
     @BeforeEach
     void setUp() {
         deletionService = new DeletionService(
-                TimeSource.of(NOW),
-                referralRepository,
-                deletionCompleteEventPusher,
-                deletionGrantedEventPusher,
-                DataComplianceProperties.builder()
-                        .deletionGrantEnabled(true)
-                        .imageRecognitionDeletionEnabled(true)
-                        .build(),
-                imageDuplicationDetectionService);
+            TimeSource.of(NOW),
+            referralRepository,
+            deletionCompleteEventPusher,
+            deletionGrantedEventPusher,
+            DataComplianceProperties.builder()
+                .deletionGrantEnabled(true)
+                .imageRecognitionDeletionEnabled(true)
+                .build(),
+            imageDuplicationDetectionService);
     }
 
     @Test
     void grantDeletion() {
 
         final var referral = OffenderDeletionReferral.builder()
-                .referralId(REFERRAL_ID)
-                .offenderNo(OFFENDER_NUMBER)
-                .build();
+            .referralId(REFERRAL_ID)
+            .offenderNo(OFFENDER_NUMBER)
+            .build();
 
         referral.addReferredOffenderAlias(ReferredOffenderAlias.builder()
-                .offenderId(OFFENDER_ID)
-                .offenderBookId(OFFENDER_BOOK_ID)
-                .build());
+            .offenderId(OFFENDER_ID)
+            .offenderBookId(OFFENDER_BOOK_ID)
+            .build());
 
         deletionService.grantDeletion(referral);
 
         verify(deletionGrantedEventPusher).grantDeletion(
-                OffenderDeletionGrant.builder()
-                        .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
-                        .referralId(REFERRAL_ID)
-                        .offenderId(OFFENDER_ID)
-                        .offenderBookId(OFFENDER_BOOK_ID)
-                        .build());
+            OffenderDeletionGrant.builder()
+                .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
+                .referralId(REFERRAL_ID)
+                .offenderId(OFFENDER_ID)
+                .offenderBookId(OFFENDER_BOOK_ID)
+                .build());
     }
 
     @Test
     void grantDeletionWithNoBooking() {
 
         final var referral = OffenderDeletionReferral.builder()
-                .referralId(REFERRAL_ID)
-                .offenderNo(OFFENDER_NUMBER)
-                .build();
+            .referralId(REFERRAL_ID)
+            .offenderNo(OFFENDER_NUMBER)
+            .build();
 
         referral.addReferredOffenderAlias(ReferredOffenderAlias.builder().offenderId(OFFENDER_ID).build());
 
         deletionService.grantDeletion(referral);
 
         verify(deletionGrantedEventPusher).grantDeletion(
-                OffenderDeletionGrant.builder()
-                        .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
-                        .referralId(REFERRAL_ID)
-                        .offenderId(OFFENDER_ID)
-                        .build());
+            OffenderDeletionGrant.builder()
+                .offenderNumber(new OffenderNumber(OFFENDER_NUMBER))
+                .referralId(REFERRAL_ID)
+                .offenderId(OFFENDER_ID)
+                .build());
     }
 
     @Test
     void grantDeletionDisabled() {
         deletionService = new DeletionService(
-                TimeSource.of(NOW),
-                referralRepository,
-                deletionCompleteEventPusher,
-                deletionGrantedEventPusher,
-                DataComplianceProperties.builder()
-                        .deletionGrantEnabled(false)
-                        .build(),
-                imageDuplicationDetectionService);
+            TimeSource.of(NOW),
+            referralRepository,
+            deletionCompleteEventPusher,
+            deletionGrantedEventPusher,
+            DataComplianceProperties.builder()
+                .deletionGrantEnabled(false)
+                .build(),
+            imageDuplicationDetectionService);
 
         deletionService.grantDeletion(OffenderDeletionReferral.builder()
-                .referralId(REFERRAL_ID)
-                .offenderNo(OFFENDER_NUMBER)
-                .build());
+            .referralId(REFERRAL_ID)
+            .offenderNo(OFFENDER_NUMBER)
+            .build());
 
         verifyNoInteractions(deletionGrantedEventPusher);
     }
@@ -154,9 +154,9 @@ class DeletionServiceTest {
         when(referralRepository.save(existingReferral)).thenReturn(existingReferral);
 
         deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
-                .offenderIdDisplay(OFFENDER_NUMBER)
-                .referralId(REFERRAL_ID)
-                .build());
+            .offenderIdDisplay(OFFENDER_NUMBER)
+            .referralId(REFERRAL_ID)
+            .build());
 
         final var resolution = existingReferral.getReferralResolution().orElseThrow();
         assertThat(resolution.getResolutionStatus()).isEqualTo(DELETED);
@@ -164,41 +164,41 @@ class DeletionServiceTest {
 
         verify(imageDuplicationDetectionService).deleteOffenderImages(new OffenderNumber(OFFENDER_NUMBER));
         verify(deletionCompleteEventPusher).sendEvent(
-                uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.builder()
-                        .offenderIdDisplay(OFFENDER_NUMBER)
-                        .offender(builder()
-                                .offenderId(1L)
-                                .booking(new Booking(11L))
-                                .booking(new Booking(12L))
-                                .build())
-                        .offender(builder()
-                                .offenderId(2L)
-                                .booking(new Booking(21L))
-                                .build())
-                        .build());
+            uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.builder()
+                .offenderIdDisplay(OFFENDER_NUMBER)
+                .offender(builder()
+                    .offenderId(1L)
+                    .booking(new Booking(11L))
+                    .booking(new Booking(12L))
+                    .build())
+                .offender(builder()
+                    .offenderId(2L)
+                    .booking(new Booking(21L))
+                    .build())
+                .build());
     }
 
     @Test
     void handleDeletionCompleteDoesNotDeleteFromImageRecognitionCollectionWhenDisabled() {
 
         deletionService = new DeletionService(
-                TimeSource.of(NOW),
-                referralRepository,
-                deletionCompleteEventPusher,
-                deletionGrantedEventPusher,
-                DataComplianceProperties.builder()
-                        .imageRecognitionDeletionEnabled(false)
-                        .build(),
-                imageDuplicationDetectionService);
+            TimeSource.of(NOW),
+            referralRepository,
+            deletionCompleteEventPusher,
+            deletionGrantedEventPusher,
+            DataComplianceProperties.builder()
+                .imageRecognitionDeletionEnabled(false)
+                .build(),
+            imageDuplicationDetectionService);
 
         final var existingReferral = generateOffenderDeletionReferral();
         when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.of(existingReferral));
         when(referralRepository.save(existingReferral)).thenReturn(existingReferral);
 
         deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
-                .offenderIdDisplay(OFFENDER_NUMBER)
-                .referralId(REFERRAL_ID)
-                .build());
+            .offenderIdDisplay(OFFENDER_NUMBER)
+            .referralId(REFERRAL_ID)
+            .build());
 
         verifyNoInteractions(imageDuplicationDetectionService);
     }
@@ -209,9 +209,9 @@ class DeletionServiceTest {
         when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                deletionService.handleDeletionComplete(OffenderDeletionComplete.builder().referralId(123L).build()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Cannot retrieve referral record for id: '123'");
+            deletionService.handleDeletionComplete(OffenderDeletionComplete.builder().referralId(123L).build()))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Cannot retrieve referral record for id: '123'");
 
         verify(referralRepository, never()).save(any());
     }
@@ -220,17 +220,17 @@ class DeletionServiceTest {
     void handleDeletionCompleteThrowsIfOffenderNumbersDoNotMatch() {
 
         when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.of(OffenderDeletionReferral.builder()
-                .referralId(REFERRAL_ID)
-                .offenderNo("offender1")
-                .build()));
+            .referralId(REFERRAL_ID)
+            .offenderNo("offender1")
+            .build()));
 
         assertThatThrownBy(() ->
-                deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
-                        .offenderIdDisplay("offender2")
-                        .referralId(REFERRAL_ID)
-                        .build()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Offender number 'offender1' of referral '123' does not match 'offender2'");
+            deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
+                .offenderIdDisplay("offender2")
+                .referralId(REFERRAL_ID)
+                .build()))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Offender number 'offender1' of referral '123' does not match 'offender2'");
 
         verify(referralRepository, never()).save(any());
     }
@@ -239,17 +239,17 @@ class DeletionServiceTest {
     void handleDeletionCompleteThrowsIfResolutionNotFound() {
 
         when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.of(OffenderDeletionReferral.builder()
-                .referralId(REFERRAL_ID)
-                .offenderNo(OFFENDER_NUMBER)
-                .build()));
+            .referralId(REFERRAL_ID)
+            .offenderNo(OFFENDER_NUMBER)
+            .build()));
 
         assertThatThrownBy(() ->
-                deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
-                        .offenderIdDisplay(OFFENDER_NUMBER)
-                        .referralId(REFERRAL_ID)
-                        .build()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Referral '123' does not have expected resolution type");
+            deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
+                .offenderIdDisplay(OFFENDER_NUMBER)
+                .referralId(REFERRAL_ID)
+                .build()))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Referral '123' does not have expected resolution type");
 
         verify(referralRepository, never()).save(any());
     }
@@ -258,42 +258,42 @@ class DeletionServiceTest {
     void handleDeletionCompleteThrowsIfResolutionTypeUnexpected() {
 
         final var existingReferral = OffenderDeletionReferral.builder()
-                .offenderNo(OFFENDER_NUMBER)
-                .referralId(REFERRAL_ID)
-                .build();
+            .offenderNo(OFFENDER_NUMBER)
+            .referralId(REFERRAL_ID)
+            .build();
         existingReferral.setReferralResolution(ReferralResolution.builder().resolutionStatus(DELETED).build());
 
         when(referralRepository.findById(REFERRAL_ID)).thenReturn(Optional.of(existingReferral));
 
         assertThatThrownBy(() ->
-                deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
-                        .offenderIdDisplay(OFFENDER_NUMBER)
-                        .referralId(REFERRAL_ID)
-                        .build()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Referral '123' does not have expected resolution type");
+            deletionService.handleDeletionComplete(OffenderDeletionComplete.builder()
+                .offenderIdDisplay(OFFENDER_NUMBER)
+                .referralId(REFERRAL_ID)
+                .build()))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("Referral '123' does not have expected resolution type");
     }
 
     private OffenderDeletionReferral generateOffenderDeletionReferral() {
 
         final var referral = spy(OffenderDeletionReferral.builder()
-                .offenderDeletionBatch(batch)
-                .offenderNo(OFFENDER_NUMBER)
-                .firstName("John")
-                .middleName("Middle")
-                .lastName("Smith")
-                .birthDate(LocalDate.of(1969, 1, 1))
-                .receivedDateTime(NOW)
-                .build());
+            .offenderDeletionBatch(batch)
+            .offenderNo(OFFENDER_NUMBER)
+            .firstName("John")
+            .middleName("Middle")
+            .lastName("Smith")
+            .birthDate(LocalDate.of(1969, 1, 1))
+            .receivedDateTime(NOW)
+            .build());
 
         referral.addReferredOffenderAlias(ReferredOffenderAlias.builder().offenderId(1L).offenderBookId(11L).build());
         referral.addReferredOffenderAlias(ReferredOffenderAlias.builder().offenderId(1L).offenderBookId(12L).build());
         referral.addReferredOffenderAlias(ReferredOffenderAlias.builder().offenderId(2L).offenderBookId(21L).build());
 
         referral.setReferralResolution(ReferralResolution.builder()
-                .resolutionStatus(DELETION_GRANTED)
-                .build()
-                .addRetentionCheck(new RetentionCheckManual(RETENTION_NOT_REQUIRED)));
+            .resolutionStatus(DELETION_GRANTED)
+            .build()
+            .addRetentionCheck(new RetentionCheckManual(RETENTION_NOT_REQUIRED)));
 
         return referral;
     }

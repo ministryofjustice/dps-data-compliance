@@ -15,7 +15,7 @@ public abstract class QueueFactory {
     public static ObjectMapper objectMapper;
 
 
-   public static MessageAttributeValue stringAttribute(final String value) {
+    public static MessageAttributeValue stringAttribute(final String value) {
         return new MessageAttributeValue()
             .withDataType(STRING)
             .withStringValue(value);

@@ -1,12 +1,8 @@
 package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.OffenderImageUpload;
 
@@ -50,12 +46,12 @@ class OffenderImageUploadRepositoryTest extends IntegrationTest {
     void findOffenderImageUploadsByOffenderNo() {
 
         assertThat(uploadRepository.findByOffenderNo("OFFENDER1"))
-                .extracting(OffenderImageUpload::getUploadId)
-                .containsOnly(1L, 2L);
+            .extracting(OffenderImageUpload::getUploadId)
+            .containsOnly(1L, 2L);
 
         assertThat(uploadRepository.findByOffenderNo("OFFENDER2"))
-                .extracting(OffenderImageUpload::getUploadId)
-                .containsOnly(3L);
+            .extracting(OffenderImageUpload::getUploadId)
+            .containsOnly(3L);
     }
 
     @Test
@@ -66,8 +62,8 @@ class OffenderImageUploadRepositoryTest extends IntegrationTest {
     @Test
     void findOffenderImageUploadByOffenderNoAndImageId() {
         assertThat(uploadRepository.findByOffenderNoAndImageId("OFFENDER1", 1L))
-                .map(OffenderImageUpload::getUploadId)
-                .contains(1L);
+            .map(OffenderImageUpload::getUploadId)
+            .contains(1L);
     }
 
     @Test
@@ -78,7 +74,7 @@ class OffenderImageUploadRepositoryTest extends IntegrationTest {
     @Test
     void findOffenderImageUploadByFaceId() {
         assertThat(uploadRepository.findByFaceId("1").orElseThrow().getUploadId())
-                .isEqualTo(1L);
+            .isEqualTo(1L);
     }
 
     @Test
@@ -88,13 +84,13 @@ class OffenderImageUploadRepositoryTest extends IntegrationTest {
 
     private OffenderImageUpload buildOffenderImageUpload() {
         return OffenderImageUpload.builder()
-                .offenderNo("A1234AA")
-                .imageId(123L)
-                .faceId("321")
-                .uploadDateTime(DATE_TIME)
-                .imageUploadBatch(batchRepository.findById(1L).orElseThrow())
-                .uploadStatus(ERROR)
-                .uploadErrorReason("Some error reason")
-                .build();
+            .offenderNo("A1234AA")
+            .imageId(123L)
+            .faceId("321")
+            .uploadDateTime(DATE_TIME)
+            .imageUploadBatch(batchRepository.findById(1L).orElseThrow())
+            .uploadStatus(ERROR)
+            .uploadErrorReason("Some error reason")
+            .build();
     }
 }

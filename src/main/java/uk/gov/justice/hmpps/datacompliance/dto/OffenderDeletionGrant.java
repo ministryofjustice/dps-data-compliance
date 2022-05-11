@@ -15,6 +15,8 @@ import java.util.Set;
 public class OffenderDeletionGrant {
     private final OffenderNumber offenderNumber;
     private final Long referralId;
-    @Singular private final Set<Long> offenderIds;
-    @Singular private final Set<Long> offenderBookIds;
+    @Singular
+    private final Set<Long> offenderIds;
+    @Singular
+    private final Set<Long> offenderBookIds;
 }

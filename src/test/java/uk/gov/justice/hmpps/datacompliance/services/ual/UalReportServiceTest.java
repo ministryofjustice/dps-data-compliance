@@ -7,11 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.justice.hmpps.datacompliance.dto.UalOffender;
+import uk.gov.justice.hmpps.datacompliance.dto.UalOffender.UalOffenderBuilder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ual.OffenderUalEntity;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ual.OffenderUalEntity.OffenderUalEntityBuilder;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.ual.OffenderUalRepository;
 import uk.gov.justice.hmpps.datacompliance.security.UserSecurityUtils;
-import uk.gov.justice.hmpps.datacompliance.dto.UalOffender.UalOffenderBuilder;
 import uk.gov.justice.hmpps.datacompliance.utils.ReportUtility;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 import uk.gov.justice.hmpps.datacompliance.web.dto.UalOffenderResponse;
@@ -94,9 +94,9 @@ public class UalReportServiceTest {
         mockUsername();
         when(reportUtility.parseFromUalReport(any())).thenReturn(List.of(ualOffender));
         when(offenderUalRepository.save(offenderEntity()
-                .offenderPnc(null)
-                .offenderCro(FORMATTED_OFFENDER_CRO)
-                .build()))
+            .offenderPnc(null)
+            .offenderCro(FORMATTED_OFFENDER_CRO)
+            .build()))
             .thenReturn(offenderEntity().offenderUalId(OFFENDER_ENTITY_ID).offenderPnc(null).offenderCro(FORMATTED_OFFENDER_CRO).build());
 
         final Optional<List<Long>> result = reportService.updateReport(mockReport);

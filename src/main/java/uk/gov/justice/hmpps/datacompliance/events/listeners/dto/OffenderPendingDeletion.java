@@ -27,7 +27,7 @@ import static java.util.stream.Collectors.toList;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ToString(exclude = { "firstName", "middleName", "lastName", "birthDate" })
+@ToString(exclude = {"firstName", "middleName", "lastName", "birthDate"})
 public class OffenderPendingDeletion {
 
     @JsonProperty("offenderIdDisplay")
@@ -68,21 +68,21 @@ public class OffenderPendingDeletion {
     @JsonIgnore
     public List<String> getOffenceCodes() {
         return offenderAliases.stream()
-                .map(OffenderAlias::getOffenderBookings)
-                .flatMap(Collection::stream)
-                .map(OffenderBooking::getOffenceCodes)
-                .flatMap(Collection::stream)
-                .collect(toList());
+            .map(OffenderAlias::getOffenderBookings)
+            .flatMap(Collection::stream)
+            .map(OffenderBooking::getOffenceCodes)
+            .flatMap(Collection::stream)
+            .collect(toList());
     }
 
     @JsonIgnore
     public List<String> getAlertCodes() {
         return offenderAliases.stream()
-                .map(OffenderAlias::getOffenderBookings)
-                .flatMap(Collection::stream)
-                .map(OffenderBooking::getAlertCodes)
-                .flatMap(Collection::stream)
-                .collect(toList());
+            .map(OffenderAlias::getOffenderBookings)
+            .flatMap(Collection::stream)
+            .map(OffenderBooking::getAlertCodes)
+            .flatMap(Collection::stream)
+            .collect(toList());
     }
 
     @Getter

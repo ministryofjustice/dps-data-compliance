@@ -27,32 +27,27 @@ import java.time.LocalDateTime;
 @Table(name = "DECEASED_OFFENDER_DELETION_BATCH")
 public class DeceasedOffenderDeletionBatch {
 
-    public enum BatchType {
-        SCHEDULED,
-        AD_HOC
-    }
-
-
     @Id
     @With
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BATCH_ID", nullable = false)
     private Long batchId;
-
     @NotNull
     @Column(name = "REQUEST_DATE_TIME", nullable = false)
     private LocalDateTime requestDateTime;
-
     @Column(name = "REFERRAL_COMPLETION_DATE_TIME")
     private LocalDateTime referralCompletionDateTime;
-
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "BATCH_TYPE", nullable = false)
     private BatchType batchType;
-
     @Column(name = "COMMENT_TEXT")
     private String commentText;
+
+    public enum BatchType {
+        SCHEDULED,
+        AD_HOC
+    }
 
 
 }

@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class DataComplianceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DataComplianceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(DataComplianceApplication.class, args);
+    }
 
 }

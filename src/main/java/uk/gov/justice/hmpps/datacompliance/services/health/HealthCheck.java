@@ -7,7 +7,6 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import uk.gov.justice.hmpps.datacompliance.client.prisonregister.PrisonRegisterClient;
 
 import static java.util.Objects.requireNonNull;
 import static lombok.AccessLevel.PROTECTED;
@@ -22,14 +21,14 @@ abstract class HealthCheck implements HealthIndicator {
         try {
 
             ResponseEntity<String> response = client.get()
-                    .uri("/health/ping")
-                    .retrieve()
-                    .toEntity(String.class)
-                    .block();
+                .uri("/health/ping")
+                .retrieve()
+                .toEntity(String.class)
+                .block();
 
             return Health.up()
-                    .withDetail("HttpStatus", requireNonNull(response).getStatusCodeValue())
-                    .build();
+                .withDetail("HttpStatus", requireNonNull(response).getStatusCodeValue())
+                .build();
 
         } catch (final Exception ex) {
             return Health.down(ex).build();

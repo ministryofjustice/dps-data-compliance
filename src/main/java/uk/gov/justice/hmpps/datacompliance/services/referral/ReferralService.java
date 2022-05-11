@@ -45,13 +45,13 @@ public class ReferralService {
     public void handleAdHocDeletion(final AdHocOffenderDeletion event) {
 
         final var batch = batchRepository.save(OffenderDeletionBatch.builder()
-                .requestDateTime(timeSource.nowAsLocalDateTime())
-                .commentText(event.getReason())
-                .batchType(AD_HOC)
-                .build());
+            .requestDateTime(timeSource.nowAsLocalDateTime())
+            .commentText(event.getReason())
+            .batchType(AD_HOC)
+            .build());
 
         deletionGrantedEventPusher.requestAdHocReferral(
-                new OffenderNumber(event.getOffenderIdDisplay()), batch.getBatchId());
+            new OffenderNumber(event.getOffenderIdDisplay()), batch.getBatchId());
     }
 
     public void handlePendingDeletionReferral(final OffenderPendingDeletion event) {
@@ -60,17 +60,17 @@ public class ReferralService {
 
         final var bookingNos = event.getOffenderAliases().stream().flatMap(offenderAlias -> offenderAlias.getOffenderBookings().stream()).map(OffenderBooking::getBookingNo).collect(Collectors.toSet());
         final var retentionChecks = retentionService.conductRetentionChecks(
-                OffenderToCheck.builder()
-                        .offenderNumber(new OffenderNumber(event.getOffenderIdDisplay()))
-                        .offenceCodes(event.getOffenceCodes())
-                        .alertCodes(event.getAlertCodes())
-                        .bookingNos(bookingNos)
-                        .firstName(event.getFirstName())
-                        .middleName(event.getMiddleName())
-                        .lastName(event.getLastName())
-                        .cros(event.getCros())
-                        .pncs(event.getPncs())
-                        .build());
+            OffenderToCheck.builder()
+                .offenderNumber(new OffenderNumber(event.getOffenderIdDisplay()))
+                .offenceCodes(event.getOffenceCodes())
+                .alertCodes(event.getAlertCodes())
+                .bookingNos(bookingNos)
+                .firstName(event.getFirstName())
+                .middleName(event.getMiddleName())
+                .lastName(event.getLastName())
+                .cros(event.getCros())
+                .pncs(event.getPncs())
+                .build());
 
         referralResolutionService.processReferral(referral, retentionChecks);
     }
@@ -103,7 +103,7 @@ public class ReferralService {
         log.info("All offenders pending deletion in batch: '{}' have been added to the queue", event.getBatchId());
 
         final var batch = batchRepository.findById(event.getBatchId())
-                .orElseThrow(illegalState("Cannot find batch with id: '%s'", event.getBatchId()));
+            .orElseThrow(illegalState("Cannot find batch with id: '%s'", event.getBatchId()));
 
         batch.setReferralCompletionDateTime(timeSource.nowAsLocalDateTime());
         batch.setRemainingInWindow((int) (event.getTotalInWindow() - event.getNumberReferred()));
@@ -114,21 +114,21 @@ public class ReferralService {
     private OffenderDeletionReferral createReferral(final OffenderPendingDeletion event) {
 
         final var batch = batchRepository.findById(event.getBatchId())
-                .orElseThrow(illegalState("Cannot find deletion batch with id: '%s'", event.getBatchId()));
+            .orElseThrow(illegalState("Cannot find deletion batch with id: '%s'", event.getBatchId()));
 
         final var referral = OffenderDeletionReferral.builder()
-                .offenderDeletionBatch(batch)
-                .receivedDateTime(timeSource.nowAsLocalDateTime())
-                .offenderNo(event.getOffenderIdDisplay())
-                .firstName(event.getFirstName())
-                .middleName(event.getMiddleName())
-                .lastName(event.getLastName())
-                .birthDate(event.getBirthDate())
-                .agencyLocationId(event.getAgencyLocationId())
-                .build();
+            .offenderDeletionBatch(batch)
+            .receivedDateTime(timeSource.nowAsLocalDateTime())
+            .offenderNo(event.getOffenderIdDisplay())
+            .firstName(event.getFirstName())
+            .middleName(event.getMiddleName())
+            .lastName(event.getLastName())
+            .birthDate(event.getBirthDate())
+            .agencyLocationId(event.getAgencyLocationId())
+            .build();
 
         event.getOffenderAliases().forEach(alias ->
-                transform(alias).forEach(referral::addReferredOffenderAlias));
+            transform(alias).forEach(referral::addReferredOffenderAlias));
 
         return referral;
     }
@@ -137,15 +137,15 @@ public class ReferralService {
 
         if (alias.getOffenderBookings().isEmpty()) {
             return List.of(ReferredOffenderAlias.builder()
-                    .offenderId(alias.getOffenderId())
-                    .build());
+                .offenderId(alias.getOffenderId())
+                .build());
         }
 
         return alias.getOffenderBookings().stream()
-                .map(booking -> ReferredOffenderAlias.builder()
-                        .offenderId(alias.getOffenderId())
-                        .offenderBookId(booking.getOffenderBookId())
-                        .build())
-                .collect(toList());
+            .map(booking -> ReferredOffenderAlias.builder()
+                .offenderId(alias.getOffenderId())
+                .offenderBookId(booking.getOffenderBookId())
+                .build())
+            .collect(toList());
     }
 }

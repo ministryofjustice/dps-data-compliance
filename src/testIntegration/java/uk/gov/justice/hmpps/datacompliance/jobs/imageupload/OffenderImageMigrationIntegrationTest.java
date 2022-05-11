@@ -68,14 +68,14 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
     void runMigration() {
 
         when(imageRecognitionClient.uploadImageToCollection(any()))
-                .thenReturn(success(new FaceId("face1")))
-                .thenReturn(success(new FaceId("face2")))
-                .thenReturn(error(FACE_NOT_FOUND));
+            .thenReturn(success(new FaceId("face1")))
+            .thenReturn(success(new FaceId("face2")))
+            .thenReturn(error(FACE_NOT_FOUND));
 
         hmppsAuthMock.enqueue(new MockResponse()
-                .setResponseCode(200)
-                .setBody("{\"access_token\":\"123\",\"token_type\":\"bearer\",\"expires_in\":\"999999\"}")
-                .setHeader("Content-Type", "application/json"));
+            .setResponseCode(200)
+            .setBody("{\"access_token\":\"123\",\"token_type\":\"bearer\",\"expires_in\":\"999999\"}")
+            .setHeader("Content-Type", "application/json"));
         prisonApiMock.setDispatcher(mockPrisonApiResponses());
 
         migration.run();
@@ -94,14 +94,14 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
     void runMigrationAsAnUpdate() {
 
         when(imageRecognitionClient.uploadImageToCollection(any()))
-                .thenReturn(success(new FaceId("face1")))
-                .thenReturn(success(new FaceId("face2")))
-                .thenReturn(error(FACE_NOT_FOUND));
+            .thenReturn(success(new FaceId("face1")))
+            .thenReturn(success(new FaceId("face2")))
+            .thenReturn(error(FACE_NOT_FOUND));
 
         hmppsAuthMock.enqueue(new MockResponse()
-                .setResponseCode(200)
-                .setBody("{\"access_token\":\"123\",\"token_type\":\"bearer\",\"expires_in\":\"999999\"}")
-                .setHeader("Content-Type", "application/json"));
+            .setResponseCode(200)
+            .setBody("{\"access_token\":\"123\",\"token_type\":\"bearer\",\"expires_in\":\"999999\"}")
+            .setHeader("Content-Type", "application/json"));
         prisonApiMock.setDispatcher(mockPrisonApiResponses());
 
         migration.run();
@@ -133,37 +133,37 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
                 if (offenderIdsMatch.find()) {
 
                     return new MockResponse()
-                            .setBody(OBJECT_MAPPER.writeValueAsString(List.of(
-                                    offenderNo(1),
-                                    offenderNo(2),
-                                    offenderNo(3))))
-                            .setHeader("Content-Type", "application/json")
-                            .setHeader("Total-Records", "3");
+                        .setBody(OBJECT_MAPPER.writeValueAsString(List.of(
+                            offenderNo(1),
+                            offenderNo(2),
+                            offenderNo(3))))
+                        .setHeader("Content-Type", "application/json")
+                        .setHeader("Total-Records", "3");
 
                 } else if (offendersWithImagesMatch.find()) {
 
                     return new MockResponse()
-                            .setBody(OBJECT_MAPPER.writeValueAsString(OffendersWithImagesResponse.builder()
-                                            .offenderNumber(offenderNo(4))
-                                            .offenderNumber(offenderNo(5))
-                                            .offenderNumber(offenderNo(6))
-                                            .totalElements(3L)
-                                            .build()))
-                            .setHeader("Content-Type", "application/json");
+                        .setBody(OBJECT_MAPPER.writeValueAsString(OffendersWithImagesResponse.builder()
+                            .offenderNumber(offenderNo(4))
+                            .offenderNumber(offenderNo(5))
+                            .offenderNumber(offenderNo(6))
+                            .totalElements(3L)
+                            .build()))
+                        .setHeader("Content-Type", "application/json");
 
                 } else if (imageMetaDataMatch.find()) {
 
                     return new MockResponse()
-                            .setBody(OBJECT_MAPPER.writeValueAsString(List.of(
-                                    new OffenderImageMetadata(parseLong(imageMetaDataMatch.group(1)), "FACE"),
-                                    new OffenderImageMetadata(123L, "OTHER"))))
-                            .setHeader("Content-Type", "application/json");
+                        .setBody(OBJECT_MAPPER.writeValueAsString(List.of(
+                            new OffenderImageMetadata(parseLong(imageMetaDataMatch.group(1)), "FACE"),
+                            new OffenderImageMetadata(123L, "OTHER"))))
+                        .setHeader("Content-Type", "application/json");
 
                 } else if (imageDataMatch.find()) {
 
                     return new MockResponse()
-                            .setBody(new Buffer().write(new byte[]{(byte) parseInt(imageDataMatch.group(1)) }))
-                            .setHeader("Content-Type", "image/jpeg");
+                        .setBody(new Buffer().write(new byte[]{(byte) parseInt(imageDataMatch.group(1))}))
+                        .setHeader("Content-Type", "image/jpeg");
 
                 }
 
@@ -178,9 +178,9 @@ class OffenderImageMigrationIntegrationTest extends IntegrationTest {
 
     private OffenderImage offenderImage(final OffenderNumber offenderNumber, final long imageId, final byte[] data) {
         return OffenderImage.builder()
-                .offenderNumber(offenderNumber)
-                .imageId(imageId)
-                .imageData(data)
-                .build();
+            .offenderNumber(offenderNumber)
+            .imageId(imageId)
+            .imageData(data)
+            .build();
     }
 }

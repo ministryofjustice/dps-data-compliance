@@ -49,16 +49,16 @@ public class RetentionCheckImageDuplicate extends RetentionCheck {
 
     public RetentionCheckImageDuplicate addImageDuplicate(final ImageDuplicate imageDuplicate) {
         imageDuplicates.add(RetentionReasonImageDuplicate.builder()
-                .retentionCheck(this)
-                .imageDuplicate(imageDuplicate)
-                .build());
+            .retentionCheck(this)
+            .imageDuplicate(imageDuplicate)
+            .build());
         return this;
     }
 
     public List<ImageDuplicate> getImageDuplicates() {
         return imageDuplicates.stream()
-                .map(RetentionReasonImageDuplicate::getImageDuplicate)
-                .collect(Collectors.toList());
+            .map(RetentionReasonImageDuplicate::getImageDuplicate)
+            .collect(Collectors.toList());
     }
 
     @Data

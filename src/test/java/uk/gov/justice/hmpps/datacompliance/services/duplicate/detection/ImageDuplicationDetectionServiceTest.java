@@ -65,25 +65,25 @@ class ImageDuplicationDetectionServiceTest {
     @BeforeEach
     void setUp() {
         service = new ImageDuplicationDetectionService(
-                imageRecognitionClient,
-                offenderImageUploadRepository,
-                imageDuplicateRepository,
-                TimeSource.of(NOW));
+            imageRecognitionClient,
+            offenderImageUploadRepository,
+            imageDuplicateRepository,
+            TimeSource.of(NOW));
     }
 
     @Test
     void findDuplicates() {
 
         givenOffenderHasAnUploaded(imageWith(REFERENCE_ID).build())
-                .andImageRecognitionFindsMatchesWith(DUPLICATE_1, DUPLICATE_2, DUPLICATE_3)
-                .andUploadedImagesExistForMatches(DUPLICATE_1, DUPLICATE_2)
-                .andUploadedImageSharesSameOffenderNumberAsReference(DUPLICATE_3)
-                .andDuplicateHasAlreadyBeenFound(DUPLICATE_1, duplicate1)
-                .andDuplicateHasNotAlreadyBeenFound(DUPLICATE_2)
-                .andCanSuccessfullyPersist(duplicate2);
+            .andImageRecognitionFindsMatchesWith(DUPLICATE_1, DUPLICATE_2, DUPLICATE_3)
+            .andUploadedImagesExistForMatches(DUPLICATE_1, DUPLICATE_2)
+            .andUploadedImageSharesSameOffenderNumberAsReference(DUPLICATE_3)
+            .andDuplicateHasAlreadyBeenFound(DUPLICATE_1, duplicate1)
+            .andDuplicateHasNotAlreadyBeenFound(DUPLICATE_2)
+            .andCanSuccessfullyPersist(duplicate2);
 
         assertThat(service.findDuplicatesFor(offenderNo(REFERENCE_ID)))
-                .containsExactlyInAnyOrder(duplicate1, duplicate2);
+            .containsExactlyInAnyOrder(duplicate1, duplicate2);
 
         verifyPersistedDuplicate(DUPLICATE_2);
     }
@@ -102,8 +102,8 @@ class ImageDuplicationDetectionServiceTest {
     void findDuplicatesReturnsEmptyWhenImageUploadFailedForOffender() {
 
         givenOffenderHasAnUploaded(imageWith(REFERENCE_ID)
-                .uploadErrorReason("Upload failed for some reason.")
-                .build());
+            .uploadErrorReason("Upload failed for some reason.")
+            .build());
 
         assertThat(service.findDuplicatesFor(offenderNo(REFERENCE_ID))).isEmpty();
 
@@ -114,12 +114,12 @@ class ImageDuplicationDetectionServiceTest {
     void findDuplicatesThrowsIfImageUploadRepositoryDoesNotContainFaceId() {
 
         givenOffenderHasAnUploaded(imageWith(REFERENCE_ID).build())
-                .andImageRecognitionFindsMatchesWith(DUPLICATE_1)
-                .andUploadedImagesExistForMatches(false, DUPLICATE_1);
+            .andImageRecognitionFindsMatchesWith(DUPLICATE_1)
+            .andUploadedImagesExistForMatches(false, DUPLICATE_1);
 
         assertThatThrownBy(() -> service.findDuplicatesFor(offenderNo(REFERENCE_ID)))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Cannot find image upload for faceId: 'face1'");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Cannot find image upload for faceId: 'face1'");
 
         verifyNoInteractions(imageDuplicateRepository);
     }
@@ -141,18 +141,18 @@ class ImageDuplicationDetectionServiceTest {
 
     private ImageDuplicationDetectionServiceTest givenOffenderHasAnUploaded(final OffenderImageUpload image) {
         when(offenderImageUploadRepository.findByOffenderNo(offenderNo(REFERENCE_ID).getOffenderNumber()))
-                .thenReturn(List.of(image));
+            .thenReturn(List.of(image));
         return this;
     }
 
     private void givenOffenderHasNoUploadedImages() {
         when(offenderImageUploadRepository.findByOffenderNo(offenderNo(REFERENCE_ID).getOffenderNumber()))
-                .thenReturn(emptyList());
+            .thenReturn(emptyList());
     }
 
     private ImageDuplicationDetectionServiceTest andImageRecognitionFindsMatchesWith(final long... duplicateIds) {
         when(imageRecognitionClient.findMatchesFor(faceId(REFERENCE_ID)))
-                .thenReturn(stream(duplicateIds).mapToObj(id -> new FaceMatch(faceId(id), SIMILARITY)).collect(toSet()));
+            .thenReturn(stream(duplicateIds).mapToObj(id -> new FaceMatch(faceId(id), SIMILARITY)).collect(toSet()));
         return this;
     }
 
@@ -162,29 +162,29 @@ class ImageDuplicationDetectionServiceTest {
 
     private ImageDuplicationDetectionServiceTest andUploadedImagesExistForMatches(final boolean exists, final long... duplicateIds) {
         stream(duplicateIds).forEach(duplicateId ->
-                when(offenderImageUploadRepository.findByFaceId(faceId(duplicateId).getFaceId()))
-                        .thenReturn(exists ? Optional.of(imageWith(duplicateId).build()) : Optional.empty()));
+            when(offenderImageUploadRepository.findByFaceId(faceId(duplicateId).getFaceId()))
+                .thenReturn(exists ? Optional.of(imageWith(duplicateId).build()) : Optional.empty()));
         return this;
     }
 
     private ImageDuplicationDetectionServiceTest andUploadedImageSharesSameOffenderNumberAsReference(final long duplicateId) {
         when(offenderImageUploadRepository.findByFaceId(faceId(duplicateId).getFaceId()))
-                .thenReturn(Optional.of(
-                        OffenderImageUpload.builder()
-                                .offenderNo(offenderNo(REFERENCE_ID).getOffenderNumber())
-                                .build()));
+            .thenReturn(Optional.of(
+                OffenderImageUpload.builder()
+                    .offenderNo(offenderNo(REFERENCE_ID).getOffenderNumber())
+                    .build()));
         return this;
     }
 
     private ImageDuplicationDetectionServiceTest andDuplicateHasAlreadyBeenFound(final long duplicateUploadId, final ImageDuplicate duplicate) {
         when(imageDuplicateRepository.findByOffenderImageUploadIds(REFERENCE_ID, duplicateUploadId))
-                .thenReturn(Optional.of(duplicate));
+            .thenReturn(Optional.of(duplicate));
         return this;
     }
 
     private ImageDuplicationDetectionServiceTest andDuplicateHasNotAlreadyBeenFound(final long duplicateUploadId) {
         when(imageDuplicateRepository.findByOffenderImageUploadIds(REFERENCE_ID, duplicateUploadId))
-                .thenReturn(Optional.empty());
+            .thenReturn(Optional.empty());
         return this;
     }
 
@@ -203,11 +203,11 @@ class ImageDuplicationDetectionServiceTest {
 
     private OffenderImageUploadBuilder imageWith(final long id) {
         return OffenderImageUpload.builder()
-                .uploadStatus(SUCCESS)
-                .imageId(id)
-                .uploadId(id)
-                .faceId(faceId(id).getFaceId())
-                .offenderNo(offenderNo(id).getOffenderNumber());
+            .uploadStatus(SUCCESS)
+            .imageId(id)
+            .uploadId(id)
+            .faceId(faceId(id).getFaceId())
+            .offenderNo(offenderNo(id).getOffenderNumber());
     }
 
     private FaceId faceId(final long suffix) {

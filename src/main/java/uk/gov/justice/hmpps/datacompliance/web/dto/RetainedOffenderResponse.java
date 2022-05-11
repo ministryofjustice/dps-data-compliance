@@ -23,7 +23,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(NON_NULL)
-@JsonPropertyOrder({ "NOMIS_ID", "FIRST_NAME", "MIDDLE_NAME", "LAST_NAME", "DATE_OF_BIRTH", "LAST_KNOWN_OFFENDER_MANAGEMENT_UNIT", "RETENTION_REASONS"})
+@JsonPropertyOrder({"NOMIS_ID", "FIRST_NAME", "MIDDLE_NAME", "LAST_NAME", "DATE_OF_BIRTH", "LAST_KNOWN_OFFENDER_MANAGEMENT_UNIT", "RETENTION_REASONS"})
 public class RetainedOffenderResponse {
 
     @Schema(required = true, description = "This is known as the 'offender number")

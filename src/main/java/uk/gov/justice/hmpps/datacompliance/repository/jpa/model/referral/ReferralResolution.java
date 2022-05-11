@@ -40,15 +40,8 @@ import static javax.persistence.FetchType.LAZY;
 @Table(name = "REFERRAL_RESOLUTION")
 public class ReferralResolution implements OffenderEntity {
 
-    public enum ResolutionStatus {
-        PENDING,
-        RETAINED,
-        PROVISIONAL_DELETION_GRANTED,
-        CHANGES_OCCURRED_IN_REVIEW_PERIOD,
-        DELETION_GRANTED,
-        DELETED
-    }
-
+    @OneToMany(mappedBy = "referralResolution", cascade = ALL, fetch = LAZY)
+    private final List<RetentionCheck> retentionChecks = new ArrayList<>();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RESOLUTION_ID", nullable = false)
@@ -72,9 +65,6 @@ public class ReferralResolution implements OffenderEntity {
     @Column(name = "PROVISIONAL_DELETION_PREVIOUSLY_GRANTED", nullable = false)
     private boolean provisionalDeletionPreviouslyGranted;
 
-    @OneToMany(mappedBy = "referralResolution", cascade = ALL, fetch = LAZY)
-    private final List<RetentionCheck> retentionChecks = new ArrayList<>();
-
     public ReferralResolution addRetentionCheck(final RetentionCheck reason) {
         this.retentionChecks.add(reason);
         reason.setReferralResolution(this);
@@ -88,5 +78,14 @@ public class ReferralResolution implements OffenderEntity {
     @Override
     public OffenderNumber getOffenderNumber() {
         return getOffenderDeletionReferral().getOffenderNumber();
+    }
+
+    public enum ResolutionStatus {
+        PENDING,
+        RETAINED,
+        PROVISIONAL_DELETION_GRANTED,
+        CHANGES_OCCURRED_IN_REVIEW_PERIOD,
+        DELETION_GRANTED,
+        DELETED
     }
 }

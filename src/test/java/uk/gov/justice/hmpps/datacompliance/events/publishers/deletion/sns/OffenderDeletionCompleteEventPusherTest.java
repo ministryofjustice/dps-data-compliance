@@ -11,11 +11,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteAwsEventPusher;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.Booking;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.OffenderWithBookings;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteAwsEventPusher;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteEventPusher;
 import uk.gov.justice.hmpps.sqs.HmppsQueueService;
 import uk.gov.justice.hmpps.sqs.HmppsTopic;
 
@@ -33,16 +33,12 @@ import static org.mockito.Mockito.when;
 class OffenderDeletionCompleteEventPusherTest {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    @Mock
-    private AmazonSNS client;
-
     @Mock
     HmppsQueueService hmppsQueueService;
-
     @Mock
     HmppsTopic hmppsTopic;
-
+    @Mock
+    private AmazonSNS client;
     private OffenderDeletionCompleteEventPusher eventPusher;
 
 
@@ -58,14 +54,14 @@ class OffenderDeletionCompleteEventPusherTest {
 
         final var request = ArgumentCaptor.forClass(PublishRequest.class);
         when(client.publish(request.capture()))
-                .thenReturn(new PublishResult().withMessageId("messageId"));
+            .thenReturn(new PublishResult().withMessageId("messageId"));
 
         eventPusher.sendEvent(deletionCompleteEvent());
 
         assertThat(request.getValue().getMessage()).isEqualToIgnoringWhitespace(getJson("delete-offender-event.json"));
         assertThat(request.getValue().getTopicArn()).isEqualTo("topic.arn");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
-                .isEqualTo("DATA_COMPLIANCE_DELETE-OFFENDER");
+            .isEqualTo("DATA_COMPLIANCE_DELETE-OFFENDER");
     }
 
     @Test
@@ -76,18 +72,18 @@ class OffenderDeletionCompleteEventPusherTest {
 
     private OffenderDeletionComplete deletionCompleteEvent() {
         return OffenderDeletionComplete.builder()
-                .offenderIdDisplay("offender1")
-                .offender(OffenderWithBookings.builder()
-                        .offenderId(1L)
-                        .booking(new Booking(11L))
-                        .booking(new Booking(12L))
-                        .build())
-                .offender(OffenderWithBookings.builder()
-                        .offenderId(2L)
-                        .booking(new Booking(21L))
-                        .booking(new Booking(22L))
-                        .build())
-                .build();
+            .offenderIdDisplay("offender1")
+            .offender(OffenderWithBookings.builder()
+                .offenderId(1L)
+                .booking(new Booking(11L))
+                .booking(new Booking(12L))
+                .build())
+            .offender(OffenderWithBookings.builder()
+                .offenderId(2L)
+                .booking(new Booking(21L))
+                .booking(new Booking(22L))
+                .build())
+            .build();
     }
 
     private String getJson(final String filename) throws IOException {

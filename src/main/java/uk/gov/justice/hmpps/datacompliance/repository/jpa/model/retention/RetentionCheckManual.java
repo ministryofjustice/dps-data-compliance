@@ -39,16 +39,16 @@ public class RetentionCheckManual extends RetentionCheck {
         super(null, null, MANUAL_RETENTION, status);
     }
 
-    public RetentionCheckManual setManualRetention(final ManualRetention manualRetention) {
-        this.retentionReasonManual = RetentionReasonManual.builder()
-                .retentionCheck(this)
-                .manualRetention(manualRetention)
-                .build();
-        return this;
-    }
-
     public ManualRetention getManualRetention() {
         return retentionReasonManual.getManualRetention();
+    }
+
+    public RetentionCheckManual setManualRetention(final ManualRetention manualRetention) {
+        this.retentionReasonManual = RetentionReasonManual.builder()
+            .retentionCheck(this)
+            .manualRetention(manualRetention)
+            .build();
+        return this;
     }
 
     @Data

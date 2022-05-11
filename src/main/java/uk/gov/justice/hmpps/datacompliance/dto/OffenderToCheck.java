@@ -17,16 +17,21 @@ import static org.springframework.util.StringUtils.hasText;
 @EqualsAndHashCode
 public class OffenderToCheck {
     private final OffenderNumber offenderNumber;
-    @Singular private final List<String> offenceCodes;
-    @Singular private final List<String> alertCodes;
-    @Singular private final Set<String> bookingNos;
-    @Singular private final Set<String> pncs;
-    @Singular private final Set<String> cros;
+    @Singular
+    private final List<String> offenceCodes;
+    @Singular
+    private final List<String> alertCodes;
+    @Singular
+    private final Set<String> bookingNos;
+    @Singular
+    private final Set<String> pncs;
+    @Singular
+    private final Set<String> cros;
     private final String firstName;
     private final String middleName;
     private final String lastName;
 
-    public String getFirstNames(){
+    public String getFirstNames() {
         if (hasText(middleName)) return firstName + " " + middleName;
         return getFirstName();
     }

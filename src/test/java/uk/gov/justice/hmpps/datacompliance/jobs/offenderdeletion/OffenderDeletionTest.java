@@ -27,12 +27,16 @@ import java.util.Optional;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch.BatchType.SCHEDULED;
 
 @ExtendWith(MockitoExtension.class)
 class OffenderDeletionTest {
 
+    public static final String PROVISIONAL_DELETION_GRANTED = "PROVISIONAL_DELETION_GRANTED";
     private static final String OFFENDER_NUMBER = "A1234AA";
     private static final long REFERRAL_ID = 123;
     private static final long BATCH_ID = 123L;
@@ -43,15 +47,13 @@ class OffenderDeletionTest {
     private static final int SOME_REMAINING_IN_WINDOW = 1;
     private static final int REFERRAL_LIMIT = 1;
     private static final int DELETION_LIMIT = 1;
-    public static final String PROVISIONAL_DELETION_GRANTED = "PROVISIONAL_DELETION_GRANTED";
-
     private static final OffenderDeletionConfig CONFIG = OffenderDeletionConfig.builder()
-            .initialWindowStart(INITIAL_WINDOW_START.atStartOfDay())
-            .windowLength(DURATION)
-            .referralLimit(REFERRAL_LIMIT)
-            .reviewDuration(DURATION)
-            .deletionLimit(DELETION_LIMIT)
-            .build();
+        .initialWindowStart(INITIAL_WINDOW_START.atStartOfDay())
+        .windowLength(DURATION)
+        .referralLimit(REFERRAL_LIMIT)
+        .reviewDuration(DURATION)
+        .deletionLimit(DELETION_LIMIT)
+        .build();
 
 
     @Mock
@@ -84,11 +86,11 @@ class OffenderDeletionTest {
         offenderDeletion.run();
 
         verify(eventPusher).requestReferral(OffenderDeletionReferralRequest.builder()
-                        .dueForDeletionWindowStart(INITIAL_WINDOW_START)
-                        .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(DURATION.toDays()))
-                        .batchId(BATCH_ID)
-                        .limit(REFERRAL_LIMIT)
-                        .build());
+            .dueForDeletionWindowStart(INITIAL_WINDOW_START)
+            .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(DURATION.toDays()))
+            .batchId(BATCH_ID)
+            .limit(REFERRAL_LIMIT)
+            .build());
     }
 
     @Test
@@ -97,17 +99,17 @@ class OffenderDeletionTest {
         final var expectedBatch = batchWith(INITIAL_WINDOW_START.plusDays(DURATION.toDays()).atStartOfDay());
 
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(
-                completedBatchWith(INITIAL_WINDOW_START.atStartOfDay(), NONE_REMAINING_IN_WINDOW)));
+            completedBatchWith(INITIAL_WINDOW_START.atStartOfDay(), NONE_REMAINING_IN_WINDOW)));
         when(batchRepository.save(expectedBatch)).thenReturn(expectedBatch.withBatchId(BATCH_ID));
 
         offenderDeletion.run();
 
         verify(eventPusher).requestReferral(OffenderDeletionReferralRequest.builder()
-                .dueForDeletionWindowStart(INITIAL_WINDOW_START.plusDays(1))
-                .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(2))
-                .batchId(BATCH_ID)
-                .limit(REFERRAL_LIMIT)
-                .build());
+            .dueForDeletionWindowStart(INITIAL_WINDOW_START.plusDays(1))
+            .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(2))
+            .batchId(BATCH_ID)
+            .limit(REFERRAL_LIMIT)
+            .build());
     }
 
     @Test
@@ -116,17 +118,17 @@ class OffenderDeletionTest {
         final var expectedBatch = batchWith(INITIAL_WINDOW_START.atStartOfDay());
 
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(
-                completedBatchWith(INITIAL_WINDOW_START.atStartOfDay(), SOME_REMAINING_IN_WINDOW)));
+            completedBatchWith(INITIAL_WINDOW_START.atStartOfDay(), SOME_REMAINING_IN_WINDOW)));
         when(batchRepository.save(expectedBatch)).thenReturn(expectedBatch.withBatchId(BATCH_ID));
 
         offenderDeletion.run();
 
         verify(eventPusher).requestReferral(OffenderDeletionReferralRequest.builder()
-                .dueForDeletionWindowStart(INITIAL_WINDOW_START)
-                .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(DURATION.toDays()))
-                .batchId(BATCH_ID)
-                .limit(REFERRAL_LIMIT)
-                .build());
+            .dueForDeletionWindowStart(INITIAL_WINDOW_START)
+            .dueForDeletionWindowEnd(INITIAL_WINDOW_START.plusDays(DURATION.toDays()))
+            .batchId(BATCH_ID)
+            .limit(REFERRAL_LIMIT)
+            .build());
     }
 
     @Test
@@ -138,46 +140,46 @@ class OffenderDeletionTest {
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(incompleteBatch));
 
         assertThatThrownBy(() -> offenderDeletion.run())
-                .isInstanceOf(NullPointerException.class)
-                .hasMessageContaining("Previous referral (123) did not complete");
+            .isInstanceOf(NullPointerException.class)
+            .hasMessageContaining("Previous referral (123) did not complete");
     }
 
     @Test
     void offenderDeletionRequestFailsIfStartDateInFuture() {
 
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(
-                completedBatchWith(NOW.plusSeconds(1), NONE_REMAINING_IN_WINDOW)));
+            completedBatchWith(NOW.plusSeconds(1), NONE_REMAINING_IN_WINDOW)));
 
         assertThatThrownBy(() -> offenderDeletion.run())
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Deletion due date cannot be in the future, window start date is not valid");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Deletion due date cannot be in the future, window start date is not valid");
     }
 
     @Test
     void offenderDeletionRequestFailsIfEndDateInFuture() {
 
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.of(
-                completedBatchWith(NOW.minusDays(2).plusSeconds(1), NONE_REMAINING_IN_WINDOW)));
+            completedBatchWith(NOW.minusDays(2).plusSeconds(1), NONE_REMAINING_IN_WINDOW)));
 
         assertThatThrownBy(() -> offenderDeletion.run())
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Deletion due date cannot be in the future, window end date is not valid");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Deletion due date cannot be in the future, window end date is not valid");
     }
 
     @Test
     void offenderDeletionRequestFailsIfWindowDatesIllogical() {
 
         final var badConfig = OffenderDeletionConfig.builder()
-                .initialWindowStart(INITIAL_WINDOW_START.atStartOfDay())
-                .windowLength(Duration.ofDays(-1))
-                .build();
+            .initialWindowStart(INITIAL_WINDOW_START.atStartOfDay())
+            .windowLength(Duration.ofDays(-1))
+            .build();
 
         offenderDeletion = new OffenderDeletion(TimeSource.of(NOW), badConfig, batchRepository, eventPusher, properties, offenderDeletionReferralRepository);
         when(batchRepository.findFirstByBatchTypeOrderByRequestDateTimeDesc(SCHEDULED)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> offenderDeletion.run())
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Deletion due window dates are illogical");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Deletion due window dates are illogical");
     }
 
     @Test
@@ -224,11 +226,11 @@ class OffenderDeletionTest {
 
     private OffenderDeletionBatch batchWith(final LocalDateTime windowStart) {
         return OffenderDeletionBatch.builder()
-                .requestDateTime(NOW)
-                .windowStartDateTime(windowStart)
-                .windowEndDateTime(windowStart.plus(DURATION))
-                .batchType(SCHEDULED)
-                .build();
+            .requestDateTime(NOW)
+            .windowStartDateTime(windowStart)
+            .windowEndDateTime(windowStart.plus(DURATION))
+            .batchType(SCHEDULED)
+            .build();
     }
 
     private OffenderDeletionBatch completedBatchWith(final LocalDateTime windowStart, final int remainingInWindow) {

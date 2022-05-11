@@ -33,19 +33,19 @@ public class JwtAuthenticationHelper {
     public String createJwt() {
 
         final var claims = Map.<String, Object>of(
-                "user_name", "data-compliance-user",
-                "client_id", "data-compliance-client",
-                "internalUser", true);
+            "user_name", "data-compliance-user",
+            "client_id", "data-compliance-client",
+            "internalUser", true);
 
         return Jwts.builder()
-                .setId(randomUUID().toString())
-                .setSubject("data-compliance-user")
-                .addClaims(claims)
-                .setExpiration(now().plusDays(1).toDate())
-                .signWith(RS256, keyPair.getPrivate())
-                .setHeaderParam("typ", "JWT")
-                .setHeaderParam("kid", "dps-client-key")
-                .compact();
+            .setId(randomUUID().toString())
+            .setSubject("data-compliance-user")
+            .addClaims(claims)
+            .setExpiration(now().plusDays(1).toDate())
+            .signWith(RS256, keyPair.getPrivate())
+            .setHeaderParam("typ", "JWT")
+            .setHeaderParam("kid", "dps-client-key")
+            .compact();
     }
 
     private KeyPair getKeyPair(final Resource resource, final String alias, final char[] password) {

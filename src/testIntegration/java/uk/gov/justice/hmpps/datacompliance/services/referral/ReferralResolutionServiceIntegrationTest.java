@@ -14,7 +14,8 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doAnswer;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.RETAINED;
@@ -44,7 +45,7 @@ class ReferralResolutionServiceIntegrationTest extends IntegrationTest {
         CompletableFuture.allOf(
                 runAsync(() -> updateAndProcessCheck(1L)),
                 runAsync(() -> updateAndProcessCheck(2L)))
-                .join();
+            .join();
 
         assertThat(referralResolutionRepository.findById(1L).orElseThrow().getResolutionStatus()).isEqualTo(RETAINED);
     }
@@ -72,8 +73,8 @@ class ReferralResolutionServiceIntegrationTest extends IntegrationTest {
             delay(150);
             return result;
         })
-        .doAnswer(InvocationOnMock::callRealMethod)
-        .when(referralResolutionService).findResolution(any(), anyBoolean());
+            .doAnswer(InvocationOnMock::callRealMethod)
+            .when(referralResolutionService).findResolution(any(), anyBoolean());
     }
 
     private void delay(final long millis) {

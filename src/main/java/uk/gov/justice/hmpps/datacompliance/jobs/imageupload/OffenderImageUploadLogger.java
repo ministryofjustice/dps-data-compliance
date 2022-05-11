@@ -36,7 +36,7 @@ class OffenderImageUploadLogger {
     void logUploadError(final OffenderNumber offenderNumber, final long imageId, final String reason) {
 
         log.debug("Upload for image: '{}' and offender: '{}' failed due to: '{}'",
-                imageId, offenderNumber.getOffenderNumber(), reason);
+            imageId, offenderNumber.getOffenderNumber(), reason);
 
         saveUploadError(offenderNumber, imageId, reason);
     }
@@ -51,17 +51,17 @@ class OffenderImageUploadLogger {
 
     private void saveUploadError(final OffenderNumber offenderNumber, final long imageId, final String reason) {
         repository.save(offenderImageUploadBuilder(offenderNumber, imageId)
-                .uploadStatus(ERROR)
-                .uploadErrorReason(reason)
-                .build());
+            .uploadStatus(ERROR)
+            .uploadErrorReason(reason)
+            .build());
     }
 
     private void save(final OffenderImage image, final FaceId faceId) {
 
         repository.save(offenderImageUploadBuilder(image.getOffenderNumber(), image.getImageId())
-                .uploadStatus(SUCCESS)
-                .faceId(faceId.getFaceId())
-                .build());
+            .uploadStatus(SUCCESS)
+            .faceId(faceId.getFaceId())
+            .build());
 
         uploadCount.incrementAndGet();
     }
@@ -69,9 +69,9 @@ class OffenderImageUploadLogger {
     private OffenderImageUpload.OffenderImageUploadBuilder offenderImageUploadBuilder(final OffenderNumber offenderNumber,
                                                                                       final long imageId) {
         return OffenderImageUpload.builder()
-                .imageUploadBatch(uploadBatch)
-                .uploadDateTime(timeSource.nowAsLocalDateTime())
-                .offenderNo(offenderNumber.getOffenderNumber())
-                .imageId(imageId);
+            .imageUploadBatch(uploadBatch)
+            .uploadDateTime(timeSource.nowAsLocalDateTime())
+            .offenderNo(offenderNumber.getOffenderNumber())
+            .imageId(imageId);
     }
 }

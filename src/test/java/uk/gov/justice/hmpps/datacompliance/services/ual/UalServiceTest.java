@@ -25,11 +25,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UalServiceTest {
 
-    private static final String USERNAME = "user1";
-    private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
     public static final String CRO = "569151/08";
     public static final String PNC = "14/663516A";
-
+    private static final String USERNAME = "user1";
+    private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
     @Mock
     OffenderUalRepository offenderUalRepository;
 

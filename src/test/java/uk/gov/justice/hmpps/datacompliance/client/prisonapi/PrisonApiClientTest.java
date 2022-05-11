@@ -40,12 +40,12 @@ class PrisonApiClientTest {
     @BeforeEach
     void initialize() {
         prisonApiClient = new PrisonApiClient(WebClient.create(),
-                DataComplianceProperties.builder()
-                        .prisonApiBaseUrl(format("http://localhost:%s", prisonApiMock.getPort()))
-                        .prisonApiOffenderIdsIterationThreads(1)
-                        .prisonApiOffenderIdsLimit(PAGE_LIMIT)
-                        .prisonApiOffenderIdsInitialOffset(0L)
-                        .build());
+            DataComplianceProperties.builder()
+                .prisonApiBaseUrl(format("http://localhost:%s", prisonApiMock.getPort()))
+                .prisonApiOffenderIdsIterationThreads(1)
+                .prisonApiOffenderIdsLimit(PAGE_LIMIT)
+                .prisonApiOffenderIdsInitialOffset(0L)
+                .build());
     }
 
     @AfterEach
@@ -57,18 +57,18 @@ class PrisonApiClientTest {
     void getOffenderNumbers() throws Exception {
 
         var offenderNumbers = List.of(
-                new OffenderNumber("A1234AA"),
-                new OffenderNumber("B1234BB"));
+            new OffenderNumber("A1234AA"),
+            new OffenderNumber("B1234BB"));
 
         prisonApiMock.enqueue(new MockResponse()
-                .setBody(OBJECT_MAPPER.writeValueAsString(offenderNumbers))
-                .setHeader("Content-Type", "application/json")
-                .setHeader("Total-Records", "123"));
+            .setBody(OBJECT_MAPPER.writeValueAsString(offenderNumbers))
+            .setHeader("Content-Type", "application/json")
+            .setHeader("Total-Records", "123"));
 
         var response = prisonApiClient.getOffenderNumbers(0, PAGE_LIMIT);
 
         assertThat(response.getOffenderNumbers()).extracting(OffenderNumber::getOffenderNumber)
-                .containsExactlyInAnyOrder("A1234AA", "B1234BB");
+            .containsExactlyInAnyOrder("A1234AA", "B1234BB");
         assertThat(response.getTotalCount()).isEqualTo(123);
 
         RecordedRequest recordedRequest = prisonApiMock.takeRequest();
@@ -84,20 +84,20 @@ class PrisonApiClientTest {
         prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
 
         assertThatThrownBy(() -> prisonApiClient.getOffenderNumbers(0, PAGE_LIMIT))
-                .isInstanceOf(WebClientResponseException.class);
+            .isInstanceOf(WebClientResponseException.class);
     }
 
     @Test
     void getOffenderNumbersThrowsIfResponseContainsNulls() {
 
         prisonApiMock.enqueue(new MockResponse()
-                .setBody("[{\"offenderNumber\":null}]")
-                .setHeader("Content-Type", "application/json")
-                .setHeader("Total-Records", "123"));
+            .setBody("[{\"offenderNumber\":null}]")
+            .setHeader("Content-Type", "application/json")
+            .setHeader("Total-Records", "123"));
 
         assertThatThrownBy(() -> prisonApiClient.getOffenderNumbers(0, PAGE_LIMIT))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Null offender number");
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Null offender number");
     }
 
     @Test
@@ -106,8 +106,8 @@ class PrisonApiClientTest {
         var offenderImages = List.of(new OffenderImageMetadata(123L, "FACE"), new OffenderImageMetadata(456L, "OTHER"));
 
         prisonApiMock.enqueue(new MockResponse()
-                .setBody(OBJECT_MAPPER.writeValueAsString(offenderImages))
-                .setHeader("Content-Type", "application/json"));
+            .setBody(OBJECT_MAPPER.writeValueAsString(offenderImages))
+            .setHeader("Content-Type", "application/json"));
 
         var result = prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER);
 
@@ -122,9 +122,9 @@ class PrisonApiClientTest {
     void getOffenderFaceImagesHandlesNotFound() {
 
         prisonApiMock.enqueue(new MockResponse()
-                .setHeader("Content-Type", "application/json")
-                .setBody("{\"message\":\"Not Found\"}")
-                .setResponseCode(404));
+            .setHeader("Content-Type", "application/json")
+            .setBody("{\"message\":\"Not Found\"}")
+            .setResponseCode(404));
 
         assertThat(prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER)).isEmpty();
     }
@@ -135,7 +135,7 @@ class PrisonApiClientTest {
         prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
 
         assertThatThrownBy(() -> prisonApiClient.getOffenderFaceImagesFor(OFFENDER_NUMBER))
-                .isInstanceOf(WebClientResponseException.class);
+            .isInstanceOf(WebClientResponseException.class);
     }
 
     @Test
@@ -144,16 +144,16 @@ class PrisonApiClientTest {
         final var data = new byte[]{0x12};
 
         prisonApiMock.enqueue(new MockResponse()
-                .setBody(new Buffer().write(data))
-                .setHeader("Content-Type", "image/jpeg"));
+            .setBody(new Buffer().write(data))
+            .setHeader("Content-Type", "image/jpeg"));
 
         var result = prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID);
 
         assertThat(result).contains(OffenderImage.builder()
-                .offenderNumber(OFFENDER_NUMBER)
-                .imageId(IMAGE_ID)
-                .imageData(data)
-                .build());
+            .offenderNumber(OFFENDER_NUMBER)
+            .imageId(IMAGE_ID)
+            .imageData(data)
+            .build());
 
         RecordedRequest recordedRequest = prisonApiMock.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("GET");
@@ -164,9 +164,9 @@ class PrisonApiClientTest {
     void getImageDataHandlesMissingImageData() {
 
         prisonApiMock.enqueue(new MockResponse()
-                .setHeader("Content-Type", "application/json")
-                .setBody("{\"message\":\"Not Found\"}")
-                .setResponseCode(404));
+            .setHeader("Content-Type", "application/json")
+            .setBody("{\"message\":\"Not Found\"}")
+            .setResponseCode(404));
 
         assertThat(prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID)).isEmpty();
     }
@@ -177,31 +177,31 @@ class PrisonApiClientTest {
         prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
 
         assertThatThrownBy(() -> prisonApiClient.getImageData(OFFENDER_NUMBER, IMAGE_ID))
-                .isInstanceOf(WebClientResponseException.class);
+            .isInstanceOf(WebClientResponseException.class);
     }
 
     @Test
     void getOffendersWithNewImages() throws Exception {
 
         prisonApiMock.enqueue(new MockResponse()
-                .setBody(OBJECT_MAPPER.writeValueAsString(
-                        OffendersWithImagesResponse.builder()
-                                .offenderNumber(new OffenderNumber("A1234AA"))
-                                .offenderNumber(new OffenderNumber("B1234BB"))
-                                .totalElements(123L)
-                                .build()))
-                .setHeader("Content-Type", "application/json"));
+            .setBody(OBJECT_MAPPER.writeValueAsString(
+                OffendersWithImagesResponse.builder()
+                    .offenderNumber(new OffenderNumber("A1234AA"))
+                    .offenderNumber(new OffenderNumber("B1234BB"))
+                    .totalElements(123L)
+                    .build()))
+            .setHeader("Content-Type", "application/json"));
 
         var response = prisonApiClient.getOffendersWithNewImages(TIMESTAMP.toLocalDate(), 0, PAGE_LIMIT);
 
         assertThat(response.getOffenderNumbers()).extracting(OffenderNumber::getOffenderNumber)
-                .containsExactlyInAnyOrder("A1234AA", "B1234BB");
+            .containsExactlyInAnyOrder("A1234AA", "B1234BB");
         assertThat(response.getTotalCount()).isEqualTo(123);
 
         RecordedRequest recordedRequest = prisonApiMock.takeRequest();
         assertThat(recordedRequest.getMethod()).isEqualTo("GET");
         assertThat(recordedRequest.getPath())
-                .isEqualTo("/api/images/offenders?fromDateTime=2020-02-01T00:00&paged=true&size=2&page=0");
+            .isEqualTo("/api/images/offenders?fromDateTime=2020-02-01T00:00&paged=true&size=2&page=0");
     }
 
     @Test
@@ -210,6 +210,6 @@ class PrisonApiClientTest {
         prisonApiMock.enqueue(new MockResponse().setResponseCode(500));
 
         assertThatThrownBy(() -> prisonApiClient.getOffendersWithNewImages(TIMESTAMP.toLocalDate(), 0, PAGE_LIMIT))
-                .isInstanceOf(WebClientResponseException.class);
+            .isInstanceOf(WebClientResponseException.class);
     }
 }

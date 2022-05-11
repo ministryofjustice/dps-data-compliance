@@ -50,13 +50,13 @@ class FalsePositiveCheckServiceTest {
     @BeforeEach
     void setUp() {
         service = new FalsePositiveCheckService(
-                prisonApiClient,
-                imageDuplicationDetectionService,
-                DataComplianceProperties.builder()
-                        .falsePositiveDuplicateCheckEnabled(true)
-                        .falsePositiveDuplicateRequiredImageCount(2)
-                        .falsePositiveDuplicateImageSimilarityThreshold(IMAGE_SIMILARITY_THRESHOLD)
-                        .build());
+            prisonApiClient,
+            imageDuplicationDetectionService,
+            DataComplianceProperties.builder()
+                .falsePositiveDuplicateCheckEnabled(true)
+                .falsePositiveDuplicateRequiredImageCount(2)
+                .falsePositiveDuplicateImageSimilarityThreshold(IMAGE_SIMILARITY_THRESHOLD)
+                .build());
     }
 
     @Test
@@ -66,7 +66,7 @@ class FalsePositiveCheckServiceTest {
         mockImagesFor(DUPLICATE_OFFENDER_NO, DUPLICATE_OFFENDER_IMAGE_ID_1, DUPLICATE_OFFENDER_IMAGE_ID_2);
 
         when(imageDuplicationDetectionService.getSimilarity(any(), any()))
-                .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD - 1));
+            .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD - 1));
 
         assertThat(service.isFalsePositive(generateDataDuplicateCheck())).isTrue();
     }
@@ -89,7 +89,7 @@ class FalsePositiveCheckServiceTest {
         mockImagesFor(DUPLICATE_OFFENDER_NO, DUPLICATE_OFFENDER_IMAGE_ID_1, DUPLICATE_OFFENDER_IMAGE_ID_2);
 
         when(imageDuplicationDetectionService.getSimilarity(any(), any()))
-                .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD));
+            .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD));
 
         assertThat(service.isFalsePositive(generateDataDuplicateCheck())).isFalse();
     }
@@ -101,7 +101,7 @@ class FalsePositiveCheckServiceTest {
         mockImagesFor(DUPLICATE_OFFENDER_NO, DUPLICATE_OFFENDER_IMAGE_ID_1, DUPLICATE_OFFENDER_IMAGE_ID_2);
 
         when(imageDuplicationDetectionService.getSimilarity(any(), any()))
-                .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD + 1));
+            .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD + 1));
 
         assertThat(service.isFalsePositive(generateDataDuplicateCheck())).isFalse();
     }
@@ -111,7 +111,7 @@ class FalsePositiveCheckServiceTest {
 
         when(prisonApiClient.getOffenderFaceImagesFor(new OffenderNumber(REFERENCE_OFFENDER_NO))).thenReturn(emptyList());
         when(prisonApiClient.getOffenderFaceImagesFor(new OffenderNumber(DUPLICATE_OFFENDER_NO)))
-                .thenReturn(List.of(new OffenderImageMetadata(DUPLICATE_OFFENDER_IMAGE_ID_1, "FACE")));
+            .thenReturn(List.of(new OffenderImageMetadata(DUPLICATE_OFFENDER_IMAGE_ID_1, "FACE")));
 
         assertThat(service.isFalsePositive(generateDataDuplicateCheck())).isFalse();
     }
@@ -120,7 +120,7 @@ class FalsePositiveCheckServiceTest {
     void notFalsePositiveIfNoImagesForDuplicateOffender() {
 
         when(prisonApiClient.getOffenderFaceImagesFor(new OffenderNumber(REFERENCE_OFFENDER_NO)))
-                .thenReturn(List.of(new OffenderImageMetadata(REFERENCE_OFFENDER_IMAGE_ID_1, "FACE")));
+            .thenReturn(List.of(new OffenderImageMetadata(REFERENCE_OFFENDER_IMAGE_ID_1, "FACE")));
         when(prisonApiClient.getOffenderFaceImagesFor(new OffenderNumber(DUPLICATE_OFFENDER_NO))).thenReturn(emptyList());
 
         assertThat(service.isFalsePositive(generateDataDuplicateCheck())).isFalse();
@@ -130,9 +130,9 @@ class FalsePositiveCheckServiceTest {
     void notFalsePositiveIfCheckDisabled() {
 
         service = new FalsePositiveCheckService(
-                prisonApiClient,
-                imageDuplicationDetectionService,
-                DataComplianceProperties.builder().falsePositiveDuplicateCheckEnabled(false).build());
+            prisonApiClient,
+            imageDuplicationDetectionService,
+            DataComplianceProperties.builder().falsePositiveDuplicateCheckEnabled(false).build());
 
         assertThat(service.isFalsePositive(generateDataDuplicateCheck())).isFalse();
     }
@@ -144,7 +144,7 @@ class FalsePositiveCheckServiceTest {
         mockImagesFor(DUPLICATE_OFFENDER_NO, DUPLICATE_OFFENDER_IMAGE_ID_1);
 
         lenient().when(imageDuplicationDetectionService.getSimilarity(any(), any()))
-                .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD - 1));
+            .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD - 1));
 
         assertThat(service.isFalsePositive(generateDataDuplicateCheck())).isFalse();
     }
@@ -156,10 +156,10 @@ class FalsePositiveCheckServiceTest {
         final var duplicateImages = mockImagesFor(DUPLICATE_OFFENDER_NO, DUPLICATE_OFFENDER_IMAGE_ID_1, DUPLICATE_OFFENDER_IMAGE_ID_2);
 
         when(imageDuplicationDetectionService.getSimilarity(any(), any()))
-                .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD - 1));
+            .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD - 1));
 
         when(imageDuplicationDetectionService.getSimilarity(referenceImages.get(0), duplicateImages.get(1)))
-                .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD + 1));
+            .thenReturn(Optional.of(IMAGE_SIMILARITY_THRESHOLD + 1));
 
         assertThat(service.isFalsePositive(generateDataDuplicateCheck())).isFalse();
     }
@@ -167,22 +167,22 @@ class FalsePositiveCheckServiceTest {
     private RetentionCheckDataDuplicate generateDataDuplicateCheck() {
         final var check = new RetentionCheckDatabaseDataDuplicate(RETENTION_REQUIRED);
         check.addDataDuplicates(List.of(DataDuplicate.builder()
-                .referenceOffenderNo(REFERENCE_OFFENDER_NO)
-                .duplicateOffenderNo(DUPLICATE_OFFENDER_NO)
-                .build()));
+            .referenceOffenderNo(REFERENCE_OFFENDER_NO)
+            .duplicateOffenderNo(DUPLICATE_OFFENDER_NO)
+            .build()));
         return check;
     }
 
     private List<OffenderImage> mockImagesFor(final String offenderNo, final Long... imageIds) {
         when(prisonApiClient.getOffenderFaceImagesFor(new OffenderNumber(offenderNo)))
-                .thenReturn(stream(imageIds).map(id -> new OffenderImageMetadata(id, "FACE")).collect(toList()));
+            .thenReturn(stream(imageIds).map(id -> new OffenderImageMetadata(id, "FACE")).collect(toList()));
         return stream(imageIds).map(id -> mockImageDataFor(offenderNo, id)).collect(toList());
     }
 
     private OffenderImage mockImageDataFor(final String offenderNumber, final long imageId) {
         final var offenderImage = mock(OffenderImage.class);
         lenient().when(prisonApiClient.getImageData(new OffenderNumber(offenderNumber), imageId))
-                .thenReturn(Optional.of(offenderImage));
+            .thenReturn(Optional.of(offenderImage));
         return offenderImage;
     }
 }

@@ -63,7 +63,7 @@ class ReportUtilityTest {
     }
 
     @Test
-    public void parseFromUalReportInvalidFileFormat(){
+    public void parseFromUalReportInvalidFileFormat() {
         final var multipartFile = new MockMultipartFile("some.file", "file.csv", MULTIPART_FORM_DATA_VALUE, ":}{|(*)(*&%&*^£$%@£$@!%£&".getBytes(Charset.forName("EUC-JP")));
 
         assertThatThrownBy(() -> reportUtility.parseFromUalReport(multipartFile))

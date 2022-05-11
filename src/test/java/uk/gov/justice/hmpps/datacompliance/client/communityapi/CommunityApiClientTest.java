@@ -21,13 +21,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class CommunityApiClientTest {
-    
+
     private final MockWebServer mockCommunityApiWebServer = new MockWebServer();
     private CommunityApiClient communityApiClient;
 
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         communityApiClient = new CommunityApiClient(WebClient.create(),
             DataComplianceProperties.builder()
                 .communityApiBaseUrl(format("http://localhost:%s", mockCommunityApiWebServer.getPort()))

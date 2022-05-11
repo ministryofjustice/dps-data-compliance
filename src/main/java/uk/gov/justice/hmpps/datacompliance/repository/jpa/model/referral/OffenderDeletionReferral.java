@@ -34,29 +34,8 @@ import static javax.persistence.FetchType.LAZY;
 @Table(name = "OFFENDER_DELETION_REFERRAL")
 public class OffenderDeletionReferral implements OffenderEntity {
 
-    // Not using @AllArgsConstructor so that retentionResolution
-    // does not appear in the builder:
-    @Builder
-    public OffenderDeletionReferral(final Long referralId,
-                                    final OffenderDeletionBatch offenderDeletionBatch,
-                                    final String offenderNo,
-                                    final String firstName,
-                                    final String middleName,
-                                    final String lastName,
-                                    final LocalDate birthDate,
-                                    final String agencyLocationId,
-                                    final LocalDateTime receivedDateTime) {
-        this.referralId = referralId;
-        this.offenderDeletionBatch = offenderDeletionBatch;
-        this.offenderNo = offenderNo;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
-        this.birthDate = birthDate;
-        this.agencyLocationId = agencyLocationId;
-        this.receivedDateTime = receivedDateTime;
-    }
-
+    @OneToMany(mappedBy = "offenderDeletionReferral", cascade = ALL, fetch = LAZY)
+    private final List<ReferredOffenderAlias> offenderAliases = new ArrayList<>();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "REFERRAL_ID", nullable = false)
@@ -94,12 +73,31 @@ public class OffenderDeletionReferral implements OffenderEntity {
     @NotNull
     @Column(name = "RECEIVED_DATE_TIME", nullable = false)
     private LocalDateTime receivedDateTime;
-
-    @OneToMany(mappedBy = "offenderDeletionReferral", cascade = ALL, fetch = LAZY)
-    private final List<ReferredOffenderAlias> offenderAliases = new ArrayList<>();
-
     @OneToOne(mappedBy = "offenderDeletionReferral", cascade = ALL, fetch = LAZY)
     private ReferralResolution referralResolution;
+
+    // Not using @AllArgsConstructor so that retentionResolution
+    // does not appear in the builder:
+    @Builder
+    public OffenderDeletionReferral(final Long referralId,
+                                    final OffenderDeletionBatch offenderDeletionBatch,
+                                    final String offenderNo,
+                                    final String firstName,
+                                    final String middleName,
+                                    final String lastName,
+                                    final LocalDate birthDate,
+                                    final String agencyLocationId,
+                                    final LocalDateTime receivedDateTime) {
+        this.referralId = referralId;
+        this.offenderDeletionBatch = offenderDeletionBatch;
+        this.offenderNo = offenderNo;
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.lastName = lastName;
+        this.birthDate = birthDate;
+        this.agencyLocationId = agencyLocationId;
+        this.receivedDateTime = receivedDateTime;
+    }
 
     public void addReferredOffenderAlias(final ReferredOffenderAlias alias) {
         this.offenderAliases.add(alias);

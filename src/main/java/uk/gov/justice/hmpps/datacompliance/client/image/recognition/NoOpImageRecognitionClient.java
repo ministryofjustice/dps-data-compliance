@@ -24,7 +24,7 @@ public class NoOpImageRecognitionClient implements ImageRecognitionClient {
     @Override
     public Result<FaceId, IndexFacesError> uploadImageToCollection(final OffenderImage image) {
         log.warn("Pretending to upload image data for offender: '{}', image: '{}'",
-                image.getOffenderNumber().getOffenderNumber(), image.getImageId());
+            image.getOffenderNumber().getOffenderNumber(), image.getImageId());
         return error(FACE_NOT_FOUND);
     }
 

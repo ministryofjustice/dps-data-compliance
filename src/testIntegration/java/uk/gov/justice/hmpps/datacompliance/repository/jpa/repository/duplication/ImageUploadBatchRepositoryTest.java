@@ -1,12 +1,8 @@
 package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageUploadBatch;
 
@@ -29,10 +25,10 @@ class ImageUploadBatchRepositoryTest extends IntegrationTest {
     void persistImageUploadBatchAndRetrieveById() {
 
         final var imageUploadBatch = ImageUploadBatch.builder()
-                .uploadStartDateTime(DATE_TIME)
-                .uploadEndDateTime(DATE_TIME.plusSeconds(1))
-                .uploadCount(123L)
-                .build();
+            .uploadStartDateTime(DATE_TIME)
+            .uploadEndDateTime(DATE_TIME.plusSeconds(1))
+            .uploadCount(123L)
+            .build();
 
         repository.save(imageUploadBatch);
         assertThat(imageUploadBatch.getBatchId()).isNotNull();

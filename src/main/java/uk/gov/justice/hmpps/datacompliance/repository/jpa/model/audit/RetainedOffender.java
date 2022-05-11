@@ -35,7 +35,7 @@ public class RetainedOffender implements OffenderEntity {
         return new OffenderNumber(offenderNumber);
     }
 
-    public List<String> getPositiveRetentionChecks(){
+    public List<String> getPositiveRetentionChecks() {
         return Arrays.asList(positiveRetentionChecks.split(",", -1));
     }
 }

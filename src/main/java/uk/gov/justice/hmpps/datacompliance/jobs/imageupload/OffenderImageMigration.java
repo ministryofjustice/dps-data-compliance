@@ -37,7 +37,7 @@ class OffenderImageMigration {
 
     private ImageUploadBatch newUploadBatch() {
         return ImageUploadBatch.builder()
-                .uploadStartDateTime(timeSource.nowAsLocalDateTime())
-                .build();
+            .uploadStartDateTime(timeSource.nowAsLocalDateTime())
+            .build();
     }
 }

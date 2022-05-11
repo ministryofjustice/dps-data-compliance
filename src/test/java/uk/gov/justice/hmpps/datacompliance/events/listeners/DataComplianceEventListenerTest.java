@@ -15,8 +15,8 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DeceasedOffender
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
-import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderRestrictionResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.ProvisionalDeletionReferralResult;
@@ -63,7 +63,7 @@ class DataComplianceEventListenerTest {
     @Test
     void handleAdHocOffenderDeletionEvent() {
         handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"reason\":\"Some reason\"}",
-                Map.of("eventType", "DATA_COMPLIANCE_AD-HOC-OFFENDER-DELETION"));
+            Map.of("eventType", "DATA_COMPLIANCE_AD-HOC-OFFENDER-DELETION"));
 
         verify(referralService).handleAdHocDeletion(new AdHocOffenderDeletion("A1234AA", "Some reason"));
     }
@@ -99,24 +99,24 @@ class DataComplianceEventListenerTest {
                    ]
                 }
                 """,
-                Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION"));
+            Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION"));
 
         verify(referralService).handlePendingDeletionReferral(OffenderPendingDeletion.builder()
-                .offenderIdDisplay("A1234AA")
-                .firstName("Bob")
-                .middleName("Middle")
-                .lastName("Jones")
-                .birthDate(LocalDate.of(1990, 1, 2))
-                .agencyLocationId("LEI")
-                .offenderAlias(OffenderAlias.builder()
-                        .offenderId(123L)
-                        .offenderBooking(OffenderBooking.builder()
-                                .offenderBookId(321L)
-                                .offenceCode("offence1")
-                                .alertCode("alert1")
-                                .build())
-                        .build())
-                .build());
+            .offenderIdDisplay("A1234AA")
+            .firstName("Bob")
+            .middleName("Middle")
+            .lastName("Jones")
+            .birthDate(LocalDate.of(1990, 1, 2))
+            .agencyLocationId("LEI")
+            .offenderAlias(OffenderAlias.builder()
+                .offenderId(123L)
+                .offenderBooking(OffenderBooking.builder()
+                    .offenderBookId(321L)
+                    .offenceCode("offence1")
+                    .alertCode("alert1")
+                    .build())
+                .build())
+            .build());
     }
 
     @Test
@@ -143,7 +143,7 @@ class DataComplianceEventListenerTest {
     @Test
     void handleReferralComplete() {
         handleMessage("{\"batchId\":123,\"numberReferred\":4,\"totalInWindow\":5}",
-                Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE"));
+            Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE"));
 
         verify(referralService).handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L, 4L, 5L));
     }
@@ -151,7 +151,7 @@ class DataComplianceEventListenerTest {
     @Test
     void handleDeletionComplete() {
         handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":123}",
-                Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE"));
+            Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE"));
 
         verify(deletionService).handleDeletionComplete(new OffenderDeletionComplete("A1234AA", 123L));
     }
@@ -159,7 +159,7 @@ class DataComplianceEventListenerTest {
     @Test
     void handleDataDuplicateIdResult() {
         handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"duplicateOffenders\":[\"B1234BB\"]}",
-                Map.of("eventType", "DATA_COMPLIANCE_DATA-DUPLICATE-ID-RESULT"));
+            Map.of("eventType", "DATA_COMPLIANCE_DATA-DUPLICATE-ID-RESULT"));
 
         verify(retentionService).handleDataDuplicateResult(new DataDuplicateResult("A1234AA", 123L, List.of("B1234BB")), ID);
     }
@@ -167,7 +167,7 @@ class DataComplianceEventListenerTest {
     @Test
     void handleDataDuplicateDbResult() {
         handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"duplicateOffenders\":[\"B1234BB\"]}",
-                Map.of("eventType", "DATA_COMPLIANCE_DATA-DUPLICATE-DB-RESULT"));
+            Map.of("eventType", "DATA_COMPLIANCE_DATA-DUPLICATE-DB-RESULT"));
 
         verify(retentionService).handleDataDuplicateResult(new DataDuplicateResult("A1234AA", 123L, List.of("B1234BB")), DATABASE);
     }
@@ -175,7 +175,7 @@ class DataComplianceEventListenerTest {
     @Test
     void handleFreeTextSearchResult() {
         handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"matchingTables\":[\"TABLE1\"]}",
-                Map.of("eventType", "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT"));
+            Map.of("eventType", "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT"));
 
         verify(retentionService).handleFreeTextSearchResult(new FreeTextSearchResult("A1234AA", 123L, List.of("TABLE1")));
     }
@@ -217,7 +217,7 @@ class DataComplianceEventListenerTest {
                 "}",
             Map.of("eventType", "DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-RESULT"));
 
-        verify(deceasedDeletionService).handleDeceasedOffenderDeletionResult(new DeceasedOffenderDeletionResult( 12345L, List.of(
+        verify(deceasedDeletionService).handleDeceasedOffenderDeletionResult(new DeceasedOffenderDeletionResult(12345L, List.of(
             DeceasedOffender.builder()
                 .offenderIdDisplay("A1234AA")
                 .firstName("Bob")
@@ -225,8 +225,8 @@ class DataComplianceEventListenerTest {
                 .lastName("Jones")
                 .agencyLocationId("LEI")
                 .birthDate(LocalDate.of(1990, 1, 2))
-                .deceasedDate(LocalDate.of(2020, 8,18))
-                .deletionDateTime(LocalDateTime.of(2021,8, 18 , 12, 56 ,31))
+                .deceasedDate(LocalDate.of(2020, 8, 18))
+                .deletionDateTime(LocalDateTime.of(2021, 8, 18, 12, 56, 31))
                 .offenderAlias(DeceasedOffenderDeletionResult.OffenderAlias.builder().offenderId(123L).offenderBookId(321L).build())
                 .build())));
     }
@@ -234,29 +234,29 @@ class DataComplianceEventListenerTest {
     @Test
     void handleEventThrowsIfMessageAttributesNotPresent() {
         assertThatThrownBy(() -> handleMessage("{\"offenderIdDisplay\":\"A1233AA\"}", Map.of()))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessage("Message event type not found");
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("Message event type not found");
     }
 
     @Test
     void handleEventThrowsIfEventTypeUnexpected() {
         assertThatThrownBy(() -> handleMessage("{\"offenderIdDisplay\":\"A1234AA\"}", Map.of("eventType", "UNEXPECTED!")))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Unexpected message event type: 'UNEXPECTED!'");
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Unexpected message event type: 'UNEXPECTED!'");
     }
 
     @Test
     void handleEventThrowsIfMessageNotPresent() {
         assertThatThrownBy(() -> handleMessage(null, Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION")))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("argument \"content\" is null");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("argument \"content\" is null");
     }
 
     @Test
     void handleEventThrowsIfMessageUnparsable() {
         assertThatThrownBy(() -> handleMessage("BAD MESSAGE!", Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION")))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Failed to parse request");
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Failed to parse request");
     }
 
     private void handleMessage(final String payload, final Map<String, Object> headers) {

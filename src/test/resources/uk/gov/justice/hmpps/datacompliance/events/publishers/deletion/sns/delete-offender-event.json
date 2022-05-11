@@ -4,15 +4,23 @@
     {
       "offenderId": 1,
       "bookings": [
-        {"offenderBookId": 11},
-        {"offenderBookId": 12}
+        {
+          "offenderBookId": 11
+        },
+        {
+          "offenderBookId": 12
+        }
       ]
     },
     {
       "offenderId": 2,
       "bookings": [
-        {"offenderBookId":21},
-        {"offenderBookId":22}
+        {
+          "offenderBookId": 21
+        },
+        {
+          "offenderBookId": 22
+        }
       ]
     }
   ]

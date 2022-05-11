@@ -48,12 +48,12 @@ public class PrisonApiClient {
     public OffenderNumbersResponse getOffenderNumbers(final long offset, final long limit) {
 
         final var response = webClient.get()
-                .uri(dataComplianceProperties.getPrisonApiBaseUrl() + OFFENDER_IDS_PATH)
-                .header("Page-Offset", String.valueOf(offset))
-                .header("Page-Limit", String.valueOf(limit))
-                .retrieve()
-                .toEntityList(OffenderNumber.class)
-                .block();
+            .uri(dataComplianceProperties.getPrisonApiBaseUrl() + OFFENDER_IDS_PATH)
+            .header("Page-Offset", String.valueOf(offset))
+            .header("Page-Limit", String.valueOf(limit))
+            .retrieve()
+            .toEntityList(OffenderNumber.class)
+            .block();
 
         return offenderNumbersResponse(response);
     }
@@ -63,57 +63,57 @@ public class PrisonApiClient {
                                                              final long limit) {
 
         final var uri = UriComponentsBuilder.fromUriString(dataComplianceProperties.getPrisonApiBaseUrl())
-                .path(OFFENDERS_WITH_IMAGES_PATH)
-                .queryParam("fromDateTime", lastRunDate.atStartOfDay())
-                .queryParam("paged", true)
-                .queryParam("size", limit)
-                .queryParam("page", pageNumber)
-                .build().encode().toUri();
+            .path(OFFENDERS_WITH_IMAGES_PATH)
+            .queryParam("fromDateTime", lastRunDate.atStartOfDay())
+            .queryParam("paged", true)
+            .queryParam("size", limit)
+            .queryParam("page", pageNumber)
+            .build().encode().toUri();
 
         return webClient.get()
-                .uri(uri)
-                .retrieve()
-                .bodyToMono(OffendersWithImagesResponse.class)
-                .map(response -> OffenderNumbersResponse.builder()
-                        .totalCount(response.getTotalElements())
-                        .offenderNumbers(new HashSet<>(response.getOffenderNumbers()))
-                        .build())
-                .block();
+            .uri(uri)
+            .retrieve()
+            .bodyToMono(OffendersWithImagesResponse.class)
+            .map(response -> OffenderNumbersResponse.builder()
+                .totalCount(response.getTotalElements())
+                .offenderNumbers(new HashSet<>(response.getOffenderNumbers()))
+                .build())
+            .block();
     }
 
     public List<OffenderImageMetadata> getOffenderFaceImagesFor(final OffenderNumber offenderNumber) {
 
         final var url = dataComplianceProperties.getPrisonApiBaseUrl() +
-                format(OFFENDER_IMAGE_METADATA_PATH, offenderNumber.getOffenderNumber());
+            format(OFFENDER_IMAGE_METADATA_PATH, offenderNumber.getOffenderNumber());
 
         return webClient.get()
-                .uri(url)
-                .retrieve()
-                .bodyToFlux(OffenderImageMetadata.class)
-                .onErrorResume(WebClientResponseException.class,
-                        ex -> NOT_FOUND.equals(ex.getStatusCode()) ? Mono.empty() : Mono.error(ex))
-                .filter(OffenderImageMetadata::isOffenderFaceImage)
-                .toStream().collect(toList());
+            .uri(url)
+            .retrieve()
+            .bodyToFlux(OffenderImageMetadata.class)
+            .onErrorResume(WebClientResponseException.class,
+                ex -> NOT_FOUND.equals(ex.getStatusCode()) ? Mono.empty() : Mono.error(ex))
+            .filter(OffenderImageMetadata::isOffenderFaceImage)
+            .toStream().collect(toList());
     }
 
     public Optional<OffenderImage> getImageData(final OffenderNumber offenderNumber, final long imageId) {
 
         return webClient.get()
-                .uri(dataComplianceProperties.getPrisonApiBaseUrl() + format(IMAGE_DATA_PATH, imageId))
-                .accept(IMAGE_JPEG)
-                .retrieve()
-                .bodyToMono(byte[].class)
-                .map(data -> OffenderImage.builder()
-                        .offenderNumber(offenderNumber)
-                        .imageId(imageId)
-                        .imageData(data)
-                        .build())
+            .uri(dataComplianceProperties.getPrisonApiBaseUrl() + format(IMAGE_DATA_PATH, imageId))
+            .accept(IMAGE_JPEG)
+            .retrieve()
+            .bodyToMono(byte[].class)
+            .map(data -> OffenderImage.builder()
+                .offenderNumber(offenderNumber)
+                .imageId(imageId)
+                .imageData(data)
+                .build())
 
-                // Handling edge case where image had no image data and a 404 response was returned
-                .onErrorResume(WebClientResponseException.class,
-                        ex -> NOT_FOUND.equals(ex.getStatusCode()) ? Mono.empty() : Mono.error(ex))
+            // Handling edge case where image had no image data and a 404 response was returned
+            .onErrorResume(WebClientResponseException.class,
+                ex -> NOT_FOUND.equals(ex.getStatusCode()) ? Mono.empty() : Mono.error(ex))
 
-                .blockOptional();
+            .blockOptional();
     }
 
     private OffenderNumbersResponse offenderNumbersResponse(final ResponseEntity<List<OffenderNumber>> response) {
@@ -121,21 +121,21 @@ public class PrisonApiClient {
         final var offenderNumbers = requireNonNull(response.getBody(), "No body found in response.");
 
         return OffenderNumbersResponse.builder()
-                .totalCount(getTotalCountFrom(response))
-                .offenderNumbers(new HashSet<>(offenderNumbers))
-                .build();
+            .totalCount(getTotalCountFrom(response))
+            .offenderNumbers(new HashSet<>(offenderNumbers))
+            .build();
     }
 
     @SuppressWarnings("rawtypes")
     private long getTotalCountFrom(final ResponseEntity entity) {
 
         final var totalCountHeader = Optional.ofNullable(entity.getHeaders())
-                .map(headers -> headers.get("Total-Records"))
-                .flatMap(headers -> headers.stream().findFirst());
+            .map(headers -> headers.get("Total-Records"))
+            .flatMap(headers -> headers.stream().findFirst());
 
         return totalCountHeader
-                .map(Long::valueOf)
-                .orElseThrow(() -> new IllegalStateException("Response did not contain Total-Records header"));
+            .map(Long::valueOf)
+            .orElseThrow(() -> new IllegalStateException("Response did not contain Total-Records header"));
     }
 
     @Data

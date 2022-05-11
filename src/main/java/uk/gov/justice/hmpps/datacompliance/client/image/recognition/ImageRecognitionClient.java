@@ -9,6 +9,7 @@ public interface ImageRecognitionClient {
 
     /**
      * Upload image and index face into collection for facial recognition.
+     *
      * @return Result object containing server-side unique identifier for the face recognised in the image or an
      * enumerated error.
      */

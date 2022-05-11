@@ -27,42 +27,35 @@ import java.time.LocalDateTime;
 @Table(name = "OFFENDER_DELETION_BATCH")
 public class OffenderDeletionBatch {
 
-    public enum BatchType {
-        SCHEDULED,
-        AD_HOC
-    }
-
     @Id
     @With
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BATCH_ID", nullable = false)
     private Long batchId;
-
     @NotNull
     @Column(name = "REQUEST_DATE_TIME", nullable = false)
     private LocalDateTime requestDateTime;
-
     @Column(name = "REFERRAL_COMPLETION_DATE_TIME")
     private LocalDateTime referralCompletionDateTime;
-
     @Column(name = "WINDOW_START_DATE_TIME")
     private LocalDateTime windowStartDateTime;
-
     @Column(name = "WINDOW_END_DATE_TIME")
     private LocalDateTime windowEndDateTime;
-
     @Column(name = "REMAINING_IN_WINDOW")
     private Integer remainingInWindow;
-
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "BATCH_TYPE", nullable = false)
     private BatchType batchType;
-
     @Column(name = "COMMENT_TEXT")
     private String commentText;
 
     public boolean hasRemainingInWindow() {
         return remainingInWindow != null && remainingInWindow != 0;
+    }
+
+    public enum BatchType {
+        SCHEDULED,
+        AD_HOC
     }
 }

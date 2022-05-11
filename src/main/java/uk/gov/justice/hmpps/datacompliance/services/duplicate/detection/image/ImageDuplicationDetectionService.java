@@ -43,9 +43,9 @@ public class ImageDuplicationDetectionService {
         final var imageUploads = imageUploadRepository.findByOffenderNo(offenderNumber.getOffenderNumber());
 
         return imageUploads.stream()
-                .filter(OffenderImageUpload::isSuccess)
-                .flatMap(this::findDuplicates)
-                .collect(toList());
+            .filter(OffenderImageUpload::isSuccess)
+            .flatMap(this::findDuplicates)
+            .collect(toList());
     }
 
     public Optional<Double> getSimilarity(final OffenderImage image1, final OffenderImage image2) {
@@ -57,33 +57,33 @@ public class ImageDuplicationDetectionService {
         log.info("Deleting offender's image recognition uploads for: '{}'", offenderNumber.getOffenderNumber());
 
         imageUploadRepository.findByOffenderNo(offenderNumber.getOffenderNumber())
-                .forEach(upload -> {
-                    imageRecognitionClient.removeFaceFromCollection(new FaceId(upload.getFaceId()));
-                    upload.setUploadStatus(DELETED);
-                    imageUploadRepository.save(upload);
-                });
+            .forEach(upload -> {
+                imageRecognitionClient.removeFaceFromCollection(new FaceId(upload.getFaceId()));
+                upload.setUploadStatus(DELETED);
+                imageUploadRepository.save(upload);
+            });
     }
 
     private Stream<ImageDuplicate> findDuplicates(final OffenderImageUpload referenceImage) {
 
         log.debug("Finding image duplicates for offender: '{}' and image: '{}'",
-                referenceImage.getOffenderNo(), referenceImage.getImageId());
+            referenceImage.getOffenderNo(), referenceImage.getImageId());
 
         final var matchingFaceIds = imageRecognitionClient.findMatchesFor(new FaceId(referenceImage.getFaceId()));
 
         return matchingFaceIds.stream()
-                .map(matchingFaceId -> getImageMatch(referenceImage, matchingFaceId))
-                .filter(ImageMatch::haveDifferentOffenderNumbers)
-                .map(this::findOrPersistDuplicate);
+            .map(matchingFaceId -> getImageMatch(referenceImage, matchingFaceId))
+            .filter(ImageMatch::haveDifferentOffenderNumbers)
+            .map(this::findOrPersistDuplicate);
     }
 
     private ImageMatch getImageMatch(final OffenderImageUpload referenceImage, final FaceMatch matchingFace) {
 
         log.debug("Duplicate face ('{}') found for offender: '{}' and image: '{}'",
-                matchingFace.getFaceId(), referenceImage.getOffenderNo(), referenceImage.getImageId());
+            matchingFace.getFaceId(), referenceImage.getOffenderNo(), referenceImage.getImageId());
 
         final var matchingImage = imageUploadRepository.findByFaceId(matchingFace.getFaceId())
-                .orElseThrow(illegalState("Cannot find image upload for faceId: '%s'", matchingFace.getFaceId()));
+            .orElseThrow(illegalState("Cannot find image upload for faceId: '%s'", matchingFace.getFaceId()));
 
         return new ImageMatch(referenceImage, matchingImage, matchingFace.getSimilarity());
     }
@@ -91,24 +91,24 @@ public class ImageDuplicationDetectionService {
     private ImageDuplicate findOrPersistDuplicate(final ImageMatch imageMatch) {
 
         log.info("Image duplicate found for reference offender: '{}', and duplicate offender: '{}'",
-                imageMatch.getReferenceOffenderNo(), imageMatch.getDuplicateOffenderNo());
+            imageMatch.getReferenceOffenderNo(), imageMatch.getDuplicateOffenderNo());
 
         return imageDuplicateRepository.findByOffenderImageUploadIds(imageMatch.getReferenceImageId(), imageMatch.getDuplicateImageId())
-                .orElseGet(() -> persistDuplicate(
-                        imageMatch.getReferenceImage(),
-                        imageMatch.getDuplicateImage(),
-                        imageMatch.getSimilarity()));
+            .orElseGet(() -> persistDuplicate(
+                imageMatch.getReferenceImage(),
+                imageMatch.getDuplicateImage(),
+                imageMatch.getSimilarity()));
     }
 
     private ImageDuplicate persistDuplicate(final OffenderImageUpload referenceImage,
                                             final OffenderImageUpload duplicateImage,
                                             final double similarity) {
         return imageDuplicateRepository.save(ImageDuplicate.builder()
-                .referenceOffenderImageUpload(referenceImage)
-                .duplicateOffenderImageUpload(duplicateImage)
-                .detectionDateTime(timeSource.nowAsLocalDateTime())
-                .similarity(similarity)
-                .build());
+            .referenceOffenderImageUpload(referenceImage)
+            .duplicateOffenderImageUpload(duplicateImage)
+            .detectionDateTime(timeSource.nowAsLocalDateTime())
+            .similarity(similarity)
+            .build());
     }
 
     @Getter

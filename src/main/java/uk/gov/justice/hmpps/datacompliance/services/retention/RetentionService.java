@@ -71,18 +71,18 @@ public class RetentionService {
         final var offenderNumber = offenderToCheck.getOffenderNumber();
 
         return List.of(
-                pathfinderReferralCheck(offenderNumber),
-                manualRetentionCheck(offenderNumber),
-                imageDuplicateCheck(offenderNumber),
-                idDataDuplicateCheck(offenderNumber),
-                databaseDataDuplicateCheck(offenderNumber),
-                analyticalPlatformDataDuplicateCheck(offenderNumber),
-                freeTextSearch(offenderNumber),
-                offenderRestrictionCheck(offenderNumber),
-                offenceCodeCheck(offenderToCheck),
-                alertCheck(offenderToCheck),
-                ualOffenderCheck(offenderToCheck),
-                mappaReferralCheck(offenderNumber));
+            pathfinderReferralCheck(offenderNumber),
+            manualRetentionCheck(offenderNumber),
+            imageDuplicateCheck(offenderNumber),
+            idDataDuplicateCheck(offenderNumber),
+            databaseDataDuplicateCheck(offenderNumber),
+            analyticalPlatformDataDuplicateCheck(offenderNumber),
+            freeTextSearch(offenderNumber),
+            offenderRestrictionCheck(offenderNumber),
+            offenceCodeCheck(offenderToCheck),
+            alertCheck(offenderToCheck),
+            ualOffenderCheck(offenderToCheck),
+            mappaReferralCheck(offenderNumber));
     }
 
     public void handleDataDuplicateResult(final DataDuplicateResult result, final Method method) {
@@ -90,16 +90,16 @@ public class RetentionService {
         final var retentionCheck = findRetentionCheck(result.getRetentionCheckId(), RetentionCheckDataDuplicate.class);
         final var referredOffenderNo = retentionCheck.getOffenderNumber();
         final var duplicateOffenderNos = result.getDuplicateOffenders().stream()
-                .map(OffenderNumber::new)
-                .map(duplicate -> new DuplicateResult(duplicate, ID == method ? MAXIMUM_CONFIDENCE : null))
-                .collect(toList());
+            .map(OffenderNumber::new)
+            .map(duplicate -> new DuplicateResult(duplicate, ID == method ? MAXIMUM_CONFIDENCE : null))
+            .collect(toList());
 
         checkState(Objects.equals(result.getOffenderIdDisplay(), referredOffenderNo.getOffenderNumber()),
-                "Offender number '%s' of result '%s' does not match '%s'",
-                result.getOffenderIdDisplay(), result.getRetentionCheckId(), referredOffenderNo);
+            "Offender number '%s' of result '%s' does not match '%s'",
+            result.getOffenderIdDisplay(), result.getRetentionCheckId(), referredOffenderNo);
 
         retentionCheck.addDataDuplicates(
-                dataDuplicationDetectionService.persistDataDuplicates(referredOffenderNo, duplicateOffenderNos, method));
+            dataDuplicationDetectionService.persistDataDuplicates(referredOffenderNo, duplicateOffenderNos, method));
 
         retentionCheck.setCheckStatus(duplicateOffenderNos.isEmpty() ? RETENTION_NOT_REQUIRED : RETENTION_REQUIRED);
 
@@ -113,12 +113,12 @@ public class RetentionService {
         final var referredOffenderNo = retentionCheck.getOffenderNumber();
 
         checkState(Objects.equals(result.getOffenderIdDisplay(), referredOffenderNo.getOffenderNumber()),
-                "Offender number '%s' of result '%s' does not match '%s'",
-                result.getOffenderIdDisplay(), result.getRetentionCheckId(), referredOffenderNo);
+            "Offender number '%s' of result '%s' does not match '%s'",
+            result.getOffenderIdDisplay(), result.getRetentionCheckId(), referredOffenderNo);
 
         if (!result.getMatchingTables().isEmpty()) {
             log.info("The following tables for offender: '{}' matched the free text search: {}",
-                    referredOffenderNo.getOffenderNumber(), result.getMatchingTables());
+                referredOffenderNo.getOffenderNumber(), result.getMatchingTables());
         }
 
         retentionCheck.setCheckStatus(result.getMatchingTables().isEmpty() ? RETENTION_NOT_REQUIRED : RETENTION_REQUIRED);
@@ -149,14 +149,14 @@ public class RetentionService {
     private <T extends RetentionCheck> T findRetentionCheck(final long retentionCheckId,
                                                             final Class<T> retentionCheckClass) {
         return retentionCheckRepository.findById(retentionCheckId)
-                .map(retentionCheckClass::cast)
-                .orElseThrow(illegalState("Cannot retrieve retention check record for id: '%s'", retentionCheckId));
+            .map(retentionCheckClass::cast)
+            .orElseThrow(illegalState("Cannot retrieve retention check record for id: '%s'", retentionCheckId));
     }
 
     private ActionableRetentionCheck pathfinderReferralCheck(final OffenderNumber offenderNumber) {
 
         final var check = new RetentionCheckPathfinder(pathfinderApiClient.isReferredToPathfinder(offenderNumber) ?
-                RETENTION_REQUIRED : RETENTION_NOT_REQUIRED);
+            RETENTION_REQUIRED : RETENTION_NOT_REQUIRED);
 
         return new ActionableRetentionCheck(check);
     }
@@ -164,8 +164,8 @@ public class RetentionService {
     private ActionableRetentionCheck manualRetentionCheck(final OffenderNumber offenderNumber) {
 
         final var check = manualRetentionService.findManualOffenderRetentionWithReasons(offenderNumber)
-                .map(manualRetention -> new RetentionCheckManual(RETENTION_REQUIRED).setManualRetention(manualRetention))
-                .orElseGet(() -> new RetentionCheckManual(RETENTION_NOT_REQUIRED));
+            .map(manualRetention -> new RetentionCheckManual(RETENTION_REQUIRED).setManualRetention(manualRetention))
+            .orElseGet(() -> new RetentionCheckManual(RETENTION_NOT_REQUIRED));
 
         return new ActionableRetentionCheck(check);
     }
@@ -179,8 +179,8 @@ public class RetentionService {
         final var imageDuplicates = imageDuplicationDetectionService.findDuplicatesFor(offenderNumber);
 
         final var check = imageDuplicates.isEmpty() ?
-                new RetentionCheckImageDuplicate(RETENTION_NOT_REQUIRED) :
-                new RetentionCheckImageDuplicate(RETENTION_REQUIRED).addImageDuplicates(imageDuplicates);
+            new RetentionCheckImageDuplicate(RETENTION_NOT_REQUIRED) :
+            new RetentionCheckImageDuplicate(RETENTION_REQUIRED).addImageDuplicates(imageDuplicates);
 
         return new ActionableRetentionCheck(check);
     }
@@ -192,8 +192,8 @@ public class RetentionService {
         }
 
         return new ActionableRetentionCheck(new RetentionCheckIdDataDuplicate(PENDING))
-                .setPendingCheck(retentionCheck -> dataDuplicationDetectionService.searchForIdDuplicates(
-                        offenderNumber, retentionCheck.getRetentionCheckId()));
+            .setPendingCheck(retentionCheck -> dataDuplicationDetectionService.searchForIdDuplicates(
+                offenderNumber, retentionCheck.getRetentionCheckId()));
     }
 
     private ActionableRetentionCheck databaseDataDuplicateCheck(final OffenderNumber offenderNumber) {
@@ -203,8 +203,8 @@ public class RetentionService {
         }
 
         return new ActionableRetentionCheck(new RetentionCheckDatabaseDataDuplicate(PENDING))
-                .setPendingCheck(retentionCheck -> dataDuplicationDetectionService.searchForDatabaseDuplicates(
-                        offenderNumber, retentionCheck.getRetentionCheckId()));
+            .setPendingCheck(retentionCheck -> dataDuplicationDetectionService.searchForDatabaseDuplicates(
+                offenderNumber, retentionCheck.getRetentionCheckId()));
     }
 
     private ActionableRetentionCheck analyticalPlatformDataDuplicateCheck(final OffenderNumber offenderNumber) {
@@ -216,9 +216,9 @@ public class RetentionService {
         final var duplicates = dataDuplicationDetectionService.searchForAnalyticalPlatformDuplicates(offenderNumber);
 
         final var check = duplicates.isEmpty() ?
-                new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_NOT_REQUIRED) :
-                new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_REQUIRED)
-                        .addDataDuplicates(duplicates);
+            new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_NOT_REQUIRED) :
+            new RetentionCheckAnalyticalPlatformDataDuplicate(RETENTION_REQUIRED)
+                .addDataDuplicates(duplicates);
 
         return new ActionableRetentionCheck(check);
     }
@@ -226,8 +226,8 @@ public class RetentionService {
     private ActionableRetentionCheck freeTextSearch(final OffenderNumber offenderNumber) {
 
         return new ActionableRetentionCheck(new RetentionCheckFreeTextSearch(PENDING))
-                .setPendingCheck(retentionCheck -> moratoriumCheckService.requestFreeTextSearch(
-                        offenderNumber, retentionCheck.getRetentionCheckId()));
+            .setPendingCheck(retentionCheck -> moratoriumCheckService.requestFreeTextSearch(
+                offenderNumber, retentionCheck.getRetentionCheckId()));
     }
 
     private ActionableRetentionCheck offenderRestrictionCheck(final OffenderNumber offenderNumber) {
@@ -239,16 +239,16 @@ public class RetentionService {
 
     private ActionableRetentionCheck offenceCodeCheck(final OffenderToCheck offenderToCheck) {
         return new ActionableRetentionCheck(new RetentionCheckOffence(
-                moratoriumCheckService.retainDueToOffence(offenderToCheck) ? RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
+            moratoriumCheckService.retainDueToOffence(offenderToCheck) ? RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
     }
 
     private ActionableRetentionCheck alertCheck(final OffenderToCheck offenderToCheck) {
         return new ActionableRetentionCheck(new RetentionCheckAlert(
-                moratoriumCheckService.retainDueToAlert(offenderToCheck) ? RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
+            moratoriumCheckService.retainDueToAlert(offenderToCheck) ? RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
     }
 
     private ActionableRetentionCheck ualOffenderCheck(final OffenderToCheck offenderToCheck) {
-         return new ActionableRetentionCheck(new RetentionCheckUal(ualService.isUnlawfullyAtLarge(offenderToCheck) ?
+        return new ActionableRetentionCheck(new RetentionCheckUal(ualService.isUnlawfullyAtLarge(offenderToCheck) ?
             RETENTION_REQUIRED : RETENTION_NOT_REQUIRED));
     }
 
