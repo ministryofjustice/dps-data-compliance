@@ -1,6 +1,7 @@
 package uk.gov.justice.hmpps.datacompliance.events.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +63,11 @@ class DataComplianceEventListenerTest {
 
     @Test
     void handleAdHocOffenderDeletionEvent() {
-        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"reason\":\"Some reason\"}",
+        handleMessage("""
+                {
+                  "offenderIdDisplay": "A1234AA",
+                  "reason": "Some reason"
+                }""",
             Map.of("eventType", "DATA_COMPLIANCE_AD-HOC-OFFENDER-DELETION"));
 
         verify(referralService).handleAdHocDeletion(new AdHocOffenderDeletion("A1234AA", "Some reason"));
@@ -122,12 +127,21 @@ class DataComplianceEventListenerTest {
     @Test
     void handleProvisionalDeletionReferralResult() {
         handleMessage(
-            "{\"referralId\":123," +
-                "\"offenderIdDisplay\":\"offender\"," +
-                "\"subsequentChangesIdentified\":false," +
-                "\"agencyLocationId\":\"someAgencyLocId\"," +
-                "\"offenceCodes\":[\"someOffenceCode1\",\"someOffenceCode2\"]," +
-                "\"alertCodes\":[\"someAlertCode1\",\"someAlertCode2\"]}",
+            """
+                {
+                  "referralId": 123,
+                  "offenderIdDisplay": "offender",
+                  "subsequentChangesIdentified": false,
+                  "agencyLocationId": "someAgencyLocId",
+                  "offenceCodes": [
+                    "someOffenceCode1",
+                    "someOffenceCode2"
+                  ],
+                  "alertCodes": [
+                    "someAlertCode1",
+                    "someAlertCode2"
+                  ]
+                }""",
             Map.of("eventType", "DATA_COMPLIANCE_OFFENDER_PROVISIONAL_DELETION_REFERRAL"));
 
         verify(referralService).handleProvisionalDeletionReferralResult(ProvisionalDeletionReferralResult.builder()
@@ -142,7 +156,12 @@ class DataComplianceEventListenerTest {
 
     @Test
     void handleReferralComplete() {
-        handleMessage("{\"batchId\":123,\"numberReferred\":4,\"totalInWindow\":5}",
+        handleMessage("""
+                {
+                  "batchId": 123,
+                  "numberReferred": 4,
+                  "totalInWindow": 5
+                }""",
             Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-PENDING-DELETION-REFERRAL-COMPLETE"));
 
         verify(referralService).handleReferralComplete(new OffenderPendingDeletionReferralComplete(123L, 4L, 5L));
@@ -150,7 +169,11 @@ class DataComplianceEventListenerTest {
 
     @Test
     void handleDeletionComplete() {
-        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":123}",
+        handleMessage("""
+                {
+                  "offenderIdDisplay": "A1234AA",
+                  "referralId": 123
+                }""",
             Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-DELETION-COMPLETE"));
 
         verify(deletionService).handleDeletionComplete(new OffenderDeletionComplete("A1234AA", 123L));
@@ -158,7 +181,14 @@ class DataComplianceEventListenerTest {
 
     @Test
     void handleDataDuplicateIdResult() {
-        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"duplicateOffenders\":[\"B1234BB\"]}",
+        handleMessage("""
+                {
+                  "offenderIdDisplay": "A1234AA",
+                  "retentionCheckId": 123,
+                  "duplicateOffenders": [
+                    "B1234BB"
+                  ]
+                }""",
             Map.of("eventType", "DATA_COMPLIANCE_DATA-DUPLICATE-ID-RESULT"));
 
         verify(retentionService).handleDataDuplicateResult(new DataDuplicateResult("A1234AA", 123L, List.of("B1234BB")), ID);
@@ -166,7 +196,14 @@ class DataComplianceEventListenerTest {
 
     @Test
     void handleDataDuplicateDbResult() {
-        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"duplicateOffenders\":[\"B1234BB\"]}",
+        handleMessage("""
+                {
+                  "offenderIdDisplay": "A1234AA",
+                  "retentionCheckId": 123,
+                  "duplicateOffenders": [
+                    "B1234BB"
+                  ]
+                }""",
             Map.of("eventType", "DATA_COMPLIANCE_DATA-DUPLICATE-DB-RESULT"));
 
         verify(retentionService).handleDataDuplicateResult(new DataDuplicateResult("A1234AA", 123L, List.of("B1234BB")), DATABASE);
@@ -174,7 +211,14 @@ class DataComplianceEventListenerTest {
 
     @Test
     void handleFreeTextSearchResult() {
-        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"matchingTables\":[\"TABLE1\"]}",
+        handleMessage("""
+                {
+                  "offenderIdDisplay": "A1234AA",
+                  "retentionCheckId": 123,
+                  "matchingTables": [
+                    "TABLE1"
+                  ]
+                }""",
             Map.of("eventType", "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT"));
 
         verify(retentionService).handleFreeTextSearchResult(new FreeTextSearchResult("A1234AA", 123L, List.of("TABLE1")));
@@ -182,7 +226,12 @@ class DataComplianceEventListenerTest {
 
     @Test
     void handleOffenderRestrictionResult() {
-        handleMessage("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"restricted\":true}",
+        handleMessage("""
+                {
+                  "offenderIdDisplay": "A1234AA",
+                  "retentionCheckId": 123,
+                  "restricted": true
+                }""",
             Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-RESTRICTION-RESULT"));
 
         verify(retentionService).handleOffenderRestrictionResult(new OffenderRestrictionResult("A1234AA", 123L, true));
@@ -192,29 +241,30 @@ class DataComplianceEventListenerTest {
     void handleDeceasedOffenderDeletionResult() {
 
         handleMessage(
-            "{\n" +
-                "  \"batchId\":12345," +
-                "  \"deceasedOffenders\":[" +
-                "    {" +
-                "      \"offenderIdDisplay\":\"A1234AA\"," +
-                "      \"firstName\":\"Bob\"," +
-                "      \"middleName\":\"Middle\"," +
-                "      \"lastName\":\"Jones\"," +
-                "      \"birthDate\":\"1990-01-02\"," +
-                "      \"deceasedDate\":\"2020-08-18\"," +
-                "      \"deletionDateTime\":\"2021-08-18 12:56:31\"," +
-                "      \"agencyLocationId\":\"LEI\"," +
-                "      \"offenderAliases\":[" +
-                "        {" +
-                "          \"offenderId\":123," +
-                "          \"offenderBookIds\":[" +
-                "            321" +
-                "          ]" +
-                "        }" +
-                "      ]" +
-                "    }" +
-                "  ]" +
-                "}",
+            """
+                {
+                  "batchId": 12345,
+                  "deceasedOffenders": [
+                    {
+                      "offenderIdDisplay": "A1234AA",
+                      "firstName": "Bob",
+                      "middleName": "Middle",
+                      "lastName": "Jones",
+                      "birthDate": "1990-01-02",
+                      "deceasedDate": "2020-08-18",
+                      "deletionDateTime": "2021-08-18 12:56:31",
+                      "agencyLocationId": "LEI",
+                      "offenderAliases": [
+                        {
+                          "offenderId": 123,
+                          "offenderBookIds": [
+                            321
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }""",
             Map.of("eventType", "DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-RESULT"));
 
         verify(deceasedDeletionService).handleDeceasedOffenderDeletionResult(new DeceasedOffenderDeletionResult(12345L, List.of(
@@ -233,14 +283,20 @@ class DataComplianceEventListenerTest {
 
     @Test
     void handleEventThrowsIfMessageAttributesNotPresent() {
-        assertThatThrownBy(() -> handleMessage("{\"offenderIdDisplay\":\"A1233AA\"}", Map.of()))
+        assertThatThrownBy(() -> handleMessage("""
+            {
+              "offenderIdDisplay": "A1233AA"
+            }""", Map.of()))
             .isInstanceOf(NullPointerException.class)
             .hasMessage("Message event type not found");
     }
 
     @Test
     void handleEventThrowsIfEventTypeUnexpected() {
-        assertThatThrownBy(() -> handleMessage("{\"offenderIdDisplay\":\"A1234AA\"}", Map.of("eventType", "UNEXPECTED!")))
+        assertThatThrownBy(() -> handleMessage("""
+            {
+              "offenderIdDisplay": "A1234AA"
+            }""", Map.of("eventType", "UNEXPECTED!")))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Unexpected message event type: 'UNEXPECTED!'");
     }

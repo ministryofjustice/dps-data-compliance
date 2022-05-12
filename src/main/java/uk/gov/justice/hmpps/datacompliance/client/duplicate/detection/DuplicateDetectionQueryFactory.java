@@ -23,9 +23,10 @@ public class DuplicateDetectionQueryFactory {
 
     private static final int MAX_RESULTS = 100;
     private static final String QUERY_TEMPLATE =
-        "SELECT * FROM %s.%s " +
-            "WHERE (offender_id_display_l = '%s' OR offender_id_display_r = '%<s') " +
-            "AND match_score > %s";
+        """
+            SELECT * FROM %s.%s 
+            "WHERE (offender_id_display_l = '%s' OR offender_id_display_r = '%<s') 
+            "AND match_score > %s""";
 
     private final String database;
     private final String table;

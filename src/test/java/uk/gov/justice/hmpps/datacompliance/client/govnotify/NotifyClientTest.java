@@ -73,10 +73,12 @@ class NotifyClientTest {
 
         when(notificationClient.sendEmail(INTENTION_TO_DELETE_TEMPLATE_ID, EMAIL, intentionToDeleteParams(), "Ref-A1234AA-LEI"))
             .thenThrow(new NotificationClientException("""
-                \t[{
-                "error": "BadRequestError",
-                "message": "Can't send to this recipient using a team-only API key"
-                }]"""));
+                [
+                  {
+                    "error": "BadRequestError",
+                    "message": "Can't send to this recipient using a team-only API key"
+                  }
+                ]"""));
 
         notifyClient.sendEmail(emailTemplate);
     }
