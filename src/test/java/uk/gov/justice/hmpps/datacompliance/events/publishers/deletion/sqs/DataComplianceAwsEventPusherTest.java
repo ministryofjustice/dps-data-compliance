@@ -78,13 +78,14 @@ class DataComplianceAwsEventPusherTest {
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_REFERRAL-REQUEST");
-        assertThat(request.getValue().getMessageBody()).isEqualTo(
-            "{" +
-                "\"batchId\":987," +
-                "\"dueForDeletionWindowStart\":\"2020-01-02\"," +
-                "\"dueForDeletionWindowEnd\":\"2020-03-04\"," +
-                "\"limit\":10" +
-                "}");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace(
+            """
+                {
+                  "batchId": 987,
+                  "dueForDeletionWindowStart": "2020-01-02",
+                  "dueForDeletionWindowEnd": "2020-03-04",
+                  "limit": 10
+                }""");
     }
 
     @Test
@@ -104,12 +105,13 @@ class DataComplianceAwsEventPusherTest {
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_REFERRAL-REQUEST");
-        assertThat(request.getValue().getMessageBody()).isEqualTo(
-            "{" +
-                "\"batchId\":987," +
-                "\"dueForDeletionWindowStart\":\"2020-01-02\"," +
-                "\"dueForDeletionWindowEnd\":\"2020-03-04\"" +
-                "}");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace(
+            """
+                {
+                  "batchId": 987,
+                  "dueForDeletionWindowStart": "2020-01-02",
+                  "dueForDeletionWindowEnd": "2020-03-04"
+                }""");
     }
 
     @Test
@@ -123,7 +125,13 @@ class DataComplianceAwsEventPusherTest {
         eventPusher.requestAdHocReferral(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"batchId\":123}");
+        assertThat(request.getValue().getMessageBody())
+            .isEqualToIgnoringWhitespace(
+                """
+                {
+                  "offenderIdDisplay": "A1234AA",
+                  "batchId": 123
+                }""");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_AD-HOC-REFERRAL-REQUEST");
     }
@@ -139,7 +147,11 @@ class DataComplianceAwsEventPusherTest {
         eventPusher.requestProvisionalDeletionReferral(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"referralId\":123}");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace("""
+            {
+              "offenderIdDisplay": "A1234AA",
+              "referralId": 123
+            }""");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("PROVISIONAL_DELETION_REFERRAL_REQUEST");
     }
@@ -155,7 +167,11 @@ class DataComplianceAwsEventPusherTest {
         eventPusher.requestIdDataDuplicateCheck(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123}");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace("""
+            {
+              "offenderIdDisplay": "A1234AA",
+              "retentionCheckId": 123
+            }""");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-ID-CHECK");
     }
@@ -171,7 +187,11 @@ class DataComplianceAwsEventPusherTest {
         eventPusher.requestDatabaseDataDuplicateCheck(OFFENDER_NUMBER, 123L);
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123}");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace("""
+            {
+              "offenderIdDisplay": "A1234AA",
+              "retentionCheckId": 123
+            }""");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_DATA-DUPLICATE-DB-CHECK");
     }
@@ -187,7 +207,15 @@ class DataComplianceAwsEventPusherTest {
         eventPusher.requestFreeTextMoratoriumCheck(OFFENDER_NUMBER, 123L, List.of("^(regex|1)$", "^(regex|2)$"));
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"regex\":[\"^(regex|1)$\",\"^(regex|2)$\"]}");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace("""
+            {
+              "offenderIdDisplay": "A1234AA",
+              "retentionCheckId": 123,
+              "regex": [
+                "^(regex|1)$",
+                "^(regex|2)$"
+              ]
+            }""");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK");
     }
@@ -204,7 +232,15 @@ class DataComplianceAwsEventPusherTest {
         eventPusher.requestOffenderRestrictionCheck(OFFENDER_NUMBER, 123L, Set.of(CHILD), "^(regex|1)$");
 
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
-        assertThat(request.getValue().getMessageBody()).isEqualTo("{\"offenderIdDisplay\":\"A1234AA\",\"retentionCheckId\":123,\"restrictionCodes\":[\"CHILD\"],\"regex\":\"^(regex|1)$\"}");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace("""
+            {
+              "offenderIdDisplay": "A1234AA",
+              "retentionCheckId": 123,
+              "restrictionCodes": [
+                "CHILD"
+              ],
+              "regex": "^(regex|1)$"
+            }""");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_OFFENDER-RESTRICTION-CHECK");
     }
@@ -228,13 +264,18 @@ class DataComplianceAwsEventPusherTest {
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_OFFENDER-DELETION-GRANTED");
-        assertThat(request.getValue().getMessageBody()).isEqualTo(
-            "{" +
-                "\"offenderIdDisplay\":\"A1234AA\"," +
-                "\"referralId\":123," +
-                "\"offenderIds\":[456]," +
-                "\"offenderBookIds\":[789]" +
-                "}");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace(
+            """
+                {
+                  "offenderIdDisplay": "A1234AA",
+                  "referralId": 123,
+                  "offenderIds": [
+                    456
+                  ],
+                  "offenderBookIds": [
+                    789
+                  ]
+                }""");
     }
 
 
@@ -254,11 +295,12 @@ class DataComplianceAwsEventPusherTest {
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-REQUEST");
-        assertThat(request.getValue().getMessageBody()).isEqualTo(
-            "{" +
-                "\"batchId\":987," +
-                "\"limit\":10" +
-                "}");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace(
+            """
+                {
+                  "batchId": 987,
+                  "limit": 10
+                }""");
     }
 
     @Test
@@ -276,8 +318,11 @@ class DataComplianceAwsEventPusherTest {
         assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
         assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
             .isEqualTo("DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-REQUEST");
-        assertThat(request.getValue().getMessageBody()).isEqualTo(
-            "{\"batchId\":987}");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace(
+            """
+                {
+                  "batchId": 987
+                }""");
     }
 
     private void mockHmppsService() {

@@ -17,33 +17,7 @@ import java.util.Set;
 public class OffenderRestrictionCheckService {
 
 
-    public static final String CHILD_RESTRICTION_COMMENT_REGEX = ".*(" +
-        "adopt|" +
-        "baby|" +
-        "boy([^f]|$)|" +
-        "child|" +
-        "chidl|" +
-        "chlid|" +
-        "chid|" +
-        "cild|" +
-        "hild|" +
-        "daughter|" +
-        "early age|" +
-        "girl([^f]|$)|" +
-        "infant|" +
-        "juven|" +
-        "kid|" +
-        "minor(\\W|$|s)|" +
-        "niece|" +
-        "nephew|" +
-        "(^|\\W)(grand)?son(\\W|$)|" +
-        "(^|\\W)teen|" +
-        "toddler|" +
-        "under( (the )?)?age|" +
-        "youth|" +
-        "young" +
-        ").*";
-
+    public static final String CHILD_RESTRICTION_COMMENT_REGEX = ".*(adopt|baby|boy([^f]|$)|child|chidl|chlid|chid|cild|hild|daughter|early age|girl([^f]|$)|infant|juven|kid|minor(\\W|$|s)|niece|nephew|(^|\\W)(grand)?son(\\W|$)|(^|\\W)teen|toddler|under( (the )?)?age|youth|young).*";
 
     private final DataComplianceEventPusher eventPusher;
 

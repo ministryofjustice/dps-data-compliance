@@ -19,75 +19,9 @@ import java.util.Set;
 public class MoratoriumCheckService {
 
     public static final String RED_FLAGS = ".*(groom|nonce|paedo|pedo|peedo|paeda|peeda|pedaph|pedaf).*";
-    private static final String LINKS_TO_CHILDREN = "(" +
-        "adopt|" +
-        "baby|" +
-        "boy([^f]|$)|" +
-        "child|" +
-        "chidl|" +
-        "chlid|" +
-        "chid|" +
-        "cild|" +
-        "hild|" +
-        "daughter|" +
-        "early age|" +
-        "girl([^f]|$)|" +
-        "infant|" +
-        "juven|" +
-        "kid|" +
-        "minor(\\W|$)|" +
-        "niece|" +
-        "nephew|" +
-        "(^|\\W)(grand)?son(\\W|$)|" +
-        "(^|\\W)teen|" +
-        "toddler|" +
-        "under( (the )?)?age|" +
-        "youth|" +
-        "young" +
-        ")";
-    private static final String LINKS_TO_PUBLIC_ROLES = "(" +
-        "borstal|" +
-        "college|" +
-        "faith|" +
-        "foster|" +
-        "nurser|" +
-        "public app|" +
-        "religi|" +
-        "school([^ie]|$)|" +
-        "teach|" +
-        "uniformed|" +
-        "voluntary|" +
-        "yoi" +
-        ")";
-    private static final String LINKS_TO_ABUSE_OR_RISK = "(" +
-        "abduct|" +
-        "abuse|" +
-        "bugger|" +
-        "danger|" +
-        "expose|" +
-        "exploit|" +
-        "explicit|" +
-        "inappropriate|" +
-        "indecent|" +
-        "internet|" +
-        "intercourse|" +
-        "kidnap|" +
-        "molest|" +
-        "neglect|" +
-        "online|" +
-        "penatrat|" +
-        "porn|" +
-        "predator|" +
-        "prostitut|" +
-        "protect|" +
-        "rape|" +
-        "risk|" +
-        "safe|" +
-        "sex|" +
-        "sodom|" +
-        "s(h)?(o)?po|" +
-        "(^.{0,3}|([^i][^n].)|[^i]n.)touch" +
-        ")";
+    private static final String LINKS_TO_CHILDREN = "(adopt|baby|boy([^f]|$)|child|chidl|chlid|chid|cild|hild|daughter|early age|girl([^f]|$)|infant|juven|kid|minor(\\W|$)|niece|nephew|(^|\\W)(grand)?son(\\W|$)|(^|\\W)teen|toddler|under( (the )?)?age|youth|young)";
+    private static final String LINKS_TO_PUBLIC_ROLES = "(borstal|college|faith|foster|nurser|public app|religi|school([^ie]|$)|teach|uniformed|voluntary|yoi)";
+    private static final String LINKS_TO_ABUSE_OR_RISK = "(abduct|abuse|bugger|danger|expose|exploit|explicit|inappropriate|indecent|internet|intercourse|kidnap|molest|neglect|online|penatrat|porn|predator|prostitut|protect|rape|risk|safe|sex|sodom|s(h)?(o)?po|(^.{0,3}|([^i][^n].)|[^i]n.)touch)";
     public static final String PUBLIC_ROLE_ABUSE_REGEX = ".*" + LINKS_TO_PUBLIC_ROLES + ".*" + LINKS_TO_ABUSE_OR_RISK + ".*";
     public static final String PUBLIC_ROLE_ABUSE_REGEX_REVERSED = ".*" + LINKS_TO_ABUSE_OR_RISK + ".*" + LINKS_TO_PUBLIC_ROLES + ".*";
     public static final String CHILD_ABUSE_REGEX = ".*" + LINKS_TO_CHILDREN + ".*" + LINKS_TO_ABUSE_OR_RISK + ".*";
