@@ -5,15 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.jdbc.Sql;
-import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.audit.DestructionLog;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.JpaRepositoryTest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DestructionLogRepositoryTest extends IntegrationTest {
+class DestructionLogRepositoryTest extends JpaRepositoryTest {
 
 
     @Autowired

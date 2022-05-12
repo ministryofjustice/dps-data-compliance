@@ -3,7 +3,6 @@ package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.referral;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
-import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.ImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution;
@@ -13,10 +12,10 @@ import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.Retent
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckImageDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckManual;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckPathfinder;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.JpaRepositoryTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.ImageDuplicateRepository;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.ManualRetentionRepository;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,8 +25,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
 
-@Transactional
-class OffenderDeletionReferralRepositoryTest extends IntegrationTest {
+class OffenderDeletionReferralRepositoryTest extends JpaRepositoryTest {
 
     @Autowired
     private ImageDuplicateRepository imageDuplicateRepository;

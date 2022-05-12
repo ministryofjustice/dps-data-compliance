@@ -3,15 +3,12 @@ package uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
-import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
-
-import javax.transaction.Transactional;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.JpaRepositoryTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.RetentionReasonCode.Code.HIGH_PROFILE;
 
-@Transactional
-class RetentionReasonCodeRepositoryTest extends IntegrationTest {
+class RetentionReasonCodeRepositoryTest extends JpaRepositoryTest {
 
     @Autowired
     private RetentionReasonCodeRepository repository;

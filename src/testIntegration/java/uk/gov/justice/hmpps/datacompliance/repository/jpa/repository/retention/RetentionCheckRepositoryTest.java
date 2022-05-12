@@ -6,6 +6,7 @@ import org.springframework.test.context.jdbc.Sql;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckDataDuplicate;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheckIdDataDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.JpaRepositoryTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.duplication.DataDuplicateRepository;
 
 import javax.transaction.Transactional;
@@ -17,8 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.PENDING;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_REQUIRED;
 
-@Transactional
-class RetentionCheckRepositoryTest extends IntegrationTest {
+class RetentionCheckRepositoryTest extends JpaRepositoryTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now().truncatedTo(MILLIS);
 

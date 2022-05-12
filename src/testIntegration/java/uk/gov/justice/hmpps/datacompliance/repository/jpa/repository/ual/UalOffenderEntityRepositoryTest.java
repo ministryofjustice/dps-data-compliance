@@ -6,13 +6,13 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.ual.OffenderUalEntity;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.JpaRepositoryTest;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Transactional
-class UalOffenderEntityRepositoryTest extends IntegrationTest {
+class UalOffenderEntityRepositoryTest extends JpaRepositoryTest {
 
     @Autowired
     private OffenderUalRepository offenderUalRepository;

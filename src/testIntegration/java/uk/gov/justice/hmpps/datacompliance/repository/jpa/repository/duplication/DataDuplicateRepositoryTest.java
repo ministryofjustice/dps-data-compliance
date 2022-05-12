@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.justice.hmpps.datacompliance.IntegrationTest;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.JpaRepositoryTest;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -13,8 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.duplication.DataDuplicate.Method.ANALYTICAL_PLATFORM;
 
 
-@Transactional
-class DataDuplicateRepositoryTest extends IntegrationTest {
+class DataDuplicateRepositoryTest extends JpaRepositoryTest {
 
     private static final LocalDateTime DATE_TIME = LocalDateTime.now().truncatedTo(MILLIS);
 
