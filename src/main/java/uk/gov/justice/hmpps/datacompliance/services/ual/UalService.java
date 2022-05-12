@@ -1,8 +1,9 @@
 package uk.gov.justice.hmpps.datacompliance.services.ual;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.similarity.JaroWinklerDistance;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderToCheck;
@@ -15,11 +16,20 @@ import java.util.Set;
 @Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class UalService {
 
     public static final double SIMILARITY_THRESHOLD = 0.93;
+
     private final OffenderUalRepository offenderUalRepository;
+    private final LevenshteinDistance levenshteinDistance;
+    private final JaroWinklerDistance jaroWinklerDistance;
+
+    public UalService(final OffenderUalRepository offenderUalRepository) {
+        this.offenderUalRepository = offenderUalRepository;
+        this.levenshteinDistance = LevenshteinDistance.getDefaultInstance();
+        this.jaroWinklerDistance = new JaroWinklerDistance();
+
+    }
 
     public boolean isUnlawfullyAtLarge(OffenderToCheck offender) {
         log.info("Conducting a search for offender {} against the unlawfully at large database", offender.getOffenderNumber().getOffenderNumber());
@@ -45,19 +55,19 @@ public class UalService {
     private double findLeventienSimilarity(String x, String y) {
         double maxLength = Double.max(x.length(), y.length());
         if (maxLength > 0) {
-            return (maxLength - StringUtils.getLevenshteinDistance(x, y)) / maxLength;
+            return (maxLength - levenshteinDistance.apply(x, y)) / maxLength;
         }
         return 1.0;
     }
 
     private double findJaroWinklerDistanceSimilarity(String x, String y) {
-        if (x == null && y == null) {
+        if ((x == null && y == null)) {
             return 1.0;
         }
         if (x == null || y == null) {
             return 0.0;
         }
-        return StringUtils.getJaroWinklerDistance(x, y);
+        return jaroWinklerDistance.apply(x, y);
     }
 
     private Optional<OffenderUalEntity> findOffenderByBooking(final Set<String> bookingNos) {
