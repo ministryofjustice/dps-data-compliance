@@ -1,0 +1,4 @@
+INSERT INTO offender_no_booking_deletion_batch(batch_id, request_date_time, referral_completion_date_time, batch_type) VALUES (1, to_timestamp('2020-01-02 03:04:05', 'YYYY-MM-DD HH:MI:SS'), to_timestamp('2021-02-03 04:05:06', 'YYYY-MM-DD HH:MI:SS'), 'SCHEDULED');
+INSERT INTO offender_no_booking_deletion_batch(batch_id, request_date_time, referral_completion_date_time, batch_type) VALUES (2, to_timestamp('2021-01-01 01:01:01', 'YYYY-MM-DD HH:MI:SS'), null, 'SCHEDULED');
+INSERT INTO offender_no_booking_deletion_batch(batch_id, request_date_time, referral_completion_date_time, batch_type) VALUES (3, to_timestamp('2020-01-01 01:01:01', 'YYYY-MM-DD HH:MI:SS'), null, 'SCHEDULED');
+INSERT INTO offender_no_booking_deletion_batch(batch_id, request_date_time, referral_completion_date_time, batch_type) VALUES (4, to_timestamp('2022-01-01 01:01:01', 'YYYY-MM-DD HH:MI:SS'), to_timestamp('2022-01-01 01:02:03', 'YYYY-MM-DD HH:MI:SS'), 'AD_HOC');

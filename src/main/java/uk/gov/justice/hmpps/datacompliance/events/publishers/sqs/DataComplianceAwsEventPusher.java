@@ -17,6 +17,7 @@ import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DataDuplicateCh
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DeceasedDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.FreeTextSearchRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGranted;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderNoBookingDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderRestrictionCode;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderRestrictionRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.ProvisionalDeletionReferralRequest;
@@ -43,6 +44,7 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
     private static final String FREE_TEXT_MORATORIUM_CHECK = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-CHECK";
     private static final String OFFENDER_RESTRICTION_CHECK = "DATA_COMPLIANCE_OFFENDER-RESTRICTION-CHECK";
     private static final String DECEASED_OFFENDER_DELETION_REQUEST = "DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-REQUEST";
+    private static final String OFFENDER_NO_BOOKING_DELETION_REQUEST = "DATA_COMPLIANCE_OFFENDER-NO_BOOKING-DELETION-REQUEST";
 
     private final HmppsQueueService hmppsQueueService;
     private final ObjectMapper objectMapper;
@@ -83,6 +85,17 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
                 .limit(request.getLimit())
                 .build()));
 
+    }
+
+    @Override
+    public void requestOffenderNoBookingDeletion(final OffenderNoBookingDeletionRequest request) {
+        log.debug("Requesting offender no booking deletion: {}", request);
+
+        client.sendMessage(generateRequest(OFFENDER_NO_BOOKING_DELETION_REQUEST,
+            OffenderNoBookingDeletionRequest.builder()
+                .batchId(request.getBatchId())
+                .limit(request.getLimit())
+                .build()));
     }
 
     @Override

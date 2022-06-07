@@ -17,6 +17,7 @@ import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.justice.hmpps.datacompliance.utils.Exceptions.illegalState;
 
 @Slf4j
@@ -40,13 +41,12 @@ public class DeceasedDeletionService {
 
         final var updatedBatch = batchRepository.save(batch);
 
-        if (result.getDeceasedOffenders() != null) {
-            result.getDeceasedOffenders().stream()
-                .map(referral -> toReferralEntity(referral, updatedBatch))
-                .forEach(referralRepository::save);
-        } else {
+        if (isEmpty(result.getDeceasedOffenders()))
             log.info("There are no deceased offenders that met the deletion criteria  {}", batch.getBatchId());
-        }
+
+        else result.getDeceasedOffenders().stream()
+            .map(referral -> toReferralEntity(referral, updatedBatch))
+            .forEach(referralRepository::save);
 
 
     }
