@@ -12,12 +12,14 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DataDuplicateRes
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DeceasedOffenderDeletionResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderNoBookingDeletionResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletionReferralComplete;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderRestrictionResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.ProvisionalDeletionReferralResult;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeceasedDeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
+import uk.gov.justice.hmpps.datacompliance.services.deletion.OffenderNoBookingDeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 
@@ -44,29 +46,37 @@ public class DataComplianceEventListener {
     private static final String FREE_TEXT_MORATORIUM_RESULT = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT";
     private static final String OFFENDER_RESTRICTION_RESULT = "DATA_COMPLIANCE_OFFENDER-RESTRICTION-RESULT";
     private static final String DECEASED_OFFENDER_DELETION_RESULT = "DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-RESULT";
+    private static final String OFFENDER_NO_BOOKING_DELETION_RESULT = "DATA_COMPLIANCE_OFFENDER-NO_BOOKING-DELETION-RESULT";
+
     private final ObjectMapper objectMapper;
     private final ReferralService referralService;
     private final RetentionService retentionService;
     private final DeletionService deletionService;
     private final DeceasedDeletionService deceasedDeletionService;
-    private final Map<String, MessageHandler> messageHandlers = Map.of(
-        ADHOC_OFFENDER_DELETION_EVENT, this::handleAdHocDeletion,
-        OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral,
-        OFFENDER_PROVISIONAL_DELETION_REFERRAL_EVENT, this::handleProvisionalDeletionReferralResult,
-        OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete,
-        OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete,
-        DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult,
-        DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult,
-        FREE_TEXT_MORATORIUM_RESULT, this::handleFreeTextSearchResult,
-        OFFENDER_RESTRICTION_RESULT, this::handleOffenderRestrictionResult,
-        DECEASED_OFFENDER_DELETION_RESULT, this::handleDeceasedOffenderDeletionResult
+    private final OffenderNoBookingDeletionService offenderNoBookingDeletionService;
+
+    private final Map<String, MessageHandler> messageHandlers = Map.ofEntries(
+        Map.entry(ADHOC_OFFENDER_DELETION_EVENT, this::handleAdHocDeletion),
+        Map.entry(OFFENDER_PENDING_DELETION_EVENT, this::handlePendingDeletionReferral),
+        Map.entry(OFFENDER_PROVISIONAL_DELETION_REFERRAL_EVENT, this::handleProvisionalDeletionReferralResult),
+        Map.entry(OFFENDER_PENDING_DELETION_REFERRAL_COMPLETE_EVENT, this::handleReferralComplete),
+        Map.entry(OFFENDER_DELETION_COMPLETE_EVENT, this::handleDeletionComplete),
+        Map.entry(DATA_DUPLICATE_ID_RESULT, this::handleDataDuplicateIdResult),
+        Map.entry(DATA_DUPLICATE_DB_RESULT, this::handleDataDuplicateDbResult),
+        Map.entry(FREE_TEXT_MORATORIUM_RESULT, this::handleFreeTextSearchResult),
+        Map.entry(OFFENDER_RESTRICTION_RESULT, this::handleOffenderRestrictionResult),
+        Map.entry(DECEASED_OFFENDER_DELETION_RESULT, this::handleDeceasedOffenderDeletionResult),
+        Map.entry(OFFENDER_NO_BOOKING_DELETION_RESULT, this::handleOffenderNoBookingDeletionResult)
     );
+
+
 
     public DataComplianceEventListener(final ObjectMapper objectMapper,
                                        final ReferralService referralService,
                                        final RetentionService retentionService,
                                        final DeletionService deletionService,
-                                       final DeceasedDeletionService deceasedDeletionService) {
+                                       final DeceasedDeletionService deceasedDeletionService,
+                                       final OffenderNoBookingDeletionService offenderNoBookingDeletionService) {
 
         log.info("Configured to listen to Offender Deletion events");
 
@@ -75,6 +85,7 @@ public class DataComplianceEventListener {
         this.retentionService = retentionService;
         this.deletionService = deletionService;
         this.deceasedDeletionService = deceasedDeletionService;
+        this.offenderNoBookingDeletionService = offenderNoBookingDeletionService;
     }
 
     @JmsListener(destination = "datacomplianceresponse", containerFactory = "hmppsQueueContainerFactoryProxy")
@@ -146,6 +157,11 @@ public class DataComplianceEventListener {
     private void handleDeceasedOffenderDeletionResult(final Message<String> message) {
         deceasedDeletionService.handleDeceasedOffenderDeletionResult(
             parseEvent(message.getPayload(), DeceasedOffenderDeletionResult.class));
+    }
+
+    private void handleOffenderNoBookingDeletionResult(final Message<String> message) {
+        offenderNoBookingDeletionService.handleOffenderNoBookingDeletionResult(
+            parseEvent(message.getPayload(), OffenderNoBookingDeletionResult.class));
     }
 
     private <T> T parseEvent(final String requestJson, final Class<T> eventType) {

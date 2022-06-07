@@ -1,7 +1,6 @@
 package uk.gov.justice.hmpps.datacompliance.events.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +14,8 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DeceasedOffender
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DeceasedOffenderDeletionResult.DeceasedOffender;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.FreeTextSearchResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderNoBookingDeletionResult;
+import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderNoBookingDeletionResult.Offender;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderAlias;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderPendingDeletion.OffenderBooking;
@@ -23,6 +24,7 @@ import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderRestrict
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.ProvisionalDeletionReferralResult;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeceasedDeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.deletion.DeletionService;
+import uk.gov.justice.hmpps.datacompliance.services.deletion.OffenderNoBookingDeletionService;
 import uk.gov.justice.hmpps.datacompliance.services.referral.ReferralService;
 import uk.gov.justice.hmpps.datacompliance.services.retention.RetentionService;
 
@@ -52,13 +54,16 @@ class DataComplianceEventListenerTest {
     private DeceasedDeletionService deceasedDeletionService;
 
     @Mock
+    private OffenderNoBookingDeletionService offenderNoBookingDeletionService;
+
+    @Mock
     private RetentionService retentionService;
 
     private DataComplianceEventListener listener;
 
     @BeforeEach
     void setUp() {
-        listener = new DataComplianceEventListener(new ObjectMapper(), referralService, retentionService, deletionService, deceasedDeletionService);
+        listener = new DataComplianceEventListener(new ObjectMapper(), referralService, retentionService, deletionService, deceasedDeletionService, offenderNoBookingDeletionService);
     }
 
     @Test
@@ -278,6 +283,43 @@ class DataComplianceEventListenerTest {
                 .deceasedDate(LocalDate.of(2020, 8, 18))
                 .deletionDateTime(LocalDateTime.of(2021, 8, 18, 12, 56, 31))
                 .offenderAlias(DeceasedOffenderDeletionResult.OffenderAlias.builder().offenderId(123L).offenderBookId(321L).build())
+                .build())));
+    }
+
+    @Test
+    void handleOffenderNoBookingDeletionResult() {
+
+        handleMessage(
+            """
+                {
+                  "batchId": 12345,
+                  "offenders": [
+                    {
+                      "offenderIdDisplay": "A1234AA",
+                      "firstName": "Bob",
+                      "middleName": "Middle",
+                      "lastName": "Jones",
+                      "birthDate": "1990-01-02",
+                      "deletionDateTime": "2021-08-18 12:56:31",
+                      "offenderAliases": [
+                        {
+                          "offenderId": 123
+                        }
+                      ]
+                    }
+                  ]
+                }""",
+            Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-NO_BOOKING-DELETION-RESULT"));
+
+        verify(offenderNoBookingDeletionService).handleOffenderNoBookingDeletionResult(new OffenderNoBookingDeletionResult(12345L, List.of(
+            Offender.builder()
+                .offenderIdDisplay("A1234AA")
+                .firstName("Bob")
+                .middleName("Middle")
+                .lastName("Jones")
+                .birthDate(LocalDate.of(1990, 1, 2))
+                .deletionDateTime(LocalDateTime.of(2021, 8, 18, 12, 56, 31))
+                .offenderAlias(OffenderNoBookingDeletionResult.OffenderAlias.builder().offenderId(123L).build())
                 .build())));
     }
 

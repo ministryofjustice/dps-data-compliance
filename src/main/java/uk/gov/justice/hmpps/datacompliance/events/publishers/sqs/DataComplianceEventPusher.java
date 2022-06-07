@@ -4,6 +4,7 @@ import uk.gov.justice.hmpps.datacompliance.dto.DeceasedOffenderDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderNoBookingDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderRestrictionCode;
 
 import java.util.List;
@@ -27,4 +28,6 @@ public interface DataComplianceEventPusher {
     void grantDeletion(OffenderDeletionGrant offenderDeletionGrant);
 
     void requestDeceasedOffenderDeletion(DeceasedOffenderDeletionRequest request);
+
+    void requestOffenderNoBookingDeletion(OffenderNoBookingDeletionRequest request);
 }
