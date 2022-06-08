@@ -43,8 +43,8 @@ generic-service:
     DECEASED_OFFENDER_DELETION_LIMIT: 200
 
     # Switch off deceased offender job in preprod
-    # OFFENDER_NO_BOOKING_DELETION_CRON: "0 0 13 ? * MON-FRI *"
-    # OFFENDER_NO_BOOKING_DELETION_LIMIT: 2000-05-10T00
+    OFFENDER_NO_BOOKING_DELETION_CRON: "0 0 10 ? * MON-FRI *"
+    OFFENDER_NO_BOOKING_DELETION_LIMIT: 200
 
     # Switching off in preprod so that it doesn't affect production collection
     #PRISON_API_OFFENDER_IDS_ITERATION_THREADS: 2
