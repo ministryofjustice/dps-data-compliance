@@ -309,7 +309,7 @@ class DataComplianceEventListenerTest {
                     }
                   ]
                 }""",
-            Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-NO_BOOKING-DELETION-RESULT"));
+            Map.of("eventType", "DATA_COMPLIANCE_OFFENDER-NO-BOOKING-DELETION-RESULT"));
 
         verify(offenderNoBookingDeletionService).handleOffenderNoBookingDeletionResult(new OffenderNoBookingDeletionResult(12345L, List.of(
             Offender.builder()

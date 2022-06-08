@@ -46,7 +46,7 @@ public class DataComplianceEventListener {
     private static final String FREE_TEXT_MORATORIUM_RESULT = "DATA_COMPLIANCE_FREE-TEXT-MORATORIUM-RESULT";
     private static final String OFFENDER_RESTRICTION_RESULT = "DATA_COMPLIANCE_OFFENDER-RESTRICTION-RESULT";
     private static final String DECEASED_OFFENDER_DELETION_RESULT = "DATA_COMPLIANCE_DECEASED-OFFENDER-DELETION-RESULT";
-    private static final String OFFENDER_NO_BOOKING_DELETION_RESULT = "DATA_COMPLIANCE_OFFENDER-NO_BOOKING-DELETION-RESULT";
+    private static final String OFFENDER_NO_BOOKING_DELETION_RESULT = "DATA_COMPLIANCE_OFFENDER-NO-BOOKING-DELETION-RESULT";
 
     private final ObjectMapper objectMapper;
     private final ReferralService referralService;
