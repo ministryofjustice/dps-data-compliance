@@ -31,7 +31,7 @@ jobs:
   validate:
     executor:
       name: hmpps/java
-      tag: "17.0"
+      tag: "18.0"
     steps:
       - checkout
       - restore_cache:
@@ -56,7 +56,7 @@ jobs:
     executor:
       name: hmpps/localstack
       localstack_tag: "0.14.2"
-      jdk_tag: "17.0"
+      jdk_tag: "18.0"
       services: "sqs,sns"
     steps:
       - run-tests:
@@ -65,7 +65,7 @@ jobs:
     executor:
       name: hmpps/localstack
       localstack_tag: "0.14.2"
-      jdk_tag: "17.0"
+      jdk_tag: "18.0"
       services: "sqs,sns"
     steps:
       - run-tests:
@@ -74,7 +74,7 @@ jobs:
     executor:
       name: hmpps/localstack
       localstack_tag: "0.14.2"
-      jdk_tag: "17.0"
+      jdk_tag: "18.0"
       services: "sqs,sns"
     steps:
       - run-tests:
