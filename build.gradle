@@ -1,5 +1,5 @@
 plugins {
-    id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.3.0-beta-1"
+    id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.3.2"
     id "org.unbroken-dome.test-sets" version "4.0.0"
 }
 
@@ -27,13 +27,13 @@ dependencies {
     implementation 'uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.5'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.17.217')
+    implementation platform('software.amazon.awssdk:bom:2.17.223')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.246')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.246'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.252')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.252'
 
     // Utils
     implementation 'io.github.resilience4j:resilience4j-retry:1.7.1'
@@ -66,6 +66,6 @@ dependencies {
     testImplementation 'com.squareup.okhttp3:okhttp:4.10.0'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.10.0'
     testImplementation 'io.jsonwebtoken:jjwt:0.9.1'
-    testImplementation 'org.testcontainers:localstack:1.17.2'
+    testImplementation 'org.testcontainers:localstack:1.17.3'
     testImplementation 'org.awaitility:awaitility:4.2.0'
 }
