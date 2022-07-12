@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DeceasedOffenderDeletionResult;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DeceasedOffenderDeletionResult.DeceasedOffender;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.DeceasedOffenderDeletionResult.OffenderAlias;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.deceasedoffender.DeceasedOffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.deceasedoffender.DeceasedOffenderDeletionBatch.BatchType;
@@ -44,9 +43,6 @@ class DeceasedDeletionServiceTest {
 
     @Mock
     private DataComplianceEventPusher deletionGrantedEventPusher;
-
-    @Mock
-    private OffenderDeletionCompleteEventPusher deletionCompleteEventPusher;
 
     @Mock
     private ImageDuplicationDetectionService imageDuplicationDetectionService;

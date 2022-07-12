@@ -24,7 +24,7 @@ public class LocalStackConfig {
 
     public static void setLocalStackProperties(LocalStackContainer localStackContainer, DynamicPropertyRegistry registry) {
 
-        final var endpointConfiguration = localStackContainer.getEndpointConfiguration(Service.SNS);
+        final var endpointConfiguration = localStackContainer.getEndpointConfiguration(Service.SQS);
 
         registry.add("hmpps.sqs.localstackUrl", endpointConfiguration::getServiceEndpoint);
         registry.add("hmpps.sqs.region", endpointConfiguration::getSigningRegion);
@@ -40,7 +40,7 @@ public class LocalStackConfig {
 
         final var localStackContainer = new LocalStackContainer(DockerImageName.parse("localstack/localstack").withTag("0.12.10"));
         localStackContainer
-            .withServices(Service.SNS, Service.SQS)
+            .withServices(Service.SQS)
             .withEnv("HOSTNAME_EXTERNAL", "localhost")
             .withEnv("DEFAULT_REGION", "eu-west-2")
             .waitingFor((
