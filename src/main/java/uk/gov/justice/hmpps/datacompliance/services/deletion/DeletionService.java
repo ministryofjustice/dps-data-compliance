@@ -9,7 +9,6 @@ import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.Booking;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.OffenderWithBookings;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferredOffenderAlias;
@@ -34,7 +33,6 @@ public class DeletionService {
 
     private final TimeSource timeSource;
     private final OffenderDeletionReferralRepository referralRepository;
-    private final OffenderDeletionCompleteEventPusher deletionCompleteEventPusher;
     private final DataComplianceEventPusher deletionGrantedEventPusher;
     private final DataComplianceProperties properties;
     private final ImageDuplicationDetectionService imageDuplicationDetectionService;
@@ -107,7 +105,5 @@ public class DeletionService {
                 bookings.forEach(booking -> offenderWithBookings.booking(new Booking(booking.getOffenderBookId())));
                 deletionCompleteEvent.offender(offenderWithBookings.build());
             });
-
-        deletionCompleteEventPusher.sendEvent(deletionCompleteEvent.build());
     }
 }

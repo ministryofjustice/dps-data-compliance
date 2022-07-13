@@ -7,9 +7,6 @@ hmpps.sqs:
     datacomplianceresponse:
       queueName: data_compliance_response_queue
       dlqName: data_compliance_response_dlq
-  topics:
-    datacomplianceevents:
-      arn: arn:aws:sns:eu-west-2:000000000000:offender_events
 
 spring:
   jpa.show-sql: true

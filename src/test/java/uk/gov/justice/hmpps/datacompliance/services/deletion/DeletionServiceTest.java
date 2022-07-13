@@ -10,8 +10,6 @@ import uk.gov.justice.hmpps.datacompliance.config.DataComplianceProperties;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.listeners.dto.OffenderDeletionComplete;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.Booking;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.sns.OffenderDeletionCompleteEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.OffenderDeletionReferral;
@@ -35,7 +33,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.OffenderWithBookings.builder;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.ReferralResolution.ResolutionStatus.DELETION_GRANTED;
 import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.RetentionCheck.Status.RETENTION_NOT_REQUIRED;
@@ -56,9 +53,6 @@ class DeletionServiceTest {
     private DataComplianceEventPusher deletionGrantedEventPusher;
 
     @Mock
-    private OffenderDeletionCompleteEventPusher deletionCompleteEventPusher;
-
-    @Mock
     private ImageDuplicationDetectionService imageDuplicationDetectionService;
 
     @Mock
@@ -72,7 +66,6 @@ class DeletionServiceTest {
         deletionService = new DeletionService(
             TimeSource.of(NOW),
             referralRepository,
-            deletionCompleteEventPusher,
             deletionGrantedEventPusher,
             DataComplianceProperties.builder()
                 .deletionGrantEnabled(true)
@@ -130,7 +123,6 @@ class DeletionServiceTest {
         deletionService = new DeletionService(
             TimeSource.of(NOW),
             referralRepository,
-            deletionCompleteEventPusher,
             deletionGrantedEventPusher,
             DataComplianceProperties.builder()
                 .deletionGrantEnabled(false)
@@ -163,19 +155,6 @@ class DeletionServiceTest {
         assertThat(resolution.getResolutionDateTime()).isEqualTo(NOW);
 
         verify(imageDuplicationDetectionService).deleteOffenderImages(new OffenderNumber(OFFENDER_NUMBER));
-        verify(deletionCompleteEventPusher).sendEvent(
-            uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionComplete.builder()
-                .offenderIdDisplay(OFFENDER_NUMBER)
-                .offender(builder()
-                    .offenderId(1L)
-                    .booking(new Booking(11L))
-                    .booking(new Booking(12L))
-                    .build())
-                .offender(builder()
-                    .offenderId(2L)
-                    .booking(new Booking(21L))
-                    .build())
-                .build());
     }
 
     @Test
@@ -184,7 +163,6 @@ class DeletionServiceTest {
         deletionService = new DeletionService(
             TimeSource.of(NOW),
             referralRepository,
-            deletionCompleteEventPusher,
             deletionGrantedEventPusher,
             DataComplianceProperties.builder()
                 .imageRecognitionDeletionEnabled(false)
