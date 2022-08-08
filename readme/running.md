@@ -9,7 +9,7 @@ To build (append `-x test` to build without running tests):
 ```
 To rebuild the docker image locally (perhaps after changes to the project), run:
 ```
-docker build -t mojdigitalstudio/dps-data-compliance:latest .
+docker build -t quay.io/hmpps/dps-data-compliance:latest .
 ```
 
 ### Common gradle tasks 
@@ -44,23 +44,19 @@ and Localstack docker containers can be run by:
 TMPDIR=/private$TMPDIR docker-compose up
 ```
 
-Without Docker, the service can be run locally by:
+The service can be run locally (in addition to all of its dependencies) by:
 
 ```
-./gradlew bootRun --args='--spring.profiles.active=dev'
+bash run_local.sh
 ```
-which will run a reduced service with an in-memory hsqldb database and without
-any connection to AWS or Localstack. The `application-dev.yml` properties file
+The dev profile
 expects that the following instances are running:
 
-- HMPPS Auth : `localhost:8081`
-- Prison API : `localhost:8082`
-- Path Finder API : `localhost:8083`
-- Community API : `localhost:8084`
-- Prison-Register API: `localhost:8085`
-
-More details on the required environment variables
-are provided below.
+- HMPPS Auth : `localhost:8999`
+- Prison API : `localhost:8998`
+- Path Finder API : `localhost:8997`
+- Community API : `localhost:8996`
+- Prison-Register API: `localhost:8995`
 
 The service can be run in a similar way within IntelliJ by running the main class with the following VM options:
 ```
@@ -81,7 +77,7 @@ Running Message Integration Tests with review period
 
 ```./gradlew testMessageIntegrationWithReviewPeriod```
 
-Running OWASP seucrity checks & All tests
+Running all of the tests & the OWASP security checks
 
 ```bash local_checks.sh```
 
@@ -101,7 +97,7 @@ to start up:
 - `OFFENDER_RETENTION_DATA_DUPLICATE_DB_CHECK_ENABLED` (Flag to use the Prison API to perform a duplicate check using data in the database)
 - `OFFENDER_RETENTION_DATA_DUPLICATE_AP_CHECK_ENABLED` (Flag to query Analytical Platform for potential duplicates)
 
-These are provided already if running with the `dev` Spring profile (see the `application-dev.yml` properties file).
+These are provided already if running with the `dev` Spring profile (see the `application.yml` properties file, under the `dev` profile).
 
 If the database instance has username / password protection the following are also required:
 - SPRING_DATASOURCE_USERNAME
