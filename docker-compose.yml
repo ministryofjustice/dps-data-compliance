@@ -1,59 +1,77 @@
 version: '3.1'
 services:
-
   dps-data-compliance:
-    image: quay.io/hmpps/dps-data-compliance:latest
+    build:
+      context: .
     container_name: dps-data-compliance
+    network_mode: "host"
     depends_on:
-      - localstack
       - dps-data-compliance-db
-      - hmpps-auth
+      - oauth
+      - localstack
       - prison-api
       - pathfinder-api
-      - community-api
-      - prison-register
-    networks:
-      - hmpps
-    ports:
-      - "8080:8080"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ping"]
     environment:
       - SERVER_PORT=8080
-      - HMPPS_AUTH_BASE_URL=http://hmpps-auth:8080/auth
-      - PRISON_API_BASE_URL=http://prison-api:8080
-      - COMMUNITY_API_BASE_URL=http://community-api:8080
-      - PATHFINDER_API_BASE_URL=http://pathfinder-api:8080
-      - PRISON_REGISTER_BASE_URL=http://prison-register:8080
-      - APP_DB_URL=jdbc:postgresql://dps-data-compliance-db:5432/dps-data-compliance-db
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=admin_password
-      - SPRING_PROFILES_ACTIVE=localstack
-      - AWS_ACCESS_KEY_ID=arbitrary
-      - AWS_SECRET_ACCESS_KEY=arbitrary
+      - SPRING_PROFILES_ACTIVE=dev
 
-  hmpps-auth:
+  dps-data-compliance-db:
+    image: postgres
+    networks:
+      - hmpps
+    container_name: dps-data-compliance-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=admin_password
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=dps-data-compliance-db
+
+  oauth:
     image: quay.io/hmpps/hmpps-auth:latest
     networks:
       - hmpps
-    container_name: hmpps-auth
+    container_name: oauth
     ports:
-      - "8081:8080"
+      - "8999:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
     environment:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
 
+  localstack:
+    image: localstack/localstack:0.12.10
+    networks:
+      - hmpps
+    container_name: localstack
+    ports:
+      - "4566-4597:4566-4597"
+      - 8991:8080
+    environment:
+      - SERVICES=sns,sqs
+      - DEBUG=${DEBUG- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DEFAULT_REGION=eu-west-2
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:4566/health?reload"]
+
   prison-api:
     image: quay.io/hmpps/prison-api:latest
     container_name: prison-api
     depends_on:
       - localstack
+      - oauth
     networks:
       - hmpps
     ports:
-      - "8082:8080"
+      - "8998:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
     environment:
@@ -63,13 +81,30 @@ services:
       - AWS_ACCESS_KEY_ID=arbitrary
       - AWS_SECRET_ACCESS_KEY=arbitrary
 
+  prison-register:
+    image: quay.io/hmpps/prison-register:latest
+    depends_on:
+      - oauth
+    networks:
+      - hmpps
+    container_name: prison-register
+    ports:
+      - "8995:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+
   pathfinder-api:
     image: quay.io/hmpps/pathfinder-api:latest
     networks:
       - hmpps
+    depends_on:
+      - oauth
     container_name: pathfinder-api
     ports:
-      - "8083:8080"
+      - "8997:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
     environment:
@@ -80,64 +115,16 @@ services:
     image: quay.io/hmpps/community-api:latest
     networks:
       - hmpps
+    depends_on:
+      - oauth
     container_name: community-api
     ports:
-      - "8084:8080"
+      - "8996:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
     environment:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
-
-  prison-register:
-    image: quay.io/hmpps/prison-register:latest
-    networks:
-      - hmpps
-    container_name: prison-register
-    ports:
-      - "8085:8080"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
-    environment:
-      - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=dev
-
-  localstack:
-    image: localstack/localstack:0.14.2
-    container_name: localstack
-    networks:
-      - hmpps
-    ports:
-      - "4567-4597:4567-4597"
-      - 8999:8080
-    environment:
-      - SERVICES=sqs
-      - DEBUG=${DEBUG- }
-      - DATA_DIR=${DATA_DIR- }
-      - PORT_WEB_UI=${PORT_WEB_UI- }
-      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
-      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - AWS_EXECUTION_ENV=True
-      - DEFAULT_REGION=eu-west-2
-      - HOSTNAME_EXTERNAL=localstack
-    volumes:
-      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - $PWD/localstack:/docker-entrypoint-initaws.d
-
-  dps-data-compliance-db:
-    image: postgres
-    networks:
-      - hmpps
-    container_name: dps-data-compliance-db
-    restart: always
-    ports:
-      - "5431:5432"
-    environment:
-      - POSTGRES_PASSWORD=admin_password
-      - POSTGRES_USER=admin
-      - POSTGRES_DB=dps-data-compliance-db
 
 networks:
   hmpps:

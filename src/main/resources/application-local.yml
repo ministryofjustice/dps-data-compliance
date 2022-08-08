@@ -4,7 +4,7 @@ management:
     info.cache.time-to-live: 0
 
 
-hmpps.auth.base.url: http://localhost:8999
+hmpps.auth.base.url: http://localhost:8999/auth
 prison.api.base.url: http://localhost:8998
 pathfinder.api.base.url: http://localhost:8997
 community.api.base.url: http://localhost:8996
