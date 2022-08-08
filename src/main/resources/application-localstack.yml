@@ -7,25 +7,3 @@ hmpps.sqs:
     datacomplianceresponse:
       queueName: data_compliance_response_queue
       dlqName: data_compliance_response_dlq
-
-spring:
-  jpa.show-sql: true
-  flyway.locations: classpath:db/migration
-  security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
-
-offender.retention:
-  false.positive.duplicate.check.enabled: false
-  image.duplicate.check.enabled: false
-  mappa.check.enabled: true
-  data.duplicate:
-    id.check.enabled: false
-    db.check.enabled: false
-    ap.check.enabled: false
-
-notify.enabled: false
-digital_prison_service_url: https://digital-dev.prison.service.justice.gov.uk
-
-deletion.grant.enabled: true
-offender.deletion.review.required: false
-
-server.shutdown: immediate

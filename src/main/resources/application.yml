@@ -40,6 +40,36 @@ spring:
       scheduler.instanceId: AUTO
       scheduler.instanceName: data-compliance-quartz
 
+  profiles:
+    group:
+      test:
+        - "stdout"
+        - "local"
+      dev:
+        - "stdout"
+        - "local"
+        - "localstack"
+        - "postgres"
+      test-integration:
+        - "stdout"
+        - "local"
+        - "hsqldb"
+      test-dlq:
+        - "stdout"
+        - "local"
+        - "localstack-test"
+        - "hsqldb"
+      message-integration:
+        - "stdout"
+        - "local"
+        - "localstack-test"
+        - "hsqldb"
+      test-message-integration-with-review-period:
+        - "stdout"
+        - "local"
+        - "localstack-test"
+        - "hsqldb"
+
 hmpps.sqs:
   queueAdminRole: ROLE_DATA_COMPLIANCE_QUEUE_ADMIN
   provider: aws
