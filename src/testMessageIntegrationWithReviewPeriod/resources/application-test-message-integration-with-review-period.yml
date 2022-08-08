@@ -9,7 +9,6 @@ offender.retention:
 
 notify.enabled: false
 
-
 deletion.grant.enabled: true
-offender.deletion.review.required: false
+offender.deletion.review.required: true
 image.recognition.deletion.enabled: true

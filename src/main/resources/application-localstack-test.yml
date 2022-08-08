@@ -1,0 +1,9 @@
+hmpps.sqs:
+  provider: localstack
+  queues:
+    datacompliancerequest:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+    datacomplianceresponse:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}

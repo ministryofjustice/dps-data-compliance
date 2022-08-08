@@ -1,15 +1,6 @@
-hmpps.auth.base.url: http://localhost:8081
-prison.api.base.url: http://localhost:8082
-pathfinder.api.base.url: http://localhost:8083
-community.api.base.url: http://localhost:8084
-prison.register.base.url: http://localhost:8085
-
-app.db.url: jdbc:hsqldb:mem:data-compliance-db;sql.syntax_pgs=true;shutdown=false
-
 spring:
-  jpa.show-sql: true
-  flyway.locations: classpath:db/migration
   security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
+
 
 offender.retention:
   false.positive.duplicate.check.enabled: false
@@ -20,8 +11,12 @@ offender.retention:
     db.check.enabled: false
     ap.check.enabled: false
 
+notify.enabled: false
+
+
 image.recognition.deletion.enabled: false
 deletion.grant.enabled: true
-offender.deletion.review.required: true
+offender.deletion.review.required: false
+
 
 server.shutdown: immediate

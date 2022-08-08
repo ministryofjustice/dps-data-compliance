@@ -1,0 +1,8 @@
+app.db.url: jdbc:postgresql://localhost:5432/dps-data-compliance-db
+
+spring:
+  jpa.show-sql: true
+  flyway.locations: classpath:db/migration,classpath:db/quartz
+  security.oauth2.resourceserver.jwt.public-key-location: classpath:local-public-key.pub
+  datasource.username: admin
+  datasource.password: admin_password

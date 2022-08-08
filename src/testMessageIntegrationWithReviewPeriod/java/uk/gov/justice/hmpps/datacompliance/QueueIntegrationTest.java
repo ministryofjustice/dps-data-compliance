@@ -40,7 +40,7 @@ import static uk.gov.justice.hmpps.datacompliance.repository.jpa.model.referral.
 
 @Sql("classpath:seed.data/reset.sql")
 @SqlMergeMode(MergeMode.MERGE)
-@ActiveProfiles("test-review-message-integration")
+@ActiveProfiles("test-message-integration-with-review-period")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class QueueIntegrationTest {
 
