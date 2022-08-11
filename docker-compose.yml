@@ -126,5 +126,22 @@ services:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
 
+  nomis-prisoner-deletion-service:
+    image: quay.io/hmpps/nomis-prisoner-deletion-service:latest
+    networks:
+      - hmpps
+    depends_on:
+      - localstack
+      - oauth
+    container_name: nomis-prisoner-deletion-service
+    ports:
+      - "8090:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+    environment:
+      - SERVER_PORT=8090
+      - SPRING_PROFILES_ACTIVE=dev
+      - HMPPS_SQS_LOCALSTACKURL=http://localstack:4566
+
 networks:
   hmpps:
