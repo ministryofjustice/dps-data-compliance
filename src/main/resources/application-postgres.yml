@@ -1,4 +1,4 @@
-app.db.url: jdbc:postgresql://localhost:5432/dps-data-compliance-db
+app.db.url: jdbc:postgresql://localhost:5431/dps-data-compliance-db
 
 spring:
   jpa.show-sql: true

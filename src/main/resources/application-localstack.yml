@@ -1,5 +1,6 @@
 hmpps.sqs:
   provider: localstack
+  localstackUrl: http://localhost:4566
   queues:
     datacompliancerequest:
       queueName: data_compliance_request_queue
