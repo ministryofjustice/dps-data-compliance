@@ -3,7 +3,7 @@ hmpps.sqs:
   queues:
     datacompliancerequest:
       queueName: data_compliance_request_queue
-      dlqName: data_compliance_request_dlq
+      dlqName: data_compliance_request_queue_dlq
     datacomplianceresponse:
       queueName: data_compliance_response_queue
-      dlqName: data_compliance_response_dlq
+      dlqName: data_compliance_response_queue_dlq
