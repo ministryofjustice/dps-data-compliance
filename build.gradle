@@ -27,13 +27,13 @@ dependencies {
     implementation 'uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.8'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.17.246')
+    implementation platform('software.amazon.awssdk:bom:2.17.255')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.275')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.275'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.284')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.284'
 
     // Utils
     implementation 'io.github.resilience4j:resilience4j-retry:1.7.1'
@@ -50,11 +50,11 @@ dependencies {
 
     runtimeOnly 'org.hsqldb:hsqldb:2.7.0'
     runtimeOnly 'org.flywaydb:flyway-core'
-    runtimeOnly 'org.postgresql:postgresql:42.4.1'
+    runtimeOnly 'org.postgresql:postgresql:42.4.2'
 
     // Swagger
-    implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
-    implementation 'org.springdoc:springdoc-openapi-data-rest:1.6.9'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.10'
+    implementation 'org.springdoc:springdoc-openapi-data-rest:1.6.10'
 
     // GOVUK Notify:
     implementation("uk.gov.service.notify:notifications-java-client:3.17.3-RELEASE")
