@@ -50,7 +50,8 @@ class RetentionControllerIntegrationTest extends IntegrationTest {
                     "{\"reasonCode\":\"MAPPA\",\"displayName\":\"MAPPA (Multi-Agency Public Protection Agreement)\",\"allowReasonDetails\":false,\"displayOrder\":4}," +
                     "{\"reasonCode\":\"FOI_SAR\",\"displayName\":\"Subject to FOI/SARs\",\"allowReasonDetails\":false,\"displayOrder\":5}," +
                     "{\"reasonCode\":\"UAL\",\"displayName\":\"UAL Recall on Licence\",\"allowReasonDetails\":false,\"displayOrder\":6}," +
-                    "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\",\"allowReasonDetails\":true,\"displayOrder\":7}" +
+                    "{\"reasonCode\":\"RESTRICTED_PATIENT\",\"displayName\":\"Restricted patient with invalid state in NOMIS\",\"allowReasonDetails\":false,\"displayOrder\":7}," +
+                    "{\"reasonCode\":\"OTHER\",\"displayName\":\"Other\",\"allowReasonDetails\":true,\"displayOrder\":8}" +
                     "]");
     }
 

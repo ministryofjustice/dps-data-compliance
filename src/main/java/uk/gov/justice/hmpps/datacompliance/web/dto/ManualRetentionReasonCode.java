@@ -12,5 +12,6 @@ public enum ManualRetentionReasonCode {
     MAPPA,
     FOI_SAR,
     UAL,
+    RESTRICTED_PATIENT,
     OTHER
 }
