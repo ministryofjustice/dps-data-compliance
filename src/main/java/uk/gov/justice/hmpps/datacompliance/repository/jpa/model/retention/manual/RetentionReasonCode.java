@@ -45,6 +45,7 @@ public class RetentionReasonCode {
         MAPPA,
         FOI_SAR,
         UAL,
+        RESTRICTED_PATIENT,
         OTHER
     }
 }
