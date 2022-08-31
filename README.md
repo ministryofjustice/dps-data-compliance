@@ -15,3 +15,4 @@ A Spring Boot app to manage data compliance for the Digital Prison Services
 6. [Ad Hoc Offender Deletion](readme/ad_hoc_deletion.md)
 7. [Destruction Log](readme/destruction_log.md)
 8. [Uploading UAL report](readme/upload_ual_report.md) 
+9. [Manually retaining a list of offenders](readme/manually_retain_offenders.md) 
