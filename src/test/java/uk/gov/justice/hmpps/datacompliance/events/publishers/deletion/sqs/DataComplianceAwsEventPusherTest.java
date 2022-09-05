@@ -289,6 +289,7 @@ class DataComplianceAwsEventPusherTest {
 
         eventPusher.requestDeceasedOffenderDeletion(DeceasedOffenderDeletionRequest.builder()
             .batchId(BATCH_ID)
+            .excludedOffenders(Set.of(OFFENDER_NUMBER.getOffenderNumber()))
             .limit(REFERRAL_LIMIT)
             .build());
 
@@ -299,6 +300,7 @@ class DataComplianceAwsEventPusherTest {
             """
                 {
                   "batchId": 987,
+                  "excludedOffenders":["A1234AA"],
                   "limit": 10
                 }""");
     }

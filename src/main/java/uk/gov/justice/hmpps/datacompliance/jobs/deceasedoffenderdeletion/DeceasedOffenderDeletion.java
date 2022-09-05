@@ -9,10 +9,14 @@ import uk.gov.justice.hmpps.datacompliance.dto.DeceasedOffenderDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.deceasedoffender.DeceasedOffenderDeletionBatch;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.deceasedoffender.DeceasedOffenderDeletionBatch.BatchType;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.model.retention.manual.ManualRetention;
 import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.deceasedoffender.DeceasedOffenderDeletionBatchRepository;
+import uk.gov.justice.hmpps.datacompliance.repository.jpa.repository.retention.ManualRetentionRepository;
 import uk.gov.justice.hmpps.datacompliance.utils.TimeSource;
 
 import javax.transaction.Transactional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -24,6 +28,7 @@ public class DeceasedOffenderDeletion {
     private final TimeSource timeSource;
     private final DeceasedOffenderDeletionConfig config;
     private final DeceasedOffenderDeletionBatchRepository repository;
+    private final ManualRetentionRepository manualRetentionRepository;
     private final DataComplianceEventPusher eventPusher;
 
     public void run() {
@@ -39,11 +44,17 @@ public class DeceasedOffenderDeletion {
     }
 
     private DeceasedOffenderDeletionRequest buildRequest(DeceasedOffenderDeletionBatch newBatch) {
-        final var request = DeceasedOffenderDeletionRequest.builder();
-        request.batchId(newBatch.getBatchId());
+        final var request = DeceasedOffenderDeletionRequest.builder()
+            .batchId(newBatch.getBatchId())
+            .excludedOffenders(getRetainedOffenderNumbers());
+
         config.getDeletionLimit().ifPresent(request::limit);
 
         return request.build();
+    }
+
+    private Set<String> getRetainedOffenderNumbers() {
+        return manualRetentionRepository.findAll().stream().map(ManualRetention::getOffenderNo).collect(Collectors.toSet());
     }
 
     private DeceasedOffenderDeletionBatch persistNewBatch() {

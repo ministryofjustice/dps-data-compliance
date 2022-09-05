@@ -82,6 +82,7 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
         client.sendMessage(generateRequest(DECEASED_OFFENDER_DELETION_REQUEST,
             DeceasedDeletionRequest.builder()
                 .batchId(request.getBatchId())
+                .excludedOffenders(request.getExcludedOffenders())
                 .limit(request.getLimit())
                 .build()));
 
