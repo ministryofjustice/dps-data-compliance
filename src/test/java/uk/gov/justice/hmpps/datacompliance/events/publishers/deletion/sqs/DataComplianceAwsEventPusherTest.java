@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.hmpps.datacompliance.dto.DeceasedOffenderDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNoBookingDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceAwsEventPusher;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.sqs.DataComplianceEventPusher;
@@ -323,7 +324,57 @@ class DataComplianceAwsEventPusherTest {
         assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace(
             """
                 {
-                  "batchId": 987
+                  "batchId": 987,
+                  "excludedOffenders":[]
+                }""");
+    }
+
+    @Test
+    void requestOffenderNoBookingDeletion() {
+
+        final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
+
+        when(client.sendMessage(request.capture()))
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
+
+        eventPusher.requestOffenderNoBookingDeletion(OffenderNoBookingDeletionRequest.builder()
+            .batchId(BATCH_ID)
+            .excludedOffenders(Set.of(OFFENDER_NUMBER.getOffenderNumber()))
+            .limit(REFERRAL_LIMIT)
+            .build());
+
+        assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
+        assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
+            .isEqualTo("DATA_COMPLIANCE_OFFENDER-NO-BOOKING-DELETION-REQUEST");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace(
+            """
+                {
+                  "batchId": 987,
+                  "excludedOffenders":["A1234AA"],
+                  "limit": 10
+                }""");
+    }
+
+    @Test
+    void requestOffenderNoBookingDeletionWithoutLimit() {
+
+        final var request = ArgumentCaptor.forClass(SendMessageRequest.class);
+
+        when(client.sendMessage(request.capture()))
+            .thenReturn(new SendMessageResult().withMessageId("message1"));
+
+        eventPusher.requestOffenderNoBookingDeletion(OffenderNoBookingDeletionRequest.builder()
+            .batchId(BATCH_ID)
+            .build());
+
+        assertThat(request.getValue().getQueueUrl()).isEqualTo("queue.url");
+        assertThat(request.getValue().getMessageAttributes().get("eventType").getStringValue())
+            .isEqualTo("DATA_COMPLIANCE_OFFENDER-NO-BOOKING-DELETION-REQUEST");
+        assertThat(request.getValue().getMessageBody()).isEqualToIgnoringWhitespace(
+            """
+                {
+                  "batchId": 987,
+                  "excludedOffenders":[]
                 }""");
     }
 
