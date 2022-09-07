@@ -6,7 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Singular;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -22,7 +25,8 @@ public class DeceasedDeletionRequest {
     private Long batchId;
 
     @JsonProperty("excludedOffenders")
-    private Set<String> excludedOffenders;
+    @Builder.Default
+    private Set<String> excludedOffenders = Collections.emptySet();
 
     @JsonProperty("limit")
     private Integer limit;

@@ -11,13 +11,14 @@ import org.springframework.stereotype.Service;
 import uk.gov.justice.hmpps.datacompliance.dto.DeceasedOffenderDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionGrant;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderDeletionReferralRequest;
+import uk.gov.justice.hmpps.datacompliance.dto.OffenderNoBookingDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.dto.OffenderNumber;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.AdHocReferralRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DataDuplicateCheck;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.DeceasedDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.FreeTextSearchRequest;
+import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.NoBookingDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderDeletionGranted;
-import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderNoBookingDeletionRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderRestrictionCode;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.OffenderRestrictionRequest;
 import uk.gov.justice.hmpps.datacompliance.events.publishers.dto.ProvisionalDeletionReferralRequest;
@@ -93,8 +94,9 @@ public class DataComplianceAwsEventPusher implements DataComplianceEventPusher {
         log.debug("Requesting offender no booking deletion: {}", request);
 
         client.sendMessage(generateRequest(OFFENDER_NO_BOOKING_DELETION_REQUEST,
-            OffenderNoBookingDeletionRequest.builder()
+            NoBookingDeletionRequest.builder()
                 .batchId(request.getBatchId())
+                .excludedOffenders(request.getExcludedOffenders())
                 .limit(request.getLimit())
                 .build()));
     }
