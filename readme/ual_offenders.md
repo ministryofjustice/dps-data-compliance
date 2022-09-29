@@ -7,7 +7,7 @@ Unlawfully large offenders must be retained according to policy. *For more infor
 see [here](https://www.cps.gov.uk/legal-guidance/unlawfully-large-after-recall)*
 
 
-In order to accurately identify and retain UAL offenders, the Public Protection Unit Database (PPUD) team publish a public quaterly report.
+In order to accurately identify and retain UAL offenders, the Public Protection Unit Database (PPUD) team publish a public quarterly report.
 
 This report can be uploaded using the following endpoint: 
 
