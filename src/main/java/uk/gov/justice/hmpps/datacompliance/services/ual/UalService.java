@@ -1,7 +1,7 @@
 package uk.gov.justice.hmpps.datacompliance.services.ual;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.similarity.JaroWinklerDistance;
+import org.apache.commons.text.similarity.JaroWinklerSimilarity;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +21,12 @@ public class UalService {
 
     private final OffenderUalRepository offenderUalRepository;
     private final LevenshteinDistance levenshteinDistance;
-    private final JaroWinklerDistance jaroWinklerDistance;
+    private final JaroWinklerSimilarity jaroWinklerSimilarity;
 
     public UalService(final OffenderUalRepository offenderUalRepository) {
         this.offenderUalRepository = offenderUalRepository;
         this.levenshteinDistance = LevenshteinDistance.getDefaultInstance();
-        this.jaroWinklerDistance = new JaroWinklerDistance();
-
+        this.jaroWinklerSimilarity = new JaroWinklerSimilarity();
     }
 
     public boolean isUnlawfullyAtLarge(OffenderToCheck offender) {
@@ -66,7 +65,7 @@ public class UalService {
         if (x == null || y == null) {
             return 0.0;
         }
-        return jaroWinklerDistance.apply(x, y);
+        return jaroWinklerSimilarity.apply(x, y);
     }
 
     private Optional<OffenderUalEntity> findOffenderByBooking(final Set<String> bookingNos) {
