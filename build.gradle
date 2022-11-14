@@ -1,5 +1,5 @@
 plugins {
-    id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.1-beta"
+    id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.7"
     id "org.unbroken-dome.test-sets" version "4.0.0"
 }
 
@@ -24,16 +24,16 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-reactor-netty'
     implementation 'org.springframework:spring-webflux'
-    implementation 'uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.10'
+    implementation 'uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.13'
 
     // AWS
-    implementation platform('software.amazon.awssdk:bom:2.17.276')
+    implementation platform('software.amazon.awssdk:bom:2.18.16')
     implementation 'software.amazon.awssdk:rekognition'
     implementation 'software.amazon.awssdk:athena'
     implementation 'software.amazon.awssdk:sts'
 
-    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.305')
-    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.305'
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.341')
+    implementation 'com.amazonaws:aws-java-sdk-sns:1.12.341'
 
     // Utils
     implementation 'io.github.resilience4j:resilience4j-retry:1.7.1'
@@ -42,30 +42,30 @@ dependencies {
     implementation ('org.quartz-scheduler:quartz:2.3.2') {
         exclude group: 'com.zaxxer'
     }
-    implementation 'org.apache.commons:commons-text:1.9'
+    implementation 'org.apache.commons:commons-text:1.10.0'
 
     //Jackson (spring versioned)
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.0")
 
-    runtimeOnly 'org.hsqldb:hsqldb:2.7.0'
+    runtimeOnly 'org.hsqldb:hsqldb:2.7.1'
     runtimeOnly 'org.flywaydb:flyway-core'
     runtimeOnly 'org.postgresql:postgresql:42.5.0'
 
     // Swagger
-    implementation 'org.springdoc:springdoc-openapi-ui:1.6.11'
-    implementation 'org.springdoc:springdoc-openapi-data-rest:1.6.11'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.12'
+    implementation 'org.springdoc:springdoc-openapi-data-rest:1.6.12'
 
     // GOVUK Notify:
-    implementation("uk.gov.service.notify:notifications-java-client:3.17.3-RELEASE")
+    implementation("uk.gov.service.notify:notifications-java-client:3.19.0-RELEASE")
 
     // Test
     testAnnotationProcessor "org.projectlombok:lombok:1.18.24"
     testCompileOnly 'org.projectlombok:lombok:1.18.24'
-    testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.35.0'
+    testImplementation 'net.javacrumbs.json-unit:json-unit-assertj:2.36.0'
     testImplementation 'com.squareup.okhttp3:okhttp:4.10.0'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.10.0'
     testImplementation 'io.jsonwebtoken:jjwt:0.9.1'
-    testImplementation 'org.testcontainers:localstack:1.17.3'
+    testImplementation 'org.testcontainers:localstack:1.17.5'
     testImplementation 'org.awaitility:awaitility:4.2.0'
 }
